@@ -1,21 +1,23 @@
 module ViewGraph exposing (..)
 
 import Dict as Dict exposing (Dict)
+import Set as Set exposing (Set)
 import Regex as Regex exposing (Regex)
 import Html as H
 import Html.Attributes as HA
 import Svg as S
 import Svg.Attributes as A
+import Svg.Events as E
 import Maybe.Extra
 import Model as M
 import GameData as G
 
 
-view : M.Model -> G.Graph -> H.Html msg
-view { search } g =
+view : M.Model -> G.Graph -> H.Html M.Msg
+view { selected, search } g =
     S.svg [ HA.style [ ( "border", "1px solid grey" ) ], A.viewBox <| formatViewBox 30 g ]
         [ S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList g.edges)
-        , S.g [] (List.map (viewNode (Maybe.map (Regex.regex >> Regex.caseInsensitive) search) << Tuple.second) <| Dict.toList g.nodes)
+        , S.g [] (List.map (viewNode selected (Maybe.map (Regex.regex >> Regex.caseInsensitive) search) << Tuple.second) <| Dict.toList g.nodes)
         ]
 
 
@@ -35,13 +37,14 @@ appendTooltip =
     Maybe.Extra.unwrap "" ((++) "\n\n")
 
 
-viewNode : Maybe Regex -> G.Node -> S.Svg msg
-viewNode q { x, y, val } =
+viewNode : Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
+viewNode selected q { id, x, y, val } =
     S.circle
         [ A.cx <| toString x
         , A.cy <| toString y
         , A.r "30"
-        , A.class <| String.join " " [ "node", nodeHighlightClass q val ]
+        , A.class <| String.join " " [ "node", nodeHighlightClass q val, nodeSelectedClass selected id ]
+        , E.onClick <| M.SelectInput id
         ]
         [ S.title [] [ S.text <| nodeTooltipText val ] ]
 
@@ -62,3 +65,11 @@ nodeHighlightClass q t =
         "node-highlight"
     else
         "node-nohighlight"
+
+
+nodeSelectedClass : Set Int -> Int -> String
+nodeSelectedClass selected id =
+    if Set.member id selected then
+        "node-selected"
+    else
+        "node-noselected"

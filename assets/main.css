@@ -1,15 +1,21 @@
 body {
   background-color: #003;
   color: #fff;
+  max-width: 1000px;
 }
 svg .edge {
   stroke: #aaa;
-  stroke-width: 2;
+  stroke-width: 4;
 }
 svg .node {
   stroke: #aaa;
   stroke-width: 1;
   fill: #ddd;
+}
+svg .node-selected {
+  stroke: lightgreen;
+  stroke-width: 3;
+  fill: green;
 }
 svg .node-highlight {
   fill: orange;

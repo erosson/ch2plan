@@ -49,7 +49,7 @@ type alias Graph =
 
 
 type alias Node =
-    { id : String, val : NodeType, x : Int, y : Int }
+    { id : Int, typeId : String, val : NodeType, x : Int, y : Int }
 
 
 type alias Edge =
@@ -141,17 +141,17 @@ nodeTypeDecoder =
 graph : Character -> Graph
 graph c =
     let
-        getNode n =
+        getNode id n =
             -- TODO this should be a decoder or result
             case Dict.get n.val c.nodeTypes of
                 Just val ->
-                    { id = n.val, x = n.x, y = n.y, val = val }
+                    { id = id, typeId = n.val, x = n.x, y = n.y, val = val }
 
                 Nothing ->
                     Debug.crash <| "no such nodetype: " ++ n.val
 
         nodes =
-            Dict.map (always getNode) c.graphSpec.nodes
+            Dict.map getNode c.graphSpec.nodes
 
         getEdge ( a, b ) =
             -- TODO this should be a decoder or result
@@ -166,6 +166,28 @@ graph c =
             Dict.map (always getEdge) c.graphSpec.edges
     in
         { nodes = nodes, edges = edges }
+
+
+type alias NodeId =
+    Int
+
+
+neighbors : NodeId -> Graph -> List Node
+neighbors id g =
+    let
+        neighbor : Edge -> Maybe Node
+        neighbor ( a, b ) =
+            if a.id == id then
+                Just b
+            else if b.id == id then
+                Just a
+            else
+                Nothing
+    in
+        g.edges
+            |> Dict.toList
+            |> List.map (Tuple.second >> neighbor)
+            |> Maybe.Extra.values
 
 
 graphMinX : Graph -> Int

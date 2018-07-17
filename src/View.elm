@@ -1,6 +1,7 @@
 module View exposing (view)
 
 import Dict as Dict exposing (Dict)
+import Set as Set exposing (Set)
 import Html as H
 import Html.Attributes as A
 import Html.Events as E
@@ -22,9 +23,9 @@ view model =
             [ H.h2 [] [ H.text "Clicker Heroes 2 Skill Tree Planner" ]
             , H.h4 [] [ H.text <| c.name ++ ": " ++ c.flavorName ++ ", " ++ c.flavorClass ]
             , H.p [] [ H.text <| c.flavor ]
-            , viewSearch model.search
+            , viewSearch model
             , ViewGraph.view model g
-            , viewSearch model.search
+            , viewSearch model
 
             -- debug data
             , H.ul [] (List.map (H.li [] << List.singleton << uncurry viewNodeType) <| Dict.toList c.nodeTypes)
@@ -32,11 +33,14 @@ view model =
             ]
 
 
-viewSearch : Maybe String -> H.Html M.Msg
-viewSearch q =
+viewSearch : M.Model -> H.Html M.Msg
+viewSearch { selected, search } =
     H.div []
-        [ H.text "Highlight: "
-        , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" q, E.onInput M.SearchInput ] []
+        [ H.div [] [ H.text <| toString (Set.size selected) ++ " points spent." ]
+        , H.div []
+            [ H.text "Highlight: "
+            , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" search, E.onInput M.SearchInput ] []
+            ]
         ]
 
 
