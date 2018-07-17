@@ -6,6 +6,7 @@
   "license": "GPL-3.0",
   "private": true,
   "scripts": {
+    "prepare": "elm-package install --yes",
     "tf:init": "terraform init",
     "tf:plan": "terraform plan",
     "tf:apply": "terraform apply -auto-approve",
