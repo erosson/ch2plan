@@ -94,6 +94,12 @@ isValidSelection startNodes graph selected =
     reachableSelectedNodes startNodes graph selected == selected
 
 
+selectableNodes : Set G.NodeId -> G.Graph -> Set G.NodeId -> Set G.NodeId
+selectableNodes startNodes graph selected =
+    Set.foldr (\id -> \res -> G.neighbors id graph |> Set.union res) startNodes selected
+        |> \res -> Set.diff res selected
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none

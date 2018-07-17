@@ -15,10 +15,17 @@ import GameData as G
 
 view : M.Model -> G.Graph -> H.Html M.Msg
 view { selected, search } g =
-    S.svg [ HA.style [ ( "border", "1px solid grey" ) ], A.viewBox <| formatViewBox 30 g ]
-        [ S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList g.edges)
-        , S.g [] (List.map (viewNode selected (Maybe.map (Regex.regex >> Regex.caseInsensitive) search) << Tuple.second) <| Dict.toList g.nodes)
-        ]
+    let
+        searchRegex =
+            Maybe.map (Regex.regex >> Regex.caseInsensitive) search
+
+        selectable =
+            M.selectableNodes M.startNodes g selected
+    in
+        S.svg [ HA.style [ ( "border", "1px solid grey" ) ], A.viewBox <| formatViewBox 30 g ]
+            [ S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList g.edges)
+            , S.g [] (List.map (viewNode selected selectable searchRegex << Tuple.second) <| Dict.toList g.nodes)
+            ]
 
 
 formatViewBox : Int -> G.Graph -> String
@@ -37,8 +44,8 @@ appendTooltip =
     Maybe.Extra.unwrap "" ((++) "\n\n")
 
 
-viewNodeCircle : Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
-viewNodeCircle selected q { id, x, y, val } =
+viewNodeCircle : Set Int -> Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
+viewNodeCircle selected selectable q { id, x, y, val } =
     S.circle
         [ A.cx <| toString x
         , A.cy <| toString y
@@ -53,10 +60,14 @@ iconSize =
     60
 
 
-viewNode : Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
-viewNode selected q { id, x, y, val } =
+viewNode =
+    viewNodeIcon
+
+
+viewNodeIcon : Set Int -> Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
+viewNodeIcon selected selectable q { id, x, y, val } =
     S.g
-        [ A.class <| String.join " " [ "node", nodeHighlightClass q val, nodeSelectedClass selected id ]
+        [ A.class <| String.join " " [ "node", nodeHighlightClass q val, nodeSelectedClass selected id, nodeSelectableClass selectable id ]
         , E.onClick <| M.SelectInput id
         ]
         [ S.title [] [ S.text <| nodeTooltipText val ]
@@ -112,3 +123,11 @@ nodeSelectedClass selected id =
         "node-selected"
     else
         "node-noselected"
+
+
+nodeSelectableClass : Set Int -> Int -> String
+nodeSelectableClass selected id =
+    if Set.member id selected then
+        "node-selectable"
+    else
+        "node-noselectable"

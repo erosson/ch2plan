@@ -1,10 +1,11 @@
 body {
-  background-color: #003;
+  /* background-image: url("./ch2data/img/starBG.png"); */
+  background: #080010;
   color: #fff;
   max-width: 1000px;
 }
 svg {
-  background: url("./ch2data/img/starBG.png")
+  background: url("./ch2data/img/starBG.png");
 }
 svg .edge {
   stroke: #aaa;
@@ -17,6 +18,12 @@ svg .node {
 }
 svg .node .overlay {
   opacity: 0;
+}
+svg .node-selectable .overlay {
+  opacity: 0.3;
+  stroke: pink;
+  stroke-width: 5;
+  fill: purple;
 }
 svg .node-selected .overlay {
   opacity: 0.3;
