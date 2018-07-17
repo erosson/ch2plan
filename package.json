@@ -1,0 +1,17 @@
+{
+  "name": "ch2plan",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Evan <github@erosson.org>",
+  "license": "GPL-3.0",
+  "private": true,
+  "scripts": {
+    "dev": "elm-live ./src/Main.elm --output=./assets/elm.js --dir=./assets --open"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "elm": "^0.18.0",
+    "elm-live": "^2.7.5"
+  }
+}
