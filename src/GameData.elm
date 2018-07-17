@@ -14,6 +14,7 @@ type alias Character =
     , flavor : String
     , nodeTypes : NodeTypes
     , graphSpec : GraphSpec
+    , lastUpdatedVersion : String
     }
 
 
@@ -67,6 +68,7 @@ characterDecoder =
         |> P.required "levelGraphNodeTypes" nodeTypesDecoder
         -- |> P.required "levelGraphObject" levelGraphObjectDecoder
         |> P.required "levelGraphObject" levelGraphObjectDecoder
+        |> P.required "lastUpdatedVersion" D.string
 
 
 nodeTypesDecoder : D.Decoder NodeTypes

@@ -23,6 +23,7 @@ view model =
             [ H.h2 [] [ H.text "Clicker Heroes 2 Skill Tree Planner" ]
             , H.h4 [] [ H.text <| c.name ++ ": " ++ c.flavorName ++ ", " ++ c.flavorClass ]
             , H.p [] [ H.text <| c.flavor ]
+            , H.p [] [ H.text <| "Last updated: v" ++ c.lastUpdatedVersion ]
             , viewSearch model
             , ViewGraph.view model g
             , viewSearch model
