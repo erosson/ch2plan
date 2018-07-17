@@ -1,0 +1,54 @@
+language: node_js
+node_js:
+  - "8"
+
+addons:
+  apt:
+    # an old version of yarn is preinstalled. update it.
+    sources:
+    - sourceline: 'deb https://dl.yarnpkg.com/debian/ stable main'
+      key_url: 'https://dl.yarnpkg.com/debian/pubkey.gpg'
+    packages:
+    - yarn
+
+# https://8thlight.com/blog/rob-looby/2016/04/07/caching-elm-builds-on-travis-ci.html
+cache:
+  directories:
+    - elm-stuff/build-artifacts
+    - node_modules/
+    - sysconfcpus/
+
+before_install:
+  - sudo rm /usr/local/bin/yarn   # an old version of yarn is preinstalled. alias didn't work, so let's be more thorough.
+  - yarn --version
+  # https://github.com/elm/compiler/issues/1473
+  - |
+    if [ ! -d sysconfcpus/bin ];
+    then
+      git clone https://github.com/obmarg/libsysconfcpus.git;
+      cd libsysconfcpus;
+      ./configure --prefix=$TRAVIS_BUILD_DIR/sysconfcpus;
+      make && make install;
+      cd ..;
+    fi
+  - export PATH=$PATH:$TRAVIS_BUILD_DIR/sysconfcpus/bin
+
+install:
+  - travis_retry sysconfcpus -n 2 yarn --frozen-lockfile
+
+script:
+  - yarn test
+  # `yarn build` may also release the electron build, if there's a draft or a tag.
+  # https://www.electron.build/configuration/publish#recommended-github-releases-workflow
+  - sysconfcpus -n 2 yarn build
+
+deploy:
+  - provider: s3
+    skip_cleanup: true
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    bucket: ch2.erosson.org
+    region: us-east-1
+    local_dir: dist/
+    on:
+      branch: master
