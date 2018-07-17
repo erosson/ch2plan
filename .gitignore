@@ -1,4 +1,6 @@
 *.log
+/dist
+/.terraform
 /game
 /node_modules
 /elm-stuff

@@ -29,8 +29,8 @@ view model =
             , viewSearch model
 
             -- debug data
-            , H.ul [] (List.map (H.li [] << List.singleton << uncurry viewNodeType) <| Dict.toList c.nodeTypes)
-            , dumpModel model
+            -- , H.ul [] (List.map (H.li [] << List.singleton << uncurry viewNodeType) <| Dict.toList c.nodeTypes)
+            -- , dumpModel model
             ]
 
 

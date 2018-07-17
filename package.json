@@ -6,7 +6,17 @@
   "license": "GPL-3.0",
   "private": true,
   "scripts": {
-    "dev": "elm-live ./src/Main.elm --output=./assets/elm.js --dir=./assets --open"
+    "tf:init": "terraform init",
+    "tf:plan": "terraform plan",
+    "tf:apply": "terraform apply -auto-approve",
+    "dev": "elm-live ./src/Main.elm --output=./assets/elm.js --dir=./assets --open",
+    "build": "rm -rf ./dist && mkdir -p ./dist && rsync -auv ./assets/ ./dist/ && elm-make ./src/Main.elm --output=./dist/elm.js",
+    "start": "yarn build && serve ./dist",
+    "deploy": "yarn build && aws s3 sync ./dist s3://ch2.erosson.org/"
+  },
+  "//optionalDependencies": "because travis fails to install me, but doesn't actually need me",
+  "optionalDependencies": {
+    "terraform-npm": "0.2.6"
   },
   "dependencies": {
   },
