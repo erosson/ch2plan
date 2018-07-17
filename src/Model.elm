@@ -5,11 +5,13 @@ import Json.Decode as Decode
 
 
 type Msg
-    = NoOp
+    = SearchInput String
 
 
 type alias Model =
-    { characterData : GameData.Character }
+    { characterData : GameData.Character
+    , search : Maybe String
+    }
 
 
 type alias Flags =
@@ -21,7 +23,7 @@ init : Flags -> ( Model, Cmd Msg )
 init flags =
     case Decode.decodeValue GameData.characterDecoder flags.characterData of
         Ok char ->
-            ( { characterData = char }, Cmd.none )
+            ( { characterData = char, search = Nothing }, Cmd.none )
 
         Err err ->
             Debug.crash err
@@ -30,8 +32,13 @@ init flags =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NoOp ->
-            ( model, Cmd.none )
+        SearchInput str ->
+            case str of
+                "" ->
+                    ( { model | search = Nothing }, Cmd.none )
+
+                _ ->
+                    ( { model | search = Just str }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg

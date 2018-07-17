@@ -1,4 +1,16 @@
+body {
+  background-color: #003;
+  color: #fff;
+}
 svg .edge {
-  stroke: black;
+  stroke: #aaa;
   stroke-width: 2;
+}
+svg .node {
+  stroke: #aaa;
+  stroke-width: 1;
+  fill: #ddd;
+}
+svg .node-highlight {
+  fill: orange;
 }
