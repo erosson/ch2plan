@@ -11,27 +11,49 @@ type alias Character =
     , flavorName : String
     , flavorClass : String
     , flavor : String
-    , levelGraphObject : LevelGraphObject
-    , levelGraphNodeTypes : Dict String NodeType
+    , nodeTypes : NodeTypes
+    , graphSpec : GraphSpec
     }
 
 
-type alias LevelGraphObject =
+type alias GraphSpec =
+    { edges : Dict Int EdgeSpec
+    , nodes : Dict Int NodeSpec
+    }
+
+
+type alias EdgeSpec =
+    ( Int, Int )
+
+
+type alias NodeSpec =
+    { val : String, x : Int, y : Int }
+
+
+type alias NodeType =
+    { name : String
+    , icon : String
+    , tooltip : Maybe String
+    , flavorText : Maybe String
+    }
+
+
+type alias NodeTypes =
+    Dict String NodeType
+
+
+type alias Graph =
     { edges : Dict Int Edge
     , nodes : Dict Int Node
     }
 
 
-type alias Edge =
-    ( Int, Int )
-
-
 type alias Node =
-    { val : String, x : Int, y : Int }
+    { id : String, val : NodeType, x : Int, y : Int }
 
 
-type alias NodeType =
-    { name : String, tooltip : Maybe String }
+type alias Edge =
+    ( Node, Node )
 
 
 characterDecoder : D.Decoder Character
@@ -41,8 +63,14 @@ characterDecoder =
         |> P.required "flavorName" D.string
         |> P.required "flavorClass" D.string
         |> P.required "flavor" D.string
+        |> P.required "levelGraphNodeTypes" nodeTypesDecoder
+        -- |> P.required "levelGraphObject" levelGraphObjectDecoder
         |> P.required "levelGraphObject" levelGraphObjectDecoder
-        |> P.required "levelGraphNodeTypes" (nodeTypeDecoder |> D.dict)
+
+
+nodeTypesDecoder : D.Decoder NodeTypes
+nodeTypesDecoder =
+    nodeTypeDecoder |> D.dict
 
 
 decodeDictKeyInt name ( key0, val ) =
@@ -54,9 +82,9 @@ decodeDictKeyInt name ( key0, val ) =
             D.fail <| "couldn't decode " ++ name ++ " dict key: " ++ err
 
 
-levelGraphObjectDecoder : D.Decoder LevelGraphObject
+levelGraphObjectDecoder : D.Decoder GraphSpec
 levelGraphObjectDecoder =
-    P.decode LevelGraphObject
+    P.decode GraphSpec
         |> P.required "edges"
             (edgeDecoder
                 |> D.dict
@@ -75,7 +103,7 @@ levelGraphObjectDecoder =
             )
 
 
-edgeDecoder : D.Decoder Edge
+edgeDecoder : D.Decoder EdgeSpec
 edgeDecoder =
     D.list D.int
         |> D.andThen
@@ -89,9 +117,9 @@ edgeDecoder =
             )
 
 
-nodeDecoder : D.Decoder Node
+nodeDecoder : D.Decoder NodeSpec
 nodeDecoder =
-    P.decode Node
+    P.decode NodeSpec
         |> P.required "val" D.string
         |> P.required "x" D.int
         |> P.required "y" D.int
@@ -101,4 +129,70 @@ nodeTypeDecoder : D.Decoder NodeType
 nodeTypeDecoder =
     P.decode NodeType
         |> P.required "name" D.string
+        |> P.required "icon" D.string
         |> P.optional "tooltip" (D.nullable D.string) Nothing
+        |> P.optional "flavorText" (D.nullable D.string) Nothing
+
+
+
+-- |> P.optional "icon" (D.nullable D.string) Nothing
+
+
+graph : Character -> Graph
+graph c =
+    let
+        getNode n =
+            -- TODO this should be a decoder or result
+            case Dict.get n.val c.nodeTypes of
+                Just val ->
+                    { id = n.val, x = n.x, y = n.y, val = val }
+
+                Nothing ->
+                    Debug.crash <| "no such nodetype: " ++ n.val
+
+        nodes =
+            Dict.map (always getNode) c.graphSpec.nodes
+
+        getEdge ( a, b ) =
+            -- TODO this should be a decoder or result
+            case ( Dict.get a nodes, Dict.get b nodes ) of
+                ( Just a, Just b ) ->
+                    ( a, b )
+
+                _ ->
+                    Debug.crash <| "no such edge: " ++ toString ( a, b )
+
+        edges =
+            Dict.map (always getEdge) c.graphSpec.edges
+    in
+        { nodes = nodes, edges = edges }
+
+
+graphMinX : Graph -> Int
+graphMinX =
+    .nodes >> Dict.foldr (always <| .x >> min) 0
+
+
+graphMinY : Graph -> Int
+graphMinY =
+    .nodes >> Dict.foldr (always <| .y >> min) 0
+
+
+graphMaxX : Graph -> Int
+graphMaxX =
+    .nodes >> Dict.foldr (always <| .x >> max) 0
+
+
+graphMaxY : Graph -> Int
+graphMaxY =
+    .nodes >> Dict.foldr (always <| .y >> max) 0
+
+
+graphHeight : Graph -> Int
+graphHeight g =
+    graphMaxY g - graphMinY g
+
+
+graphWidth : Graph -> Int
+graphWidth g =
+    graphMaxX g - graphMinX g
