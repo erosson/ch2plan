@@ -37,7 +37,14 @@ type alias NodeType =
     , icon : String
     , tooltip : Maybe String
     , flavorText : Maybe String
+    , quality : NodeQuality
     }
+
+
+type NodeQuality
+    = Plain
+    | Notable
+    | Keystone
 
 
 type alias NodeTypes =
@@ -71,9 +78,20 @@ characterDecoder =
         |> P.required "lastUpdatedVersion" D.string
 
 
+parseNodeQuality : String -> NodeQuality
+parseNodeQuality id =
+    -- This is a terribly hacky way to determine a node's color, but it works for now.
+    if String.startsWith "q" id then
+        Notable
+    else if String.startsWith "Q" id then
+        Keystone
+    else
+        Plain
+
+
 nodeTypesDecoder : D.Decoder NodeTypes
 nodeTypesDecoder =
-    nodeTypeDecoder |> D.dict
+    nodeTypeDecoder |> D.dict |> D.map (Dict.map (\k -> \v -> v <| parseNodeQuality k))
 
 
 decodeDictKeyInt name ( key0, val ) =
@@ -128,7 +146,7 @@ nodeDecoder =
         |> P.required "y" D.int
 
 
-nodeTypeDecoder : D.Decoder NodeType
+nodeTypeDecoder : D.Decoder (NodeQuality -> NodeType)
 nodeTypeDecoder =
     P.decode NodeType
         |> P.required "name" D.string

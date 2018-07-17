@@ -53,10 +53,15 @@ viewNodeCircle selected selectable q { id, x, y, val } =
         [ A.cx <| toString x
         , A.cy <| toString y
         , A.r <| toString <| iconSize / 2
-        , A.class <| String.join " " [ "node", nodeHighlightClass q val, nodeSelectedClass selected id ]
+        , A.class <| String.join " " [ "node", nodeHighlightClass q val, nodeSelectedClass selected id, nodeSelectableClass selectable id, nodeQualityClass val.quality ]
         , E.onClick <| M.SelectInput id
         ]
         [ S.title [] [ S.text <| nodeTooltipText val ] ]
+
+
+nodeQualityClass : G.NodeQuality -> String
+nodeQualityClass =
+    toString >> (++) "node-"
 
 
 iconSize =
@@ -70,7 +75,7 @@ viewNode =
 viewNodeIcon : Set Int -> Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
 viewNodeIcon selected selectable q { id, x, y, val } =
     S.g
-        [ A.class <| String.join " " [ "node", nodeHighlightClass q val, nodeSelectedClass selected id, nodeSelectableClass selectable id ]
+        [ A.class <| String.join " " [ "node", nodeHighlightClass q val, nodeSelectedClass selected id, nodeSelectableClass selectable id, nodeQualityClass val.quality ]
         , E.onClick <| M.SelectInput id
         ]
         [ S.title [] [ S.text <| nodeTooltipText val ]

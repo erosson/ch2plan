@@ -19,6 +19,17 @@ svg .node {
 svg .node .overlay {
   opacity: 0;
 }
+svg .node-Plain.overlay {
+  opacity: 0;
+}
+svg .node-Notable .overlay {
+  opacity: 0.1;
+  fill: yellow;
+}
+svg .node-Keystone .overlay {
+  opacity: 0.2;
+  fill: teal;
+}
 svg .node-selectable .overlay {
   opacity: 0.3;
   stroke: pink;
