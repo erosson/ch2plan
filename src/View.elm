@@ -31,6 +31,7 @@ view model =
             -- debug data
             -- , H.ul [] (List.map (H.li [] << List.singleton << uncurry viewNodeType) <| Dict.toList c.nodeTypes)
             -- , dumpModel model
+            , H.p [] [ H.a [ A.href "https://github.com/erosson/ch2plan" ] [ H.text "Source code" ] ]
             ]
 
 
