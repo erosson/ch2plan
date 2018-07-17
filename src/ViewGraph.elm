@@ -72,6 +72,11 @@ viewNode =
     viewNodeIcon
 
 
+iconUrl : G.NodeType -> String
+iconUrl node =
+    "./ch2data/img/" ++ node.icon ++ ".png"
+
+
 viewNodeIcon : Set Int -> Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
 viewNodeIcon selected selectable q { id, x, y, val } =
     S.g
@@ -80,7 +85,7 @@ viewNodeIcon selected selectable q { id, x, y, val } =
         ]
         [ S.title [] [ S.text <| nodeTooltipText val ]
         , S.image
-            [ A.xlinkHref <| "./ch2data/img/" ++ val.icon ++ ".png"
+            [ A.xlinkHref <| iconUrl val
             , A.x <| toString <| x - iconSize // 2
             , A.y <| toString <| y - iconSize // 2
             , A.width <| toString iconSize

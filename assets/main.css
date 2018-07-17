@@ -46,3 +46,35 @@ svg .node-highlight .overlay {
   opacity: 0.3;
   fill: orange;
 }
+
+.summary .icon {
+  float: left;
+  position: relative;
+}
+.summary .icon img {
+  width: 1em;
+  height: 1em;
+}
+.summary .icon .overlay {
+  position: absolute;
+  top:0;left:0;
+  width: 1em;
+  height: 1em;
+}
+.summary .icon.node-Keystone .overlay {
+  opacity: 0.4;
+  background-color: teal;
+}
+.summary .icon.node-Notable .overlay {
+  opacity: 0.2;
+  background-color: yellow;
+}
+.summary .clear {
+  clear: left;
+}
+.summary ul {
+  list-style-type: none;
+}
+.summary li {
+  margin: 0.2em;
+}

@@ -2,9 +2,11 @@ module Model exposing (..)
 
 import Char
 import Set as Set exposing (Set)
+import Dict as Dict exposing (Dict)
 import Json.Decode as Decode
 import Navigation
 import Maybe.Extra
+import List.Extra
 import GameData as G
 import Route as Route exposing (Route)
 
@@ -166,6 +168,39 @@ selectedNodes model =
     case model.route of
         Route.Home { build } ->
             buildToNodes startNodes (G.graph model.characterData) build
+
+
+summary : Model -> List ( Int, G.NodeType )
+summary model =
+    let
+        selected =
+            selectedNodes model
+    in
+        G.graph model.characterData
+            |> .nodes
+            |> Dict.filter (\id nodeType -> Set.member id selected)
+            |> Dict.values
+            |> List.map .val
+            |> List.sortBy .name
+            |> List.Extra.group
+            |> List.map (\g -> List.head g |> Maybe.map ((,) (List.length g)))
+            |> Maybe.Extra.values
+            |> List.sortBy
+                (\( count, nodeType ) ->
+                    -1
+                        * (count
+                            -- I really can't sort on a tuple, Elm? Sigh.
+                            + case nodeType.quality of
+                                G.Keystone ->
+                                    1000000
+
+                                G.Notable ->
+                                    1000
+
+                                G.Plain ->
+                                    0
+                          )
+                )
 
 
 subscriptions : Model -> Sub Msg

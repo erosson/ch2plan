@@ -5,6 +5,7 @@ import Set as Set exposing (Set)
 import Html as H
 import Html.Attributes as A
 import Html.Events as E
+import Maybe.Extra
 import Model as M
 import GameData as G
 import ViewGraph
@@ -31,6 +32,7 @@ view model =
             -- debug data
             -- , H.ul [] (List.map (H.li [] << List.singleton << uncurry viewNodeType) <| Dict.toList c.nodeTypes)
             -- , dumpModel model
+            , viewSummary <| M.summary model
             , H.p [] [ H.a [ A.href "https://github.com/erosson/ch2plan" ] [ H.text "Source code" ] ]
             ]
 
@@ -49,6 +51,42 @@ viewSearch model =
 viewNodeType : String -> G.NodeType -> H.Html msg
 viewNodeType key nodetype =
     H.text <| key ++ ": " ++ toString nodetype
+
+
+viewSummary : List ( Int, G.NodeType ) -> H.Html msg
+viewSummary ns =
+    H.div [ A.class "summary" ] <|
+        if List.length ns == 0 then
+            []
+        else
+            [ H.p [] [ H.text "Build summary: " ]
+            , H.ul [] (List.map (uncurry viewSummaryLine) ns)
+            ]
+
+
+viewSummaryLine : Int -> G.NodeType -> H.Html msg
+viewSummaryLine count nodeType =
+    H.li []
+        [ H.div [ A.class <| String.join " " [ "icon", ViewGraph.nodeQualityClass nodeType.quality ] ]
+            [ H.img [ A.src <| ViewGraph.iconUrl nodeType ] []
+            , H.div [ A.class "overlay" ] []
+            ]
+        , H.div []
+            [ H.text <|
+                " "
+                    ++ if count /= 1 then
+                        toString count ++ "x "
+                       else
+                        ""
+            , H.b [] [ H.text nodeType.name ]
+            , H.span [] [ H.text <| Maybe.Extra.unwrap "" ((++) ": ") nodeType.tooltip ]
+            ]
+
+        -- , H.div [] [ H.text <| Maybe.withDefault "" nodeType.tooltip ]
+        , H.div [ A.class "clear" ] []
+
+        -- , H.text <| toString nodeType
+        ]
 
 
 dumpModel : M.Model -> H.Html msg
