@@ -3,6 +3,7 @@ module GameData exposing (..)
 import Json.Decode as D
 import Json.Decode.Pipeline as P
 import Dict as Dict exposing (Dict)
+import Set as Set exposing (Set)
 import Maybe.Extra
 
 
@@ -172,15 +173,15 @@ type alias NodeId =
     Int
 
 
-neighbors : NodeId -> Graph -> List Node
+neighbors : NodeId -> Graph -> Set NodeId
 neighbors id g =
     let
-        neighbor : Edge -> Maybe Node
+        neighbor : Edge -> Maybe NodeId
         neighbor ( a, b ) =
             if a.id == id then
-                Just b
+                Just b.id
             else if b.id == id then
-                Just a
+                Just a.id
             else
                 Nothing
     in
@@ -188,6 +189,7 @@ neighbors id g =
             |> Dict.toList
             |> List.map (Tuple.second >> neighbor)
             |> Maybe.Extra.values
+            |> Set.fromList
 
 
 graphMinX : Graph -> Int

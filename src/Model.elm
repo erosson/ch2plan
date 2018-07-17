@@ -52,16 +52,46 @@ update msg model =
                     ( { model | search = Just str }, Cmd.none )
 
         SelectInput id ->
-            if isSelectable id model then
-                ( { model | selected = invert id model.selected }, Cmd.none )
+            let
+                selected =
+                    invert id model.selected
+            in
+                if isValidSelection startNodes (G.graph model.characterData) selected then
+                    ( { model | selected = selected }, Cmd.none )
+                else
+                    ( model, Cmd.none )
+
+
+startNodes : Set G.NodeId
+startNodes =
+    -- TODO is this defined in the actual data?
+    Set.singleton 1
+
+
+reachableSelectedNodes : Set G.NodeId -> G.Graph -> Set G.NodeId -> Set G.NodeId
+reachableSelectedNodes startNodes graph selected =
+    let
+        loop : G.NodeId -> { reachable : Set G.NodeId, tried : Set G.NodeId } -> { reachable : Set G.NodeId, tried : Set G.NodeId }
+        loop id res =
+            if Set.member id res.tried then
+                res
             else
-                ( model, Cmd.none )
+                let
+                    nextIds =
+                        G.neighbors id graph |> Set.intersect selected
+                in
+                    Set.foldr loop { tried = Set.insert id res.tried, reachable = Set.union res.reachable nextIds } nextIds
+
+        startReachable =
+            Set.intersect selected startNodes
+    in
+        Set.foldr loop { tried = Set.empty, reachable = startReachable } startReachable
+            |> .reachable
 
 
-isSelectable : G.NodeId -> Model -> Bool
-isSelectable id model =
-    -- TODO: restrict nodes by edges
-    True
+isValidSelection : Set G.NodeId -> G.Graph -> Set G.NodeId -> Bool
+isValidSelection startNodes graph selected =
+    reachableSelectedNodes startNodes graph selected == selected
 
 
 subscriptions : Model -> Sub Msg
