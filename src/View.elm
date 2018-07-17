@@ -36,12 +36,12 @@ view model =
 
 
 viewSearch : M.Model -> H.Html M.Msg
-viewSearch { selected, search } =
+viewSearch model =
     H.div []
-        [ H.div [] [ H.text <| toString (Set.size selected) ++ " points spent." ]
+        [ H.div [] [ H.text <| toString (Set.size <| M.selectedNodes model) ++ " points spent." ]
         , H.div []
             [ H.text "Highlight: "
-            , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" search, E.onInput M.SearchInput ] []
+            , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" model.search, E.onInput M.SearchInput ] []
             ]
         ]
 

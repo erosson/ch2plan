@@ -14,10 +14,13 @@ import GameData as G
 
 
 view : M.Model -> G.Graph -> H.Html M.Msg
-view { selected, search } g =
+view model g =
     let
         searchRegex =
-            Maybe.map (Regex.regex >> Regex.caseInsensitive) search
+            Maybe.map (Regex.regex >> Regex.caseInsensitive) model.search
+
+        selected =
+            M.selectedNodes model
 
         selectable =
             M.selectableNodes M.startNodes g selected

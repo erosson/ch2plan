@@ -1,19 +1,25 @@
 module Model exposing (..)
 
+import Char
 import Set as Set exposing (Set)
-import GameData as G
 import Json.Decode as Decode
+import Navigation
+import Maybe.Extra
+import GameData as G
+import Route as Route exposing (Route)
 
 
 type Msg
     = SearchInput String
-    | SelectInput Int
+    | SelectInput Int -- TODO should really remove this one in favor of links
+    | NavLocation Navigation.Location
+    | NavRoute Route
 
 
 type alias Model =
     { characterData : G.Character
+    , route : Route
     , search : Maybe String
-    , selected : Set Int
     }
 
 
@@ -22,11 +28,16 @@ type alias Flags =
     }
 
 
-init : Flags -> ( Model, Cmd Msg )
-init flags =
+init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
+init flags loc =
     case Decode.decodeValue G.characterDecoder flags.characterData of
         Ok char ->
-            ( { characterData = char, search = Nothing, selected = Set.empty }, Cmd.none )
+            ( { characterData = char
+              , route = Route.parse loc
+              , search = Nothing
+              }
+            , Cmd.none
+            )
 
         Err err ->
             Debug.crash err
@@ -54,12 +65,27 @@ update msg model =
         SelectInput id ->
             let
                 selected =
-                    invert id model.selected
+                    invert id <| selectedNodes model
+
+                g =
+                    G.graph model.characterData
+
+                _ =
+                    ( nodesToBuild g selected, buildToNodes startNodes g (nodesToBuild g selected) ) |> Debug.log "build"
+
+                route =
+                    Route.Home { build = nodesToBuild g selected }
             in
-                if isValidSelection startNodes (G.graph model.characterData) selected then
-                    ( { model | selected = selected }, Cmd.none )
+                if isValidSelection startNodes g selected then
+                    ( model, Navigation.modifyUrl <| Route.stringify route )
                 else
                     ( model, Cmd.none )
+
+        NavLocation loc ->
+            ( { model | route = Route.parse loc }, Cmd.none )
+
+        NavRoute route ->
+            ( { model | route = route }, Cmd.none )
 
 
 startNodes : Set G.NodeId
@@ -98,6 +124,48 @@ selectableNodes : Set G.NodeId -> G.Graph -> Set G.NodeId -> Set G.NodeId
 selectableNodes startNodes graph selected =
     Set.foldr (\id -> \res -> G.neighbors id graph |> Set.union res) startNodes selected
         |> \res -> Set.diff res selected
+
+
+nodesToBuild : G.Graph -> Set G.NodeId -> Maybe String
+nodesToBuild graph =
+    Set.toList
+        >> List.map nodeToString
+        >> String.join "&"
+        >> (\s ->
+                if s == "" then
+                    Nothing
+                else
+                    Just s
+           )
+
+
+nodeToString : G.NodeId -> String
+nodeToString =
+    -- Char.fromCode >> String.fromChar
+    toString
+
+
+buildToNodes : Set G.NodeId -> G.Graph -> Maybe String -> Set G.NodeId
+buildToNodes startNodes graph =
+    Maybe.withDefault ""
+        >> String.split "&"
+        >> List.map (String.toInt >> Result.toMaybe)
+        >> \ids0 ->
+            let
+                ids =
+                    ids0 |> Maybe.Extra.values |> Set.fromList
+            in
+                if List.length ids0 == Set.size ids && isValidSelection startNodes graph ids then
+                    ids
+                else
+                    Set.empty
+
+
+selectedNodes : Model -> Set G.NodeId
+selectedNodes model =
+    case model.route of
+        Route.Home { build } ->
+            buildToNodes startNodes (G.graph model.characterData) build
 
 
 subscriptions : Model -> Sub Msg
