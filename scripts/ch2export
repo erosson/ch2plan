@@ -1,0 +1,9 @@
+#!/bin/sh -eux
+# I expect the Clicker Heroes 2 game to be extracted to `./game`. I'm not going to autodownload the 2gb thing in this script.
+mkdir -p build/extract
+unzip -o ./game/packer/src/exports/Essentials_MEDIUM_ATF.swc -d ./build/extract/Essentials_MEDIUM_ATF 
+ffdec -export sprite ./build/extract/Essentials_MEDIUM_ATF/sprites ./build/extract/Essentials_MEDIUM_ATF/library.swf 
+mkdir -p ./assets/ch2data/img
+for icon in starBG `./list-icons.js ./assets/ch2data/HelpfulAdventurer.js`; do
+  cp -p ./build/extract/Essentials_MEDIUM_ATF/sprites/*_${icon}_*/*.png ./assets/ch2data/img/$icon.png
+done

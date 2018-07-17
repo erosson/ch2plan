@@ -37,16 +37,55 @@ appendTooltip =
     Maybe.Extra.unwrap "" ((++) "\n\n")
 
 
-viewNode : Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
-viewNode selected q { id, x, y, val } =
+viewNodeCircle : Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
+viewNodeCircle selected q { id, x, y, val } =
     S.circle
         [ A.cx <| toString x
         , A.cy <| toString y
-        , A.r "30"
+        , A.r <| toString <| iconSize / 2
         , A.class <| String.join " " [ "node", nodeHighlightClass q val, nodeSelectedClass selected id ]
         , E.onClick <| M.SelectInput id
         ]
         [ S.title [] [ S.text <| nodeTooltipText val ] ]
+
+
+iconSize =
+    60
+
+
+viewNode : Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
+viewNode selected q { id, x, y, val } =
+    S.g
+        [ A.class <| String.join " " [ "node", nodeHighlightClass q val, nodeSelectedClass selected id ]
+        , E.onClick <| M.SelectInput id
+        ]
+        [ S.title [] [ S.text <| nodeTooltipText val ]
+        , S.image
+            [ A.xlinkHref <| "./ch2data/img/" ++ val.icon ++ ".png"
+            , A.x <| toString <| x - iconSize // 2
+            , A.y <| toString <| y - iconSize // 2
+            , A.width <| toString iconSize
+            , A.height <| toString iconSize
+            ]
+            []
+
+        {- , S.circle
+           [ A.cx <| toString x
+           , A.cy <| toString y
+           , A.r <| toString <| iconSize / 2
+           , A.class "overlay"
+           ]
+           []
+        -}
+        , S.rect
+            [ A.x <| toString <| x - iconSize // 2
+            , A.y <| toString <| y - iconSize // 2
+            , A.width <| toString iconSize
+            , A.height <| toString iconSize
+            , A.class "overlay"
+            ]
+            []
+        ]
 
 
 nodeTooltipText : G.NodeType -> String

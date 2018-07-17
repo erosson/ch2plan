@@ -1,5 +1,6 @@
 *.log
 /dist
+/build
 /.terraform
 /game
 /node_modules
