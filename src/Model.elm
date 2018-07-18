@@ -66,11 +66,14 @@ update msg model =
 
         SelectInput id ->
             let
-                selected =
-                    invert id <| selectedNodes model
-
                 g =
                     G.graph model.characterData
+
+                selected =
+                    selectedNodes model
+                        |> invert id
+                        -- removes disconnected nodes
+                        |> reachableSelectedNodes startNodes g
 
                 _ =
                     ( nodesToBuild g selected, buildToNodes startNodes g (nodesToBuild g selected) ) |> Debug.log "build"
@@ -78,10 +81,10 @@ update msg model =
                 route =
                     Route.Home { build = nodesToBuild g selected }
             in
-                if isValidSelection startNodes g selected then
-                    ( model, Navigation.modifyUrl <| Route.stringify route )
-                else
-                    ( model, Cmd.none )
+                -- if isValidSelection startNodes g selected then
+                -- else
+                -- ( model, Cmd.none )
+                ( model, Navigation.modifyUrl <| Route.stringify route )
 
         NavLocation loc ->
             ( { model | route = Route.parse loc }, Cmd.none )
