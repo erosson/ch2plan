@@ -24,10 +24,13 @@ view model g =
 
         selectable =
             M.selectableNodes M.startNodes g selected
+
+        paths =
+            M.dijkstra M.startNodes g selected |> .distances
     in
         S.svg [ HA.style [ ( "border", "1px solid grey" ) ], A.viewBox <| formatViewBox 30 g ]
             [ S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList g.edges)
-            , S.g [] (List.map (viewNode selected selectable searchRegex << Tuple.second) <| Dict.toList g.nodes)
+            , S.g [] (List.map (viewNode selected selectable paths searchRegex << Tuple.second) <| Dict.toList g.nodes)
             ]
 
 
@@ -77,13 +80,13 @@ iconUrl node =
     "./ch2data/img/" ++ node.icon ++ ".png"
 
 
-viewNodeIcon : Set Int -> Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
-viewNodeIcon selected selectable q { id, x, y, val } =
+viewNodeIcon : Set Int -> Set Int -> Dict G.NodeId Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
+viewNodeIcon selected selectable paths q { id, x, y, val } =
     S.g
         [ A.class <| String.join " " [ "node", nodeHighlightClass q val, nodeSelectedClass selected id, nodeSelectableClass selectable id, nodeQualityClass val.quality ]
         , E.onClick <| M.SelectInput id
         ]
-        [ S.title [] [ S.text <| nodeTooltipText val ]
+        [ S.title [] [ S.text <| nodeTooltipText val ++ "\n\n\n" ++ toString (Dict.get id paths) ]
         , S.image
             [ A.xlinkHref <| iconUrl val
             , A.x <| toString <| x - iconSize // 2

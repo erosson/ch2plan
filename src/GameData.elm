@@ -52,8 +52,8 @@ type alias NodeTypes =
 
 
 type alias Graph =
-    { edges : Dict Int Edge
-    , nodes : Dict Int Node
+    { edges : Dict NodeId Edge
+    , nodes : Dict NodeId Node
     }
 
 
