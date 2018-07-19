@@ -9,6 +9,10 @@ import Svg as S
 import Svg.Attributes as A
 import Svg.Events as E
 import Maybe.Extra
+import Math.Vector2 as V2
+import Draggable
+import VirtualDom
+import Json.Decode as Decode
 import Model as M
 import GameData as G
 
@@ -24,11 +28,46 @@ view model g =
 
         selectable =
             M.selectableNodes M.startNodes g selected
+
+        ( cx, cy ) =
+            ( V2.getX model.center, V2.getY model.center )
+
+        ( halfWidth, halfHeight ) =
+            ( V2.getX model.size / model.zoom / 2, V2.getY model.size / model.zoom / 2 )
+
+        ( top, left, bottom, right ) =
+            ( cy - halfHeight, cx - halfWidth, cy + halfHeight, cx + halfWidth )
+
+        panning =
+            "translate(" ++ toString -left ++ ", " ++ toString -top ++ ")"
+
+        zooming =
+            "scale(" ++ toString model.zoom ++ ")"
     in
-        S.svg [ HA.style [ ( "border", "1px solid grey" ) ], A.viewBox <| formatViewBox 30 g ]
-            [ S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList g.edges)
-            , S.g [] (List.map (viewNode selected selectable searchRegex << Tuple.second) <| Dict.toList g.nodes)
+        S.svg
+            [ HA.style [ ( "border", "1px solid grey" ) ]
+            , A.viewBox <| formatViewBox 30 g
+
+            --, A.width <| toString (V2.getX model.size)
+            --, A.height <| toString (V2.getY model.size)
+            , handleZoom M.Zoom
+            , Draggable.mouseTrigger () M.DragMsg
             ]
+            [ S.g [ A.transform (zooming ++ " " ++ panning) ] (List.map (viewEdge << Tuple.second) <| Dict.toList g.edges)
+            , S.g [ A.transform (zooming ++ " " ++ panning) ] (List.map (viewNode selected selectable searchRegex << Tuple.second) <| Dict.toList g.nodes)
+            ]
+
+
+handleZoom : (Float -> msg) -> S.Attribute msg
+handleZoom onZoom =
+    let
+        ignoreDefaults =
+            VirtualDom.Options True True
+    in
+        VirtualDom.onWithOptions
+            "wheel"
+            ignoreDefaults
+            (Decode.map onZoom <| Decode.field "deltaY" Decode.float)
 
 
 formatViewBox : Int -> G.Graph -> String

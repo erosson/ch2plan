@@ -7,6 +7,8 @@ import Json.Decode as Decode
 import Navigation
 import Maybe.Extra
 import List.Extra
+import Math.Vector2 as V2
+import Draggable
 import GameData as G
 import Route as Route exposing (Route)
 
@@ -16,12 +18,19 @@ type Msg
     | SelectInput Int -- TODO should really remove this one in favor of links
     | NavLocation Navigation.Location
     | NavRoute Route
+    | OnDragBy V2.Vec2
+    | DragMsg (Draggable.Msg ())
+    | Zoom Float
 
 
 type alias Model =
     { characterData : G.Character
     , route : Route
     , search : Maybe String
+    , zoom : Float
+    , center : V2.Vec2
+    , size : V2.Vec2
+    , drag : Draggable.State ()
     }
 
 
@@ -37,6 +46,10 @@ init flags loc =
             ( { characterData = char
               , route = Route.parse loc
               , search = Nothing
+              , zoom = 0.9
+              , center = V2.vec2 500 500
+              , size = V2.vec2 1000 1000
+              , drag = Draggable.init
               }
             , Cmd.none
             )
@@ -88,6 +101,46 @@ update msg model =
 
         NavRoute route ->
             ( { model | route = route }, Cmd.none )
+
+        OnDragBy rawDelta ->
+            let
+                delta =
+                    rawDelta
+                        --|> V2.scale (-1 / model.zoom)
+                        |> V2.scale (-1)
+
+                deltaCenter =
+                    model.center
+                        |> V2.add delta
+
+                clampedCenter =
+                    v2Clamp (V2.vec2 -1000 -1000) (V2.vec2 1000 1000) deltaCenter model.zoom
+            in
+                ( { model | center = clampedCenter }, Cmd.none )
+
+        Zoom factor ->
+            let
+                newZoom =
+                    model.zoom
+                        |> (+) (-factor * 0.05)
+                        |> clamp 0.95 5
+            in
+                ( { model | zoom = newZoom }, Cmd.none )
+
+        DragMsg dragMsg ->
+            Draggable.update dragConfig dragMsg model
+
+
+v2Clamp : V2.Vec2 -> V2.Vec2 -> V2.Vec2 -> Float -> V2.Vec2
+v2Clamp min max orig zoom =
+    let
+        scaledMin =
+            V2.scale (sqrt zoom) min
+
+        scaledMax =
+            V2.scale (sqrt zoom) max
+    in
+        V2.vec2 (clamp (V2.getX scaledMin) (V2.getX scaledMax) (V2.getX orig)) (clamp (V2.getY scaledMin) (V2.getY scaledMax) (V2.getY orig))
 
 
 startNodes : Set G.NodeId
@@ -205,4 +258,9 @@ summary model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Draggable.subscriptions DragMsg model.drag
+
+
+dragConfig : Draggable.Config () Msg
+dragConfig =
+    Draggable.basicConfig (OnDragBy << V2.fromTuple)
