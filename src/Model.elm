@@ -15,12 +15,13 @@ type Msg
     = SearchInput String
     | SelectInput Int -- TODO should really remove this one in favor of links
     | NavLocation Navigation.Location
-    | NavRoute Route
+    | NavRoute Route Route.Features
 
 
 type alias Model =
     { characterData : G.Character
     , route : Route
+    , features : Route.Features
     , search : Maybe String
     }
 
@@ -36,6 +37,7 @@ init flags loc =
         Ok char ->
             ( { characterData = char
               , route = Route.parse loc
+              , features = Route.parseFeatures loc
               , search = Nothing
               }
             , Cmd.none
@@ -73,16 +75,27 @@ update msg model =
                     selectedNodes model
 
                 selected =
-                    if Set.member id selected0 then
-                        -- remove the node, and any disconnected from the start by its removal
-                        selected0
-                            |> invert id
-                            |> reachableSelectedNodes startNodes g
+                    if model.features.multiSelect then
+                        if Set.member id selected0 then
+                            -- remove the node, and any disconnected from the start by its removal
+                            selected0
+                                |> invert id
+                                |> reachableSelectedNodes startNodes g
+                        else
+                            -- add the node and any in between
+                            selectPathToNode (dijkstra startNodes g selected0) id
+                                |> Set.fromList
+                                |> Set.union selected0
                     else
-                        -- add the node and any in between
-                        selectPathToNode (dijkstra startNodes g selected0) id
-                            |> Set.fromList
-                            |> Set.union selected0
+                        -- the old way - one node at a time. faster.
+                        let
+                            s =
+                                invert id <| selected0
+                        in
+                            if isValidSelection startNodes g s then
+                                s
+                            else
+                                selected0
 
                 _ =
                     ( nodesToBuild g selected, buildToNodes startNodes g (nodesToBuild g selected) ) |> Debug.log "build"
@@ -96,10 +109,10 @@ update msg model =
                 ( model, Navigation.modifyUrl <| Route.stringify route )
 
         NavLocation loc ->
-            ( { model | route = Route.parse loc }, Cmd.none )
+            ( { model | route = Route.parse loc, features = Route.parseFeatures loc }, Cmd.none )
 
-        NavRoute route ->
-            ( { model | route = route }, Cmd.none )
+        NavRoute route features ->
+            ( { model | route = route, features = features }, Cmd.none )
 
 
 startNodes : Set G.NodeId
