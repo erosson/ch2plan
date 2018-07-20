@@ -9,3 +9,8 @@ var app = Elm.Main.fullscreen({
   // TODO support list of characterdata
   characterData: window.helpfulAdventurer,
 })
+
+fetch('./CHANGELOG.md')
+.then(function(res) { return res.text() })
+.then(function(text) { app.ports.changelogText.send(text) })
+.catch(console.error)

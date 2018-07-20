@@ -4,14 +4,21 @@ import Set as Set exposing (Set)
 import Navigation
 import UrlParser as P exposing ((</>), (<?>))
 import Regex
+import Html as H
+import Html.Attributes as A
 
 
 type alias HomeParams =
     { build : Maybe String }
 
 
+homeParams0 =
+    { build = Nothing }
+
+
 type Route
     = Home HomeParams
+    | Changelog
 
 
 type alias Features =
@@ -64,6 +71,7 @@ parser =
     P.oneOf
         [ P.map (Home { build = Nothing }) P.top
         , P.map Home <| P.map HomeParams <| P.s "b" </> maybeString
+        , P.map Changelog <| P.s "changelog"
         ]
 
 
@@ -116,3 +124,11 @@ stringify route =
 
                 Just b ->
                     "#/b/" ++ b
+
+        Changelog ->
+            "#/changelog"
+
+
+href : Route -> H.Attribute msg
+href =
+    stringify >> A.href

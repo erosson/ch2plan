@@ -11,6 +11,7 @@ import Math.Vector2 as V2
 import Draggable
 import GameData as G
 import Route as Route exposing (Route)
+import Ports
 
 
 type Msg
@@ -18,13 +19,15 @@ type Msg
     | SelectInput Int -- TODO should really remove this one in favor of links
     | NavLocation Navigation.Location
     | NavRoute Route Route.Features
+    | ChangelogText String
     | OnDragBy V2.Vec2
     | DragMsg (Draggable.Msg ())
     | Zoom Float
 
 
 type alias Model =
-    { characterData : G.Character
+    { changelog : Maybe String
+    , characterData : G.Character
     , route : Route
     , features : Route.Features
     , search : Maybe String
@@ -44,7 +47,8 @@ init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
 init flags loc =
     case Decode.decodeValue G.characterDecoder flags.characterData of
         Ok char ->
-            ( { characterData = char
+            ( { changelog = Nothing
+              , characterData = char
               , route = Route.parse loc
               , features = Route.parseFeatures loc
               , search = Nothing
@@ -126,6 +130,9 @@ update msg model =
 
         NavRoute route features ->
             ( { model | route = route, features = features }, Cmd.none )
+
+        ChangelogText text ->
+            ( { model | changelog = Just text }, Cmd.none )
 
         OnDragBy rawDelta ->
             let
@@ -361,6 +368,9 @@ selectedNodes model =
         Route.Home { build } ->
             buildToNodes startNodes (G.graph model.characterData) build
 
+        _ ->
+            Set.empty
+
 
 summary : Model -> List ( Int, G.NodeType )
 summary model =
@@ -397,7 +407,10 @@ summary model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Draggable.subscriptions DragMsg model.drag
+    Sub.batch
+        [ Draggable.subscriptions DragMsg model.drag
+        , Ports.changelogText ChangelogText
+        ]
 
 
 dragConfig : Draggable.Config () Msg
