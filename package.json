@@ -11,6 +11,7 @@
     "tf:plan": "terraform plan",
     "tf:apply": "terraform apply -auto-approve",
     "ch2export": "scripty",
+    "export:chars": "scripty",
     "dev": "cp CHANGELOG.md ./assets && elm-live ./src/Main.elm --output=./assets/elm.js --dir=./assets --open",
     "build": "rm -rf ./dist && mkdir -p ./dist && cp CHANGELOG.md ./dist && rsync -auv ./assets/ ./dist/ && elm-make ./src/Main.elm --output=./dist/elm.js",
     "test": "echo 'no tests yet'",

@@ -1,0 +1,20 @@
+#!/bin/sh -eux
+# assumptions:
+# * clicker heroes 2 is symlinked (or installed?) to <this-repo>/game
+# * the flex sdk is installed (for mxmlc) - https://www.adobe.com/devnet/flex/flex-sdk-download.html
+#
+# Run me, and copy the json from the browser console into gedit.
+
+rm -rf build/chars
+mkdir -p build/chars
+
+for f in `pwd`/game/mods/active/*.swf; do
+  ln -s $f build/chars
+done
+ln -s `pwd`/game/ClickerHeroes2.swf build/chars
+ls build/chars
+mxmlc src/CharToJson.as -output build/chars/CharToJson.swf
+cp src/CharToJson.html build/chars/index.html
+
+gedit assets/ch2data/chars.json &
+serve build/chars

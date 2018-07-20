@@ -23,7 +23,6 @@ view model =
         H.div []
             [ H.h4 [] [ H.text <| c.name ++ ": " ++ c.flavorName ++ ", " ++ c.flavorClass ]
             , H.p [] [ H.text <| c.flavor ]
-            , H.p [] [ H.text <| "Last updated: v" ++ c.lastUpdatedVersion ]
             , viewSearch model
             , ViewGraph.view model g
             , viewSearch model
@@ -32,6 +31,7 @@ view model =
             -- , H.ul [] (List.map (H.li [] << List.singleton << uncurry viewNodeType) <| Dict.toList c.nodeTypes)
             -- , dumpModel model
             , viewSummary <| M.summary model
+            , H.p [] [ H.text <| "Last updated: " ++ model.lastUpdatedVersion ]
             ]
 
 
