@@ -73,7 +73,8 @@ falseBools =
 
 boolParam : String -> P.QueryParser (Bool -> a) a
 boolParam name =
-    Maybe.withDefault ""
+    -- `?flag` enables it. `?flag=` or `?flag=0` disables it.
+    Maybe.withDefault "1"
         >> String.toLower
         >> (flip Set.member) falseBools
         >> not
@@ -83,7 +84,7 @@ boolParam name =
 parseFeatures : Navigation.Location -> Features
 parseFeatures =
     hashQS
-        -- parser expects no segments
+        -- feature-flag parser doesn't care about path segments - remove them
         >> (\loc -> { loc | hash = "" })
         >> P.parseHash featuresParser
         >> Maybe.withDefault features0
