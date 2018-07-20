@@ -15,6 +15,7 @@ import VirtualDom
 import Json.Decode as Decode
 import Model as M
 import GameData as G
+import Route
 
 
 view : M.Model -> G.Graph -> H.Html M.Msg
@@ -28,7 +29,30 @@ view model g =
 
         selectable =
             M.selectableNodes M.startNodes g selected
+    in
+        S.svg
+            ([ HA.style [ ( "border", "1px solid grey" ) ]
+             , A.viewBox <| formatViewBox (iconSize // 2) g
+             ]
+                ++ Route.ifFeature model.features.zoom inputZoomAndPan []
+            )
+            [ S.g (Route.ifFeature model.features.zoom [ zoomAndPan model ] [])
+                [ S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList g.edges)
+                , S.g [] (List.map (viewNode selected selectable searchRegex << Tuple.second) <| Dict.toList g.nodes)
+                ]
+            ]
 
+
+inputZoomAndPan : List (S.Attribute M.Msg)
+inputZoomAndPan =
+    [ handleZoom M.Zoom
+    , Draggable.mouseTrigger () M.DragMsg
+    ]
+
+
+zoomAndPan : M.Model -> S.Attribute msg
+zoomAndPan model =
+    let
         ( cx, cy ) =
             ( V2.getX model.center, V2.getY model.center )
 
@@ -44,18 +68,7 @@ view model g =
         zooming =
             "scale(" ++ toString model.zoom ++ ")"
     in
-        S.svg
-            [ HA.style [ ( "border", "1px solid grey" ) ]
-            , A.viewBox <| formatViewBox 30 g
-
-            --, A.width <| toString (V2.getX model.size)
-            --, A.height <| toString (V2.getY model.size)
-            , handleZoom M.Zoom
-            , Draggable.mouseTrigger () M.DragMsg
-            ]
-            [ S.g [ A.transform (zooming ++ " " ++ panning) ] (List.map (viewEdge << Tuple.second) <| Dict.toList g.edges)
-            , S.g [ A.transform (zooming ++ " " ++ panning) ] (List.map (viewNode selected selectable searchRegex << Tuple.second) <| Dict.toList g.nodes)
-            ]
+        A.transform (zooming ++ " " ++ panning)
 
 
 handleZoom : (Float -> msg) -> S.Attribute msg

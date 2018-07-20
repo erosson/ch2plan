@@ -15,12 +15,12 @@ type Route
 
 
 type alias Features =
-    { multiSelect : Bool }
+    { multiSelect : Bool, zoom : Bool }
 
 
 features0 : Features
 features0 =
-    { multiSelect = False }
+    { multiSelect = False, zoom = False }
 
 
 parse : Navigation.Location -> Route
@@ -92,7 +92,18 @@ parseFeatures =
 
 featuresParser : P.Parser (Features -> a) a
 featuresParser =
-    P.map Features <| P.top <?> boolParam "enableMultiSelect"
+    P.map Features <|
+        P.top
+            <?> boolParam "enableMultiSelect"
+            <?> boolParam "enableZoom"
+
+
+ifFeature : Bool -> a -> a -> a
+ifFeature pred t f =
+    if pred then
+        t
+    else
+        f
 
 
 stringify : Route -> String
