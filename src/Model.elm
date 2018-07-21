@@ -194,7 +194,7 @@ update msg model =
                             let
                                 newZoom =
                                     home.zoom
-                                        |> (+) (-factor * 0.05)
+                                        |> (+) (-factor * 0.025)
                                         |> clamp 1 5
 
                                 newCenter =
