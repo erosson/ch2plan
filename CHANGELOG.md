@@ -10,6 +10,11 @@ These are at least partially working, but turned off by default.
 - [Zoom/pan](https://ch2.erosson.org/?enableZoom=1). [Thanks, @Judgy53](https://github.com/erosson/ch2plan/pull/15)! https://github.com/erosson/ch2plan/issues/4
 
 ---
+## 2018-07-21
+- Improvements to zooming/panning - [thanks, @Judgy53](https://github.com/erosson/ch2plan/pull/18)!
+- Performance tweaking - selecting/unselecting nodes should be a bit faster.
+- Nicer background images for small nodes, next (purple) nodes, and search results nodes.
+
 ## 2018-07-20
 - New beta feature: zoom/pan.
 - New beta feature: select/unselect multiple nodes with one click. Thanks, [@Judgy53](https://github.com/Judgy53)!
