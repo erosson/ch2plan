@@ -33,8 +33,22 @@ view model features =
              ]
                 ++ Route.ifFeature features.zoom inputZoomAndPan []
             )
-            [ S.g (Route.ifFeature features.zoom [ zoomAndPan model ] [])
-                [ S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList model.graph.edges)
+            [ S.defs []
+                [ S.filter [ A.id "highlight" ]
+                    [ S.feColorMatrix
+                        [ A.type_ "hueRotate"
+                        , A.values "60" -- red/orange
+
+                        -- , A.values "45" -- pinkish-purple
+                        -- , A.values "90" -- orange
+                        -- , A.values "300" -- blue
+                        ]
+                        []
+                    ]
+                ]
+            , S.g (Route.ifFeature features.zoom [ zoomAndPan model ] [])
+                [ S.g [] (List.map (viewNodeBackground model.selected selectable searchRegex << Tuple.second) <| Dict.toList model.graph.nodes)
+                , S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList model.graph.edges)
                 , S.g [] (List.map (viewNode model.selected selectable searchRegex << Tuple.second) <| Dict.toList model.graph.nodes)
                 ]
             ]
@@ -87,25 +101,17 @@ appendTooltip =
     Maybe.Extra.unwrap "" ((++) "\n\n")
 
 
-viewNodeCircle : Set Int -> Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
-viewNodeCircle selected selectable q { id, x, y, val } =
-    S.circle
-        [ A.cx <| toString x
-        , A.cy <| toString y
-        , A.r <| toString <| iconSize / 2
-        , A.class <| String.join " " [ "node", nodeHighlightClass q val, nodeSelectedClass selected id, nodeSelectableClass selectable id, nodeQualityClass val.quality ]
-        , E.onClick <| M.SelectInput id
-        ]
-        [ S.title [] [ S.text <| nodeTooltipText val ] ]
-
-
 nodeQualityClass : G.NodeQuality -> String
 nodeQualityClass =
     toString >> (++) "node-"
 
 
 iconSize =
-    60
+    50
+
+
+nodeBGSize =
+    iconSize * 4
 
 
 viewNode =
@@ -117,11 +123,26 @@ iconUrl node =
     "./ch2data/img/" ++ node.icon ++ ".png"
 
 
+viewNodeBackground : Set Int -> Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
+viewNodeBackground selected selectable q { id, x, y, val } =
+    -- Backgrounds are drawn separately from the rest of the node, so they don't interfere with other nodes' clicks
+    S.image
+        [ A.class <| String.join " " [ "node-background", nodeHighlightClass q val, nodeSelectedClass selected id, nodeSelectableClass selectable id, nodeQualityClass val.quality ]
+        , A.xlinkHref <| nodeBackgroundImage val (isNodeHighlighted q val) (Set.member id selected) (Set.member id selectable)
+        , A.x <| toString <| x - nodeBGSize // 2
+        , A.y <| toString <| y - nodeBGSize // 2
+        , A.width <| toString nodeBGSize
+        , A.height <| toString nodeBGSize
+
+        -- , A.class "overlay"
+        ]
+        []
+
+
 viewNodeIcon : Set Int -> Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
 viewNodeIcon selected selectable q { id, x, y, val } =
     S.g
         [ A.class <| String.join " " [ "node", nodeHighlightClass q val, nodeSelectedClass selected id, nodeSelectableClass selectable id, nodeQualityClass val.quality ]
-        , E.onClick <| M.SelectInput id
         ]
         [ S.title [] [ S.text <| nodeTooltipText val ]
         , S.image
@@ -130,26 +151,38 @@ viewNodeIcon selected selectable q { id, x, y, val } =
             , A.y <| toString <| y - iconSize // 2
             , A.width <| toString iconSize
             , A.height <| toString iconSize
-            ]
-            []
-
-        {- , S.circle
-           [ A.cx <| toString x
-           , A.cy <| toString y
-           , A.r <| toString <| iconSize / 2
-           , A.class "overlay"
-           ]
-           []
-        -}
-        , S.rect
-            [ A.x <| toString <| x - iconSize // 2
-            , A.y <| toString <| y - iconSize // 2
-            , A.width <| toString iconSize
-            , A.height <| toString iconSize
-            , A.class "overlay"
+            , E.onClick <| M.SelectInput id
             ]
             []
         ]
+
+
+nodeBackgroundImage : G.NodeType -> Bool -> Bool -> Bool -> String
+nodeBackgroundImage node isHighlighted isSelected isSelectable =
+    let
+        quality =
+            case node.quality of
+                G.Keystone ->
+                    "deluxeNode"
+
+                G.Notable ->
+                    "specialNode"
+
+                G.Plain ->
+                    "generalNode"
+
+        suffix =
+            if isHighlighted then
+                -- this also has a css filter applied to it, changing from purple to orange
+                "Next"
+            else if isSelected then
+                "Selected"
+            else if isSelectable then
+                "Next"
+            else
+                ""
+    in
+        "./ch2data/node-img/" ++ quality ++ suffix ++ ".png"
 
 
 nodeTooltipText : G.NodeType -> String
