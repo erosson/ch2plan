@@ -17,6 +17,7 @@ package {
     public function CharToJson () {
       requestSwf("./ClickerHeroes2.swf", loadCH2)
       requestSwf("./HelpfulAdventurer.swf", loadHelpfulAdventurer)
+      requestSwf("./Wizard.swf", loadWizard)
 
       var textField:TextField = new TextField();
       textField.text = "Open the JS console!";
@@ -38,10 +39,29 @@ package {
     }
     private function loadHelpfulAdventurer(e:Event):void {
       try {
-        var CharClass:Class = e.target.applicationDomain.getDefinition("HelpfulAdventurerMain") as Class;
-        var char:Object = new CharClass();
-        char.onStartup(null)
-        this.chars.helpfulAdventurer = pick(char.helpfulAdventurer, fields)
+        var cls:Class = e.target.applicationDomain.getDefinition("HelpfulAdventurerMain") as Class;
+        new cls().onStartup(null);
+        var chars:Class = e.target.applicationDomain.getDefinition("models.Characters") as Class;
+        var char:Object = chars.startingDefaultInstances['Helpful Adventurer']
+        this.chars.helpfulAdventurer = pick(char, fields)
+        loadComplete()
+      }
+      catch(e:Error) {
+        log("failed to load character: "+e)
+      }
+    }
+    private function loadWizard(e:Event):void {
+      try {
+        var cls:Class = e.target.applicationDomain.getDefinition("WizardMain") as Class;
+        new cls().onStartup(null)
+        var chars:Class = e.target.applicationDomain.getDefinition("models.Characters") as Class;
+        var char:Object = chars.startingDefaultInstances['Wizard']
+        log('prepick')
+        this.chars.wizard = pick(char, fields)
+        log('postpick')
+        // until wizard's working, fake its graph
+        this.chars.wizard.levelGraphObject = {edges:[], nodes:[]}
+        this.chars.wizard.levelGraphNodeTypes = {}
         loadComplete()
       }
       catch(e:Error) {

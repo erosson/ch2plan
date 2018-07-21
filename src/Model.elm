@@ -26,14 +26,28 @@ type Msg
 type alias Model =
     { changelog : String
     , lastUpdatedVersion : String
-    , characterData : G.Character
-    , route : Route
+    , characterData : Dict String G.Character
+    , route : RouteModel
     , features : Route.Features
-    , search : Maybe String
+    }
+
+
+type RouteModel
+    = NotFound
+    | Changelog
+    | Home Route.HomeParams HomeModel
+    | HomeError Route.HomeParams
+
+
+type alias HomeModel =
+    { search : Maybe String
     , zoom : Float
     , center : V2.Vec2
     , size : V2.Vec2
     , drag : Draggable.State ()
+    , char : G.Character
+    , graph : G.Graph
+    , selected : Set G.NodeId
     }
 
 
@@ -46,24 +60,61 @@ type alias Flags =
 
 init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
 init flags loc =
-    case Decode.decodeValue G.characterDecoder flags.characterData of
-        Ok char ->
+    case Decode.decodeValue G.decoder flags.characterData of
+        Ok chars ->
             ( { changelog = flags.changelog
               , lastUpdatedVersion = flags.lastUpdatedVersion
-              , characterData = char
-              , route = Route.parse loc
+              , characterData = chars
+              , route = Changelog -- placeholder
               , features = Route.parseFeatures loc
-              , search = Nothing
-              , zoom = 0.9
-              , center = V2.vec2 500 500
-              , size = V2.vec2 1000 1000
-              , drag = Draggable.init
               }
+                |> \model -> { model | route = Route.parse loc |> routeToModel model }
             , Cmd.none
             )
 
         Err err ->
             Debug.crash err
+
+
+routeToModel : Model -> Route -> RouteModel
+routeToModel model route =
+    case route of
+        Route.Changelog ->
+            Changelog
+
+        Route.NotFound ->
+            NotFound
+
+        Route.Home params ->
+            case initHome params model of
+                Ok m ->
+                    Home params m
+
+                Err _ ->
+                    HomeError params
+
+
+initHome : Route.HomeParams -> { m | characterData : Dict String G.Character } -> Result String HomeModel
+initHome q { characterData } =
+    case Dict.get q.hero characterData of
+        Nothing ->
+            Err <| "no such hero: " ++ q.hero
+
+        Just char ->
+            let
+                g =
+                    G.graph char
+            in
+                Ok
+                    { search = Nothing
+                    , zoom = 0.9
+                    , center = V2.vec2 500 500
+                    , size = V2.vec2 1000 1000
+                    , drag = Draggable.init
+                    , char = char
+                    , graph = g
+                    , selected = buildToNodes startNodes g q.build
+                    }
 
 
 invert : comparable -> Set comparable -> Set comparable
@@ -77,89 +128,97 @@ invert id set =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SearchInput str ->
-            case str of
-                "" ->
-                    ( { model | search = Nothing }, Cmd.none )
-
-                _ ->
-                    ( { model | search = Just str }, Cmd.none )
-
-        SelectInput id ->
-            let
-                g =
-                    G.graph model.characterData
-
-                selected0 =
-                    selectedNodes model
-
-                selected =
-                    if model.features.multiSelect then
-                        if Set.member id selected0 then
-                            -- remove the node, and any disconnected from the start by its removal
-                            selected0
-                                |> invert id
-                                |> reachableSelectedNodes startNodes g
-                        else
-                            -- add the node and any in between
-                            selectPathToNode (dijkstra startNodes g selected0) id
-                                |> Set.fromList
-                                |> Set.union selected0
-                    else
-                        -- the old way - one node at a time. faster.
-                        let
-                            s =
-                                invert id <| selected0
-                        in
-                            if isValidSelection startNodes g s then
-                                s
-                            else
-                                selected0
-
-                _ =
-                    ( nodesToBuild g selected, buildToNodes startNodes g (nodesToBuild g selected) ) |> Debug.log "build"
-
-                route =
-                    Route.Home { build = nodesToBuild g selected }
-            in
-                -- if isValidSelection startNodes g selected then
-                -- else
-                -- ( model, Cmd.none )
-                ( model, Navigation.modifyUrl <| Route.stringify route )
-
         NavLocation loc ->
-            ( { model | route = Route.parse loc, features = Route.parseFeatures loc }, Cmd.none )
+            ( { model | route = Route.parse loc |> routeToModel model, features = Route.parseFeatures loc }, Cmd.none )
 
         NavRoute route features ->
-            ( { model | route = route, features = features }, Cmd.none )
+            ( { model | route = route |> routeToModel model, features = features }, Cmd.none )
 
-        OnDragBy rawDelta ->
-            let
-                delta =
-                    rawDelta
-                        --|> V2.scale (-1 / model.zoom)
-                        |> V2.scale (-1)
+        _ ->
+            case model.route of
+                Changelog ->
+                    ( model, Cmd.none )
 
-                deltaCenter =
-                    model.center
-                        |> V2.add delta
+                NotFound ->
+                    ( model, Cmd.none )
 
-                clampedCenter =
-                    v2Clamp (V2.vec2 -1000 -1000) (V2.vec2 1000 1000) deltaCenter model.zoom
-            in
-                ( { model | center = clampedCenter }, Cmd.none )
+                HomeError _ ->
+                    ( model, Cmd.none )
 
-        Zoom factor ->
-            let
-                newZoom =
-                    model.zoom
-                        |> (+) (-factor * 0.05)
-                        |> clamp 0.95 5
-            in
-                ( { model | zoom = newZoom }, Cmd.none )
+                Home q home ->
+                    case msg of
+                        SearchInput str ->
+                            case str of
+                                "" ->
+                                    ( { model | route = Home q { home | search = Nothing } }, Cmd.none )
 
-        DragMsg dragMsg ->
-            Draggable.update dragConfig dragMsg model
+                                _ ->
+                                    ( { model | route = Home q { home | search = Just str } }, Cmd.none )
+
+                        SelectInput id ->
+                            let
+                                selected =
+                                    if model.features.multiSelect then
+                                        if Set.member id home.selected then
+                                            -- remove the node, and any disconnected from the start by its removal
+                                            home.selected
+                                                |> invert id
+                                                |> reachableSelectedNodes startNodes home.graph
+                                        else
+                                            -- add the node and any in between
+                                            selectPathToNode (dijkstra startNodes home.graph home.selected) id
+                                                |> Set.fromList
+                                                |> Set.union home.selected
+                                    else
+                                        -- the old way - one node at a time. faster.
+                                        let
+                                            s =
+                                                invert id home.selected
+                                        in
+                                            if isValidSelection startNodes home.graph s then
+                                                s
+                                            else
+                                                home.selected
+
+                                route =
+                                    Route.Home { q | build = nodesToBuild home.graph selected }
+                            in
+                                ( model, Navigation.modifyUrl <| Route.stringify route )
+
+                        OnDragBy rawDelta ->
+                            let
+                                delta =
+                                    rawDelta
+                                        --|> V2.scale (-1 / model.zoom)
+                                        |> V2.scale (-1)
+
+                                deltaCenter =
+                                    home.center
+                                        |> V2.add delta
+
+                                clampedCenter =
+                                    v2Clamp (V2.vec2 -1000 -1000) (V2.vec2 1000 1000) deltaCenter home.zoom
+                            in
+                                ( { model | route = Home q { home | center = clampedCenter } }, Cmd.none )
+
+                        Zoom factor ->
+                            let
+                                newZoom =
+                                    home.zoom
+                                        |> (+) (-factor * 0.05)
+                                        |> clamp 0.95 5
+                            in
+                                ( { model | route = Home q { home | zoom = newZoom } }, Cmd.none )
+
+                        DragMsg dragMsg ->
+                            Draggable.update dragConfig dragMsg home
+                                |> Tuple.mapFirst (\home2 -> { model | route = Home q home2 })
+
+                        NavRoute _ _ ->
+                            Debug.crash "already did NavRoute"
+
+                        NavLocation _ ->
+                            Debug.crash "already did NavLocation"
 
 
 v2Clamp : V2.Vec2 -> V2.Vec2 -> V2.Vec2 -> Float -> V2.Vec2
@@ -361,52 +420,42 @@ buildToNodes startNodes graph =
                     Set.empty
 
 
-selectedNodes : Model -> Set G.NodeId
-selectedNodes model =
-    case model.route of
-        Route.Home { build } ->
-            buildToNodes startNodes (G.graph model.characterData) build
+summary : HomeModel -> List ( Int, G.NodeType )
+summary { graph, selected } =
+    graph.nodes
+        |> Dict.filter (\id nodeType -> Set.member id selected)
+        |> Dict.values
+        |> List.map .val
+        |> List.sortBy .name
+        |> List.Extra.group
+        |> List.map (\g -> List.head g |> Maybe.map ((,) (List.length g)))
+        |> Maybe.Extra.values
+        |> List.sortBy
+            (\( count, nodeType ) ->
+                -1
+                    * (count
+                        -- I really can't sort on a tuple, Elm? Sigh.
+                        + case nodeType.quality of
+                            G.Keystone ->
+                                1000000
 
-        _ ->
-            Set.empty
+                            G.Notable ->
+                                1000
 
-
-summary : Model -> List ( Int, G.NodeType )
-summary model =
-    let
-        selected =
-            selectedNodes model
-    in
-        G.graph model.characterData
-            |> .nodes
-            |> Dict.filter (\id nodeType -> Set.member id selected)
-            |> Dict.values
-            |> List.map .val
-            |> List.sortBy .name
-            |> List.Extra.group
-            |> List.map (\g -> List.head g |> Maybe.map ((,) (List.length g)))
-            |> Maybe.Extra.values
-            |> List.sortBy
-                (\( count, nodeType ) ->
-                    -1
-                        * (count
-                            -- I really can't sort on a tuple, Elm? Sigh.
-                            + case nodeType.quality of
-                                G.Keystone ->
-                                    1000000
-
-                                G.Notable ->
-                                    1000
-
-                                G.Plain ->
-                                    0
-                          )
-                )
+                            G.Plain ->
+                                0
+                      )
+            )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Draggable.subscriptions DragMsg model.drag
+    case model.route of
+        Home q home ->
+            Draggable.subscriptions DragMsg home.drag
+
+        _ ->
+            Sub.none
 
 
 dragConfig : Draggable.Config () Msg

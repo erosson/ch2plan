@@ -64,6 +64,11 @@ type alias Edge =
     ( Node, Node )
 
 
+decoder : D.Decoder (Dict String Character)
+decoder =
+    D.dict characterDecoder
+
+
 characterDecoder : D.Decoder Character
 characterDecoder =
     P.decode Character

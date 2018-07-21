@@ -10,10 +10,13 @@ Promise.all([
   fetch('./CHANGELOG.md').then(function(res) { return res.text() }),
 ])
 .then(function([chars, changelog]) {
+  // console.log(chars)
+  var ch2 = chars.ch2
+  delete chars.ch2
   var app = Elm.Main.fullscreen({
     changelog: changelog,
-    lastUpdatedVersion: chars.ch2.GAME_VERSION,
-    characterData: chars.helpfulAdventurer,
+    lastUpdatedVersion: ch2.GAME_VERSION,
+    characterData: chars,
   })
 })
 .catch(console.error)

@@ -18,27 +18,24 @@ import GameData as G
 import Route
 
 
-view : M.Model -> G.Graph -> H.Html M.Msg
-view model g =
+view : M.HomeModel -> Route.Features -> H.Html M.Msg
+view model features =
     let
         searchRegex =
             Maybe.map (Regex.regex >> Regex.caseInsensitive) model.search
 
-        selected =
-            M.selectedNodes model
-
         selectable =
-            M.selectableNodes M.startNodes g selected
+            M.selectableNodes M.startNodes model.graph model.selected
     in
         S.svg
             ([ HA.style [ ( "border", "1px solid grey" ) ]
-             , A.viewBox <| formatViewBox (iconSize // 2) g
+             , A.viewBox <| formatViewBox (iconSize // 2) model.graph
              ]
-                ++ Route.ifFeature model.features.zoom inputZoomAndPan []
+                ++ Route.ifFeature features.zoom inputZoomAndPan []
             )
-            [ S.g (Route.ifFeature model.features.zoom [ zoomAndPan model ] [])
-                [ S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList g.edges)
-                , S.g [] (List.map (viewNode selected selectable searchRegex << Tuple.second) <| Dict.toList g.nodes)
+            [ S.g (Route.ifFeature features.zoom [ zoomAndPan model ] [])
+                [ S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList model.graph.edges)
+                , S.g [] (List.map (viewNode model.selected selectable searchRegex << Tuple.second) <| Dict.toList model.graph.nodes)
                 ]
             ]
 
@@ -50,7 +47,7 @@ inputZoomAndPan =
     ]
 
 
-zoomAndPan : M.Model -> S.Attribute msg
+zoomAndPan : M.HomeModel -> S.Attribute msg
 zoomAndPan model =
     let
         ( cx, cy ) =

@@ -7,38 +7,47 @@ import Html.Attributes as A
 import Html.Events as E
 import Maybe.Extra
 import Model as M
+import Route
 import GameData as G
 import ViewGraph
 
 
-view : M.Model -> H.Html M.Msg
-view model =
+view : { m | characterData : Dict String G.Character, features : Route.Features, lastUpdatedVersion : String } -> M.HomeModel -> H.Html M.Msg
+view { characterData, features, lastUpdatedVersion } model =
+    H.div []
+        [ viewCharacterNav characterData
+        , H.h4 [] [ H.text <| model.char.flavorName ++ ", " ++ model.char.flavorClass ]
+        , H.p [] [ H.text <| model.char.flavor ]
+        , viewSearch model
+        , ViewGraph.view model features
+        , viewSearch model
+
+        -- debug data
+        -- , H.ul [] (List.map (H.li [] << List.singleton << uncurry viewNodeType) <| Dict.toList c.nodeTypes)
+        -- , dumpModel model
+        , viewSummary <| M.summary model
+        , H.p [] [ H.text <| "Last updated: " ++ lastUpdatedVersion ]
+        ]
+
+
+viewCharacterNav : Dict String G.Character -> H.Html msg
+viewCharacterNav =
+    Dict.toList >> List.map (uncurry viewCharacterNavEntry) >> H.nav []
+
+
+viewCharacterNavEntry : String -> G.Character -> H.Html msg
+viewCharacterNavEntry key char =
     let
-        c =
-            model.characterData
-
-        g =
-            G.graph c
+        q =
+            Route.homeParams0
     in
-        H.div []
-            [ H.h4 [] [ H.text <| c.name ++ ": " ++ c.flavorName ++ ", " ++ c.flavorClass ]
-            , H.p [] [ H.text <| c.flavor ]
-            , viewSearch model
-            , ViewGraph.view model g
-            , viewSearch model
-
-            -- debug data
-            -- , H.ul [] (List.map (H.li [] << List.singleton << uncurry viewNodeType) <| Dict.toList c.nodeTypes)
-            -- , dumpModel model
-            , viewSummary <| M.summary model
-            , H.p [] [ H.text <| "Last updated: " ++ model.lastUpdatedVersion ]
-            ]
+        H.a [ Route.href <| Route.Home { q | hero = key } ] [ H.text char.flavorClass ]
 
 
-viewSearch : M.Model -> H.Html M.Msg
+viewSearch : M.HomeModel -> H.Html M.Msg
 viewSearch model =
     H.div []
-        [ H.div [] [ H.text <| toString (Set.size <| M.selectedNodes model) ++ " points spent." ]
+        [ H.div [] [ H.text <| toString (Set.size model.selected) ++ " points spent." ]
         , H.div []
             [ H.text "Highlight: "
             , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" model.search, E.onInput M.SearchInput ] []

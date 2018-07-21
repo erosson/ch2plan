@@ -9,16 +9,17 @@ import Html.Attributes as A
 
 
 type alias HomeParams =
-    { build : Maybe String }
+    { hero : String, build : Maybe String }
 
 
 homeParams0 =
-    { build = Nothing }
+    { hero = "helpfulAdventurer", build = Nothing }
 
 
 type Route
     = Home HomeParams
     | Changelog
+    | NotFound
 
 
 type alias Features =
@@ -34,7 +35,7 @@ parse : Navigation.Location -> Route
 parse =
     hashQS
         >> P.parseHash parser
-        >> Maybe.withDefault (Home { build = Nothing })
+        >> Maybe.withDefault NotFound
         >> Debug.log "navigate to"
 
 
@@ -69,8 +70,12 @@ maybeString =
 parser : P.Parser (Route -> a) a
 parser =
     P.oneOf
-        [ P.map (Home { build = Nothing }) P.top
-        , P.map Home <| P.map HomeParams <| P.s "b" </> maybeString
+        [ P.map (Home homeParams0) P.top
+        , P.map Home <| P.map (\h -> HomeParams h Nothing) <| P.s "h" </> P.string
+        , P.map Home <| P.map HomeParams <| P.s "h" </> P.string </> maybeString
+
+        -- legacy builds, back when Cid was the only hero
+        , P.map Home <| P.map (HomeParams "helpfulAdventurer") <| P.s "b" </> maybeString
         , P.map Changelog <| P.s "changelog"
         ]
 
@@ -117,16 +122,22 @@ ifFeature pred t f =
 stringify : Route -> String
 stringify route =
     case route of
-        Home { build } ->
-            case build of
-                Nothing ->
+        Home { hero, build } ->
+            case ( hero, build ) of
+                ( "helpfulAdventurer", Nothing ) ->
                     "#/"
 
-                Just b ->
-                    "#/b/" ++ b
+                ( _, Nothing ) ->
+                    "#/h/" ++ hero
+
+                ( _, Just b ) ->
+                    "#/h/" ++ hero ++ "/" ++ b
 
         Changelog ->
             "#/changelog"
+
+        NotFound ->
+            Debug.crash "why are you stringifying Route.NotFound?"
 
 
 href : Route -> H.Attribute msg
