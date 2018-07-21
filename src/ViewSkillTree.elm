@@ -50,7 +50,7 @@ viewSearch model =
         [ H.div [] [ H.text <| toString (Set.size model.selected) ++ " points spent." ]
         , H.div []
             [ H.text "Highlight: "
-            , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" model.search, E.onInput M.SearchInput ] []
+            , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" model.params.search, E.onInput M.SearchInput ] []
             ]
         ]
 

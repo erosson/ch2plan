@@ -19,7 +19,7 @@ view model =
             , H.a [ A.href "https://github.com/erosson/ch2plan", A.target "_blank" ] [ H.text "Source code" ]
             ]
         , case model.route of
-            M.Home _ home ->
+            M.Home home ->
                 ViewSkillTree.view model home
 
             M.NotFound ->

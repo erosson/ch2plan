@@ -21,9 +21,6 @@ import Route
 view : M.HomeModel -> Route.Features -> H.Html M.Msg
 view model features =
     let
-        searchRegex =
-            Maybe.map (Regex.regex >> Regex.caseInsensitive) model.search
-
         selectable =
             M.selectableNodes M.startNodes model.char.graph model.selected
     in
@@ -34,9 +31,9 @@ view model features =
                 ++ Route.ifFeature features.zoom inputZoomAndPan []
             )
             [ S.g (Route.ifFeature features.zoom [ zoomAndPan model ] [])
-                [ S.g [] (List.map (viewNodeBackground model.selected selectable searchRegex << Tuple.second) <| Dict.toList model.char.graph.nodes)
+                [ S.g [] (List.map (viewNodeBackground model.selected selectable model.search << Tuple.second) <| Dict.toList model.char.graph.nodes)
                 , S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList model.char.graph.edges)
-                , S.g [] (List.map (viewNode model.selected selectable searchRegex << Tuple.second) <| Dict.toList model.char.graph.nodes)
+                , S.g [] (List.map (viewNode model.selected selectable model.search << Tuple.second) <| Dict.toList model.char.graph.nodes)
                 ]
             ]
 

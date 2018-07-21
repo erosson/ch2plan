@@ -6,14 +6,17 @@ import UrlParser as P exposing ((</>), (<?>))
 import Regex
 import Html as H
 import Html.Attributes as A
+import Http
+import Maybe.Extra
 
 
 type alias HomeParams =
-    { hero : String, build : Maybe String }
+    { hero : String, build : Maybe String, search : Maybe String }
 
 
+homeParams0 : HomeParams
 homeParams0 =
-    { hero = "helpfulAdventurer", build = Nothing }
+    { hero = "helpfulAdventurer", build = Nothing, search = Nothing }
 
 
 type Route
@@ -70,12 +73,12 @@ maybeString =
 parser : P.Parser (Route -> a) a
 parser =
     P.oneOf
-        [ P.map (Home homeParams0) P.top
-        , P.map Home <| P.map (\h -> HomeParams h Nothing) <| P.s "h" </> P.string
-        , P.map Home <| P.map HomeParams <| P.s "h" </> P.string </> maybeString
+        [ P.map Home <| P.map (HomeParams homeParams0.hero Nothing) <| P.top <?> P.stringParam "q"
+        , P.map Home <| P.map (\h -> HomeParams h Nothing) <| P.s "h" </> P.string <?> P.stringParam "q"
+        , P.map Home <| P.map HomeParams <| P.s "h" </> P.string </> maybeString <?> P.stringParam "q"
 
         -- legacy builds, back when Cid was the only hero
-        , P.map Home <| P.map (HomeParams "helpfulAdventurer") <| P.s "b" </> maybeString
+        , P.map Home <| P.map (HomeParams homeParams0.hero) <| P.s "b" </> maybeString <?> P.stringParam "q"
         , P.map Changelog <| P.s "changelog"
         ]
 
@@ -122,16 +125,20 @@ ifFeature pred t f =
 stringify : Route -> String
 stringify route =
     case route of
-        Home { hero, build } ->
-            case ( hero, build ) of
-                ( "helpfulAdventurer", Nothing ) ->
-                    "#/"
+        Home { hero, build, search } ->
+            let
+                qs =
+                    Maybe.Extra.unwrap "" ((++) "?q=" << Http.encodeUri) search
+            in
+                case ( hero, build ) of
+                    ( "helpfulAdventurer", Nothing ) ->
+                        "#/" ++ qs
 
-                ( _, Nothing ) ->
-                    "#/h/" ++ hero
+                    ( _, Nothing ) ->
+                        "#/h/" ++ hero ++ qs
 
-                ( _, Just b ) ->
-                    "#/h/" ++ hero ++ "/" ++ b
+                    ( _, Just b ) ->
+                        "#/h/" ++ hero ++ "/" ++ b ++ qs
 
         Changelog ->
             "#/changelog"

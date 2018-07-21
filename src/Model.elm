@@ -1,6 +1,6 @@
 module Model exposing (..)
 
-import Char
+import Regex as Regex exposing (Regex)
 import Set as Set exposing (Set)
 import Dict as Dict exposing (Dict)
 import Json.Decode as Decode
@@ -34,7 +34,7 @@ type alias Model =
 type RouteModel
     = NotFound
     | Changelog
-    | Home Route.HomeParams HomeModel
+    | Home HomeModel
     | HomeError Route.HomeParams
 
 
@@ -44,7 +44,8 @@ type alias HomeModel =
     -- Route.HomeParams.build and HomeModel.selected contain the same information.
     -- This is deliberate - Elm does not have memoization (pure functional!)
     -- so this speeds things up a bit. Be careful when updating.
-    { search : Maybe String
+    { params : Route.HomeParams
+    , search : Maybe Regex
     , zoom : Float
     , center : V2.Vec2
     , drag : Draggable.State ()
@@ -90,7 +91,7 @@ routeToModel model route =
         Route.Home params ->
             case initHome params model of
                 Ok m ->
-                    Home params m
+                    Home m
 
                 Err _ ->
                     HomeError params
@@ -104,7 +105,8 @@ initHome q { characterData } =
 
         Just char ->
             Ok
-                { search = Nothing
+                { params = q
+                , search = Maybe.map (Regex.regex >> Regex.caseInsensitive) q.search
                 , zoom = 1
                 , center = V2.vec2 0 0
                 , drag = Draggable.init
@@ -124,15 +126,19 @@ invert id set =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case model.route of
-        Home q home ->
+        Home home ->
             case msg of
                 SearchInput str ->
-                    case str of
-                        "" ->
-                            ( { model | route = Home q { home | search = Nothing } }, Cmd.none )
+                    let
+                        q =
+                            home.params
+                    in
+                        case str of
+                            "" ->
+                                ( model, Navigation.modifyUrl <| Route.stringify <| Route.Home { q | search = Nothing } )
 
-                        _ ->
-                            ( { model | route = Home q { home | search = Just str } }, Cmd.none )
+                            _ ->
+                                ( model, Navigation.modifyUrl <| Route.stringify <| Route.Home { q | search = Just str } )
 
                 SelectInput id ->
                     let
@@ -159,6 +165,9 @@ update msg model =
                                     else
                                         home.selected
 
+                        q =
+                            home.params
+
                         route =
                             Route.Home { q | build = nodesToBuild home.char.graph selected }
                     in
@@ -169,7 +178,7 @@ update msg model =
                         clampedCenter =
                             handleDrag home rawDelta home.zoom
                     in
-                        ( { model | route = Home q { home | center = clampedCenter } }, Cmd.none )
+                        ( { model | route = Home { home | center = clampedCenter } }, Cmd.none )
 
                 Zoom factor ->
                     let
@@ -181,17 +190,17 @@ update msg model =
                         newCenter =
                             handleDrag home (V2.vec2 0 0) newZoom
                     in
-                        ( { model | route = Home q { home | zoom = newZoom, center = newCenter } }, Cmd.none )
+                        ( { model | route = Home { home | zoom = newZoom, center = newCenter } }, Cmd.none )
 
                 DragMsg dragMsg ->
                     Draggable.update dragConfig dragMsg home
-                        |> Tuple.mapFirst (\home2 -> { model | route = Home q home2 })
+                        |> Tuple.mapFirst (\home2 -> { model | route = Home home2 })
 
                 NavLocation loc ->
                     case Route.parse loc |> routeToModel model of
-                        Home q2 home2 ->
+                        Home home2 ->
                             -- preserve non-url state, like zoom/pan
-                            ( { model | route = Home q2 { home | char = home2.char, selected = home2.selected }, features = Route.parseFeatures loc }, Cmd.none )
+                            ( { model | route = Home { home | params = home2.params, search = home2.search, char = home2.char, selected = home2.selected }, features = Route.parseFeatures loc }, Cmd.none )
 
                         route ->
                             ( { model | route = route, features = Route.parseFeatures loc }, Cmd.none )
@@ -473,7 +482,7 @@ summary { char, selected } =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     case model.route of
-        Home q home ->
+        Home home ->
             Draggable.subscriptions DragMsg home.drag
 
         _ ->
