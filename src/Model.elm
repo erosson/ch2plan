@@ -48,7 +48,6 @@ type alias HomeModel =
     { search : Maybe String
     , zoom : Float
     , center : V2.Vec2
-    , size : V2.Vec2
     , drag : Draggable.State ()
     , char : G.Character
     , graph : G.Graph
@@ -112,9 +111,8 @@ initHome q { characterData } =
             in
                 Ok
                     { search = Nothing
-                    , zoom = 0.9
-                    , center = V2.vec2 500 500
-                    , size = V2.vec2 1000 1000
+                    , zoom = 1
+                    , center = V2.vec2 0 0
                     , drag = Draggable.init
                     , char = char
                     , graph = g
@@ -175,17 +173,8 @@ update msg model =
 
                 OnDragBy rawDelta ->
                     let
-                        delta =
-                            rawDelta
-                                --|> V2.scale (-1 / model.zoom)
-                                |> V2.scale (-1)
-
-                        deltaCenter =
-                            home.center
-                                |> V2.add delta
-
                         clampedCenter =
-                            v2Clamp (V2.vec2 -1000 -1000) (V2.vec2 1000 1000) deltaCenter home.zoom
+                            handleDrag home rawDelta home.zoom
                     in
                         ( { model | route = Home q { home | center = clampedCenter } }, Cmd.none )
 
@@ -193,10 +182,13 @@ update msg model =
                     let
                         newZoom =
                             home.zoom
-                                |> (+) (-factor * 0.05)
-                                |> clamp 0.95 5
+                                |> (+) (-factor * 0.025)
+                                |> clamp 1 5
+
+                        newCenter =
+                            handleDrag home (V2.vec2 0 0) newZoom
                     in
-                        ( { model | route = Home q { home | zoom = newZoom } }, Cmd.none )
+                        ( { model | route = Home q { home | zoom = newZoom, center = newCenter } }, Cmd.none )
 
                 DragMsg dragMsg ->
                     Draggable.update dragConfig dragMsg home
@@ -221,16 +213,53 @@ update msg model =
                     ( model, Cmd.none )
 
 
-v2Clamp : V2.Vec2 -> V2.Vec2 -> V2.Vec2 -> Float -> V2.Vec2
-v2Clamp min max orig zoom =
+handleDrag : HomeModel -> V2.Vec2 -> Float -> V2.Vec2
+handleDrag home delta zoom =
     let
-        scaledMin =
-            V2.scale (sqrt zoom) min
+        g =
+            home.graph
 
-        scaledMax =
-            V2.scale (sqrt zoom) max
+        --Similar to iconSize in ViewGraph (can't access it here)
+        margin =
+            30 * zoom
+
+        ( graphMin, graphMax ) =
+            ( V2.vec2 (toFloat (G.graphMinX g) - margin) (toFloat (G.graphMinY g) - margin), V2.vec2 (toFloat (G.graphMaxX g) + margin) (toFloat (G.graphMaxY g) + margin) )
+
+        ( halfGraphWidth, halfGraphHeight ) =
+            ( toFloat (G.graphWidth g) / 2, toFloat (G.graphHeight g) / 2 )
+
+        halfZoomedGraph =
+            V2.scale (1 / zoom) (V2.vec2 halfGraphWidth halfGraphHeight)
     in
-        V2.vec2 (clamp (V2.getX scaledMin) (V2.getX scaledMax) (V2.getX orig)) (clamp (V2.getY scaledMin) (V2.getY scaledMax) (V2.getY orig))
+        home.center
+            |> V2.add delta
+            |> v2Max (V2.add graphMin halfZoomedGraph)
+            |> v2Min (V2.sub graphMax halfZoomedGraph)
+
+
+v2Min : V2.Vec2 -> V2.Vec2 -> V2.Vec2
+v2Min a b =
+    let
+        x =
+            min (V2.getX a) (V2.getX b)
+
+        y =
+            min (V2.getY a) (V2.getY b)
+    in
+        V2.vec2 x y
+
+
+v2Max : V2.Vec2 -> V2.Vec2 -> V2.Vec2
+v2Max a b =
+    let
+        x =
+            max (V2.getX a) (V2.getX b)
+
+        y =
+            max (V2.getY a) (V2.getY b)
+    in
+        V2.vec2 x y
 
 
 startNodes : Set G.NodeId

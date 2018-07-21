@@ -64,17 +64,8 @@ inputZoomAndPan =
 zoomAndPan : M.HomeModel -> S.Attribute msg
 zoomAndPan model =
     let
-        ( cx, cy ) =
-            ( V2.getX model.center, V2.getY model.center )
-
-        ( halfWidth, halfHeight ) =
-            ( V2.getX model.size / model.zoom / 2, V2.getY model.size / model.zoom / 2 )
-
-        ( top, left, bottom, right ) =
-            ( cy - halfHeight, cx - halfWidth, cy + halfHeight, cx + halfWidth )
-
         panning =
-            "translate(" ++ toString -left ++ ", " ++ toString -top ++ ")"
+            "translate(" ++ toString (V2.getX model.center) ++ ", " ++ toString (V2.getY model.center) ++ ")"
 
         zooming =
             "scale(" ++ toString model.zoom ++ ")"
