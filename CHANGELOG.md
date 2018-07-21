@@ -13,6 +13,8 @@ These are at least partially working, but turned off by default.
 ## 2018-07-20
 - New beta feature: zoom/pan.
 - New beta feature: select/unselect multiple nodes with one click. Thanks, [@Judgy53](https://github.com/Judgy53)!
+- Redesigned how data's extracted from the Clicker Heroes 2 game files. Tooltips should be more complete, and future updates to game data are more automatic.
+- Added support for multiple character classes. Added a link to the (currently empty) wizard.
 - Started this changelog. (Shame on me for not having one from the start; things were a bit rushed.)
 
 ## 2018-07-17

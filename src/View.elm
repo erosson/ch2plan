@@ -19,10 +19,16 @@ view model =
             , H.a [ A.href "https://github.com/erosson/ch2plan", A.target "_blank" ] [ H.text "Source code" ]
             ]
         , case model.route of
-            Route.Home _ ->
-                ViewSkillTree.view model
+            M.Home _ home ->
+                ViewSkillTree.view model home
 
-            Route.Changelog ->
+            M.NotFound ->
+                H.div [] [ H.text "404" ]
+
+            M.HomeError q ->
+                H.div [] [ H.text "404" ]
+
+            M.Changelog ->
                 ViewChangelog.view model.changelog
         ]
 

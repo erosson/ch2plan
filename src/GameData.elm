@@ -14,7 +14,6 @@ type alias Character =
     , flavor : String
     , nodeTypes : NodeTypes
     , graphSpec : GraphSpec
-    , lastUpdatedVersion : String
     }
 
 
@@ -65,6 +64,11 @@ type alias Edge =
     ( Node, Node )
 
 
+decoder : D.Decoder (Dict String Character)
+decoder =
+    D.dict characterDecoder
+
+
 characterDecoder : D.Decoder Character
 characterDecoder =
     P.decode Character
@@ -75,7 +79,6 @@ characterDecoder =
         |> P.required "levelGraphNodeTypes" nodeTypesDecoder
         -- |> P.required "levelGraphObject" levelGraphObjectDecoder
         |> P.required "levelGraphObject" levelGraphObjectDecoder
-        |> P.required "lastUpdatedVersion" D.string
 
 
 parseNodeQuality : String -> NodeQuality

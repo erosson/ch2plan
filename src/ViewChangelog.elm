@@ -8,11 +8,6 @@ import Route
 import Markdown
 
 
-view : Maybe String -> H.Html M.Msg
-view changelog =
-    case changelog of
-        Nothing ->
-            H.div [] [ H.text "Failed to load changelog. Try refreshing the page?" ]
-
-        Just markdown ->
-            Markdown.toHtml [ A.class "changelog" ] markdown
+view : String -> H.Html M.Msg
+view =
+    Markdown.toHtml [ A.class "changelog" ]
