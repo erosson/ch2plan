@@ -33,21 +33,7 @@ view model features =
              ]
                 ++ Route.ifFeature features.zoom inputZoomAndPan []
             )
-            [ S.defs []
-                [ S.filter [ A.id "highlight" ]
-                    -- Search results highlight. Hue-rotate from the *NodeNext purplish color.
-                    [ S.feColorMatrix
-                        [ A.type_ "hueRotate"
-                        , A.values "60" -- red/orange
-
-                        -- , A.values "45" -- pinkish-purple
-                        -- , A.values "90" -- orange
-                        -- , A.values "300" -- blue
-                        ]
-                        []
-                    ]
-                ]
-            , S.g (Route.ifFeature features.zoom [ zoomAndPan model ] [])
+            [ S.g (Route.ifFeature features.zoom [ zoomAndPan model ] [])
                 [ S.g [] (List.map (viewNodeBackground model.selected selectable searchRegex << Tuple.second) <| Dict.toList model.char.graph.nodes)
                 , S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList model.char.graph.edges)
                 , S.g [] (List.map (viewNode model.selected selectable searchRegex << Tuple.second) <| Dict.toList model.char.graph.nodes)
@@ -168,16 +154,23 @@ nodeBackgroundImage node isHighlighted isSelected isSelectable =
 
         suffix =
             if isHighlighted then
-                -- this also has a css filter applied to it, changing from purple to orange
-                "Next"
+                "Highlight"
             else if isSelected then
-                "Selected"
+                -- SelectedVis has a green border, while Selected is just like in-game.
+                -- Small nodes aren't visible enough when selected - too small,
+                -- not enough color; in-game they're animated so it's more visible -
+                -- so give them the border. Other nodes are visible enough without
+                -- the extra border - much larger, with more color - so leave them alone.
+                if node.quality == G.Plain then
+                    "SelectedVis"
+                else
+                    "Selected"
             else if isSelectable then
                 "Next"
             else
                 ""
     in
-        "./ch2data/node-img/" ++ quality ++ suffix ++ ".png?2"
+        "./ch2data/node-img/" ++ quality ++ suffix ++ ".png?3"
 
 
 nodeTooltipText : G.NodeType -> String

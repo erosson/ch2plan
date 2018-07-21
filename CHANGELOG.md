@@ -14,6 +14,7 @@ These are at least partially working, but turned off by default.
 - Improvements to zooming/panning - [thanks, @Judgy53](https://github.com/erosson/ch2plan/pull/18)!
 - Performance tweaking - selecting/unselecting nodes should be a bit faster.
 - Nicer background images for small nodes, next (purple) nodes, and search results nodes.
+- Improved visibility for some nodes - small nodes now have a green border when selected; search results now have a bright red border.
 
 ## 2018-07-20
 - New beta feature: zoom/pan.

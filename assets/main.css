@@ -16,9 +16,6 @@ svg .node {
   stroke-width: 1;
   fill: #ddd;
 }
-svg .node-background.node-highlight{
-  filter: url(#highlight);
-}
 
 .summary .icon {
   float: left;
