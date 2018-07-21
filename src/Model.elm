@@ -33,7 +33,6 @@ type alias Model =
     , search : Maybe String
     , zoom : Float
     , center : V2.Vec2
-    , size : V2.Vec2
     , drag : Draggable.State ()
     }
 
@@ -52,9 +51,8 @@ init flags loc =
               , route = Route.parse loc
               , features = Route.parseFeatures loc
               , search = Nothing
-              , zoom = 0.9
-              , center = V2.vec2 500 500
-              , size = V2.vec2 1000 1000
+              , zoom = 1
+              , center = V2.vec2 0 0
               , drag = Draggable.init
               }
             , Cmd.none
@@ -136,17 +134,23 @@ update msg model =
 
         OnDragBy rawDelta ->
             let
-                delta =
-                    rawDelta
-                        --|> V2.scale (-1 / model.zoom)
-                        |> V2.scale (-1)
+                g =
+                    G.graph model.characterData
 
-                deltaCenter =
-                    model.center
-                        |> V2.add delta
+                ( graphMin, graphMax ) =
+                    ( V2.vec2 (toFloat (G.graphMinX g)) (toFloat (G.graphMinY g)), V2.vec2 (toFloat (G.graphMaxX g)) (toFloat (G.graphMaxY g)) )
+
+                ( halfGraphWidth, halfGraphHeight ) =
+                    ( toFloat (G.graphWidth g) / 2, toFloat (G.graphHeight g) / 2 )
+
+                halfZoomedGraph =
+                    V2.scale (1 / model.zoom) (V2.vec2 halfGraphWidth halfGraphHeight)
 
                 clampedCenter =
-                    v2Clamp (V2.vec2 -1000 -1000) (V2.vec2 1000 1000) deltaCenter model.zoom
+                    model.center
+                        |> V2.add rawDelta
+                        |> v2Max (V2.add graphMin halfZoomedGraph)
+                        |> v2Min (V2.sub graphMax halfZoomedGraph)
             in
                 ( { model | center = clampedCenter }, Cmd.none )
 
@@ -155,7 +159,7 @@ update msg model =
                 newZoom =
                     model.zoom
                         |> (+) (-factor * 0.05)
-                        |> clamp 0.95 5
+                        |> clamp 1 5
             in
                 ( { model | zoom = newZoom }, Cmd.none )
 
@@ -171,8 +175,38 @@ v2Clamp min max orig zoom =
 
         scaledMax =
             V2.scale (sqrt zoom) max
+
+        clampedX =
+            clamp (V2.getX min) (V2.getX max) (V2.getX orig)
+
+        clampedY =
+            clamp (V2.getY min) (V2.getY max) (V2.getY orig)
     in
-        V2.vec2 (clamp (V2.getX scaledMin) (V2.getX scaledMax) (V2.getX orig)) (clamp (V2.getY scaledMin) (V2.getY scaledMax) (V2.getY orig))
+        V2.vec2 clampedX clampedY
+
+
+v2Min : V2.Vec2 -> V2.Vec2 -> V2.Vec2
+v2Min a b =
+    let
+        x =
+            min (V2.getX a) (V2.getX b)
+
+        y =
+            min (V2.getY a) (V2.getY b)
+    in
+        V2.vec2 x y
+
+
+v2Max : V2.Vec2 -> V2.Vec2 -> V2.Vec2
+v2Max a b =
+    let
+        x =
+            max (V2.getX a) (V2.getX b)
+
+        y =
+            max (V2.getY a) (V2.getY b)
+    in
+        V2.vec2 x y
 
 
 startNodes : Set G.NodeId

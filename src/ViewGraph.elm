@@ -36,7 +36,7 @@ view model g =
              ]
                 ++ Route.ifFeature model.features.zoom inputZoomAndPan []
             )
-            [ S.g (Route.ifFeature model.features.zoom [ zoomAndPan model ] [])
+            [ S.g (Route.ifFeature model.features.zoom [ zoomAndPan model g ] [])
                 [ S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList g.edges)
                 , S.g [] (List.map (viewNode selected selectable searchRegex << Tuple.second) <| Dict.toList g.nodes)
                 ]
@@ -50,20 +50,11 @@ inputZoomAndPan =
     ]
 
 
-zoomAndPan : M.Model -> S.Attribute msg
-zoomAndPan model =
+zoomAndPan : M.Model -> G.Graph -> S.Attribute msg
+zoomAndPan model g =
     let
-        ( cx, cy ) =
-            ( V2.getX model.center, V2.getY model.center )
-
-        ( halfWidth, halfHeight ) =
-            ( V2.getX model.size / model.zoom / 2, V2.getY model.size / model.zoom / 2 )
-
-        ( top, left, bottom, right ) =
-            ( cy - halfHeight, cx - halfWidth, cy + halfHeight, cx + halfWidth )
-
         panning =
-            "translate(" ++ toString -left ++ ", " ++ toString -top ++ ")"
+            "translate(" ++ toString (V2.getX model.center) ++ ", " ++ toString (V2.getY model.center) ++ ")"
 
         zooming =
             "scale(" ++ toString model.zoom ++ ")"
