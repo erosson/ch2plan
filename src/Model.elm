@@ -219,8 +219,12 @@ handleDrag home delta zoom =
         g =
             home.graph
 
+        --Similar to iconSize in ViewGraph (can't access it here)
+        margin =
+            30 * zoom
+
         ( graphMin, graphMax ) =
-            ( V2.vec2 (toFloat (G.graphMinX g)) (toFloat (G.graphMinY g)), V2.vec2 (toFloat (G.graphMaxX g)) (toFloat (G.graphMaxY g)) )
+            ( V2.vec2 (toFloat (G.graphMinX g) - margin) (toFloat (G.graphMinY g) - margin), V2.vec2 (toFloat (G.graphMaxX g) + margin) (toFloat (G.graphMaxY g) + margin) )
 
         ( halfGraphWidth, halfGraphHeight ) =
             ( toFloat (G.graphWidth g) / 2, toFloat (G.graphHeight g) / 2 )
