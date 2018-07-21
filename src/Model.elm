@@ -17,7 +17,6 @@ type Msg
     = SearchInput String
     | SelectInput Int -- TODO should really remove this one in favor of links
     | NavLocation Navigation.Location
-    | NavRoute Route Route.Features
     | OnDragBy V2.Vec2
     | DragMsg (Draggable.Msg ())
     | Zoom Float
@@ -40,6 +39,12 @@ type RouteModel
 
 
 type alias HomeModel =
+    -- Data unique to the skill tree page. Lost when leaving the skill tree.
+    -- Some of this is redundant with the plain route - for example,
+    -- Route.HomeParams.build and HomeModel.selected contain the same information,
+    -- and HomeModel.graph is just the result of (G.graph HomeModel.char).
+    -- This is deliberate - Elm does not have memoization (pure functional!)
+    -- so this speeds things up a bit. Be careful when updating.
     { search : Maybe String
     , zoom : Float
     , center : V2.Vec2
@@ -127,98 +132,93 @@ invert id set =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        NavLocation loc ->
-            ( { model | route = Route.parse loc |> routeToModel model, features = Route.parseFeatures loc }, Cmd.none )
+    case model.route of
+        Home q home ->
+            case msg of
+                SearchInput str ->
+                    case str of
+                        "" ->
+                            ( { model | route = Home q { home | search = Nothing } }, Cmd.none )
 
-        NavRoute route features ->
-            ( { model | route = route |> routeToModel model, features = features }, Cmd.none )
+                        _ ->
+                            ( { model | route = Home q { home | search = Just str } }, Cmd.none )
+
+                SelectInput id ->
+                    let
+                        selected =
+                            if model.features.multiSelect then
+                                if Set.member id home.selected then
+                                    -- remove the node, and any disconnected from the start by its removal
+                                    home.selected
+                                        |> invert id
+                                        |> reachableSelectedNodes startNodes home.graph
+                                else
+                                    -- add the node and any in between
+                                    selectPathToNode (dijkstra startNodes home.graph home.selected) id
+                                        |> Set.fromList
+                                        |> Set.union home.selected
+                            else
+                                -- the old way - one node at a time. faster.
+                                let
+                                    s =
+                                        invert id home.selected
+                                in
+                                    if isValidSelection startNodes home.graph s then
+                                        s
+                                    else
+                                        home.selected
+
+                        route =
+                            Route.Home { q | build = nodesToBuild home.graph selected }
+                    in
+                        ( model, Navigation.modifyUrl <| Route.stringify route )
+
+                OnDragBy rawDelta ->
+                    let
+                        delta =
+                            rawDelta
+                                --|> V2.scale (-1 / model.zoom)
+                                |> V2.scale (-1)
+
+                        deltaCenter =
+                            home.center
+                                |> V2.add delta
+
+                        clampedCenter =
+                            v2Clamp (V2.vec2 -1000 -1000) (V2.vec2 1000 1000) deltaCenter home.zoom
+                    in
+                        ( { model | route = Home q { home | center = clampedCenter } }, Cmd.none )
+
+                Zoom factor ->
+                    let
+                        newZoom =
+                            home.zoom
+                                |> (+) (-factor * 0.05)
+                                |> clamp 0.95 5
+                    in
+                        ( { model | route = Home q { home | zoom = newZoom } }, Cmd.none )
+
+                DragMsg dragMsg ->
+                    Draggable.update dragConfig dragMsg home
+                        |> Tuple.mapFirst (\home2 -> { model | route = Home q home2 })
+
+                NavLocation loc ->
+                    case Route.parse loc |> routeToModel model of
+                        Home q2 home2 ->
+                            -- preserve non-url state, like zoom/pan
+                            ( { model | route = Home q2 { home | char = home2.char, selected = home2.selected }, features = Route.parseFeatures loc }, Cmd.none )
+
+                        route ->
+                            ( { model | route = route, features = Route.parseFeatures loc }, Cmd.none )
 
         _ ->
-            case model.route of
-                Changelog ->
+            -- all other routes have no state to preserve or update
+            case msg of
+                NavLocation loc ->
+                    ( { model | route = Route.parse loc |> routeToModel model, features = Route.parseFeatures loc }, Cmd.none )
+
+                _ ->
                     ( model, Cmd.none )
-
-                NotFound ->
-                    ( model, Cmd.none )
-
-                HomeError _ ->
-                    ( model, Cmd.none )
-
-                Home q home ->
-                    case msg of
-                        SearchInput str ->
-                            case str of
-                                "" ->
-                                    ( { model | route = Home q { home | search = Nothing } }, Cmd.none )
-
-                                _ ->
-                                    ( { model | route = Home q { home | search = Just str } }, Cmd.none )
-
-                        SelectInput id ->
-                            let
-                                selected =
-                                    if model.features.multiSelect then
-                                        if Set.member id home.selected then
-                                            -- remove the node, and any disconnected from the start by its removal
-                                            home.selected
-                                                |> invert id
-                                                |> reachableSelectedNodes startNodes home.graph
-                                        else
-                                            -- add the node and any in between
-                                            selectPathToNode (dijkstra startNodes home.graph home.selected) id
-                                                |> Set.fromList
-                                                |> Set.union home.selected
-                                    else
-                                        -- the old way - one node at a time. faster.
-                                        let
-                                            s =
-                                                invert id home.selected
-                                        in
-                                            if isValidSelection startNodes home.graph s then
-                                                s
-                                            else
-                                                home.selected
-
-                                route =
-                                    Route.Home { q | build = nodesToBuild home.graph selected }
-                            in
-                                ( model, Navigation.modifyUrl <| Route.stringify route )
-
-                        OnDragBy rawDelta ->
-                            let
-                                delta =
-                                    rawDelta
-                                        --|> V2.scale (-1 / model.zoom)
-                                        |> V2.scale (-1)
-
-                                deltaCenter =
-                                    home.center
-                                        |> V2.add delta
-
-                                clampedCenter =
-                                    v2Clamp (V2.vec2 -1000 -1000) (V2.vec2 1000 1000) deltaCenter home.zoom
-                            in
-                                ( { model | route = Home q { home | center = clampedCenter } }, Cmd.none )
-
-                        Zoom factor ->
-                            let
-                                newZoom =
-                                    home.zoom
-                                        |> (+) (-factor * 0.05)
-                                        |> clamp 0.95 5
-                            in
-                                ( { model | route = Home q { home | zoom = newZoom } }, Cmd.none )
-
-                        DragMsg dragMsg ->
-                            Draggable.update dragConfig dragMsg home
-                                |> Tuple.mapFirst (\home2 -> { model | route = Home q home2 })
-
-                        NavRoute _ _ ->
-                            Debug.crash "already did NavRoute"
-
-                        NavLocation _ ->
-                            Debug.crash "already did NavLocation"
 
 
 v2Clamp : V2.Vec2 -> V2.Vec2 -> V2.Vec2 -> Float -> V2.Vec2
