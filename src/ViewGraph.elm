@@ -177,7 +177,7 @@ nodeBackgroundImage node isHighlighted isSelected isSelectable =
             else
                 ""
     in
-        "./ch2data/node-img/" ++ quality ++ suffix ++ ".png"
+        "./ch2data/node-img/" ++ quality ++ suffix ++ ".png?2"
 
 
 nodeTooltipText : G.NodeType -> String
