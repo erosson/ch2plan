@@ -15,6 +15,7 @@ These are at least partially working, but turned off by default.
 - New beta feature: select/unselect multiple nodes with one click. Thanks, [@Judgy53](https://github.com/Judgy53)!
 - Redesigned how data's extracted from the Clicker Heroes 2 game files. Tooltips should be more complete, and future updates to game data are more automatic.
 - Added support for multiple character classes. Added a link to the (currently empty) wizard.
+- Icons now have transparency, and icon backgrounds now use the fancy in-game galaxy(?) images. Search results should be much more visible.
 - Started this changelog. (Shame on me for not having one from the start; things were a bit rushed.)
 
 ## 2018-07-17
