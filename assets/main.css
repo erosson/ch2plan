@@ -16,58 +16,21 @@ svg .node {
   stroke-width: 1;
   fill: #ddd;
 }
-svg .node .overlay {
-  opacity: 0;
-}
-svg .node-Plain.overlay {
-  opacity: 0;
-}
-svg .node-Notable .overlay {
-  opacity: 0.1;
-  fill: yellow;
-}
-svg .node-Keystone .overlay {
-  opacity: 0.2;
-  fill: teal;
-}
-svg .node-selectable .overlay {
-  opacity: 0.3;
-  stroke: pink;
-  stroke-width: 5;
-  fill: purple;
-}
-svg .node-selected .overlay {
-  opacity: 0.3;
-  stroke: lightgreen;
-  stroke-width: 5;
-  fill: green;
-}
-svg .node-highlight .overlay {
-  opacity: 0.3;
-  fill: orange;
+svg .node-background.node-highlight{
+  filter: url(#highlight);
 }
 
 .summary .icon {
   float: left;
-  position: relative;
 }
-.summary .icon img {
+.summary .icon .icon-main {
   width: 1em;
   height: 1em;
 }
-.summary .icon .overlay {
-  position: absolute;
-  top:0;left:0;
+.summary .icon .icon-background {
+  /* original plan was to put the background behind the icon, but separately actually works better for visibility and the background looks like a bullet point */
   width: 1em;
   height: 1em;
-}
-.summary .icon.node-Keystone .overlay {
-  opacity: 0.4;
-  background-color: teal;
-}
-.summary .icon.node-Notable .overlay {
-  opacity: 0.2;
-  background-color: yellow;
 }
 .summary .clear {
   clear: left;

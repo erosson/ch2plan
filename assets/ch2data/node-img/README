@@ -1,0 +1,5 @@
+these were exported by hand. weird special cases: important transparency that fails from the command line for some reason.
+
+open the ffdec gui -> zoom to 250% -> take snapshot into clipboard (bottom right, camera icon) -> paste to imgur -> download
+
+next-node images (the purple ones) were especially tricky - above looks screwy, seems like it's missing transforms on all the spikes or something. Instead, commandline export -> imagemagick remove transparency - like other icons. A black outline is clearly visible, but it's the best we can do.

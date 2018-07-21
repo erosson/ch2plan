@@ -75,8 +75,8 @@ viewSummaryLine : Int -> G.NodeType -> H.Html msg
 viewSummaryLine count nodeType =
     H.li []
         [ H.div [ A.class <| String.join " " [ "icon", ViewGraph.nodeQualityClass nodeType.quality ] ]
-            [ H.img [ A.src <| ViewGraph.iconUrl nodeType ] []
-            , H.div [ A.class "overlay" ] []
+            [ H.img [ A.class "icon-background", A.src <| ViewGraph.nodeBackgroundImage nodeType False False False ] []
+            , H.img [ A.class "icon-main", A.src <| ViewGraph.iconUrl nodeType ] []
             ]
         , H.div []
             [ H.text <|
