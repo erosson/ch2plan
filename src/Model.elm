@@ -147,10 +147,7 @@ update msg model =
                     V2.scale (1 / model.zoom) (V2.vec2 halfGraphWidth halfGraphHeight)
 
                 clampedCenter =
-                    model.center
-                        |> V2.add rawDelta
-                        |> v2Max (V2.add graphMin halfZoomedGraph)
-                        |> v2Min (V2.sub graphMax halfZoomedGraph)
+                    handleDrag model rawDelta model.zoom
             in
                 ( { model | center = clampedCenter }, Cmd.none )
 
@@ -160,29 +157,35 @@ update msg model =
                     model.zoom
                         |> (+) (-factor * 0.05)
                         |> clamp 1 5
+
+                newCenter =
+                    handleDrag model (V2.vec2 0 0) newZoom
             in
-                ( { model | zoom = newZoom }, Cmd.none )
+                ( { model | zoom = newZoom, center = newCenter }, Cmd.none )
 
         DragMsg dragMsg ->
             Draggable.update dragConfig dragMsg model
 
 
-v2Clamp : V2.Vec2 -> V2.Vec2 -> V2.Vec2 -> Float -> V2.Vec2
-v2Clamp min max orig zoom =
+handleDrag : Model -> V2.Vec2 -> Float -> V2.Vec2
+handleDrag model delta zoom =
     let
-        scaledMin =
-            V2.scale (sqrt zoom) min
+        g =
+            G.graph model.characterData
 
-        scaledMax =
-            V2.scale (sqrt zoom) max
+        ( graphMin, graphMax ) =
+            ( V2.vec2 (toFloat (G.graphMinX g)) (toFloat (G.graphMinY g)), V2.vec2 (toFloat (G.graphMaxX g)) (toFloat (G.graphMaxY g)) )
 
-        clampedX =
-            clamp (V2.getX min) (V2.getX max) (V2.getX orig)
+        ( halfGraphWidth, halfGraphHeight ) =
+            ( toFloat (G.graphWidth g) / 2, toFloat (G.graphHeight g) / 2 )
 
-        clampedY =
-            clamp (V2.getY min) (V2.getY max) (V2.getY orig)
+        halfZoomedGraph =
+            V2.scale (1 / zoom) (V2.vec2 halfGraphWidth halfGraphHeight)
     in
-        V2.vec2 clampedX clampedY
+        model.center
+            |> V2.add delta
+            |> v2Max (V2.add graphMin halfZoomedGraph)
+            |> v2Min (V2.sub graphMax halfZoomedGraph)
 
 
 v2Min : V2.Vec2 -> V2.Vec2 -> V2.Vec2
