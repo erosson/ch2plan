@@ -41,8 +41,7 @@ type RouteModel
 type alias HomeModel =
     -- Data unique to the skill tree page. Lost when leaving the skill tree.
     -- Some of this is redundant with the plain route - for example,
-    -- Route.HomeParams.build and HomeModel.selected contain the same information,
-    -- and HomeModel.graph is just the result of (G.graph HomeModel.char).
+    -- Route.HomeParams.build and HomeModel.selected contain the same information.
     -- This is deliberate - Elm does not have memoization (pure functional!)
     -- so this speeds things up a bit. Be careful when updating.
     { search : Maybe String
@@ -50,7 +49,6 @@ type alias HomeModel =
     , center : V2.Vec2
     , drag : Draggable.State ()
     , char : G.Character
-    , graph : G.Graph
     , selected : Set G.NodeId
     }
 
@@ -105,19 +103,14 @@ initHome q { characterData } =
             Err <| "no such hero: " ++ q.hero
 
         Just char ->
-            let
-                g =
-                    G.graph char
-            in
-                Ok
-                    { search = Nothing
-                    , zoom = 1
-                    , center = V2.vec2 0 0
-                    , drag = Draggable.init
-                    , char = char
-                    , graph = g
-                    , selected = buildToNodes startNodes g q.build
-                    }
+            Ok
+                { search = Nothing
+                , zoom = 1
+                , center = V2.vec2 0 0
+                , drag = Draggable.init
+                , char = char
+                , selected = buildToNodes startNodes char.graph q.build
+                }
 
 
 invert : comparable -> Set comparable -> Set comparable
@@ -149,10 +142,10 @@ update msg model =
                                     -- remove the node, and any disconnected from the start by its removal
                                     home.selected
                                         |> invert id
-                                        |> reachableSelectedNodes startNodes home.graph
+                                        |> reachableSelectedNodes startNodes home.char.graph
                                 else
                                     -- add the node and any in between
-                                    selectPathToNode (dijkstra startNodes home.graph home.selected) id
+                                    selectPathToNode (dijkstra startNodes home.char.graph home.selected) id
                                         |> Set.fromList
                                         |> Set.union home.selected
                             else
@@ -161,13 +154,13 @@ update msg model =
                                     s =
                                         invert id home.selected
                                 in
-                                    if isValidSelection startNodes home.graph s then
+                                    if isValidSelection startNodes home.char.graph s then
                                         s
                                     else
                                         home.selected
 
                         route =
-                            Route.Home { q | build = nodesToBuild home.graph selected }
+                            Route.Home { q | build = nodesToBuild home.char.graph selected }
                     in
                         ( model, Navigation.modifyUrl <| Route.stringify route )
 
@@ -217,7 +210,7 @@ handleDrag : HomeModel -> V2.Vec2 -> Float -> V2.Vec2
 handleDrag home delta zoom =
     let
         g =
-            home.graph
+            home.char.graph
 
         --Similar to iconSize in ViewGraph (can't access it here)
         margin =
@@ -450,8 +443,8 @@ buildToNodes startNodes graph =
 
 
 summary : HomeModel -> List ( Int, G.NodeType )
-summary { graph, selected } =
-    graph.nodes
+summary { char, selected } =
+    char.graph.nodes
         |> Dict.filter (\id nodeType -> Set.member id selected)
         |> Dict.values
         |> List.map .val

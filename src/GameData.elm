@@ -1,4 +1,21 @@
-module GameData exposing (..)
+module GameData
+    exposing
+        ( Character
+        , Graph
+        , Node
+        , Edge
+        , NodeId
+        , NodeType
+        , NodeQuality(..)
+        , neighbors
+        , decoder
+        , graphMinX
+        , graphMinY
+        , graphMaxX
+        , graphMaxY
+        , graphWidth
+        , graphHeight
+        )
 
 import Json.Decode as D
 import Json.Decode.Pipeline as P
@@ -13,7 +30,7 @@ type alias Character =
     , flavorClass : String
     , flavor : String
     , nodeTypes : NodeTypes
-    , graphSpec : GraphSpec
+    , graph : Graph
     }
 
 
@@ -53,6 +70,10 @@ type alias NodeTypes =
 type alias Graph =
     { edges : Dict NodeId Edge
     , nodes : Dict NodeId Node
+
+    -- precalculated/derived from edges/nodes
+    , bounds : GraphBounds
+    , neighbors : Dict NodeId (Set NodeId)
     }
 
 
@@ -77,8 +98,12 @@ characterDecoder =
         |> P.required "flavorClass" D.string
         |> P.required "flavor" D.string
         |> P.required "levelGraphNodeTypes" nodeTypesDecoder
-        -- |> P.required "levelGraphObject" levelGraphObjectDecoder
-        |> P.required "levelGraphObject" levelGraphObjectDecoder
+        -- graph looks at two fields to construct one, so this looks a little weird
+        |> P.custom
+            (P.decode graph
+                |> P.required "levelGraphNodeTypes" nodeTypesDecoder
+                |> P.required "levelGraphObject" levelGraphObjectDecoder
+            )
 
 
 parseNodeQuality : String -> NodeQuality
@@ -162,12 +187,12 @@ nodeTypeDecoder =
 -- |> P.optional "icon" (D.nullable D.string) Nothing
 
 
-graph : Character -> Graph
-graph c =
+graph : NodeTypes -> GraphSpec -> Graph
+graph nodeTypes graphSpec =
     let
         getNode id n =
             -- TODO this should be a decoder or result
-            case Dict.get n.val c.nodeTypes of
+            case Dict.get n.val nodeTypes of
                 Just val ->
                     { id = id, typeId = n.val, x = n.x, y = n.y, val = val }
 
@@ -175,7 +200,7 @@ graph c =
                     Debug.crash <| "no such nodetype: " ++ n.val
 
         nodes =
-            Dict.map getNode c.graphSpec.nodes
+            Dict.map getNode graphSpec.nodes
 
         getEdge ( a, b ) =
             -- TODO this should be a decoder or result
@@ -187,52 +212,74 @@ graph c =
                     Debug.crash <| "no such edge: " ++ toString ( a, b )
 
         edges =
-            Dict.map (always getEdge) c.graphSpec.edges
+            Dict.map (always getEdge) graphSpec.edges
     in
-        { nodes = nodes, edges = edges }
+        { nodes = nodes
+        , edges = edges
+        , neighbors = calcNeighbors <| Dict.values edges
+        , bounds = calcBounds <| Dict.values nodes
+        }
 
 
 type alias NodeId =
     Int
 
 
-neighbors : NodeId -> Graph -> Set NodeId
-neighbors id g =
+calcNeighbors : List Edge -> Dict NodeId (Set NodeId)
+calcNeighbors =
+    -- precalculate all node neighbors. The graph is large and doesn't change.
     let
-        neighbor : Edge -> Maybe NodeId
-        neighbor ( a, b ) =
-            if a.id == id then
-                Just b.id
-            else if b.id == id then
-                Just a.id
-            else
-                Nothing
+        update : NodeId -> Maybe (Set NodeId) -> Maybe (Set NodeId)
+        update n2 =
+            Maybe.withDefault Set.empty >> Set.insert n2 >> Just
+
+        fold : Edge -> Dict NodeId (Set NodeId) -> Dict NodeId (Set NodeId)
+        fold ( n1, n2 ) =
+            Dict.update n1.id (update n2.id) >> Dict.update n2.id (update n1.id)
     in
-        g.edges
-            |> Dict.toList
-            |> List.map (Tuple.second >> neighbor)
-            |> Maybe.Extra.values
-            |> Set.fromList
+        List.foldr fold Dict.empty
+
+
+neighbors : NodeId -> Graph -> Set NodeId
+neighbors id { neighbors } =
+    case Dict.get id neighbors of
+        Just ids ->
+            ids
+
+        Nothing ->
+            Debug.crash <| "neighbors for a nonexistant node: " ++ toString id
+
+
+type alias GraphBounds =
+    { x : ( Int, Int ), y : ( Int, Int ) }
+
+
+calcBounds : List Node -> GraphBounds
+calcBounds nodes =
+    -- precalculate x/y min/maxes. The graph is large and doesn't change.
+    { x = ( List.foldr (.x >> min) 0 nodes, List.foldr (.x >> max) 0 nodes )
+    , y = ( List.foldr (.y >> min) 0 nodes, List.foldr (.y >> max) 0 nodes )
+    }
 
 
 graphMinX : Graph -> Int
 graphMinX =
-    .nodes >> Dict.foldr (always <| .x >> min) 0
+    .bounds >> .x >> Tuple.first
 
 
 graphMinY : Graph -> Int
 graphMinY =
-    .nodes >> Dict.foldr (always <| .y >> min) 0
+    .bounds >> .y >> Tuple.first
 
 
 graphMaxX : Graph -> Int
 graphMaxX =
-    .nodes >> Dict.foldr (always <| .x >> max) 0
+    .bounds >> .x >> Tuple.second
 
 
 graphMaxY : Graph -> Int
 graphMaxY =
-    .nodes >> Dict.foldr (always <| .y >> max) 0
+    .bounds >> .y >> Tuple.second
 
 
 graphHeight : Graph -> Int

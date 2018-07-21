@@ -25,16 +25,17 @@ view model features =
             Maybe.map (Regex.regex >> Regex.caseInsensitive) model.search
 
         selectable =
-            M.selectableNodes M.startNodes model.graph model.selected
+            M.selectableNodes M.startNodes model.char.graph model.selected
     in
         S.svg
             ([ HA.style [ ( "border", "1px solid grey" ) ]
-             , A.viewBox <| formatViewBox (iconSize // 2) model.graph
+             , A.viewBox <| formatViewBox (iconSize // 2) model.char.graph
              ]
                 ++ Route.ifFeature features.zoom inputZoomAndPan []
             )
             [ S.defs []
                 [ S.filter [ A.id "highlight" ]
+                    -- Search results highlight. Hue-rotate from the *NodeNext purplish color.
                     [ S.feColorMatrix
                         [ A.type_ "hueRotate"
                         , A.values "60" -- red/orange
@@ -47,9 +48,9 @@ view model features =
                     ]
                 ]
             , S.g (Route.ifFeature features.zoom [ zoomAndPan model ] [])
-                [ S.g [] (List.map (viewNodeBackground model.selected selectable searchRegex << Tuple.second) <| Dict.toList model.graph.nodes)
-                , S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList model.graph.edges)
-                , S.g [] (List.map (viewNode model.selected selectable searchRegex << Tuple.second) <| Dict.toList model.graph.nodes)
+                [ S.g [] (List.map (viewNodeBackground model.selected selectable searchRegex << Tuple.second) <| Dict.toList model.char.graph.nodes)
+                , S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList model.char.graph.edges)
+                , S.g [] (List.map (viewNode model.selected selectable searchRegex << Tuple.second) <| Dict.toList model.char.graph.nodes)
                 ]
             ]
 
@@ -114,10 +115,6 @@ nodeBGSize =
     iconSize * 4
 
 
-viewNode =
-    viewNodeIcon
-
-
 iconUrl : G.NodeType -> String
 iconUrl node =
     "./ch2data/img/" ++ node.icon ++ ".png"
@@ -133,14 +130,12 @@ viewNodeBackground selected selectable q { id, x, y, val } =
         , A.y <| toString <| y - nodeBGSize // 2
         , A.width <| toString nodeBGSize
         , A.height <| toString nodeBGSize
-
-        -- , A.class "overlay"
         ]
         []
 
 
-viewNodeIcon : Set Int -> Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
-viewNodeIcon selected selectable q { id, x, y, val } =
+viewNode : Set Int -> Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
+viewNode selected selectable q { id, x, y, val } =
     S.g
         [ A.class <| String.join " " [ "node", nodeHighlightClass q val, nodeSelectedClass selected id, nodeSelectableClass selectable id, nodeQualityClass val.quality ]
         ]
