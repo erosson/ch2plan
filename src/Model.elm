@@ -201,7 +201,10 @@ update msg model =
                     -- but here the side effect is pre-computing dijkstra!
                     let
                         _ =
-                            Lazy.force home.dijkstra
+                            if model.features.multiSelect then
+                                Lazy.force home.dijkstra
+                            else
+                                Dijkstra.empty
                     in
                         ( model, Cmd.none )
 

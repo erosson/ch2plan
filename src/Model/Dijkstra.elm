@@ -1,4 +1,4 @@
-module Model.Dijkstra exposing (Result, dijkstra, selectPathToNode)
+module Model.Dijkstra exposing (Result, empty, dijkstra, selectPathToNode)
 
 import Set as Set exposing (Set)
 import Dict as Dict exposing (Dict)
@@ -11,6 +11,11 @@ import GameData as G
 -}
 type alias Result =
     { distances : Dict G.NodeId Int, prevs : Dict G.NodeId G.NodeId }
+
+
+empty : Result
+empty =
+    { distances = Dict.empty, prevs = Dict.empty }
 
 
 infinity : Int
