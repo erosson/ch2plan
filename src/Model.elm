@@ -152,7 +152,7 @@ update msg model =
                                         |> reachableSelectedNodes startNodes home.char.graph
                                 else
                                     -- add the node and any in between
-                                    Dijkstra.selectPathToNode (Dijkstra.dijkstra startNodes home.char.graph home.selected) id
+                                    Dijkstra.selectPathToNode (Dijkstra.dijkstra startNodes home.char.graph home.selected <| Just id) id
                                         |> Set.fromList
                                         |> Set.union home.selected
                             else

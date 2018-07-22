@@ -3,6 +3,7 @@ module Model.Dijkstra exposing (Result, dijkstra, selectPathToNode)
 import Set as Set exposing (Set)
 import Dict as Dict exposing (Dict)
 import Maybe.Extra
+import List.Extra
 import GameData as G
 
 
@@ -12,19 +13,20 @@ type alias Result =
     { distances : Dict G.NodeId Int, prevs : Dict G.NodeId G.NodeId }
 
 
-dijkstra : Set G.NodeId -> G.Graph -> Set G.NodeId -> Result
-dijkstra startNodes graph selected0 =
+infinity : Int
+infinity =
+    -- no constant for this, Elm?
+    1 / 0 |> floor
+
+
+dijkstra : Set G.NodeId -> G.Graph -> Set G.NodeId -> Maybe G.NodeId -> Result
+dijkstra startNodes graph selected0 target =
     let
         allNodes =
             Dict.keys graph.nodes
 
         startOrSelected =
             Set.union startNodes selected0
-
-        -- no constant for this, Elm?
-        infinity : Int
-        infinity =
-            1 / 0 |> floor
 
         distances0 : Dict G.NodeId Int
         distances0 =
@@ -33,55 +35,24 @@ dijkstra startNodes graph selected0 =
                 |> Set.toList
                 |> List.map (\id -> ( id, 0 ))
                 |> Dict.fromList
+    in
+        visitNode startOrSelected graph (allNodes |> Set.fromList) target { distances = distances0, prevs = Dict.empty }
+            |> Debug.log "dijkstra"
 
-        pqueue0 =
-            startNodes |> Set.toList
 
-        -- TODO: use a real priority queue. I'm offline right now!
-        pqueueSort : Dict G.NodeId Int -> List G.NodeId -> List G.NodeId
-        pqueueSort distances =
-            List.sortBy (\id -> Dict.get id distances |> Maybe.withDefault infinity)
+visitNode : Set G.NodeId -> G.Graph -> Set G.NodeId -> Maybe G.NodeId -> Result -> Result
+visitNode startOrSelected graph unvisited target dp0 =
+    -- the unvisited node with the minimum distance.
+    -- A priority queue would be faster here, but it's dependant on distance -
+    -- this is much simpler, requires no new dependencies, and fast enough.
+    case unvisited |> Set.foldl (\id list -> Dict.get id dp0.distances |> Maybe.Extra.unwrap list (\d -> ( id, d ) :: list)) [] |> List.Extra.minimumBy Tuple.second of
+        Nothing ->
+            -- all nodes visited!
+            dp0
 
-        pqueueNext : List a -> a
-        pqueueNext =
-            List.head >> Maybe.Extra.unpack (\_ -> Debug.crash "dijkstra: empty pqueue (no start nodes?)") identity
-
-        visitNeighbors : Result -> G.NodeId -> List G.NodeId -> Result
-        visitNeighbors dp prevNode neighbors =
-            case List.head neighbors of
-                Nothing ->
-                    dp
-
-                Just nextNode ->
-                    let
-                        { distances, prevs } =
-                            dp
-
-                        dSource =
-                            Dict.get prevNode distances |> Maybe.Extra.unpack (\_ -> Debug.crash "dijkstra: visitNeighbors: no prevNode distance?") identity
-
-                        d =
-                            if dSource == 0 && Set.member nextNode startOrSelected then
-                                -- we still have a selected-connection to the start area; keep growing it
-                                0
-                            else
-                                -- even if this node's selected, it's not start-connected
-                                dSource + 1
-
-                        isShorter =
-                            d < (Dict.get nextNode distances |> Maybe.withDefault infinity)
-
-                        dp1 =
-                            if isShorter then
-                                { distances = Dict.insert nextNode d distances, prevs = Dict.insert nextNode prevNode prevs }
-                            else
-                                dp
-                    in
-                        visitNeighbors dp1 prevNode (List.drop 1 neighbors)
-
-        visitNode : Set G.NodeId -> Result -> List G.NodeId -> G.NodeId -> Result
-        visitNode unvisited dp0 pqueue0 node =
-            if Set.isEmpty unvisited then
+        Just ( node, _ ) ->
+            if Just node == target then
+                -- if we're searching for this one specific node, quit early
                 dp0
             else
                 let
@@ -89,14 +60,43 @@ dijkstra startNodes graph selected0 =
                         G.neighbors node graph |> Set.intersect unvisited |> Set.toList
 
                     dp =
-                        visitNeighbors { distances = dp0.distances, prevs = dp0.prevs } node unvisitedNeighbors
-
-                    pqueue =
-                        pqueue0 ++ unvisitedNeighbors |> pqueueSort dp.distances
+                        visitNeighbors startOrSelected { distances = dp0.distances, prevs = dp0.prevs } node unvisitedNeighbors
                 in
-                    visitNode (Set.remove node unvisited) dp (List.drop 1 pqueue) (pqueueNext pqueue)
-    in
-        visitNode (allNodes |> Set.fromList) { distances = distances0, prevs = Dict.empty } (List.drop 1 pqueue0) (pqueueNext pqueue0)
+                    visitNode startOrSelected graph (Set.remove node unvisited) target dp
+
+
+visitNeighbors : Set G.NodeId -> Result -> G.NodeId -> List G.NodeId -> Result
+visitNeighbors startOrSelected dp prevNode neighbors =
+    case List.head neighbors of
+        Nothing ->
+            dp
+
+        Just nextNode ->
+            let
+                { distances, prevs } =
+                    dp
+
+                dSource =
+                    Dict.get prevNode distances |> Maybe.Extra.unpack (\_ -> Debug.crash "dijkstra: visitNeighbors: no prevNode distance?") identity
+
+                d =
+                    if dSource == 0 && Set.member nextNode startOrSelected then
+                        -- we still have a selected-connection to the start area; keep growing it
+                        0
+                    else
+                        -- even if this node's selected, it's not start-connected
+                        dSource + 1
+
+                isShorter =
+                    d < (Dict.get nextNode distances |> Maybe.withDefault infinity)
+
+                dp1 =
+                    if isShorter then
+                        { distances = Dict.insert nextNode d distances, prevs = Dict.insert nextNode prevNode prevs }
+                    else
+                        dp
+            in
+                visitNeighbors startOrSelected dp1 prevNode (List.drop 1 neighbors)
 
 
 
