@@ -3,6 +3,9 @@ module Model exposing (..)
 import Regex as Regex exposing (Regex)
 import Set as Set exposing (Set)
 import Dict as Dict exposing (Dict)
+import Lazy as Lazy exposing (Lazy)
+import Task
+import Process
 import Json.Decode as Decode
 import Navigation
 import Maybe.Extra
@@ -18,6 +21,7 @@ type Msg
     = SearchInput String
     | SelectInput Int -- TODO should really remove this one in favor of links
     | NavLocation Navigation.Location
+    | Preprocess
     | OnDragBy V2.Vec2
     | DragMsg (Draggable.Msg ())
     | Zoom Float
@@ -52,6 +56,7 @@ type alias HomeModel =
     , drag : Draggable.State ()
     , char : G.Character
     , selected : Set G.NodeId
+    , dijkstra : Lazy Dijkstra.Result
     }
 
 
@@ -73,11 +78,19 @@ init flags loc =
               , features = Route.parseFeatures loc
               }
                 |> \model -> { model | route = Route.parse loc |> routeToModel model }
-            , Cmd.none
+            , preprocessCmd
             )
 
         Err err ->
             Debug.crash err
+
+
+preprocessCmd : Cmd Msg
+preprocessCmd =
+    -- setTimeout to let the UI render, then run delayed calculations
+    Process.sleep 1
+        |> Task.andThen (always <| Task.succeed Preprocess)
+        |> Task.perform identity
 
 
 routeToModel : Model -> Route -> RouteModel
@@ -105,15 +118,20 @@ initHome q { characterData } =
             Err <| "no such hero: " ++ q.hero
 
         Just char ->
-            Ok
-                { params = q
-                , search = Maybe.map (Regex.regex >> Regex.caseInsensitive) q.search
-                , zoom = 1
-                , center = V2.vec2 0 0
-                , drag = Draggable.init
-                , char = char
-                , selected = buildToNodes startNodes char.graph q.build
-                }
+            let
+                selected =
+                    buildToNodes startNodes char.graph q.build
+            in
+                Ok
+                    { params = q
+                    , search = Maybe.map (Regex.regex >> Regex.caseInsensitive) q.search
+                    , zoom = 1
+                    , center = V2.vec2 0 0
+                    , drag = Draggable.init
+                    , char = char
+                    , selected = selected
+                    , dijkstra = Lazy.lazy (\() -> Dijkstra.dijkstra startNodes char.graph selected Nothing)
+                    }
 
 
 invert : comparable -> Set comparable -> Set comparable
@@ -152,7 +170,7 @@ update msg model =
                                         |> reachableSelectedNodes startNodes home.char.graph
                                 else
                                     -- add the node and any in between
-                                    Dijkstra.selectPathToNode (Dijkstra.dijkstra startNodes home.char.graph home.selected <| Just id) id
+                                    Dijkstra.selectPathToNode (Lazy.force home.dijkstra) id
                                         |> Set.fromList
                                         |> Set.union home.selected
                             else
@@ -173,6 +191,19 @@ update msg model =
                             Route.Home { q | build = nodesToBuild home.char.graph selected }
                     in
                         ( model, Navigation.modifyUrl <| Route.stringify route )
+
+                Preprocess ->
+                    -- calculate dijkstra immediately after the view renders, so we have it ready later, when the user clicks.
+                    -- It's not *that* slow - 200ms-ish - but that's slow enough to make a difference.
+                    -- This makes things feel much more responsive.
+                    --
+                    -- Unlike most other things Elm, Lazy is *not* pure-functional. "let _ = ..." normally does nothing,
+                    -- but here the side effect is pre-computing dijkstra!
+                    let
+                        _ =
+                            Lazy.force home.dijkstra
+                    in
+                        ( model, Cmd.none )
 
                 OnDragBy rawDelta ->
                     let
@@ -201,7 +232,21 @@ update msg model =
                     case Route.parse loc |> routeToModel model of
                         Home home2 ->
                             -- preserve non-url state, like zoom/pan
-                            ( { model | route = Home { home | params = home2.params, search = home2.search, char = home2.char, selected = home2.selected }, features = Route.parseFeatures loc }, Cmd.none )
+                            ( { model
+                                | route =
+                                    Home
+                                        { home
+                                            | params = home2.params
+                                            , search = home2.search
+                                            , char = home2.char
+                                            , selected = home2.selected
+                                            , dijkstra = home2.dijkstra
+                                        }
+                                , features = Route.parseFeatures loc
+                              }
+                              -- compute dijkstra's after the view renders
+                            , preprocessCmd
+                            )
 
                         route ->
                             ( { model | route = route, features = Route.parseFeatures loc }, Cmd.none )
