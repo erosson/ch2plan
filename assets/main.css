@@ -16,6 +16,17 @@ svg .node {
   stroke-width: 1;
   fill: #ddd;
 }
+svg .zoom-buttons {
+  fill: #222d;
+  stroke: #ccc;
+  stroke-width: 3;
+  border-radius: 5;
+}
+svg .zoom-buttons text {
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
 
 .summary .icon {
   float: left;

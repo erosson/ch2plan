@@ -10,6 +10,10 @@ These are at least partially working, but turned off by default.
 - [Zoom/pan](https://ch2.erosson.org/?enableZoom=1). [Thanks, @Judgy53](https://github.com/erosson/ch2plan/pull/15)! https://github.com/erosson/ch2plan/issues/4
 
 ---
+## 2018-07-23
+- Smoother panning.
+- Added zoom buttons for those without mouse-wheels.
+
 ## 2018-07-21
 - Improvements to zooming/panning - [thanks, @Judgy53](https://github.com/erosson/ch2plan/pull/18)!
 - Performance tweaking - selecting/unselecting nodes should be a bit faster.

@@ -39,7 +39,24 @@ view model features =
                 , S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList model.char.graph.edges)
                 , S.g [] (List.map (viewNode model.selected selectable model.search << Tuple.second) <| Dict.toList model.char.graph.nodes)
                 ]
+            , (Route.ifFeature features.zoom viewZoomButtons <| S.g [] [])
             ]
+
+
+viewZoomButtons : S.Svg M.Msg
+viewZoomButtons =
+    S.g [ A.class "zoom-buttons" ]
+        [ viewZoomButton ( 5, 5 ) "+" (M.Zoom -25)
+        , viewZoomButton ( 5, 35 ) "-" (M.Zoom 25)
+        ]
+
+
+viewZoomButton : ( Int, Int ) -> String -> msg -> S.Svg msg
+viewZoomButton ( x, y ) text msg =
+    S.g [ E.onClick msg ]
+        [ S.rect [ A.x (toString x), A.y (toString y), A.width "30", A.height "30", A.rx "5", A.ry "5" ] []
+        , S.text_ [ A.x (toString <| x + 15), A.y (toString <| y + 15) ] [ S.text text ]
+        ]
 
 
 inputZoomAndPan : List (S.Attribute M.Msg)
