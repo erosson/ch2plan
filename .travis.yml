@@ -37,7 +37,7 @@ install:
   - travis_retry sysconfcpus -n 2 yarn --frozen-lockfile
 
 script:
-  - yarn test
+  - sysconfcpus -n 2 yarn test
   # `yarn build` may also release the electron build, if there's a draft or a tag.
   # https://www.electron.build/configuration/publish#recommended-github-releases-workflow
   - sysconfcpus -n 2 yarn build
