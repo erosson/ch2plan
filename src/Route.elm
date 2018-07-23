@@ -87,12 +87,11 @@ falseBools =
     Set.fromList [ "", "0", "no", "n", "false" ]
 
 
-boolParam : String -> P.QueryParser (Bool -> a) a
-boolParam name =
-    Maybe.withDefault ""
-        >> String.toLower
-        >> (flip Set.member) falseBools
-        >> not
+{-| bool param with a default value
+-}
+flagParam : String -> Bool -> P.QueryParser (Bool -> a) a
+flagParam name default =
+    Maybe.Extra.unwrap default (String.toLower >> (flip Set.member) falseBools >> not)
         |> P.customParam name
 
 
@@ -110,8 +109,8 @@ featuresParser : P.Parser (Features -> a) a
 featuresParser =
     P.map Features <|
         P.top
-            <?> boolParam "enableMultiSelect"
-            <?> boolParam "enableZoom"
+            <?> flagParam "enableMultiSelect" features0.multiSelect
+            <?> flagParam "enableZoom" features0.zoom
 
 
 ifFeature : Bool -> a -> a -> a

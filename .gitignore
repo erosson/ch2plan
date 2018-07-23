@@ -4,6 +4,6 @@
 /.terraform
 /game
 /node_modules
-/elm-stuff
+elm-stuff
 /assets/elm.js
 /assets/CHANGELOG.md

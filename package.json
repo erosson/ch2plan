@@ -14,7 +14,8 @@
     "export:chars": "scripty",
     "dev": "cp CHANGELOG.md ./assets && elm-live ./src/Main.elm --output=./assets/elm.js --dir=./assets --open",
     "build": "rm -rf ./dist && mkdir -p ./dist && cp CHANGELOG.md ./dist && rsync -auv ./assets/ ./dist/ && elm-make ./src/Main.elm --output=./dist/elm.js",
-    "test": "echo 'no tests yet'",
+    "//test": "you probably want to run this with --watch, like 'yarn test --watch'",
+    "test": "elm-test",
     "start": "yarn build && serve ./dist"
   },
   "//optionalDependencies": "because travis fails to install me, but doesn't actually need me",
@@ -25,6 +26,7 @@
   "devDependencies": {
     "elm": "^0.18.0",
     "elm-live": "^2.7.5",
+    "elm-test": "^0.18.12",
     "scripty": "^1.7.2"
   }
 }
