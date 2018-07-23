@@ -210,22 +210,22 @@ update msg model =
 
                 OnDragBy rawDelta ->
                     let
-                        clampedCenter =
-                            handleDrag home rawDelta home.zoom
+                        delta =
+                            rawDelta |> V2.scale (-1 / home.zoom)
+
+                        center =
+                            home.center |> V2.add delta |> clampCenter home.char.graph
                     in
-                        ( { model | route = Home { home | center = clampedCenter } }, Cmd.none )
+                        ( { model | route = Home { home | center = center } }, Cmd.none )
 
                 Zoom factor ->
                     let
                         newZoom =
                             home.zoom
-                                |> (+) (-factor * 0.025)
-                                |> clamp 1 5
-
-                        newCenter =
-                            handleDrag home (V2.vec2 0 0) newZoom
+                                |> (+) (-factor * 0.01)
+                                |> clamp 0.2 3
                     in
-                        ( { model | route = Home { home | zoom = newZoom, center = newCenter } }, Cmd.none )
+                        ( { model | route = Home { home | zoom = newZoom } }, Cmd.none )
 
                 DragMsg dragMsg ->
                     Draggable.update dragConfig dragMsg home
@@ -264,53 +264,32 @@ update msg model =
                     ( model, Cmd.none )
 
 
-handleDrag : HomeModel -> V2.Vec2 -> Float -> V2.Vec2
-handleDrag home delta zoom =
+clampCenter : G.Graph -> V2.Vec2 -> V2.Vec2
+clampCenter g =
+    v2Clamp (graphMinXY g) (graphMaxXY g)
+
+
+graphMinXY g =
+    V2.vec2 (G.graphMinX g |> toFloat) (G.graphMinY g |> toFloat)
+
+
+graphMaxXY g =
+    V2.vec2 (G.graphMaxX g |> toFloat) (G.graphMaxY g |> toFloat)
+
+
+v2Clamp : V2.Vec2 -> V2.Vec2 -> V2.Vec2 -> V2.Vec2
+v2Clamp minV maxV v =
     let
-        g =
-            home.char.graph
+        ( minX, minY ) =
+            V2.toTuple minV
 
-        --Similar to iconSize in ViewGraph (can't access it here)
-        margin =
-            30 * zoom
+        ( maxX, maxY ) =
+            V2.toTuple maxV
 
-        ( graphMin, graphMax ) =
-            ( V2.vec2 (toFloat (G.graphMinX g) - margin) (toFloat (G.graphMinY g) - margin), V2.vec2 (toFloat (G.graphMaxX g) + margin) (toFloat (G.graphMaxY g) + margin) )
-
-        ( halfGraphWidth, halfGraphHeight ) =
-            ( toFloat (G.graphWidth g) / 2, toFloat (G.graphHeight g) / 2 )
-
-        halfZoomedGraph =
-            V2.scale (1 / zoom) (V2.vec2 halfGraphWidth halfGraphHeight)
+        ( x, y ) =
+            V2.toTuple v
     in
-        home.center
-            |> V2.add delta
-            |> v2Max (V2.add graphMin halfZoomedGraph)
-            |> v2Min (V2.sub graphMax halfZoomedGraph)
-
-
-v2Min : V2.Vec2 -> V2.Vec2 -> V2.Vec2
-v2Min a b =
-    let
-        x =
-            min (V2.getX a) (V2.getX b)
-
-        y =
-            min (V2.getY a) (V2.getY b)
-    in
-        V2.vec2 x y
-
-
-v2Max : V2.Vec2 -> V2.Vec2 -> V2.Vec2
-v2Max a b =
-    let
-        x =
-            max (V2.getX a) (V2.getX b)
-
-        y =
-            max (V2.getY a) (V2.getY b)
-    in
-        V2.vec2 x y
+        V2.vec2 (clamp minX maxX x) (clamp minY maxY y)
 
 
 startNodes : Set G.NodeId

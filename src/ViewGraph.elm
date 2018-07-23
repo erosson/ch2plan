@@ -21,16 +21,20 @@ import Route
 view : M.HomeModel -> Route.Features -> H.Html M.Msg
 view model features =
     let
+        (( w, h ) as wh) =
+            ( 1000, 1000 )
+
         selectable =
             M.selectableNodes M.startNodes model.char.graph model.selected
     in
         S.svg
-            ([ HA.style [ ( "border", "1px solid grey" ) ]
-             , A.viewBox <| formatViewBox (iconSize // 2) model.char.graph
+            ([ HA.style [ ( "border", "1px solid grey" ), ( "width", toString w ++ "px" ), ( "height", toString h ++ "px" ) ]
              ]
-                ++ Route.ifFeature features.zoom inputZoomAndPan []
+                ++ Route.ifFeature features.zoom
+                    inputZoomAndPan
+                    [ A.viewBox <| formatViewBox (iconSize // 2) model.char.graph ]
             )
-            [ S.g (Route.ifFeature features.zoom [ zoomAndPan model ] [])
+            [ S.g (Route.ifFeature features.zoom [ zoomAndPan wh model ] [])
                 [ S.g [] (List.map (viewNodeBackground model.selected selectable model.search << Tuple.second) <| Dict.toList model.char.graph.nodes)
                 , S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList model.char.graph.edges)
                 , S.g [] (List.map (viewNode model.selected selectable model.search << Tuple.second) <| Dict.toList model.char.graph.nodes)
@@ -45,11 +49,17 @@ inputZoomAndPan =
     ]
 
 
-zoomAndPan : M.HomeModel -> S.Attribute msg
-zoomAndPan model =
+zoomAndPan : ( Float, Float ) -> M.HomeModel -> S.Attribute msg
+zoomAndPan ( w, h ) model =
     let
+        ( cx, cy ) =
+            V2.toTuple model.center
+
+        ( left, top ) =
+            ( cx - w / model.zoom / 2, cy - h / model.zoom / 2 )
+
         panning =
-            "translate(" ++ toString (V2.getX model.center) ++ ", " ++ toString (V2.getY model.center) ++ ")"
+            "translate(" ++ toString -left ++ ", " ++ toString -top ++ ")"
 
         zooming =
             "scale(" ++ toString model.zoom ++ ")"
