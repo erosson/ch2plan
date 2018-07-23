@@ -31,7 +31,7 @@ type alias Features =
 
 features0 : Features
 features0 =
-    { multiSelect = False, zoom = False }
+    { multiSelect = True, zoom = True }
 
 
 parse : Navigation.Location -> Route
