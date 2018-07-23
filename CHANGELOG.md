@@ -13,6 +13,7 @@ These are at least partially working, but turned off by default.
 ## 2018-07-23
 - Smoother panning.
 - Added zoom buttons for those without mouse-wheels.
+- The browser's back button now undoes your last point selection.
 
 ## 2018-07-21
 - Improvements to zooming/panning - [thanks, @Judgy53](https://github.com/erosson/ch2plan/pull/18)!

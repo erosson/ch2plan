@@ -190,7 +190,7 @@ update msg model =
                         route =
                             Route.Home { q | build = nodesToBuild home.char.graph selected }
                     in
-                        ( model, Navigation.modifyUrl <| Route.stringify route )
+                        ( model, Navigation.newUrl <| Route.stringify route )
 
                 Preprocess ->
                     -- calculate dijkstra immediately after the view renders, so we have it ready later, when the user clicks.
