@@ -41,16 +41,61 @@ dijkstra startNodes graph selected0 target =
                 |> List.map (\id -> ( id, 0 ))
                 |> Dict.fromList
     in
-        visitNode startOrSelected graph (allNodes |> Set.fromList) target { distances = distances0, prevs = Dict.empty }
-            |> Debug.log "dijkstra"
+        visitNode 0 startOrSelected graph (allNodes |> Set.fromList) target { distances = distances0, prevs = Dict.empty }
 
 
-visitNode : Set G.NodeId -> G.Graph -> Set G.NodeId -> Maybe G.NodeId -> Result -> Result
-visitNode startOrSelected graph unvisited target dp0 =
+{-| List.Extra.minimumBy, but quit early if the value reaches a certain threshold.
+
+Useful when we gotta go fast and know the minimum won't go below a certain value.
+
+-}
+terminatingMinimumBy : comparable -> (a -> comparable) -> List a -> Maybe a
+terminatingMinimumBy terminateAt fn items =
+    let
+        loop : List a -> a -> comparable -> a
+        loop items minIn minOut =
+            case items of
+                [] ->
+                    minIn
+
+                headIn :: tail ->
+                    let
+                        headOut =
+                            fn headIn
+                    in
+                        if headOut <= terminateAt then
+                            headIn
+                        else if headOut <= minOut then
+                            loop tail headIn headOut
+                        else
+                            loop tail minIn minOut
+    in
+        case items of
+            [] ->
+                Nothing
+
+            headIn :: tail ->
+                Just <|
+                    let
+                        headOut =
+                            fn headIn
+                    in
+                        if headOut <= terminateAt then
+                            headIn
+                        else
+                            loop tail headIn headOut
+
+
+visitNode : Int -> Set G.NodeId -> G.Graph -> Set G.NodeId -> Maybe G.NodeId -> Result -> Result
+visitNode lastDistance startOrSelected graph unvisited target dp0 =
     -- the unvisited node with the minimum distance.
     -- A priority queue would be faster here, but it's dependant on distance -
     -- this is much simpler, requires no new dependencies, and fast enough.
-    case unvisited |> Set.foldl (\id list -> Dict.get id dp0.distances |> Maybe.Extra.unwrap list (\d -> ( id, d ) :: list)) [] |> List.Extra.minimumBy Tuple.second of
+    --
+    -- Dijkstra's guarantees the distance of each visited node never decreases,
+    -- so we can use terminatingMinimumBy to quit early if this node has the same
+    -- distance as the last one we visited.
+    case unvisited |> Set.foldl (\id list -> Dict.get id dp0.distances |> Maybe.Extra.unwrap list (\d -> ( id, d ) :: list)) [] |> terminatingMinimumBy lastDistance Tuple.second of
         Nothing ->
             -- all nodes visited!
             dp0
@@ -64,14 +109,17 @@ visitNode startOrSelected graph unvisited target dp0 =
                     unvisitedNeighbors =
                         G.neighbors node graph |> Set.intersect unvisited |> Set.toList
 
+                    d =
+                        Dict.get node dp0.distances |> Maybe.Extra.unpack (\_ -> Debug.crash "dijkstra: visitNeighbors: no prevNode distance?") identity
+
                     dp =
-                        visitNeighbors startOrSelected { distances = dp0.distances, prevs = dp0.prevs } node unvisitedNeighbors
+                        visitNeighbors startOrSelected { distances = dp0.distances, prevs = dp0.prevs } node d unvisitedNeighbors
                 in
-                    visitNode startOrSelected graph (Set.remove node unvisited) target dp
+                    visitNode d startOrSelected graph (Set.remove node unvisited) target dp
 
 
-visitNeighbors : Set G.NodeId -> Result -> G.NodeId -> List G.NodeId -> Result
-visitNeighbors startOrSelected dp prevNode neighbors =
+visitNeighbors : Set G.NodeId -> Result -> G.NodeId -> Int -> List G.NodeId -> Result
+visitNeighbors startOrSelected dp prevNode prevDist neighbors =
     case List.head neighbors of
         Nothing ->
             dp
@@ -81,16 +129,13 @@ visitNeighbors startOrSelected dp prevNode neighbors =
                 { distances, prevs } =
                     dp
 
-                dSource =
-                    Dict.get prevNode distances |> Maybe.Extra.unpack (\_ -> Debug.crash "dijkstra: visitNeighbors: no prevNode distance?") identity
-
                 d =
-                    if dSource == 0 && Set.member nextNode startOrSelected then
+                    if prevDist == 0 && Set.member nextNode startOrSelected then
                         -- we still have a selected-connection to the start area; keep growing it
                         0
                     else
                         -- even if this node's selected, it's not start-connected
-                        dSource + 1
+                        prevDist + 1
 
                 isShorter =
                     d < (Dict.get nextNode distances |> Maybe.withDefault infinity)
@@ -101,7 +146,7 @@ visitNeighbors startOrSelected dp prevNode neighbors =
                     else
                         dp
             in
-                visitNeighbors startOrSelected dp1 prevNode (List.drop 1 neighbors)
+                visitNeighbors startOrSelected dp1 prevNode prevDist (List.drop 1 neighbors)
 
 
 
