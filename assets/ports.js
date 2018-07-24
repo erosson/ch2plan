@@ -17,6 +17,7 @@ Promise.all([
     changelog: changelog,
     lastUpdatedVersion: ch2.GAME_VERSION,
     characterData: chars,
+    windowSize: {width: document.documentElement.clientWidth, height: document.documentElement.clientHeight},
   })
 })
 .catch(console.error)

@@ -2,7 +2,9 @@ body {
   /* background-image: url("./ch2data/img/starBG.png"); */
   background: #080010;
   color: #fff;
-  max-width: 1000px;
+}
+h2 {
+  white-space: nowrap;
 }
 svg {
   background: url("./ch2data/img/starBG.png");
@@ -31,8 +33,42 @@ svg .zoom-buttons text {
 .svg-container {
   position: relative;
   margin: 0; padding: 0;
-  border: 1px solid grey;
+  /* border: 1px solid grey; */
 }
+.svg-container,
+.svg-container svg,
+.skill-tree-main,
+body,
+html {
+  width: 100%;
+  height: 100%;
+  border: 0; padding: 0; margin: 0;
+  /* overflow: hidden; */
+}
+.skill-tree-main .sidebar {
+  position: fixed;
+  left: 0; top: 0;
+  width: 480px;
+  height: 100%;
+  background: #080010f0;
+  overflow: auto;
+}
+.sidebar-hide {
+  float: right;
+}
+.sidebar-show {
+  position: absolute;
+  top: 4px; left: 4px;
+}
+.sidebar-show, .sidebar-hide {
+  border: 3px solid #ccc;
+  border-radius: 5px;
+  background: #080010f0;
+  color: #ccc;
+  font-weight: bold;
+  font-size: 120%;
+}
+
 .tooltip {
   position: absolute;
   display: inline-block;
@@ -85,6 +121,9 @@ nav a {
   background-opacity: 0.3;
   border: 0.1em solid #ccc;
   border-radius: 5px;
+}
+.skill-tree-main nav a {
+  display: block;
 }
 nav {
   padding: 0.5em;

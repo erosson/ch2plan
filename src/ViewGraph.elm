@@ -13,50 +13,43 @@ import Math.Vector2 as V2
 import Draggable
 import VirtualDom
 import Json.Decode as Decode
+import Window
 import Model as M
 import GameData as G
 import Route
 
 
-view : M.HomeModel -> Route.Features -> H.Html M.Msg
-view model features =
+view : Window.Size -> M.HomeModel -> Route.Features -> H.Html M.Msg
+view windowSize model features =
     let
-        (( w, h ) as wh) =
-            ( 1000, 1000 )
-
         selectable =
             M.selectableNodes M.startNodes model.char.graph model.selected
-
-        style =
-            [ ( "width", toString w ++ "px" ), ( "height", toString h ++ "px" ) ]
     in
         -- svg-container is for tooltip positioning. It must be exactly the same size as the svg itself.
-        H.div [ HA.class "svg-container", HA.style style ]
+        H.div [ HA.class "svg-container" ]
             ([ S.svg
-                ([ HA.style style
-                 ]
-                    ++ Route.ifFeature features.zoom
-                        inputZoomAndPan
-                        [ A.viewBox <| formatViewBox (iconSize // 2) model.char.graph ]
+                (Route.ifFeature features.zoom
+                    inputZoomAndPan
+                    [ A.viewBox <| formatViewBox (iconSize // 2) model.char.graph ]
                 )
-                [ S.g (Route.ifFeature features.zoom [ zoomAndPan wh model ] [])
+                [ S.g (Route.ifFeature features.zoom [ zoomAndPan windowSize model ] [])
                     ([ S.g [] (List.map (viewNodeBackground model.selected selectable model.search << Tuple.second) <| Dict.toList model.char.graph.nodes)
                      , S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList model.char.graph.edges)
                      , S.g [] (List.map (viewNode features model.selected selectable model.search << Tuple.second) <| Dict.toList model.char.graph.nodes)
                      ]
                     )
-                , (Route.ifFeature features.zoom viewZoomButtons <| S.g [] [])
+                , (Route.ifFeature features.zoom (viewZoomButtons windowSize) <| S.g [] [])
                 ]
              ]
                 ++ Maybe.Extra.unwrap []
-                    (List.singleton << viewTooltip wh model)
+                    (List.singleton << viewTooltip windowSize model)
                     -- (model.tooltip |> Maybe.withDefault 1 |> Just |> Maybe.andThen ((flip Dict.get) model.char.graph.nodes))
                     (Route.ifFeature features.fancyTooltips model.tooltip Nothing |> Maybe.andThen ((flip Dict.get) model.char.graph.nodes))
             )
 
 
-viewTooltip : ( Float, Float ) -> M.HomeModel -> G.Node -> H.Html msg
-viewTooltip (( w, h ) as wh) model node =
+viewTooltip : Window.Size -> M.HomeModel -> G.Node -> H.Html msg
+viewTooltip win model node =
     -- no css-scaling here - tooltips don't scale with zoom.
     -- no svg here - svg can't word-wrap, and <foreignObject> has screwy browser support.
     --
@@ -64,7 +57,10 @@ viewTooltip (( w, h ) as wh) model node =
     -- so coordinates in both should match.
     let
         ( panX, panY ) =
-            panOffsets wh model
+            panOffsets win model
+
+        ( w, h ) =
+            ( toFloat win.width, toFloat win.height )
 
         ( x, y ) =
             ( (toFloat node.x + panX) * model.zoom, (toFloat node.y + panY) * model.zoom )
@@ -99,11 +95,11 @@ appendSearch =
     Maybe.Extra.unwrap "" ((++) "\n\n")
 
 
-viewZoomButtons : S.Svg M.Msg
-viewZoomButtons =
+viewZoomButtons : Window.Size -> S.Svg M.Msg
+viewZoomButtons w =
     S.g [ A.class "zoom-buttons" ]
-        [ viewZoomButton ( 5, 5 ) "+" (M.Zoom -25)
-        , viewZoomButton ( 5, 35 ) "-" (M.Zoom 25)
+        [ viewZoomButton ( w.width - 35, 5 ) "+" (M.Zoom -25)
+        , viewZoomButton ( w.width - 35, 35 ) "-" (M.Zoom 25)
         ]
 
 
@@ -122,23 +118,23 @@ inputZoomAndPan =
     ]
 
 
-panOffsets : ( Float, Float ) -> M.HomeModel -> ( Float, Float )
-panOffsets ( w, h ) { center, zoom } =
+panOffsets : Window.Size -> M.HomeModel -> ( Float, Float )
+panOffsets w { center, zoom } =
     let
         ( cx, cy ) =
             V2.toTuple center
 
         ( left, top ) =
-            ( cx - w / zoom / 2, cy - h / zoom / 2 )
+            ( cx - toFloat w.width / zoom / 2, cy - toFloat w.height / zoom / 2 )
     in
         ( -left, -top )
 
 
-zoomAndPan : ( Float, Float ) -> M.HomeModel -> S.Attribute msg
-zoomAndPan wh model =
+zoomAndPan : Window.Size -> M.HomeModel -> S.Attribute msg
+zoomAndPan w model =
     let
         ( panX, panY ) =
-            panOffsets wh model
+            panOffsets w model
 
         panning =
             "translate(" ++ toString panX ++ ", " ++ toString panY ++ ")"

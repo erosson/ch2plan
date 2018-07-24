@@ -12,6 +12,7 @@ import Maybe.Extra
 import List.Extra
 import Math.Vector2 as V2
 import Draggable
+import Window
 import GameData as G
 import Route as Route exposing (Route)
 import Model.Dijkstra as Dijkstra
@@ -26,6 +27,8 @@ type Msg
     | DragMsg (Draggable.Msg ())
     | Zoom Float
     | Tooltip (Maybe G.NodeId)
+    | Resize Window.Size
+    | ToggleSidebar
 
 
 type alias Model =
@@ -34,6 +37,7 @@ type alias Model =
     , characterData : Dict String G.Character
     , route : RouteModel
     , features : Route.Features
+    , windowSize : Window.Size
     }
 
 
@@ -59,6 +63,7 @@ type alias HomeModel =
     , selected : Set G.NodeId
     , dijkstra : Lazy Dijkstra.Result
     , tooltip : Maybe G.NodeId
+    , sidebarOpen : Bool
     }
 
 
@@ -66,6 +71,7 @@ type alias Flags =
     { characterData : Decode.Value
     , lastUpdatedVersion : String
     , changelog : String
+    , windowSize : Window.Size
     }
 
 
@@ -75,12 +81,13 @@ init flags loc =
         Ok chars ->
             ( { changelog = flags.changelog
               , lastUpdatedVersion = flags.lastUpdatedVersion
+              , windowSize = flags.windowSize
               , characterData = chars
               , route = Changelog -- placeholder
               , features = Route.parseFeatures loc
               }
                 |> \model -> { model | route = Route.parse loc |> routeToModel model }
-            , preprocessCmd
+            , Cmd.batch [ preprocessCmd, Task.perform Resize Window.size ]
             )
 
         Err err ->
@@ -134,6 +141,7 @@ initHome q { characterData } =
                     , selected = selected
                     , dijkstra = Lazy.lazy (\() -> Dijkstra.dijkstra startNodes char.graph selected Nothing)
                     , tooltip = Nothing
+                    , sidebarOpen = True
                     }
 
 
@@ -260,11 +268,20 @@ update msg model =
                         route ->
                             ( { model | route = route, features = Route.parseFeatures loc }, Cmd.none )
 
+                Resize windowSize ->
+                    ( { model | windowSize = windowSize |> Debug.log "resize" }, Cmd.none )
+
+                ToggleSidebar ->
+                    ( { model | route = Home { home | sidebarOpen = not home.sidebarOpen } }, Cmd.none )
+
         _ ->
             -- all other routes have no state to preserve or update
             case msg of
                 NavLocation loc ->
                     ( { model | route = Route.parse loc |> routeToModel model, features = Route.parseFeatures loc }, Cmd.none )
+
+                Resize windowSize ->
+                    ( { model | windowSize = windowSize }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
@@ -406,7 +423,10 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     case model.route of
         Home home ->
-            Draggable.subscriptions DragMsg home.drag
+            Sub.batch
+                [ Window.resizes Resize
+                , Draggable.subscriptions DragMsg home.drag
+                ]
 
         _ ->
             Sub.none

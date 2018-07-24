@@ -12,45 +12,55 @@ import GameData as G
 import ViewGraph
 
 
-view : { m | characterData : Dict String G.Character, features : Route.Features, lastUpdatedVersion : String } -> M.HomeModel -> H.Html M.Msg
-view { characterData, features, lastUpdatedVersion } model =
-    H.div []
-        [ viewCharacterNav characterData
-        , H.h4 [] [ H.text <| model.char.flavorName ++ ", " ++ model.char.flavorClass ]
-        , H.p [] [ H.text <| model.char.flavor ]
-        , viewSearch model
-        , ViewGraph.view model features
-        , viewSearch model
+view : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
+view header model home =
+    if model.features.fullscreen then
+        viewFullscreenTree header model home
+    else
+        viewOldTree header model home
 
-        -- debug data
-        -- , H.ul [] (List.map (H.li [] << List.singleton << uncurry viewNodeType) <| Dict.toList c.nodeTypes)
-        -- , dumpModel model
-        , viewSummary <| M.summary model
-        , H.p [] [ H.text <| "Last updated: " ++ lastUpdatedVersion ]
+
+viewOldTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
+viewOldTree header { characterData, features, lastUpdatedVersion } home =
+    H.div [] <|
+        header
+            ++ [ H.h4 [] [ H.text <| home.char.flavorName ++ ", " ++ home.char.flavorClass ]
+               , H.p [] [ H.text <| home.char.flavor ]
+               , viewSearch home
+               , H.div [ A.style [ ( "width", "1000px" ), ( "height", "1000px" ) ] ]
+                    [ ViewGraph.view { width = 1000, height = 1000 } home features ]
+               , viewSearch home
+               , viewSummary <| M.summary home
+               , H.p [] [ H.text <| "Last updated: " ++ lastUpdatedVersion ]
+               ]
+
+
+viewFullscreenTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
+viewFullscreenTree header { windowSize, characterData, features, lastUpdatedVersion } home =
+    H.div [ A.class "skill-tree-main" ]
+        [ ViewGraph.view windowSize home features
+        , if home.sidebarOpen then
+            H.div [ A.class "sidebar" ]
+                ([ H.button [ A.class "sidebar-hide", A.title "hide", E.onClick M.ToggleSidebar ] [ H.text "<<" ] ]
+                    ++ header
+                    ++ [ H.h4 [] [ H.text <| home.char.flavorName ++ ", " ++ home.char.flavorClass ]
+                       , H.p [] [ H.text <| home.char.flavor ]
+                       , viewSearch home
+                       , viewSummary <| M.summary home
+                       ]
+                )
+          else
+            H.button [ A.class "sidebar-show", A.title "show", E.onClick M.ToggleSidebar ] [ H.text ">>" ]
         ]
 
 
-viewCharacterNav : Dict String G.Character -> H.Html msg
-viewCharacterNav =
-    Dict.toList >> List.map (uncurry viewCharacterNavEntry) >> H.nav []
-
-
-viewCharacterNavEntry : String -> G.Character -> H.Html msg
-viewCharacterNavEntry key char =
-    let
-        q =
-            Route.homeParams0
-    in
-        H.a [ Route.href <| Route.Home { q | hero = key } ] [ H.text char.flavorClass ]
-
-
 viewSearch : M.HomeModel -> H.Html M.Msg
-viewSearch model =
+viewSearch home =
     H.div []
-        [ H.div [] [ H.text <| toString (Set.size model.selected) ++ " points spent." ]
+        [ H.div [] [ H.text <| toString (Set.size home.selected) ++ " points spent." ]
         , H.div []
             [ H.text "Highlight: "
-            , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" model.params.search, E.onInput M.SearchInput ] []
+            , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" home.params.search, E.onInput M.SearchInput ] []
             ]
         ]
 

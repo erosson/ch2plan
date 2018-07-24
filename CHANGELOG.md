@@ -6,6 +6,7 @@ All substantial Skill Tree Planner changes.
 ### Beta/experimental features
 These are at least partially working, but turned *off* by default.
 
+- [Full-screen skill tree](https://ch2.erosson.org/?enableFullscreen=1).
 - [Prettier-looking, faster-activating skill info tooltips/mouseover text](https://ch2.erosson.org/?enableFancyTooltips=1).
 
 ### New features

@@ -1,8 +1,10 @@
 module View exposing (view)
 
+import Dict as Dict exposing (Dict)
 import Html as H
 import Html.Attributes as A
 import Html.Events as E
+import GameData as G
 import Model as M
 import Route as Route exposing (Route)
 import ViewSkillTree
@@ -11,26 +13,43 @@ import ViewChangelog
 
 view : M.Model -> H.Html M.Msg
 view model =
-    H.div []
-        [ H.h2 [] [ H.text "Clicker Heroes 2 Skill Tree Planner" ]
-        , H.nav []
-            [ viewNavEntry "Skill Tree" (Route.Home Route.homeParams0)
-            , viewNavEntry "Changelog" Route.Changelog
-            , H.a [ A.href "https://github.com/erosson/ch2plan", A.target "_blank" ] [ H.text "Source code" ]
+    let
+        header =
+            [ H.h2 [] [ H.text "Clicker Heroes 2 Skill Tree Planner" ]
+            , H.nav []
+                (viewCharacterNav model.characterData
+                    ++ [ viewNavEntry "Changelog" Route.Changelog
+                       , H.a [ A.href "https://github.com/erosson/ch2plan", A.target "_blank" ] [ H.text "Source code" ]
+                       ]
+                )
             ]
-        , case model.route of
+    in
+        case model.route of
             M.Home home ->
-                ViewSkillTree.view model home
+                ViewSkillTree.view header model home
 
             M.NotFound ->
-                H.div [] [ H.text "404" ]
+                H.div [] (header ++ [ H.text "404" ])
 
             M.HomeError q ->
-                H.div [] [ H.text "404" ]
+                H.div [] (header ++ [ H.text "404" ])
 
             M.Changelog ->
-                ViewChangelog.view model.changelog
-        ]
+                H.div [] (header ++ [ ViewChangelog.view model.changelog ])
+
+
+viewCharacterNav : Dict String G.Character -> List (H.Html msg)
+viewCharacterNav =
+    Dict.toList >> List.map (uncurry viewCharacterNavEntry)
+
+
+viewCharacterNavEntry : String -> G.Character -> H.Html msg
+viewCharacterNavEntry key char =
+    let
+        q =
+            Route.homeParams0
+    in
+        viewNavEntry char.flavorClass (Route.Home { q | hero = key })
 
 
 viewNavEntry : String -> Route -> H.Html msg
