@@ -26,12 +26,12 @@ type Route
 
 
 type alias Features =
-    { multiSelect : Bool, zoom : Bool }
+    { multiSelect : Bool, zoom : Bool, fancyTooltips : Bool }
 
 
 features0 : Features
 features0 =
-    { multiSelect = True, zoom = True }
+    { multiSelect = True, zoom = True, fancyTooltips = False }
 
 
 parse : Navigation.Location -> Route
@@ -111,6 +111,7 @@ featuresParser =
         P.top
             <?> flagParam "enableMultiSelect" features0.multiSelect
             <?> flagParam "enableZoom" features0.zoom
+            <?> flagParam "enableFancyTooltips" features0.fancyTooltips
 
 
 ifFeature : Bool -> a -> a -> a

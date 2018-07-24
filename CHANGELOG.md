@@ -6,7 +6,7 @@ All substantial Skill Tree Planner changes.
 ### Beta/experimental features
 These are at least partially working, but turned *off* by default.
 
-- Nothing, for now.
+- [Prettier-looking, faster-activating skill info tooltips/mouseover text](https://ch2.erosson.org/?enableFancyTooltips=1).
 
 ### New features
 These recently left beta, and are turned *on* by default. For now, you can disable them if they're causing trouble.

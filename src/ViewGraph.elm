@@ -26,21 +26,77 @@ view model features =
 
         selectable =
             M.selectableNodes M.startNodes model.char.graph model.selected
+
+        style =
+            [ ( "width", toString w ++ "px" ), ( "height", toString h ++ "px" ) ]
     in
-        S.svg
-            ([ HA.style [ ( "border", "1px solid grey" ), ( "width", toString w ++ "px" ), ( "height", toString h ++ "px" ) ]
-             ]
-                ++ Route.ifFeature features.zoom
-                    inputZoomAndPan
-                    [ A.viewBox <| formatViewBox (iconSize // 2) model.char.graph ]
-            )
-            [ S.g (Route.ifFeature features.zoom [ zoomAndPan wh model ] [])
-                [ S.g [] (List.map (viewNodeBackground model.selected selectable model.search << Tuple.second) <| Dict.toList model.char.graph.nodes)
-                , S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList model.char.graph.edges)
-                , S.g [] (List.map (viewNode model.selected selectable model.search << Tuple.second) <| Dict.toList model.char.graph.nodes)
+        -- svg-container is for tooltip positioning. It must be exactly the same size as the svg itself.
+        H.div [ HA.class "svg-container", HA.style style ]
+            ([ S.svg
+                ([ HA.style style
+                 ]
+                    ++ Route.ifFeature features.zoom
+                        inputZoomAndPan
+                        [ A.viewBox <| formatViewBox (iconSize // 2) model.char.graph ]
+                )
+                [ S.g (Route.ifFeature features.zoom [ zoomAndPan wh model ] [])
+                    ([ S.g [] (List.map (viewNodeBackground model.selected selectable model.search << Tuple.second) <| Dict.toList model.char.graph.nodes)
+                     , S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList model.char.graph.edges)
+                     , S.g [] (List.map (viewNode features model.selected selectable model.search << Tuple.second) <| Dict.toList model.char.graph.nodes)
+                     ]
+                    )
+                , (Route.ifFeature features.zoom viewZoomButtons <| S.g [] [])
                 ]
-            , (Route.ifFeature features.zoom viewZoomButtons <| S.g [] [])
+             ]
+                ++ Maybe.Extra.unwrap []
+                    (List.singleton << viewTooltip wh model)
+                    -- (model.tooltip |> Maybe.withDefault 1 |> Just |> Maybe.andThen ((flip Dict.get) model.char.graph.nodes))
+                    (Route.ifFeature features.fancyTooltips model.tooltip Nothing |> Maybe.andThen ((flip Dict.get) model.char.graph.nodes))
+            )
+
+
+viewTooltip : ( Float, Float ) -> M.HomeModel -> G.Node -> H.Html msg
+viewTooltip (( w, h ) as wh) model node =
+    -- no css-scaling here - tooltips don't scale with zoom.
+    -- no svg here - svg can't word-wrap, and <foreignObject> has screwy browser support.
+    --
+    -- svg has no viewbox and the html container size == the svg size,
+    -- so coordinates in both should match.
+    let
+        ( panX, panY ) =
+            panOffsets wh model
+
+        ( x, y ) =
+            ( (toFloat node.x + panX) * model.zoom, (toFloat node.y + panY) * model.zoom )
+
+        style =
+            [ if x > w / 2 then
+                ( "right", w - x )
+              else
+                ( "left", x )
+            , if y > h / 2 then
+                ( "bottom", h - y )
+              else
+                ( "top", y )
             ]
+                |> List.map (Tuple.mapSecond <| \n -> toString n ++ "px")
+    in
+        H.div [ HA.class "tooltip", HA.style style ]
+            [ H.b [] [ H.text node.val.name ]
+            , H.p [] [ H.text <| Maybe.withDefault "" node.val.tooltip ]
+            , H.p [ A.class "flavor" ] [ H.text <| Maybe.withDefault "" node.val.flavorText ]
+            ]
+
+
+{-| Also old title-tooltip text.
+-}
+nodeSearchText : G.NodeType -> String
+nodeSearchText val =
+    val.name ++ appendSearch val.tooltip ++ appendSearch val.flavorText
+
+
+appendSearch =
+    Maybe.Extra.unwrap "" ((++) "\n\n")
 
 
 viewZoomButtons : S.Svg M.Msg
@@ -66,17 +122,26 @@ inputZoomAndPan =
     ]
 
 
-zoomAndPan : ( Float, Float ) -> M.HomeModel -> S.Attribute msg
-zoomAndPan ( w, h ) model =
+panOffsets : ( Float, Float ) -> M.HomeModel -> ( Float, Float )
+panOffsets ( w, h ) { center, zoom } =
     let
         ( cx, cy ) =
-            V2.toTuple model.center
+            V2.toTuple center
 
         ( left, top ) =
-            ( cx - w / model.zoom / 2, cy - h / model.zoom / 2 )
+            ( cx - w / zoom / 2, cy - h / zoom / 2 )
+    in
+        ( -left, -top )
+
+
+zoomAndPan : ( Float, Float ) -> M.HomeModel -> S.Attribute msg
+zoomAndPan wh model =
+    let
+        ( panX, panY ) =
+            panOffsets wh model
 
         panning =
-            "translate(" ++ toString -left ++ ", " ++ toString -top ++ ")"
+            "translate(" ++ toString panX ++ ", " ++ toString panY ++ ")"
 
         zooming =
             "scale(" ++ toString model.zoom ++ ")"
@@ -106,10 +171,6 @@ formatViewBox margin g =
 viewEdge : G.Edge -> S.Svg msg
 viewEdge ( a, b ) =
     S.line [ A.x1 <| toString a.x, A.y1 <| toString a.y, A.x2 <| toString b.x, A.y2 <| toString b.y, A.class "edge" ] []
-
-
-appendTooltip =
-    Maybe.Extra.unwrap "" ((++) "\n\n")
 
 
 nodeQualityClass : G.NodeQuality -> String
@@ -144,13 +205,14 @@ viewNodeBackground selected selectable q { id, x, y, val } =
         []
 
 
-viewNode : Set Int -> Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
-viewNode selected selectable q { id, x, y, val } =
+viewNode : Route.Features -> Set Int -> Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
+viewNode features selected selectable q { id, x, y, val } =
     S.g
         [ A.class <| String.join " " [ "node", nodeHighlightClass q val, nodeSelectedClass selected id, nodeSelectableClass selectable id, nodeQualityClass val.quality ]
+        , E.onMouseOver <| M.Tooltip <| Just id
+        , E.onMouseOut <| M.Tooltip Nothing
         ]
-        [ S.title [] [ S.text <| nodeTooltipText val ]
-        , S.image
+        ([ S.image
             [ A.xlinkHref <| iconUrl val
             , A.x <| toString <| x - iconSize // 2
             , A.y <| toString <| y - iconSize // 2
@@ -159,7 +221,9 @@ viewNode selected selectable q { id, x, y, val } =
             , E.onClick <| M.SelectInput id
             ]
             []
-        ]
+         ]
+            ++ Route.ifFeature features.fancyTooltips [] [ S.title [] [ S.text <| nodeSearchText val ] ]
+        )
 
 
 nodeBackgroundImage : G.NodeType -> Bool -> Bool -> Bool -> String
@@ -197,14 +261,9 @@ nodeBackgroundImage node isHighlighted isSelected isSelectable =
         "./ch2data/node-img/" ++ quality ++ suffix ++ ".png?3"
 
 
-nodeTooltipText : G.NodeType -> String
-nodeTooltipText val =
-    val.name ++ appendTooltip val.tooltip ++ appendTooltip val.flavorText
-
-
 isNodeHighlighted : Maybe Regex -> G.NodeType -> Bool
 isNodeHighlighted q0 t =
-    Maybe.Extra.unwrap False (\q -> Regex.contains q <| nodeTooltipText t) q0
+    Maybe.Extra.unwrap False (\q -> Regex.contains q <| nodeSearchText t) q0
 
 
 nodeHighlightClass : Maybe Regex -> G.NodeType -> String

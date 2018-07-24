@@ -25,6 +25,7 @@ type Msg
     | OnDragBy V2.Vec2
     | DragMsg (Draggable.Msg ())
     | Zoom Float
+    | Tooltip (Maybe G.NodeId)
 
 
 type alias Model =
@@ -57,6 +58,7 @@ type alias HomeModel =
     , char : G.Character
     , selected : Set G.NodeId
     , dijkstra : Lazy Dijkstra.Result
+    , tooltip : Maybe G.NodeId
     }
 
 
@@ -131,6 +133,7 @@ initHome q { characterData } =
                     , char = char
                     , selected = selected
                     , dijkstra = Lazy.lazy (\() -> Dijkstra.dijkstra startNodes char.graph selected Nothing)
+                    , tooltip = Nothing
                     }
 
 
@@ -230,6 +233,9 @@ update msg model =
                 DragMsg dragMsg ->
                     Draggable.update dragConfig dragMsg home
                         |> Tuple.mapFirst (\home2 -> { model | route = Home home2 })
+
+                Tooltip node ->
+                    ( { model | route = Home { home | tooltip = node } }, Cmd.none )
 
                 NavLocation loc ->
                     case Route.parse loc |> routeToModel model of
