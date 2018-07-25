@@ -14,6 +14,7 @@ import Math.Vector2 as V2
 import Draggable
 import Window
 import GameData as G
+import GameData.Stats as GS
 import Route as Route exposing (Route)
 import Model.Dijkstra as Dijkstra
 
@@ -35,6 +36,7 @@ type alias Model =
     { changelog : String
     , lastUpdatedVersion : String
     , characterData : Dict String G.Character
+    , statsData : GS.Stats
     , route : RouteModel
     , features : Route.Features
     , windowSize : Window.Size
@@ -69,6 +71,7 @@ type alias HomeModel =
 
 type alias Flags =
     { characterData : Decode.Value
+    , statsData : Decode.Value
     , lastUpdatedVersion : String
     , changelog : String
     , windowSize : Window.Size
@@ -77,18 +80,24 @@ type alias Flags =
 
 init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
 init flags loc =
-    case Decode.decodeValue G.decoder flags.characterData of
-        Ok chars ->
-            ( { changelog = flags.changelog
-              , lastUpdatedVersion = flags.lastUpdatedVersion
-              , windowSize = flags.windowSize
-              , characterData = chars
-              , route = Changelog -- placeholder
-              , features = Route.parseFeatures loc
-              }
-                |> \model -> { model | route = Route.parse loc |> routeToModel model }
-            , Cmd.batch [ preprocessCmd, Task.perform Resize Window.size ]
-            )
+    case Decode.decodeValue GS.decoder flags.statsData of
+        Ok stats ->
+            case Decode.decodeValue (G.decoder stats) flags.characterData of
+                Ok chars ->
+                    ( { changelog = flags.changelog
+                      , lastUpdatedVersion = flags.lastUpdatedVersion
+                      , windowSize = flags.windowSize
+                      , characterData = chars
+                      , statsData = stats
+                      , features = Route.parseFeatures loc
+                      , route = Changelog -- placeholder, modified just below
+                      }
+                        |> \model -> { model | route = Route.parse loc |> routeToModel model }
+                    , Cmd.batch [ preprocessCmd, Task.perform Resize Window.size ]
+                    )
+
+                Err err ->
+                    Debug.crash err
 
         Err err ->
             Debug.crash err
@@ -391,8 +400,8 @@ buildToNodes startNodes graph =
                     Set.empty
 
 
-summary : HomeModel -> List ( Int, G.NodeType )
-summary { char, selected } =
+nodeSummary : HomeModel -> List ( Int, G.NodeType )
+nodeSummary { char, selected } =
     char.graph.nodes
         |> Dict.filter (\id nodeType -> Set.member id selected)
         |> Dict.values
@@ -417,6 +426,14 @@ summary { char, selected } =
                                 0
                       )
             )
+
+
+statsSummary : Model -> HomeModel -> List GS.StatTotal
+statsSummary { statsData } home =
+    home
+        |> nodeSummary
+        |> List.concatMap (\( count, node ) -> node.stats |> List.map (\( stat, level ) -> ( stat, count * level )))
+        |> GS.calcStats statsData
 
 
 subscriptions : Model -> Sub Msg

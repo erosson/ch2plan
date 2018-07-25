@@ -12,6 +12,7 @@
     "tf:apply": "terraform apply -auto-approve",
     "export:icons": "scripty",
     "export:chars": "scripty",
+    "export:as3": "scripty",
     "dev": "cp CHANGELOG.md ./assets && elm-live ./src/Main.elm --output=./assets/elm.js --dir=./assets --open",
     "build": "rm -rf ./dist && mkdir -p ./dist && cp CHANGELOG.md ./dist && rsync -auv ./assets/ ./dist/ && elm-make ./src/Main.elm --output=./dist/elm.js",
     "//test": "you probably want to run this with --watch, like 'yarn test --watch'",

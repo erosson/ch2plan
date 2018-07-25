@@ -22,6 +22,7 @@ import Json.Decode.Pipeline as P
 import Dict as Dict exposing (Dict)
 import Set as Set exposing (Set)
 import Maybe.Extra
+import GameData.Stats as GS
 
 
 type alias Character =
@@ -53,6 +54,7 @@ type alias NodeType =
     , icon : String
     , tooltip : Maybe String
     , flavorText : Maybe String
+    , stats : List ( GS.Stat, Int )
     , quality : NodeQuality
     }
 
@@ -85,23 +87,42 @@ type alias Edge =
     ( Node, Node )
 
 
-decoder : D.Decoder (Dict String Character)
-decoder =
-    D.dict characterDecoder
+decoder : GS.Stats -> D.Decoder (Dict String Character)
+decoder stats =
+    --D.dict characterDecoder
+    dictKeyDecoder (\name -> Dict.get name stats.characters |> characterDecoder)
 
 
-characterDecoder : D.Decoder Character
-characterDecoder =
+dictKeyDecoder : (String -> D.Decoder a) -> D.Decoder (Dict String a)
+dictKeyDecoder decoder =
+    let
+        decode : String -> D.Value -> D.Decoder ( String, a )
+        decode key val =
+            case D.decodeValue (decoder key) val of
+                Ok ok ->
+                    D.succeed ( key, ok )
+
+                Err err ->
+                    D.fail err
+    in
+        D.keyValuePairs D.value
+            |> D.map (List.map (uncurry decode))
+            |> D.andThen (List.foldr (D.map2 (::)) (D.succeed []))
+            |> D.map Dict.fromList
+
+
+characterDecoder : Maybe GS.Character -> D.Decoder Character
+characterDecoder stats =
     P.decode Character
         |> P.required "name" D.string
         |> P.required "flavorName" D.string
         |> P.required "flavorClass" D.string
         |> P.required "flavor" D.string
-        |> P.required "levelGraphNodeTypes" nodeTypesDecoder
+        |> P.required "levelGraphNodeTypes" (nodeTypesDecoder stats)
         -- graph looks at two fields to construct one, so this looks a little weird
         |> P.custom
             (P.decode graph
-                |> P.required "levelGraphNodeTypes" nodeTypesDecoder
+                |> P.required "levelGraphNodeTypes" (nodeTypesDecoder stats)
                 |> P.required "levelGraphObject" levelGraphObjectDecoder
             )
 
@@ -117,9 +138,9 @@ parseNodeQuality id =
         Plain
 
 
-nodeTypesDecoder : D.Decoder NodeTypes
-nodeTypesDecoder =
-    nodeTypeDecoder |> D.dict |> D.map (Dict.map (\k -> \v -> v <| parseNodeQuality k))
+nodeTypesDecoder : Maybe GS.Character -> D.Decoder NodeTypes
+nodeTypesDecoder stats =
+    nodeTypeDecoder stats |> dictKeyDecoder |> D.map (Dict.map (\k -> \v -> v <| parseNodeQuality k))
 
 
 decodeDictKeyInt name ( key0, val ) =
@@ -174,13 +195,14 @@ nodeDecoder =
         |> P.required "y" D.int
 
 
-nodeTypeDecoder : D.Decoder (NodeQuality -> NodeType)
-nodeTypeDecoder =
+nodeTypeDecoder : Maybe GS.Character -> String -> D.Decoder (NodeQuality -> NodeType)
+nodeTypeDecoder stats key =
     P.decode NodeType
         |> P.required "name" D.string
         |> P.required "icon" D.string
         |> P.optional "tooltip" (D.nullable D.string) Nothing
         |> P.optional "flavorText" (D.nullable D.string) Nothing
+        |> P.custom (Maybe.andThen (.stats >> Dict.get key) stats |> Maybe.withDefault [] |> D.succeed)
 
 
 

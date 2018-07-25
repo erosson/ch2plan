@@ -9,6 +9,7 @@ import Maybe.Extra
 import Model as M
 import Route
 import GameData as G
+import GameData.Stats as GS
 import ViewGraph
 
 
@@ -21,7 +22,7 @@ view header model home =
 
 
 viewOldTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
-viewOldTree header { characterData, features, lastUpdatedVersion } home =
+viewOldTree header ({ characterData, features, lastUpdatedVersion } as model) home =
     H.div [] <|
         header
             ++ [ H.h4 [] [ H.text <| home.char.flavorName ++ ", " ++ home.char.flavorClass ]
@@ -30,13 +31,14 @@ viewOldTree header { characterData, features, lastUpdatedVersion } home =
                , H.div [ A.style [ ( "width", "1000px" ), ( "height", "1000px" ) ] ]
                     [ ViewGraph.view { width = 1000, height = 1000 } home features ]
                , viewSearch home
-               , viewSummary <| M.summary home
+               , viewStatsSummary <| M.statsSummary model home
+               , viewSummary <| M.nodeSummary home
                , H.p [] [ H.text <| "Last updated: " ++ lastUpdatedVersion ]
                ]
 
 
 viewFullscreenTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
-viewFullscreenTree header { windowSize, characterData, features, lastUpdatedVersion } home =
+viewFullscreenTree header ({ windowSize, characterData, features, lastUpdatedVersion } as model) home =
     H.div [ A.class "skill-tree-main" ]
         [ ViewGraph.view windowSize home features
         , if home.sidebarOpen then
@@ -46,12 +48,180 @@ viewFullscreenTree header { windowSize, characterData, features, lastUpdatedVers
                     ++ [ H.h4 [] [ H.text <| home.char.flavorName ++ ", " ++ home.char.flavorClass ]
                        , H.p [] [ H.text <| home.char.flavor ]
                        , viewSearch home
-                       , viewSummary <| M.summary home
+                       , viewStatsSummary <| M.statsSummary model home
+                       , viewSummary <| M.nodeSummary home
                        ]
                 )
           else
             H.button [ A.class "sidebar-show", A.title "show", E.onClick M.ToggleSidebar ] [ H.text ">>" ]
         ]
+
+
+viewStatsSummary : List GS.StatTotal -> H.Html msg
+viewStatsSummary stats =
+    H.div [ A.class "stats-summary" ]
+        [ H.p [] [ H.text "Stats summary:" ]
+        , H.table [] (List.map viewStatSummary stats |> Maybe.Extra.values)
+        ]
+
+
+pct : Float -> String
+pct f =
+    (f * 100 |> floor |> toString) ++ "%"
+
+
+pct0 f =
+    pct <| f - 1
+
+
+negPct f =
+    if f == 1 then
+        "-0%"
+    else
+        pct0 f
+
+
+int =
+    toString << floor
+
+
+viewStatSummary : GS.StatTotal -> Maybe (H.Html msg)
+viewStatSummary { stat, level, val } =
+    let
+        body =
+            case stat of
+                GS.STAT_GOLD ->
+                    Just ( "Gold", "×" ++ pct val )
+
+                GS.STAT_HASTE ->
+                    Just ( "Haste", "×" ++ pct val )
+
+                GS.STAT_CRIT_CHANCE ->
+                    Just ( "Critical Chance", pct val )
+
+                GS.STAT_CRIT_DAMAGE ->
+                    Just ( "Critical Damage Multiplier", "×" ++ pct val )
+
+                GS.STAT_TOTAL_ENERGY ->
+                    Just ( "Maximum Energy", int val )
+
+                GS.STAT_TOTAL_MANA ->
+                    Just ( "Maximum Mana", int val )
+
+                GS.STAT_BONUS_GOLD_CHANCE ->
+                    Just ( "Bonus ×10 Gold Chance", pct val )
+
+                GS.STAT_ITEM_COST_REDUCTION ->
+                    Just ( "Item Cost Reduction", negPct val )
+
+                GS.STAT_CLICK_DAMAGE ->
+                    Just ( "Click Damage Multiplier", "×" ++ pct val )
+
+                GS.STAT_MANA_REGEN ->
+                    Just ( "Mana Regeneration", "×" ++ pct val )
+
+                GS.STAT_CLICKABLE_CHANCE ->
+                    Just ( "Clickable Find Chance", pct val )
+
+                GS.STAT_TREASURE_CHEST_CHANCE ->
+                    Just ( "Treasure Chest Chance", pct val )
+
+                GS.STAT_TREASURE_CHEST_GOLD ->
+                    Just ( "Treasure Chest Gold", "×" ++ pct val )
+
+                GS.STAT_CLICKABLE_GOLD ->
+                    Just ( "Clickable Gold Multiplier", "×" ++ pct val )
+
+                GS.STAT_AUTOMATOR_SPEED ->
+                    Just ( "Automator Speed", "×" ++ pct val )
+
+                GS.STAT_ITEM_WEAPON_DAMAGE ->
+                    Just ( "Weapon Damage", "×" ++ pct val )
+
+                GS.STAT_ITEM_HEAD_DAMAGE ->
+                    Just ( "Helmet Damage", "×" ++ pct val )
+
+                GS.STAT_ITEM_CHEST_DAMAGE ->
+                    Just ( "Chest Damage", "×" ++ pct val )
+
+                GS.STAT_ITEM_RING_DAMAGE ->
+                    Just ( "Ring Damage", "×" ++ pct val )
+
+                GS.STAT_ITEM_LEGS_DAMAGE ->
+                    Just ( "Pants Damage", "×" ++ pct val )
+
+                GS.STAT_ITEM_HANDS_DAMAGE ->
+                    Just ( "Gloves Damage", "×" ++ pct val )
+
+                GS.STAT_ITEM_FEET_DAMAGE ->
+                    Just ( "Boots Damage", "×" ++ pct val )
+
+                GS.STAT_ITEM_BACK_DAMAGE ->
+                    Just ( "Cape Damage", "×" ++ pct val )
+
+                GS.ExtraMulticlicks ->
+                    if level > 0 then
+                        Just ( "Multiclick Clicks (no flurry/frenzy yet)", int val )
+                    else
+                        Nothing
+
+                GS.MulticlickCost ->
+                    if level > 0 then
+                        Just ( "Multiclick Energy Cost", int val )
+                    else
+                        Nothing
+
+                GS.BigClicksStacks ->
+                    if level > 0 then
+                        Just ( "Big Clicks Stacks", int val )
+                    else
+                        Nothing
+
+                GS.BigClicksDamage ->
+                    if level > 0 then
+                        Just ( "Big Clicks Damage Multiplier", pct val )
+                    else
+                        Nothing
+
+                GS.HugeClickDamage ->
+                    if level > 0 then
+                        Just ( "Huge Click Damage Multiplier", pct val )
+                    else
+                        Nothing
+
+                GS.ManaCritDamage ->
+                    if level > 0 then
+                        Just ( "Mana Crit Damage Multiplier", pct val )
+                    else
+                        Nothing
+
+                _ ->
+                    -- Just ( toString ( stat, level ), toString val )
+                    Nothing
+    in
+        Maybe.map
+            (\( label, value ) ->
+                H.tr
+                    [ A.class <| "level-" ++ statLevelTier level
+                    , A.title <| "Level " ++ toString level
+                    ]
+                    [ H.td [] [ H.text <| label ++ ": " ]
+                    , H.td [ A.class "stat-value" ] [ H.text value ]
+
+                    -- , H.td [ A.class "stat-level" ] [ H.text <| "Level " ++ toString level ]
+                    ]
+            )
+            body
+
+
+statLevelTier : Int -> String
+statLevelTier level =
+    if level > 7 then
+        "high"
+    else if level > 3 then
+        "mid"
+    else
+        "low"
 
 
 viewSearch : M.HomeModel -> H.Html M.Msg
@@ -83,8 +253,8 @@ viewSummary ns =
 
 viewSummaryLine : Int -> G.NodeType -> H.Html msg
 viewSummaryLine count nodeType =
-    H.li []
-        [ H.div [ A.class <| String.join " " [ "icon", ViewGraph.nodeQualityClass nodeType.quality ] ]
+    H.li [ A.class <| ViewGraph.nodeQualityClass nodeType.quality ]
+        [ H.div [ A.class "icon" ]
             [ H.img [ A.class "icon-background", A.src <| ViewGraph.nodeBackgroundImage nodeType False False False ] []
             , H.img [ A.class "icon-main", A.src <| ViewGraph.iconUrl nodeType ] []
             ]
