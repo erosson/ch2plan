@@ -1,6 +1,13 @@
 # Clicker Heroes 2 Skill Tree Planner: updates
 
-All substantial Skill Tree Planner changes.
+All substantial Skill Tree Planner changes are listed here.
+
+The source code: https://github.com/erosson/ch2plan
+
+The developer: https://github.com/erosson . Also on [Reddit](https://www.reddit.com/user/kawaritai).
+
+Shameless self-promotion: if you like Clicker Heroes, you should try my game, [Swarm Simulator](https://www.swarmsim.com).
+Now also on [Android](https://play.google.com/store/apps/details?id=com.ironhorse.swarmsimulator) and [iOS](https://itunes.apple.com/us/app/swarm-simulator-evolution/id1320056680)!
 
 ## [Unreleased]
 ### Beta/experimental features
@@ -16,6 +23,10 @@ These recently left beta, and are turned *on* by default. For now, you can disab
 - [Zoom/pan](https://ch2.erosson.org/?enableZoom=0). [Thanks, @Judgy53](https://github.com/Judgy53)!
 
 ---
+## 2018-07-25
+- Smoother zooming in more browsers. Thanks, [@Judgy53](https://github.com/Judgy53)!
+- Added some basic character stat calculations. More to come soon.
+
 ## 2018-07-23
 - Smoother panning.
 - Added zoom buttons for those without mouse-wheels.
