@@ -113,7 +113,7 @@ viewZoomButton ( x, y ) text msg =
 
 inputZoomAndPan : List (S.Attribute M.Msg)
 inputZoomAndPan =
-    [ handleZoom M.Zoom
+    [ handleZoom
     , Draggable.mouseTrigger () M.DragMsg
     ]
 
@@ -145,8 +145,8 @@ zoomAndPan w model =
         A.transform (zooming ++ " " ++ panning)
 
 
-handleZoom : (Float -> msg) -> S.Attribute msg
-handleZoom onZoom =
+handleZoom : S.Attribute M.Msg
+handleZoom =
     let
         ignoreDefaults =
             VirtualDom.Options True True
@@ -154,7 +154,24 @@ handleZoom onZoom =
         VirtualDom.onWithOptions
             "wheel"
             ignoreDefaults
-            (Decode.map onZoom <| Decode.field "deltaY" Decode.float)
+            (Decode.map normalizeMouseZoom <| Decode.field "deltaY" Decode.float)
+
+
+normalizeMouseZoom : Float -> M.Msg
+normalizeMouseZoom deltaY =
+    let
+        normalized =
+            if deltaY < 0 then
+                -1
+            else if deltaY > 0 then
+                1
+            else
+                0
+
+        speed =
+            10
+    in
+        M.Zoom <| normalized * speed
 
 
 formatViewBox : Int -> G.Graph -> String
