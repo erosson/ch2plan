@@ -21,7 +21,7 @@ import Model.Dijkstra as Dijkstra
 
 type Msg
     = SearchInput String
-    | SelectInput Int -- TODO should really remove this one in favor of links
+    | SelectInput Int
     | NavLocation Navigation.Location
     | Preprocess
     | OnDragBy V2.Vec2
@@ -260,18 +260,28 @@ update msg model =
                             -- preserve non-url state, like zoom/pan
                             ( { model
                                 | route =
-                                    Home
-                                        { home
-                                            | params = home2.params
-                                            , search = home2.search
-                                            , char = home2.char
-                                            , selected = home2.selected
-                                            , dijkstra = home2.dijkstra
-                                        }
+                                    ({ home
+                                        | params = home2.params
+                                        , search = home2.search
+                                        , char = home2.char
+                                        , selected = home2.selected
+                                     }
+                                        -- avoid needless recomputing, ex. on search
+                                        |> (\h ->
+                                                if home.params.build == home2.params.build then
+                                                    h
+                                                else
+                                                    { h | dijkstra = home2.dijkstra }
+                                           )
+                                        |> Home
+                                    )
                                 , features = Route.parseFeatures loc
                               }
                               -- compute dijkstra's after the view renders
-                            , preprocessCmd
+                            , if home.params.build == home2.params.build then
+                                Cmd.none
+                              else
+                                preprocessCmd
                             )
 
                         route ->
