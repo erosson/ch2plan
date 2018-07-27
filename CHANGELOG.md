@@ -2,6 +2,8 @@
 
 All substantial Skill Tree Planner changes are listed here.
 
+**Found a bug?** Please [file an issue](https://github.com/erosson/ch2plan/issues) or [message me on Reddit](https://www.reddit.com/user/kawaritai).
+
 The source code: https://github.com/erosson/ch2plan
 
 The developer: https://github.com/erosson . Also on [Reddit](https://www.reddit.com/user/kawaritai).

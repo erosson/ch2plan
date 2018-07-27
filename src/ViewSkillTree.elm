@@ -230,7 +230,7 @@ viewSearch home =
         [ H.div [] [ H.text <| toString (Set.size home.selected) ++ " points spent." ]
         , H.div []
             [ H.text "Highlight: "
-            , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" home.params.search, E.onInput M.SearchInput ] []
+            , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" home.searchString, E.onInput M.SearchInput ] []
             ]
         ]
 

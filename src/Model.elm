@@ -4,6 +4,7 @@ import Regex as Regex exposing (Regex)
 import Set as Set exposing (Set)
 import Dict as Dict exposing (Dict)
 import Lazy as Lazy exposing (Lazy)
+import Time as Time exposing (Time)
 import Task
 import Process
 import Json.Decode as Decode
@@ -21,6 +22,7 @@ import Model.Dijkstra as Dijkstra
 
 type Msg
     = SearchInput String
+    | SearchNav (Maybe String) (Maybe String)
     | SelectInput Int
     | NavLocation Navigation.Location
     | Preprocess
@@ -57,6 +59,8 @@ type alias HomeModel =
     -- This is deliberate - Elm does not have memoization (pure functional!)
     -- so this speeds things up a bit. Be careful when updating.
     { params : Route.HomeParams
+    , searchPrev : Maybe String
+    , searchString : Maybe String
     , search : Maybe Regex
     , zoom : Float
     , center : V2.Vec2
@@ -129,6 +133,14 @@ routeToModel model route =
                     HomeError params
 
 
+invert : comparable -> Set comparable -> Set comparable
+invert id set =
+    if Set.member id set then
+        Set.remove id set
+    else
+        Set.insert id set
+
+
 initHome : Route.HomeParams -> { m | characterData : Dict String G.Character } -> Result String HomeModel
 initHome q { characterData } =
     case Dict.get q.hero characterData of
@@ -142,7 +154,9 @@ initHome q { characterData } =
             in
                 Ok
                     { params = q
-                    , search = Maybe.map (Regex.regex >> Regex.caseInsensitive) q.search
+                    , searchPrev = q.search
+                    , searchString = q.search
+                    , search = searchRegex q.search
                     , zoom = 1
                     , center = V2.vec2 0 0
                     , drag = Draggable.init
@@ -154,30 +168,71 @@ initHome q { characterData } =
                     }
 
 
-invert : comparable -> Set comparable -> Set comparable
-invert id set =
-    if Set.member id set then
-        Set.remove id set
-    else
-        Set.insert id set
+searchRegex : Maybe String -> Maybe Regex
+searchRegex =
+    Maybe.map (Regex.regex >> Regex.caseInsensitive)
+
+
+navFromHome : Model -> HomeModel -> Route -> ( RouteModel, Cmd Msg )
+navFromHome model old route =
+    case route |> routeToModel model of
+        Home new ->
+            -- preserve non-url state, like zoom/pan
+            ( { old
+                | params = new.params
+                , search = new.search
+                , char = new.char
+                , selected = new.selected
+              }
+                -- avoid needless recomputing, ex. on search
+                |> (\h ->
+                        if old.params.build == new.params.build then
+                            h
+                        else
+                            { h | dijkstra = new.dijkstra }
+                   )
+                |> Home
+              -- compute dijkstra's after the view renders
+            , if old.params.build == new.params.build then
+                Cmd.none
+              else
+                preprocessCmd
+            )
+
+        routeModel ->
+            ( routeModel, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case model.route of
-        Home home ->
+        Home ({ params } as home) ->
             case msg of
-                SearchInput str ->
+                SearchInput search0 ->
                     let
-                        q =
-                            home.params
+                        search =
+                            if search0 == "" then
+                                Nothing
+                            else
+                                Just search0
                     in
-                        case str of
-                            "" ->
-                                ( model, Navigation.modifyUrl <| Route.stringify <| Route.Home { q | search = Nothing } )
+                        -- update the model instantly, but delay the url change for a moment, to solve https://github.com/erosson/ch2plan/issues/31
+                        ( { model | route = Home { home | searchPrev = home.searchString, searchString = search, search = searchRegex search } }
+                        , Process.sleep (1 * Time.second) |> Task.perform (always <| SearchNav home.searchString search)
+                        )
 
-                            _ ->
-                                ( model, Navigation.modifyUrl <| Route.stringify <| Route.Home { q | search = Just str } )
+                SearchNav from to ->
+                    ( model
+                    , if home.searchPrev == from then
+                        let
+                            _ =
+                                Debug.log "searchNav accepted" ( home.searchPrev, from, to )
+                        in
+                            { params | search = to } |> Route.Home |> Route.stringify |> Navigation.modifyUrl
+                      else
+                        -- they typed something since the delay, do not update the url
+                        Cmd.none
+                    )
 
                 SelectInput id ->
                     let
@@ -255,37 +310,11 @@ update msg model =
                     ( { model | route = Home { home | tooltip = node } }, Cmd.none )
 
                 NavLocation loc ->
-                    case Route.parse loc |> routeToModel model of
-                        Home home2 ->
-                            -- preserve non-url state, like zoom/pan
-                            ( { model
-                                | route =
-                                    ({ home
-                                        | params = home2.params
-                                        , search = home2.search
-                                        , char = home2.char
-                                        , selected = home2.selected
-                                     }
-                                        -- avoid needless recomputing, ex. on search
-                                        |> (\h ->
-                                                if home.params.build == home2.params.build then
-                                                    h
-                                                else
-                                                    { h | dijkstra = home2.dijkstra }
-                                           )
-                                        |> Home
-                                    )
-                                , features = Route.parseFeatures loc
-                              }
-                              -- compute dijkstra's after the view renders
-                            , if home.params.build == home2.params.build then
-                                Cmd.none
-                              else
-                                preprocessCmd
-                            )
-
-                        route ->
-                            ( { model | route = route, features = Route.parseFeatures loc }, Cmd.none )
+                    let
+                        ( route, cmd ) =
+                            Route.parse loc |> navFromHome model home
+                    in
+                        ( { model | route = route, features = Route.parseFeatures loc }, cmd )
 
                 Resize windowSize ->
                     ( { model | windowSize = windowSize |> Debug.log "resize" }, Cmd.none )
