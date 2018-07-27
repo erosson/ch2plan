@@ -11,12 +11,25 @@ import Maybe.Extra
 
 
 type alias HomeParams =
-    { hero : String, build : Maybe String, search : Maybe String }
+    { hero : String
+    , build : Maybe String
+    , search : Maybe String
+
+    -- Hue rotation for these node colors, for accessibility.
+    -- https://github.com/erosson/ch2plan/issues/33
+    , hueSelected : Maybe Int
+    , hueSearch : Maybe Int
+    }
 
 
 homeParams0 : HomeParams
 homeParams0 =
-    { hero = "helpfulAdventurer", build = Nothing, search = Nothing }
+    { hero = "helpfulAdventurer"
+    , build = Nothing
+    , search = Nothing
+    , hueSelected = Nothing
+    , hueSearch = Nothing
+    }
 
 
 type Route
@@ -70,15 +83,28 @@ maybeString =
             )
 
 
+homeQS path =
+    -- Query string for all skill tree urls
+    path
+        <?> P.stringParam "q"
+        <?> P.intParam "hueSelected"
+        <?> P.intParam "hueSearch"
+
+
 parser : P.Parser (Route -> a) a
 parser =
     P.oneOf
-        [ P.map Home <| P.map (HomeParams homeParams0.hero Nothing) <| P.top <?> P.stringParam "q"
-        , P.map Home <| P.map (\h -> HomeParams h Nothing) <| P.s "h" </> P.string <?> P.stringParam "q"
-        , P.map Home <| P.map HomeParams <| P.s "h" </> P.string </> maybeString <?> P.stringParam "q"
+        -- the skilltree has a few different urls. Root, "/"...
+        [ P.map Home <| P.map (HomeParams homeParams0.hero Nothing) <| homeQS <| P.top
 
-        -- legacy builds, back when Cid was the only hero
-        , P.map Home <| P.map (HomeParams homeParams0.hero) <| P.s "b" </> maybeString <?> P.stringParam "q"
+        -- an empty build: "/h/helpfulAdventurer"...
+        , P.map Home <| P.map (\h -> HomeParams h Nothing) <| homeQS <| P.s "h" </> P.string
+
+        -- a non-empty build: "/h/helpfulAdventurer/1&2&3&4&5"...
+        , P.map Home <| P.map HomeParams <| homeQS <| P.s "h" </> P.string </> maybeString
+
+        -- and a non-empty legacy build, back when we only supported Cid: "/b/1&2&3&4&5"
+        , P.map Home <| P.map (HomeParams homeParams0.hero) <| homeQS <| P.s "b" </> maybeString
         , P.map Changelog <| P.s "changelog"
         ]
 

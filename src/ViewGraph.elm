@@ -32,10 +32,14 @@ view windowSize model features =
                     inputZoomAndPan
                     [ A.viewBox <| formatViewBox (iconSize // 2) model.char.graph ]
                 )
-                [ S.g (Route.ifFeature features.zoom [ zoomAndPan windowSize model ] [])
-                    ([ S.g [] (List.map (viewNodeBackground model.selected selectable model.search << Tuple.second) <| Dict.toList model.char.graph.nodes)
+                [ S.defs []
+                    [ S.filter [ A.id "hueSelected" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values <| toString <| Maybe.withDefault 0 <| model.params.hueSelected ] [] ]
+                    , S.filter [ A.id "hueSearch" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values <| toString <| Maybe.withDefault 0 <| model.params.hueSearch ] [] ]
+                    ]
+                , S.g (Route.ifFeature features.zoom [ zoomAndPan windowSize model ] [])
+                    ([ S.g [] (List.map (viewNodeBackground model selectable << Tuple.second) <| Dict.toList model.char.graph.nodes)
                      , S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList model.char.graph.edges)
-                     , S.g [] (List.map (viewNode features model.selected selectable model.search << Tuple.second) <| Dict.toList model.char.graph.nodes)
+                     , S.g [] (List.map (viewNode features model selectable << Tuple.second) <| Dict.toList model.char.graph.nodes)
                      ]
                     )
                 , (Route.ifFeature features.zoom (viewZoomButtons windowSize) <| S.g [] [])
@@ -204,12 +208,12 @@ iconUrl node =
     "./ch2data/img/" ++ node.icon ++ ".png"
 
 
-viewNodeBackground : Set Int -> Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
-viewNodeBackground selected selectable q { id, x, y, val } =
+viewNodeBackground : M.HomeModel -> Set Int -> G.Node -> S.Svg M.Msg
+viewNodeBackground { selected, search } selectable { id, x, y, val } =
     -- Backgrounds are drawn separately from the rest of the node, so they don't interfere with other nodes' clicks
     S.image
-        [ A.class <| String.join " " [ "node-background", nodeHighlightClass q val, nodeSelectedClass selected id, nodeSelectableClass selectable id, nodeQualityClass val.quality ]
-        , A.xlinkHref <| nodeBackgroundImage val (isNodeHighlighted q val) (Set.member id selected) (Set.member id selectable)
+        [ A.class <| String.join " " [ "node-background", nodeHighlightClass search val, nodeSelectedClass selected id, nodeSelectableClass selectable id, nodeQualityClass val.quality ]
+        , A.xlinkHref <| nodeBackgroundImage val (isNodeHighlighted search val) (Set.member id selected) (Set.member id selectable)
         , A.x <| toString <| x - nodeBGSize // 2
         , A.y <| toString <| y - nodeBGSize // 2
         , A.width <| toString nodeBGSize
@@ -218,10 +222,10 @@ viewNodeBackground selected selectable q { id, x, y, val } =
         []
 
 
-viewNode : Route.Features -> Set Int -> Set Int -> Maybe Regex -> G.Node -> S.Svg M.Msg
-viewNode features selected selectable q { id, x, y, val } =
+viewNode : Route.Features -> M.HomeModel -> Set Int -> G.Node -> S.Svg M.Msg
+viewNode features home selectable { id, x, y, val } =
     S.g
-        [ A.class <| String.join " " [ "node", nodeHighlightClass q val, nodeSelectedClass selected id, nodeSelectableClass selectable id, nodeQualityClass val.quality ]
+        [ A.class <| String.join " " [ "node", nodeHighlightClass home.search val, nodeSelectedClass home.selected id, nodeSelectableClass selectable id, nodeQualityClass val.quality ]
         , E.onMouseOver <| M.Tooltip <| Just id
         , E.onMouseOut <| M.Tooltip Nothing
         ]
