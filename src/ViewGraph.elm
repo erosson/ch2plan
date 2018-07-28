@@ -8,6 +8,7 @@ import Html.Attributes as HA
 import Svg as S
 import Svg.Attributes as A
 import Svg.Events as E
+import Svg.Lazy as L
 import Maybe.Extra
 import Math.Vector2 as V2
 import Draggable
@@ -21,38 +22,60 @@ import Route
 
 view : Window.Size -> M.HomeModel -> Route.Features -> H.Html M.Msg
 view windowSize model features =
-    let
-        selectable =
-            M.selectableNodes M.startNodes model.char.graph model.selected
-    in
-        -- svg-container is for tooltip positioning. It must be exactly the same size as the svg itself.
-        H.div [ HA.class "svg-container" ]
-            ([ S.svg
-                (Route.ifFeature features.zoom
-                    inputZoomAndPan
-                    [ A.viewBox <| formatViewBox (iconSize // 2) model.char.graph ]
-                )
-                [ S.defs []
-                    [ S.filter [ A.id "hueSelected" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values <| toString <| Maybe.withDefault 0 <| model.params.hueSelected ] [] ]
-                    , S.filter [ A.id "hueSearch" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values <| toString <| Maybe.withDefault 0 <| model.params.hueSearch ] [] ]
-                    , S.filter [ A.id "edge" ] [ S.feGaussianBlur [ A.in_ "SourceGraphic", A.stdDeviation "2" ] [] ]
-                    , S.filter [ A.id "edgeSelected" ] [ S.feGaussianBlur [ A.in_ "SourceGraphic", A.stdDeviation "4" ] [] ]
-                    ]
-                , S.g (Route.ifFeature features.zoom [ zoomAndPan windowSize model ] [])
-                    ([ S.g [] []
-                     , S.g [] (List.map (viewEdge model << Tuple.second) <| Dict.toList model.char.graph.edges)
-                     , S.g [] (List.map (viewNodeBackground model selectable << Tuple.second) <| Dict.toList model.char.graph.nodes)
-                     , S.g [] (List.map (viewNode features model selectable << Tuple.second) <| Dict.toList model.char.graph.nodes)
-                     ]
-                    )
-                , (Route.ifFeature features.zoom (viewZoomButtons windowSize) <| S.g [] [])
-                ]
-             ]
-                ++ Maybe.Extra.unwrap []
-                    (List.singleton << viewTooltip windowSize model)
-                    -- (model.tooltip |> Maybe.withDefault 1 |> Just |> Maybe.andThen ((flip Dict.get) model.char.graph.nodes))
-                    (Route.ifFeature features.fancyTooltips model.tooltip Nothing |> Maybe.andThen ((flip Dict.get) model.char.graph.nodes))
+    -- svg-container is for tooltip positioning. It must be exactly the same size as the svg itself.
+    H.div [ HA.class "svg-container" ]
+        ([ S.svg
+            (Route.ifFeature features.zoom
+                inputZoomAndPan
+                [ A.viewBox <| formatViewBox (iconSize // 2) model.graph.char.graph ]
             )
+            [ S.defs []
+                [ S.filter [ A.id "hueSelected" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values <| toString <| Maybe.withDefault 0 <| model.params.hueSelected ] [] ]
+                , S.filter [ A.id "hueSearch" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values <| toString <| Maybe.withDefault 0 <| model.params.hueSearch ] [] ]
+                , S.filter [ A.id "edge" ] [ S.feGaussianBlur [ A.in_ "SourceGraphic", A.stdDeviation "2" ] [] ]
+                , S.filter [ A.id "edgeSelected" ] [ S.feGaussianBlur [ A.in_ "SourceGraphic", A.stdDeviation "4" ] [] ]
+                ]
+            , S.g (Route.ifFeature features.zoom [ zoomAndPan windowSize model ] [])
+                ([ model.graph |> L.lazy viewEdges
+                 , model.graph |> L.lazy viewNodeBackgrounds
+                 , model.graph |> L.lazy2 viewNodes features
+                 ]
+                )
+            , (Route.ifFeature features.zoom (viewZoomButtons windowSize) <| S.g [] [])
+            ]
+         ]
+            ++ Maybe.Extra.unwrap []
+                (List.singleton << viewTooltip windowSize model)
+                -- (model.tooltip |> Maybe.withDefault 1 |> Just |> Maybe.andThen ((flip Dict.get) model.char.graph.nodes))
+                (Route.ifFeature features.fancyTooltips model.tooltip Nothing |> Maybe.andThen ((flip Dict.get) model.graph.char.graph.nodes))
+        )
+
+
+viewNodeBackgrounds : M.HomeGraphModel -> S.Svg msg
+viewNodeBackgrounds home =
+    let
+        _ =
+            Debug.log "redraw backgrounds" ()
+    in
+        home.char.graph.nodes |> Dict.toList |> List.map (viewNodeBackground home << Tuple.second) |> S.g []
+
+
+viewNodes : Route.Features -> M.HomeGraphModel -> S.Svg M.Msg
+viewNodes features home =
+    let
+        _ =
+            Debug.log "redraw nodes" ()
+    in
+        home.char.graph.nodes |> Dict.toList |> List.map (viewNode features home << Tuple.second) |> S.g []
+
+
+viewEdges : M.HomeGraphModel -> S.Svg msg
+viewEdges home =
+    let
+        _ =
+            Debug.log "redraw edges" ()
+    in
+        S.g [] (List.map (viewEdge home << Tuple.second) <| Dict.toList home.char.graph.edges)
 
 
 viewTooltip : Window.Size -> M.HomeModel -> G.Node -> H.Html msg
@@ -188,7 +211,7 @@ formatViewBox margin g =
         |> String.join " "
 
 
-viewEdge : M.HomeModel -> G.Edge -> S.Svg msg
+viewEdge : M.HomeGraphModel -> G.Edge -> S.Svg msg
 viewEdge home ( a, b ) =
     let
         -- the SVG blur filter does not work on vertical or horizontal lines. Ugh.
@@ -253,12 +276,12 @@ iconUrl node =
     "./ch2data/img/" ++ node.icon ++ ".png"
 
 
-viewNodeBackground : M.HomeModel -> Set Int -> G.Node -> S.Svg M.Msg
-viewNodeBackground { selected, search } selectable { id, x, y, val } =
+viewNodeBackground : M.HomeGraphModel -> G.Node -> S.Svg msg
+viewNodeBackground { selected, search, neighbors } { id, x, y, val } =
     -- Backgrounds are drawn separately from the rest of the node, so they don't interfere with other nodes' clicks
     S.image
-        [ A.class <| String.join " " [ "node-background", nodeHighlightClass search val, nodeSelectedClass selected id, nodeSelectableClass selectable id, nodeQualityClass val.quality ]
-        , A.xlinkHref <| nodeBackgroundImage val (isNodeHighlighted search val) (Set.member id selected) (Set.member id selectable)
+        [ A.class <| String.join " " [ "node-background", nodeHighlightClass search val, nodeSelectedClass selected id, nodeNeighborClass neighbors id, nodeQualityClass val.quality ]
+        , A.xlinkHref <| nodeBackgroundImage val (isNodeHighlighted search val) (Set.member id selected) (Set.member id neighbors)
         , A.x <| toString <| x - nodeBGSize // 2
         , A.y <| toString <| y - nodeBGSize // 2
         , A.width <| toString nodeBGSize
@@ -267,10 +290,10 @@ viewNodeBackground { selected, search } selectable { id, x, y, val } =
         []
 
 
-viewNode : Route.Features -> M.HomeModel -> Set Int -> G.Node -> S.Svg M.Msg
-viewNode features home selectable { id, x, y, val } =
+viewNode : Route.Features -> M.HomeGraphModel -> G.Node -> S.Svg M.Msg
+viewNode features home { id, x, y, val } =
     S.g
-        [ A.class <| String.join " " [ "node", nodeHighlightClass home.search val, nodeSelectedClass home.selected id, nodeSelectableClass selectable id, nodeQualityClass val.quality ]
+        [ A.class <| String.join " " [ "node", nodeHighlightClass home.search val, nodeSelectedClass home.selected id, nodeNeighborClass home.neighbors id, nodeQualityClass val.quality ]
         , E.onMouseOver <| M.Tooltip <| Just id
         , E.onMouseOut <| M.Tooltip Nothing
         ]
@@ -289,7 +312,7 @@ viewNode features home selectable { id, x, y, val } =
 
 
 nodeBackgroundImage : G.NodeType -> Bool -> Bool -> Bool -> String
-nodeBackgroundImage node isHighlighted isSelected isSelectable =
+nodeBackgroundImage node isHighlighted isSelected isNeighbor =
     let
         quality =
             case node.quality of
@@ -315,7 +338,7 @@ nodeBackgroundImage node isHighlighted isSelected isSelectable =
                     "SelectedVis"
                 else
                     "Selected"
-            else if isSelectable then
+            else if isNeighbor then
                 "Next"
             else
                 ""
@@ -344,9 +367,9 @@ nodeSelectedClass selected id =
         "node-noselected"
 
 
-nodeSelectableClass : Set Int -> Int -> String
-nodeSelectableClass selected id =
+nodeNeighborClass : Set Int -> Int -> String
+nodeNeighborClass selected id =
     if Set.member id selected then
-        "node-selectable"
+        "node-neighbor"
     else
-        "node-noselectable"
+        "node-nonneighbor"

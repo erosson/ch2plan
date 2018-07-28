@@ -25,8 +25,8 @@ viewOldTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
 viewOldTree header ({ characterData, features, lastUpdatedVersion } as model) home =
     H.div [] <|
         header
-            ++ [ H.h4 [] [ H.text <| home.char.flavorName ++ ", " ++ home.char.flavorClass ]
-               , H.p [] [ H.text <| home.char.flavor ]
+            ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
+               , H.p [] [ H.text <| home.graph.char.flavor ]
                , viewSearch home
                , H.div [ A.style [ ( "width", "1000px" ), ( "height", "1000px" ) ] ]
                     [ ViewGraph.view { width = 1000, height = 1000 } home features ]
@@ -45,8 +45,8 @@ viewFullscreenTree header ({ windowSize, characterData, features, lastUpdatedVer
             H.div [ A.class "sidebar" ]
                 ([ H.button [ A.class "sidebar-hide", A.title "hide", E.onClick M.ToggleSidebar ] [ H.text "<<" ] ]
                     ++ header
-                    ++ [ H.h4 [] [ H.text <| home.char.flavorName ++ ", " ++ home.char.flavorClass ]
-                       , H.p [] [ H.text <| home.char.flavor ]
+                    ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
+                       , H.p [] [ H.text <| home.graph.char.flavor ]
                        , viewSearch home
                        , viewStatsSummary <| M.statsSummary model home
                        , viewSummary <| M.nodeSummary home
@@ -227,7 +227,7 @@ statLevelTier level =
 viewSearch : M.HomeModel -> H.Html M.Msg
 viewSearch home =
     H.div []
-        [ H.div [] [ H.text <| toString (Set.size home.selected) ++ " points spent." ]
+        [ H.div [] [ H.text <| toString (Set.size home.graph.selected) ++ " points spent." ]
         , H.div []
             [ H.text "Highlight: "
             , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" home.searchString, E.onInput M.SearchInput ] []

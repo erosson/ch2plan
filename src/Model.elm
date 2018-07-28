@@ -59,17 +59,28 @@ type alias HomeModel =
     -- This is deliberate - Elm does not have memoization (pure functional!)
     -- so this speeds things up a bit. Be careful when updating.
     { params : Route.HomeParams
+    , graph : HomeGraphModel
     , searchPrev : Maybe String
     , searchString : Maybe String
-    , search : Maybe Regex
     , zoom : Float
     , center : V2.Vec2
     , drag : Draggable.State ()
-    , char : G.Character
-    , selected : Set G.NodeId
-    , dijkstra : Lazy Dijkstra.Result
     , tooltip : Maybe G.NodeId
     , sidebarOpen : Bool
+    }
+
+
+type alias HomeGraphModel =
+    -- These should really be fields on HomeModel, but they're split for efficiently
+    -- re-rendering with Svg.Lazy. It cares about referential equality. Modifying
+    -- this object means the graph will be redrawn - but if this object isn't updated,
+    -- as when zooming/panning, we can efficiently skip that step. Redrawing the
+    -- edges and nodes is slow enough that this really is worth the trouble.
+    { char : G.Character
+    , search : Maybe Regex
+    , selected : Set G.NodeId
+    , neighbors : Set G.NodeId
+    , dijkstra : Lazy Dijkstra.Result
     }
 
 
@@ -154,15 +165,18 @@ initHome q { characterData } =
             in
                 Ok
                     { params = q
+                    , graph =
+                        { search = searchRegex q.search
+                        , char = char
+                        , selected = selected
+                        , neighbors = neighborNodes startNodes char.graph selected
+                        , dijkstra = Lazy.lazy (\() -> Dijkstra.dijkstra startNodes char.graph selected Nothing)
+                        }
                     , searchPrev = q.search
                     , searchString = q.search
-                    , search = searchRegex q.search
                     , zoom = 1
                     , center = V2.vec2 0 0
                     , drag = Draggable.init
-                    , char = char
-                    , selected = selected
-                    , dijkstra = Lazy.lazy (\() -> Dijkstra.dijkstra startNodes char.graph selected Nothing)
                     , tooltip = Nothing
                     , sidebarOpen = True
                     }
@@ -175,32 +189,51 @@ searchRegex =
 
 navFromHome : Model -> HomeModel -> Route -> ( RouteModel, Cmd Msg )
 navFromHome model old route =
-    case route |> routeToModel model of
-        Home new ->
-            -- preserve non-url state, like zoom/pan
-            ( { old
-                | params = new.params
-                , search = new.search
-                , char = new.char
-                , selected = new.selected
-              }
-                -- avoid needless recomputing, ex. on search
-                |> (\h ->
-                        if old.params.build == new.params.build then
-                            h
-                        else
-                            { h | dijkstra = new.dijkstra }
-                   )
-                |> Home
-              -- compute dijkstra's after the view renders
-            , if old.params.build == new.params.build then
-                Cmd.none
-              else
-                preprocessCmd
-            )
+    let
+        og =
+            old.graph
+    in
+        case route |> routeToModel model of
+            Home new ->
+                -- preserve non-url state, like zoom/pan
+                ( { old
+                    | params = new.params
+                    , searchString = new.searchString
+                    , searchPrev = new.searchPrev
+                    , graph =
+                        { og
+                            | search = new.graph.search
+                            , char = new.graph.char
+                        }
+                  }
+                    -- avoid needless recomputing, ex. on search
+                    |> (\h ->
+                            if old.params.build == new.params.build then
+                                h
+                            else
+                                let
+                                    g =
+                                        h.graph
+                                in
+                                    { h
+                                        | graph =
+                                            { g
+                                                | selected = new.graph.selected
+                                                , neighbors = new.graph.neighbors
+                                                , dijkstra = new.graph.dijkstra
+                                            }
+                                    }
+                       )
+                    |> Home
+                  -- compute dijkstra's after the view renders
+                , if old.params.build == new.params.build then
+                    Cmd.none
+                  else
+                    preprocessCmd
+                )
 
-        routeModel ->
-            ( routeModel, Cmd.none )
+            routeModel ->
+                ( routeModel, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -215,10 +248,15 @@ update msg model =
                                 Nothing
                             else
                                 Just search0
+
+                        g =
+                            home.graph
                     in
-                        -- update the model instantly, but delay the url change for a moment, to solve https://github.com/erosson/ch2plan/issues/31
-                        ( { model | route = Home { home | searchPrev = home.searchString, searchString = search, search = searchRegex search } }
-                        , Process.sleep (1 * Time.second) |> Task.perform (always <| SearchNav home.searchString search)
+                        -- don't update searchRegex: wait to actually perform the search, for performance's sake.
+                        -- https://github.com/erosson/ch2plan/issues/31
+                        -- https://github.com/erosson/ch2plan/issues/36
+                        ( { model | route = Home { home | searchPrev = home.searchString, searchString = search } }
+                        , Process.sleep (0.3 * Time.second) |> Task.perform (always <| SearchNav home.searchString search)
                         )
 
                 SearchNav from to ->
@@ -238,32 +276,32 @@ update msg model =
                     let
                         selected =
                             if model.features.multiSelect then
-                                if Set.member id home.selected then
+                                if Set.member id home.graph.selected then
                                     -- remove the node, and any disconnected from the start by its removal
-                                    home.selected
+                                    home.graph.selected
                                         |> invert id
-                                        |> reachableSelectedNodes startNodes home.char.graph
+                                        |> reachableSelectedNodes startNodes home.graph.char.graph
                                 else
                                     -- add the node and any in between
-                                    Dijkstra.selectPathToNode (Lazy.force home.dijkstra) id
+                                    Dijkstra.selectPathToNode (Lazy.force home.graph.dijkstra) id
                                         |> Set.fromList
-                                        |> Set.union home.selected
+                                        |> Set.union home.graph.selected
                             else
                                 -- the old way - one node at a time. faster.
                                 let
                                     s =
-                                        invert id home.selected
+                                        invert id home.graph.selected
                                 in
-                                    if isValidSelection startNodes home.char.graph s then
+                                    if isValidSelection startNodes home.graph.char.graph s then
                                         s
                                     else
-                                        home.selected
+                                        home.graph.selected
 
                         q =
                             home.params
 
                         route =
-                            Route.Home { q | build = nodesToBuild home.char.graph selected }
+                            Route.Home { q | build = nodesToBuild home.graph.char.graph selected }
                     in
                         ( model, Navigation.newUrl <| Route.stringify route )
 
@@ -277,7 +315,7 @@ update msg model =
                     let
                         _ =
                             if model.features.multiSelect then
-                                Lazy.force home.dijkstra
+                                Lazy.force home.graph.dijkstra
                             else
                                 Dijkstra.empty
                     in
@@ -289,7 +327,7 @@ update msg model =
                             rawDelta |> V2.scale (-1 / home.zoom)
 
                         center =
-                            home.center |> V2.add delta |> clampCenter home.char.graph
+                            home.center |> V2.add delta |> clampCenter home.graph.char.graph
                     in
                         ( { model | route = Home { home | center = center } }, Cmd.none )
 
@@ -398,9 +436,9 @@ isValidSelection startNodes graph selected =
     reachableSelectedNodes startNodes graph selected == selected
 
 
-selectableNodes : Set G.NodeId -> G.Graph -> Set G.NodeId -> Set G.NodeId
-selectableNodes startNodes graph selected =
-    Set.foldr (\id -> \res -> G.neighbors id graph |> Set.union res) startNodes selected
+neighborNodes : Set G.NodeId -> G.Graph -> Set G.NodeId -> Set G.NodeId
+neighborNodes startNodes graph selected =
+    Set.foldr (\id res -> G.neighbors id graph |> Set.union res) startNodes selected
         |> \res -> Set.diff res selected
 
 
@@ -440,9 +478,9 @@ buildToNodes startNodes graph =
 
 
 nodeSummary : HomeModel -> List ( Int, G.NodeType )
-nodeSummary { char, selected } =
-    char.graph.nodes
-        |> Dict.filter (\id nodeType -> Set.member id selected)
+nodeSummary { graph } =
+    graph.char.graph.nodes
+        |> Dict.filter (\id nodeType -> Set.member id graph.selected)
         |> Dict.values
         |> List.map .val
         |> List.sortBy .name

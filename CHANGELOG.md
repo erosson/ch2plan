@@ -26,10 +26,14 @@ These recently left beta, and are turned *on* by default. For now, you can disab
 - [Zoom/pan](https://ch2.erosson.org/?enableZoom=0). [Thanks, @Judgy53](https://github.com/Judgy53)!
 
 ---
+## 2018-07-28
+- Edges between two selected nodes are now much more visible.
+- Zooming/panning are now much less laggy.
+- Search no longer tries to highlight things while you're typing; it's less laggy this way.
+
 ## 2018-07-27
 - Added `?hueSelected=` and `?hueSearch=` parameters, intended to make life a little easier for the colorblind.
 - Search should be much less laggy, and no longer skips letters.
-- Edges between two selected nodes are now much more visible.
 
 ## 2018-07-25
 - Smoother zooming in more browsers. Thanks, [@Judgy53](https://github.com/Judgy53)!
