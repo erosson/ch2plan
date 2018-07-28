@@ -17,7 +17,7 @@ These are at least partially working, but turned *off* by default.
 
 - [Full-screen skill tree](https://ch2.erosson.org/?enableFullscreen=1).
 - [Prettier-looking, faster-activating skill info tooltips/mouseover text](https://ch2.erosson.org/?enableFancyTooltips=1).
-- [Different search and select colors](https://ch2.erosson.org/?hueSelected=270&hueSearch=120). Change the `hueSelected=` and `hueSearch=` numbers for different colors. Intended for colorblind accessibility.
+<!-- - [Different search and select colors](https://ch2.erosson.org/?hueSelected=270&hueSearch=120). Change the `hueSelected=` and `hueSearch=` numbers for different colors. Intended for colorblind accessibility. -->
 
 ### New features
 These recently left beta, and are turned *on* by default. For now, you can disable them if they're causing trouble.
@@ -28,6 +28,7 @@ These recently left beta, and are turned *on* by default. For now, you can disab
 ---
 ## 2018-07-27
 - Added `?hueSelected=` and `?hueSearch=` parameters, intended to make life a little easier for the colorblind.
+- Edges between two selected nodes are now much more visible.
 
 ## 2018-07-25
 - Smoother zooming in more browsers. Thanks, [@Judgy53](https://github.com/Judgy53)!

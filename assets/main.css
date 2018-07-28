@@ -11,8 +11,14 @@ svg {
   margin: 0; padding: 0;
 }
 svg .edge {
-  stroke: #aaa;
-  stroke-width: 4;
+  stroke: #8888;
+  stroke-width: 12px;
+  filter: url(#edge);
+}
+svg .edge-selected {
+  stroke: #0f08;
+  stroke-width: 40px;
+  filter: url(#edgeSelected);
 }
 svg .node {
   stroke: #aaa;

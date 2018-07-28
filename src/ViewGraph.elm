@@ -35,10 +35,13 @@ view windowSize model features =
                 [ S.defs []
                     [ S.filter [ A.id "hueSelected" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values <| toString <| Maybe.withDefault 0 <| model.params.hueSelected ] [] ]
                     , S.filter [ A.id "hueSearch" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values <| toString <| Maybe.withDefault 0 <| model.params.hueSearch ] [] ]
+                    , S.filter [ A.id "edge" ] [ S.feGaussianBlur [ A.in_ "SourceGraphic", A.stdDeviation "2" ] [] ]
+                    , S.filter [ A.id "edgeSelected" ] [ S.feGaussianBlur [ A.in_ "SourceGraphic", A.stdDeviation "4" ] [] ]
                     ]
                 , S.g (Route.ifFeature features.zoom [ zoomAndPan windowSize model ] [])
-                    ([ S.g [] (List.map (viewNodeBackground model selectable << Tuple.second) <| Dict.toList model.char.graph.nodes)
-                     , S.g [] (List.map (viewEdge << Tuple.second) <| Dict.toList model.char.graph.edges)
+                    ([ S.g [] []
+                     , S.g [] (List.map (viewEdge model << Tuple.second) <| Dict.toList model.char.graph.edges)
+                     , S.g [] (List.map (viewNodeBackground model selectable << Tuple.second) <| Dict.toList model.char.graph.nodes)
                      , S.g [] (List.map (viewNode features model selectable << Tuple.second) <| Dict.toList model.char.graph.nodes)
                      ]
                     )
@@ -185,9 +188,51 @@ formatViewBox margin g =
         |> String.join " "
 
 
-viewEdge : G.Edge -> S.Svg msg
-viewEdge ( a, b ) =
-    S.line [ A.x1 <| toString a.x, A.y1 <| toString a.y, A.x2 <| toString b.x, A.y2 <| toString b.y, A.class "edge" ] []
+viewEdge : M.HomeModel -> G.Edge -> S.Svg msg
+viewEdge home ( a, b ) =
+    let
+        -- the SVG blur filter does not work on vertical or horizontal lines. Ugh.
+        -- To work around this, don't draw the line between a and b. Instead, draw
+        -- a line of the same length at 45 degrees - a square diagonal - and
+        -- transform it to the correct angle. What a pain.
+        ( ax, ay, bx, by ) =
+            ( toFloat a.x, toFloat a.y, toFloat b.x, toFloat b.y )
+
+        ( length, radians ) =
+            toPolar ( ax - bx, ay - by )
+
+        ( x2, y2 ) =
+            -- a diagonal line. Workaround svg filter problem below.
+            fromPolar ( length, pi / 4 )
+                |> \( dx, dy ) -> ( ax + dx, ay + dy )
+
+        transformDegrees =
+            -- transform the 45% angle back to the original angle
+            radians
+                - (pi / 4)
+                |> (+) pi
+                -- svg insists on degrees, not radians
+                |> (*) (180 / pi)
+    in
+        S.line
+            [ A.x1 <| toString ax
+            , A.y1 <| toString ay
+
+            -- , A.x2 <| toString <| b.x + 1
+            -- , A.y2 <| toString <| b.y + 1
+            , A.x2 <| toString x2
+            , A.y2 <| toString y2
+            , A.transform <| "rotate(" ++ (String.join " " <| List.map toString [ transformDegrees, ax, ay ]) ++ ")"
+            , A.class <|
+                String.join " " <|
+                    [ "edge"
+                    , if Set.member a.id home.selected && Set.member b.id home.selected then
+                        "edge-selected"
+                      else
+                        "edge-unselected"
+                    ]
+            ]
+            []
 
 
 nodeQualityClass : G.NodeQuality -> String
