@@ -22,7 +22,7 @@ view header model home =
 
 
 viewOldTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
-viewOldTree header ({ characterData, features, lastUpdatedVersion } as model) home =
+viewOldTree header ({ features, lastUpdatedVersion } as model) home =
     H.div [] <|
         header
             ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
@@ -31,14 +31,14 @@ viewOldTree header ({ characterData, features, lastUpdatedVersion } as model) ho
                , H.div [ A.style [ ( "width", "1000px" ), ( "height", "1000px" ) ] ]
                     [ ViewGraph.view { width = 1000, height = 1000 } home features ]
                , viewSearch home
-               , viewStatsSummary <| M.statsSummary model home
+               , viewStatsSummary <| M.statsSummary home
                , viewSummary <| M.nodeSummary home
                , H.p [] [ H.text <| "Last updated: " ++ lastUpdatedVersion ]
                ]
 
 
 viewFullscreenTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
-viewFullscreenTree header ({ windowSize, characterData, features, lastUpdatedVersion } as model) home =
+viewFullscreenTree header ({ windowSize, features } as model) home =
     H.div [ A.class "skill-tree-main" ]
         [ ViewGraph.view windowSize home features
         , if home.sidebarOpen then
@@ -48,7 +48,7 @@ viewFullscreenTree header ({ windowSize, characterData, features, lastUpdatedVer
                     ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
                        , H.p [] [ H.text <| home.graph.char.flavor ]
                        , viewSearch home
-                       , viewStatsSummary <| M.statsSummary model home
+                       , viewStatsSummary <| M.statsSummary home
                        , viewSummary <| M.nodeSummary home
                        ]
                 )

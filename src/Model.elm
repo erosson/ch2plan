@@ -37,8 +37,7 @@ type Msg
 type alias Model =
     { changelog : String
     , lastUpdatedVersion : String
-    , characterData : Dict String G.Character
-    , statsData : GS.Stats
+    , gameData : G.GameData
     , route : RouteModel
     , features : Route.Features
     , windowSize : Window.Size
@@ -46,8 +45,7 @@ type alias Model =
 
 
 type RouteModel
-    = NotFound
-    | Changelog
+    = StatelessRoute Route
     | Home HomeModel
     | HomeError Route.HomeParams
 
@@ -76,7 +74,8 @@ type alias HomeGraphModel =
     -- this object means the graph will be redrawn - but if this object isn't updated,
     -- as when zooming/panning, we can efficiently skip that step. Redrawing the
     -- edges and nodes is slow enough that this really is worth the trouble.
-    { char : G.Character
+    { game : G.GameVersionData
+    , char : G.Character
     , search : Maybe Regex
     , selected : Set G.NodeId
     , neighbors : Set G.NodeId
@@ -85,8 +84,7 @@ type alias HomeGraphModel =
 
 
 type alias Flags =
-    { characterData : Decode.Value
-    , statsData : Decode.Value
+    { gameData : Decode.Value
     , lastUpdatedVersion : String
     , changelog : String
     , windowSize : Window.Size
@@ -95,24 +93,22 @@ type alias Flags =
 
 init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
 init flags loc =
-    case Decode.decodeValue GS.decoder flags.statsData of
-        Ok stats ->
-            case Decode.decodeValue (G.decoder stats) flags.characterData of
-                Ok chars ->
-                    ( { changelog = flags.changelog
-                      , lastUpdatedVersion = flags.lastUpdatedVersion
-                      , windowSize = flags.windowSize
-                      , characterData = chars
-                      , statsData = stats
-                      , features = Route.parseFeatures loc
-                      , route = Changelog -- placeholder, modified just below
-                      }
-                        |> \model -> { model | route = Route.parse loc |> routeToModel model }
-                    , Cmd.batch [ preprocessCmd, Task.perform Resize Window.size ]
-                    )
-
-                Err err ->
-                    Debug.crash err
+    case Decode.decodeValue G.decoder flags.gameData of
+        Ok gameData ->
+            let
+                route =
+                    Route.parse loc
+            in
+                ( { changelog = flags.changelog
+                  , lastUpdatedVersion = flags.lastUpdatedVersion
+                  , windowSize = flags.windowSize
+                  , gameData = gameData
+                  , features = Route.parseFeatures loc
+                  , route = StatelessRoute Route.NotFound -- placeholder, modified just below
+                  }
+                    |> \model -> { model | route = route |> routeToModel model }
+                , Cmd.batch [ preprocessCmd, Task.perform Resize Window.size, redirectCmd gameData route ]
+                )
 
         Err err ->
             Debug.crash err
@@ -129,12 +125,6 @@ preprocessCmd =
 routeToModel : Model -> Route -> RouteModel
 routeToModel model route =
     case route of
-        Route.Changelog ->
-            Changelog
-
-        Route.NotFound ->
-            NotFound
-
         Route.Home params ->
             case initHome params model of
                 Ok m ->
@@ -142,6 +132,9 @@ routeToModel model route =
 
                 Err _ ->
                     HomeError params
+
+        _ ->
+            StatelessRoute route
 
 
 invert : comparable -> Set comparable -> Set comparable
@@ -152,34 +145,40 @@ invert id set =
         Set.insert id set
 
 
-initHome : Route.HomeParams -> { m | characterData : Dict String G.Character } -> Result String HomeModel
-initHome q { characterData } =
-    case Dict.get q.hero characterData of
+initHome : Route.HomeParams -> { m | gameData : G.GameData } -> Result String HomeModel
+initHome q { gameData } =
+    case Dict.get q.version gameData.byVersion of
         Nothing ->
-            Err <| "no such hero: " ++ q.hero
+            Err <| "no such game-version: " ++ toString q.version
 
-        Just char ->
-            let
-                selected =
-                    buildToNodes startNodes char.graph q.build
-            in
-                Ok
-                    { params = q
-                    , graph =
-                        { search = searchRegex q.search
-                        , char = char
-                        , selected = selected
-                        , neighbors = neighborNodes startNodes char.graph selected
-                        , dijkstra = Lazy.lazy (\() -> Dijkstra.dijkstra startNodes char.graph selected Nothing)
-                        }
-                    , searchPrev = q.search
-                    , searchString = q.search
-                    , zoom = 1
-                    , center = V2.vec2 0 0
-                    , drag = Draggable.init
-                    , tooltip = Nothing
-                    , sidebarOpen = True
-                    }
+        Just game ->
+            case Dict.get q.hero game.heroes of
+                Nothing ->
+                    Err <| "no such hero: " ++ q.hero
+
+                Just char ->
+                    let
+                        selected =
+                            buildToNodes startNodes char.graph q.build
+                    in
+                        Ok
+                            { params = q
+                            , graph =
+                                { game = game
+                                , char = char
+                                , search = searchRegex q.search
+                                , selected = selected
+                                , neighbors = neighborNodes startNodes char.graph selected
+                                , dijkstra = Lazy.lazy (\() -> Dijkstra.dijkstra startNodes char.graph selected Nothing)
+                                }
+                            , searchPrev = q.search
+                            , searchString = q.search
+                            , zoom = 1
+                            , center = V2.vec2 0 0
+                            , drag = Draggable.init
+                            , tooltip = Nothing
+                            , sidebarOpen = True
+                            }
 
 
 searchRegex : Maybe String -> Maybe Regex
@@ -233,7 +232,7 @@ navFromHome model old route =
                 )
 
             routeModel ->
-                ( routeModel, Cmd.none )
+                ( routeModel, redirectCmd model.gameData route )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -364,13 +363,36 @@ update msg model =
             -- all other routes have no state to preserve or update
             case msg of
                 NavLocation loc ->
-                    ( { model | route = Route.parse loc |> routeToModel model, features = Route.parseFeatures loc }, Cmd.none )
+                    let
+                        route =
+                            Route.parse loc
+                    in
+                        ( { model | route = route |> routeToModel model, features = Route.parseFeatures loc }, redirectCmd model.gameData route )
 
                 Resize windowSize ->
                     ( { model | windowSize = windowSize }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
+
+
+redirect : G.GameData -> Route -> Maybe Route
+redirect gameData route =
+    case route |> Debug.log "redir" of
+        Route.Root params ->
+            Just <| Route.Home <| Route.delegacy (G.latestVersionId gameData) params
+
+        Route.LegacyHome params ->
+            Just <| Route.Home <| Route.delegacy (G.latestVersionId gameData) params
+
+        _ ->
+            Nothing
+
+
+redirectCmd : G.GameData -> Route -> Cmd Msg
+redirectCmd gameData route =
+    redirect gameData route
+        |> Maybe.Extra.unwrap Cmd.none (Route.stringify >> Navigation.modifyUrl)
 
 
 clampCenter : G.Graph -> V2.Vec2 -> V2.Vec2
@@ -505,12 +527,12 @@ nodeSummary { graph } =
             )
 
 
-statsSummary : Model -> HomeModel -> List GS.StatTotal
-statsSummary { statsData } home =
+statsSummary : HomeModel -> List GS.StatTotal
+statsSummary home =
     home
         |> nodeSummary
         |> List.concatMap (\( count, node ) -> node.stats |> List.map (\( stat, level ) -> ( stat, count * level )))
-        |> GS.calcStats statsData
+        |> GS.calcStats home.graph.game.stats
 
 
 subscriptions : Model -> Sub Msg

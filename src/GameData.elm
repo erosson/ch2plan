@@ -1,14 +1,18 @@
 module GameData
     exposing
-        ( Character
+        ( GameData
+        , GameVersionData
+        , Character
         , Graph
         , Node
         , Edge
         , NodeId
         , NodeType
         , NodeQuality(..)
-        , neighbors
         , decoder
+        , neighbors
+        , latestVersionId
+        , latestVersion
         , graphMinX
         , graphMinY
         , graphMaxX
@@ -23,6 +27,19 @@ import Dict as Dict exposing (Dict)
 import Set as Set exposing (Set)
 import Maybe.Extra
 import GameData.Stats as GS
+
+
+type alias GameData =
+    { versionList : List String
+    , byVersion : Dict String GameVersionData
+    }
+
+
+type alias GameVersionData =
+    { versionSlug : String
+    , stats : GS.Stats
+    , heroes : Dict String Character
+    }
 
 
 type alias Character =
@@ -87,8 +104,49 @@ type alias Edge =
     ( Node, Node )
 
 
-decoder : GS.Stats -> D.Decoder (Dict String Character)
-decoder stats =
+latestVersionId : GameData -> String
+latestVersionId g =
+    case g.versionList |> List.reverse |> List.head of
+        Nothing ->
+            Debug.crash "no game version data, no tree-planner"
+
+        Just v ->
+            v
+
+
+latestVersion : GameData -> GameVersionData
+latestVersion g =
+    case Dict.get (latestVersionId g) g.byVersion of
+        Nothing ->
+            Debug.crash "game version in versionList not in byVersion"
+
+        Just s ->
+            s
+
+
+decoder : D.Decoder GameData
+decoder =
+    P.decode GameData
+        |> P.required "versionList" (D.list D.string)
+        |> P.required "byVersion" (D.dict gameVersionDecoder)
+
+
+gameVersionDecoder : D.Decoder GameVersionData
+gameVersionDecoder =
+    let
+        decoder : GS.Stats -> D.Decoder GameVersionData
+        decoder stats =
+            P.decode GameVersionData
+                |> P.required "versionSlug" D.string
+                |> P.custom (D.succeed stats)
+                |> P.required "heroes" (heroesDecoder stats)
+    in
+        D.field "stats" GS.decoder
+            |> D.andThen decoder
+
+
+heroesDecoder : GS.Stats -> D.Decoder (Dict String Character)
+heroesDecoder stats =
     --D.dict characterDecoder
     dictKeyDecoder (\name -> Dict.get name stats.characters |> characterDecoder)
 

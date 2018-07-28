@@ -1,0 +1,40 @@
+#!/usr/bin/env node
+const {promisify} = require('util')
+const fs = require('fs')
+
+async function main(path) {
+  const statsJson = JSON.parse(await promisify(fs.readFile)('./assets/stats.json'))
+  // no need to snapshot my comments
+  for (let key of Object.keys(statsJson)) {
+    if (key.startsWith('//')) {
+      delete statsJson[key]
+    }
+  }
+  const json = JSON.parse(await promisify(fs.readFile)(path))
+  json.versionSlug = json.ch2.GAME_VERSION.replace(/\s/g, '-')
+  json.stats = statsJson
+
+  const allPath = './assets/ch2data/chars/all.min.json'
+  const allJson = JSON.parse(await promisify(fs.readFile)(allPath))
+  if (!allJson.byVersion[json.versionSlug]) {
+    allJson.versionList.push(json.versionSlug)
+  }
+  allJson.byVersion[json.versionSlug] = json
+  try {
+    await promisify(fs.mkdir)('./assets/ch2data/chars/v')
+  }
+  catch(e) {
+    // the dir already exists, that's fine
+  }
+  await Promise.all([
+    promisify(fs.writeFile)('./assets/ch2data/chars/latest.min.json', JSON.stringify(json)),
+    promisify(fs.writeFile)('./assets/ch2data/chars/v/'+json.versionSlug+'.min.json', JSON.stringify(json)),
+    promisify(fs.writeFile)(allPath, JSON.stringify(allJson)),
+  ])
+  console.log('postexport:chars', path, json.versionSlug)
+}
+main(process.argv[process.argv.length-1])
+.catch(err => {
+  console.error(err)
+  process.exit(1)
+})

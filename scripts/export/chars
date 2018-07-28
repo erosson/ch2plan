@@ -3,7 +3,8 @@
 # * clicker heroes 2 is symlinked (or installed?) to <this-repo>/game
 # * the flex sdk is installed (for mxmlc) - https://www.adobe.com/devnet/flex/flex-sdk-download.html
 #
-# Run me, and copy the json from the browser console into gedit.
+# Run me, copy the json from the browser console into gedit, and ctrl-c the server when done.
+# Ctrl-c to kill the server afterward is important - there's some post-processing done then.
 
 rm -rf build/chars
 mkdir -p build/chars
@@ -16,5 +17,12 @@ ls build/chars
 mxmlc src/CharToJson.as -output build/chars/CharToJson.swf
 cp src/CharToJson.html build/chars/index.html
 
-gedit assets/ch2data/chars.json &
+rm -f assets/ch2data/chars/latest.json
+gedit assets/ch2data/chars/latest.json &
+# https://stackoverflow.com/questions/14702148/how-to-fire-a-command-when-a-shell-script-is-interrupted
+onExit() {
+  trap INT
+  ./scripts/postexport/chars assets/ch2data/chars/latest.json
+}
+trap onExit INT
 serve build/chars

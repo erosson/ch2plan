@@ -17,7 +17,7 @@ view model =
         header =
             [ H.h2 [] [ H.text "Clicker Heroes 2 Skill Tree Planner" ]
             , H.nav []
-                (viewCharacterNav model.characterData
+                (viewCharacterNav (G.latestVersion model.gameData)
                     ++ [ viewNavEntry "Changelog" Route.Changelog
                        , H.a [ A.href "https://github.com/erosson/ch2plan", A.target "_blank" ] [ H.text "Source code" ]
                        ]
@@ -28,26 +28,32 @@ view model =
             M.Home home ->
                 ViewSkillTree.view header model home
 
-            M.NotFound ->
-                H.div [] (header ++ [ H.text "404" ])
-
             M.HomeError q ->
                 H.div [] (header ++ [ H.text "404" ])
 
-            M.Changelog ->
+            M.StatelessRoute Route.NotFound ->
+                H.div [] (header ++ [ H.text "404" ])
+
+            M.StatelessRoute Route.Changelog ->
                 H.div [] (header ++ [ ViewChangelog.view model.changelog ])
 
+            M.StatelessRoute (Route.Home _) ->
+                Debug.crash "home is not stateless. How did this happen?"
 
-viewCharacterNav : Dict String G.Character -> List (H.Html msg)
-viewCharacterNav =
-    Dict.toList >> List.map (uncurry viewCharacterNavEntry)
+            M.StatelessRoute route ->
+                H.div [] [ H.text "loading..." ]
 
 
-viewCharacterNavEntry : String -> G.Character -> H.Html msg
-viewCharacterNavEntry key char =
+viewCharacterNav : G.GameVersionData -> List (H.Html msg)
+viewCharacterNav g =
+    g.heroes |> Dict.toList |> List.map (uncurry <| viewCharacterNavEntry g.versionSlug)
+
+
+viewCharacterNavEntry : String -> String -> G.Character -> H.Html msg
+viewCharacterNavEntry version key char =
     let
         q =
-            Route.homeParams0
+            Route.delegacy version Route.homeParams0
     in
         viewNavEntry char.flavorClass (Route.Home { q | hero = key })
 

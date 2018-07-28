@@ -11,7 +11,7 @@ package {
 
   public class CharToJson extends Sprite {
     private var pending: int = 0
-    private var chars: Object = {}
+    private var json: Object = {heroes: {}}
     private var fields:Array = ['name', 'flavorName', 'flavorClass', 'flavor', 'levelGraphNodeTypes', 'levelGraphObject']
 
     public function CharToJson () {
@@ -30,7 +30,7 @@ package {
       try {
         var cls:Class = e.target.applicationDomain.getDefinition("IdleHeroMain") as Class;
         // thanks, ffdec/JPEXS!
-        this.chars.ch2 = pick(cls, ['GAME_VERSION'])
+        this.json.ch2 = pick(cls, ['GAME_VERSION'])
         loadComplete()
       }
       catch(e:Error) {
@@ -43,7 +43,7 @@ package {
         new cls().onStartup(null);
         var chars:Class = e.target.applicationDomain.getDefinition("models.Characters") as Class;
         var char:Object = chars.startingDefaultInstances['Helpful Adventurer']
-        this.chars.helpfulAdventurer = pick(char, fields)
+        this.json.heroes.helpfulAdventurer = pick(char, fields)
         loadComplete()
       }
       catch(e:Error) {
@@ -57,11 +57,11 @@ package {
         var chars:Class = e.target.applicationDomain.getDefinition("models.Characters") as Class;
         var char:Object = chars.startingDefaultInstances['Wizard']
         log('prepick')
-        this.chars.wizard = pick(char, fields)
+        this.json.heroes.wizard = pick(char, fields)
         log('postpick')
         // until wizard's working, fake its graph
-        this.chars.wizard.levelGraphObject = {edges:[], nodes:[]}
-        this.chars.wizard.levelGraphNodeTypes = {}
+        this.json.heroes.wizard.levelGraphObject = {edges:[], nodes:[]}
+        this.json.heroes.wizard.levelGraphNodeTypes = {}
         loadComplete()
       }
       catch(e:Error) {
@@ -69,17 +69,14 @@ package {
       }
     }
     private function loadComplete():void {
-      var numLoaded: int = 0;
-      for (var key:String in this.chars) {
-        numLoaded += 1;
-      }
-      if (numLoaded < this.pending) return;
+      this.pending -= 1;
+      if (this.pending > 0) return;
 
       // all loaded!
-      logJson(this.chars)
+      logJson(this.json)
       log("")
-      log("CharToJson success! Copy-paste that big mess above into ch2plan's json file, please: ")
-      log("./assets/ch2data/chars.json")
+      log("CharToJson success! Copy-paste that big mess above into the json file that we just opened for you, please:")
+      log("./assets/ch2data/chars/latest.json")
     }
 
     // https://stackoverflow.com/questions/1634757/as3-instantiate-class-from-external-swf
@@ -99,8 +96,7 @@ package {
     }
 
     private function logJson(obj: Object): void {
-      //log(JSON.stringify(obj, null, 2))
-      log(JSON.stringify(obj))
+      log(JSON.stringify(obj, null, 2))
     }
 
     private function pick(obj: Object, keys: Array): Object {

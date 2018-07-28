@@ -11,7 +11,8 @@ import Maybe.Extra
 
 
 type alias HomeParams =
-    { hero : String
+    { version : String
+    , hero : String
     , build : Maybe String
     , search : Maybe String
 
@@ -22,7 +23,27 @@ type alias HomeParams =
     }
 
 
-homeParams0 : HomeParams
+type alias LegacyHomeParams =
+    { hero : String
+    , build : Maybe String
+    , search : Maybe String
+    , hueSelected : Maybe Int
+    , hueSearch : Maybe Int
+    }
+
+
+delegacy : String -> LegacyHomeParams -> HomeParams
+delegacy version params =
+    { version = version
+    , hero = params.hero
+    , build = params.build
+    , search = params.search
+    , hueSelected = Nothing
+    , hueSearch = Nothing
+    }
+
+
+homeParams0 : LegacyHomeParams
 homeParams0 =
     { hero = "helpfulAdventurer"
     , build = Nothing
@@ -36,6 +57,8 @@ type Route
     = Home HomeParams
     | Changelog
     | NotFound
+    | Root LegacyHomeParams
+    | LegacyHome LegacyHomeParams
 
 
 type alias Features =
@@ -95,16 +118,25 @@ parser : P.Parser (Route -> a) a
 parser =
     P.oneOf
         -- the skilltree has a few different urls. Root, "/"...
-        [ P.map Home <| P.map (HomeParams homeParams0.hero Nothing) <| homeQS <| P.top
+        [ P.map Root <| P.map (LegacyHomeParams homeParams0.hero Nothing) <| homeQS <| P.top
 
-        -- an empty build: "/h/helpfulAdventurer"...
-        , P.map Home <| P.map (\h -> HomeParams h Nothing) <| homeQS <| P.s "h" </> P.string
+        -- an old legacy build, back when we only supported Cid: "/b/1&2&3&4&5"
+        , P.map LegacyHome <| P.map (LegacyHomeParams homeParams0.hero) <| homeQS <| P.s "b" </> maybeString
 
-        -- a non-empty build: "/h/helpfulAdventurer/1&2&3&4&5"...
-        , P.map Home <| P.map HomeParams <| homeQS <| P.s "h" </> P.string </> maybeString
+        -- an old/legacy empty versionless build: "/h/helpfulAdventurer"...
+        , P.map LegacyHome <| P.map (\h -> LegacyHomeParams h Nothing) <| homeQS <| P.s "h" </> P.string
 
-        -- and a non-empty legacy build, back when we only supported Cid: "/b/1&2&3&4&5"
-        , P.map Home <| P.map (HomeParams homeParams0.hero) <| homeQS <| P.s "b" </> maybeString
+        -- a non-empty versionless build: "/h/helpfulAdventurer/1&2&3&4&5"...
+        , P.map LegacyHome <| P.map LegacyHomeParams <| homeQS <| P.s "h" </> P.string </> maybeString
+
+        -- a modern versioned url, no build
+        , P.map Home <| P.map (\v -> HomeParams v homeParams0.hero Nothing) <| homeQS <| P.s "g" </> P.string
+        , P.map Home <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "g" </> P.string </> P.string
+
+        -- a modern versioned url, with build
+        , P.map Home <| P.map HomeParams <| homeQS <| P.s "g" </> P.string </> P.string </> maybeString
+
+        -- other urls.
         , P.map Changelog <| P.s "changelog"
         ]
 
@@ -152,26 +184,30 @@ ifFeature pred t f =
 stringify : Route -> String
 stringify route =
     case route of
-        Home { hero, build, search } ->
+        Home { version, hero, build, search } ->
             let
                 qs =
                     Maybe.Extra.unwrap "" ((++) "?q=" << Http.encodeUri) search
             in
-                case ( hero, build ) of
-                    ( "helpfulAdventurer", Nothing ) ->
-                        "#/" ++ qs
+                "#/g/"
+                    ++ version
+                    ++ case ( hero, build ) of
+                        -- ( "helpfulAdventurer", Nothing ) ->
+                        -- qs
+                        ( _, Nothing ) ->
+                            "/" ++ hero ++ qs
 
-                    ( _, Nothing ) ->
-                        "#/h/" ++ hero ++ qs
-
-                    ( _, Just b ) ->
-                        "#/h/" ++ hero ++ "/" ++ b ++ qs
+                        ( _, Just b ) ->
+                            "/" ++ hero ++ "/" ++ b ++ qs
 
         Changelog ->
             "#/changelog"
 
         NotFound ->
             Debug.crash "why are you stringifying Route.NotFound?"
+
+        _ ->
+            Debug.crash "I refuse to stringify legacy urls" route
 
 
 href : Route -> H.Attribute msg
