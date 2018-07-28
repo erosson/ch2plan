@@ -28,6 +28,7 @@ These recently left beta, and are turned *on* by default. For now, you can disab
 ---
 ## 2018-07-27
 - Added `?hueSelected=` and `?hueSearch=` parameters, intended to make life a little easier for the colorblind.
+- Search should be much less laggy, and no longer skips letters.
 - Edges between two selected nodes are now much more visible.
 
 ## 2018-07-25
