@@ -27,6 +27,7 @@ viewOldTree header ({ features, lastUpdatedVersion } as model) home =
         header
             ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
                , H.p [] [ H.text <| home.graph.char.flavor ]
+               , viewVersionNav home.graph.game home.params
                , viewSearch home
                , H.div [ A.style [ ( "width", "1000px" ), ( "height", "1000px" ) ] ]
                     [ ViewGraph.view { width = 1000, height = 1000 } home features ]
@@ -47,6 +48,7 @@ viewFullscreenTree header ({ windowSize, features } as model) home =
                     ++ header
                     ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
                        , H.p [] [ H.text <| home.graph.char.flavor ]
+                       , viewVersionNav home.graph.game home.params
                        , viewSearch home
                        , viewStatsSummary <| M.statsSummary home
                        , viewSummary <| M.nodeSummary home
@@ -55,6 +57,27 @@ viewFullscreenTree header ({ windowSize, features } as model) home =
           else
             H.button [ A.class "sidebar-show", A.title "show", E.onClick M.ToggleSidebar ] [ H.text ">>" ]
         ]
+
+
+ver =
+    { live = "0.052-beta"
+    , ptr = "0.06-(2)-beta-PTR"
+    }
+
+
+viewVersionNav : G.GameVersionData -> Route.HomeParams -> H.Html msg
+viewVersionNav g q =
+    let
+        _ =
+            Debug.log "viewVersionNav" ( q, g.versionSlug )
+    in
+        H.div []
+            [ H.text <| "Your game version: " ++ g.versionSlug ++ ". "
+            , if g.versionSlug == ver.live then
+                H.a [ Route.href <| Route.Home { q | version = ver.ptr } ] [ H.text <| "Use PTR: " ++ ver.ptr ]
+              else
+                H.a [ Route.href <| Route.Home { q | version = ver.live } ] [ H.text <| "Use live: " ++ ver.live ]
+            ]
 
 
 viewStatsSummary : List GS.StatTotal -> H.Html msg

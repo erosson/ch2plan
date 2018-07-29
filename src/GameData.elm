@@ -27,6 +27,7 @@ import Dict as Dict exposing (Dict)
 import Set as Set exposing (Set)
 import Maybe.Extra
 import GameData.Stats as GS
+import Regex as Regex exposing (Regex)
 
 
 type alias GameData =
@@ -106,7 +107,7 @@ type alias Edge =
 
 latestVersionId : GameData -> String
 latestVersionId g =
-    case g.versionList |> List.reverse |> List.head of
+    case g.versionList |> List.filter (\v -> not <| Regex.contains (Regex.regex "PTR") v) |> List.reverse |> List.head of
         Nothing ->
             Debug.crash "no game version data, no tree-planner"
 

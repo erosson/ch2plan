@@ -30,6 +30,7 @@ These recently left beta, and are turned *on* by default. For now, you can disab
 - Edges between two selected nodes are now much more visible.
 - Zooming/panning are now much less laggy.
 - Search no longer tries to highlight things while you're typing; it's less laggy this way.
+- Add support for multiple game versions, and for the new 0.06 PTR release.
 
 ## 2018-07-27
 - Added `?hueSelected=` and `?hueSearch=` parameters, intended to make life a little easier for the colorblind.

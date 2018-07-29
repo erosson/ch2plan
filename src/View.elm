@@ -17,7 +17,7 @@ view model =
         header =
             [ H.h2 [] [ H.text "Clicker Heroes 2 Skill Tree Planner" ]
             , H.nav []
-                (viewCharacterNav (G.latestVersion model.gameData)
+                (viewCharacterNav (gameVersion model)
                     ++ [ viewNavEntry "Changelog" Route.Changelog
                        , H.a [ A.href "https://github.com/erosson/ch2plan", A.target "_blank" ] [ H.text "Source code" ]
                        ]
@@ -42,6 +42,17 @@ view model =
 
             M.StatelessRoute route ->
                 H.div [] [ H.text "loading..." ]
+
+
+gameVersion : M.Model -> G.GameVersionData
+gameVersion m =
+    case m.route of
+        M.Home { params } ->
+            Dict.get params.version m.gameData.byVersion
+                |> Maybe.withDefault (G.latestVersion m.gameData)
+
+        _ ->
+            G.latestVersion m.gameData
 
 
 viewCharacterNav : G.GameVersionData -> List (H.Html msg)

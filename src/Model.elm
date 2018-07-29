@@ -194,42 +194,47 @@ navFromHome model old route =
     in
         case route |> routeToModel model of
             Home new ->
-                -- preserve non-url state, like zoom/pan
-                ( { old
-                    | params = new.params
-                    , searchString = new.searchString
-                    , searchPrev = new.searchPrev
-                    , graph =
-                        { og
-                            | search = new.graph.search
-                            , char = new.graph.char
-                        }
-                  }
-                    -- avoid needless recomputing, ex. on search
-                    |> (\h ->
-                            if old.params.build == new.params.build then
-                                h
-                            else
-                                let
-                                    g =
-                                        h.graph
-                                in
-                                    { h
-                                        | graph =
-                                            { g
-                                                | selected = new.graph.selected
-                                                , neighbors = new.graph.neighbors
-                                                , dijkstra = new.graph.dijkstra
-                                            }
-                                    }
-                       )
-                    |> Home
-                  -- compute dijkstra's after the view renders
-                , if old.params.build == new.params.build then
-                    Cmd.none
-                  else
-                    preprocessCmd
-                )
+                let
+                    isBuildEqual =
+                        old.params.build == new.params.build && old.params.version == new.params.version
+                in
+                    -- preserve non-url state, like zoom/pan
+                    ( { old
+                        | params = new.params
+                        , searchString = new.searchString
+                        , searchPrev = new.searchPrev
+                        , graph =
+                            { og
+                                | search = new.graph.search
+                                , char = new.graph.char
+                                , game = new.graph.game
+                            }
+                      }
+                        -- avoid needless recomputing, ex. on search
+                        |> (\h ->
+                                if isBuildEqual then
+                                    h
+                                else
+                                    let
+                                        g =
+                                            h.graph
+                                    in
+                                        { h
+                                            | graph =
+                                                { g
+                                                    | selected = new.graph.selected
+                                                    , neighbors = new.graph.neighbors
+                                                    , dijkstra = new.graph.dijkstra
+                                                }
+                                        }
+                           )
+                        |> Home
+                      -- compute dijkstra's after the view renders
+                    , if isBuildEqual then
+                        Cmd.none
+                      else
+                        preprocessCmd
+                    )
 
             routeModel ->
                 ( routeModel, redirectCmd model.gameData route )
@@ -383,7 +388,8 @@ redirect gameData route =
             Just <| Route.Home <| Route.delegacy (G.latestVersionId gameData) params
 
         Route.LegacyHome params ->
-            Just <| Route.Home <| Route.delegacy (G.latestVersionId gameData) params
+            -- legacy urls are assigned a legacy version
+            Just <| Route.Home <| Route.delegacy "0.052-beta" params
 
         _ ->
             Nothing
