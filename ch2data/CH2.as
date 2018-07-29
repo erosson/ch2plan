@@ -81,6 +81,18 @@ package heroclickerlib
       
       public static var STATS:Array = new Array();
       
+      public static const COMPARISON_LT:int = 0;
+      
+      public static const COMPARISON_LTE:int = 1;
+      
+      public static const COMPARISON_EQ:int = 2;
+      
+      public static const COMPARISON_GTE:int = 3;
+      
+      public static const COMPARISON_GT:int = 4;
+      
+      public static const COMPARISON_NEQ:int = 5;
+      
       public static var shaker:Shaker = new Shaker();
       
       public static var game:IdleHeroMain;

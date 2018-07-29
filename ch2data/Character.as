@@ -26,9 +26,7 @@ package models
       
       public static const TIME_UNTIL_PLAYER_NEEDS_RUBY_SHOP_HINT_MS:Number = 150000;
       
-      public static const ROLLER_SEED_MIN:Number = 1;
-      
-      public static const ROLLER_SEED_MAX:Number = 50;
+      public static const ROLLER_SEEDS:Array = [12,6,10,42,49,29,38,26,8,31,1,9,36,7,44,30,40,20,11,37,48,34,28,16,45];
       
       public static const STATE_WALKING:int = 0;
       
@@ -57,6 +55,8 @@ package models
       public static const MAX_CATALOG_SIZE:Number = 4;
       
       public static const ZONES_BETWEEN_TALENTS:Number = 10;
+      
+      private static const WORLD_END_AUTOMATION_OPTIONS_UNLOCK_WORLD:Number = 3;
       
       public static const WALK_SPEED_METERS_PER_SECOND:Number = 4.5;
       
@@ -100,11 +100,11 @@ package models
       
       public static const DEFAULT_UPGRADEABLE_STATS:Array = [CH2.STAT_GOLD,CH2.STAT_MOVEMENT_SPEED,CH2.STAT_CRIT_CHANCE,CH2.STAT_CRIT_DAMAGE,CH2.STAT_HASTE,CH2.STAT_MANA_REGEN,CH2.STAT_IDLE_DAMAGE,CH2.STAT_CLICKABLE_GOLD,CH2.STAT_CLICK_DAMAGE,CH2.STAT_TREASURE_CHEST_CHANCE,CH2.STAT_BOSS_GOLD,CH2.STAT_ITEM_COST_REDUCTION,CH2.STAT_TOTAL_MANA,CH2.STAT_TOTAL_ENERGY,CH2.STAT_CLICKABLE_CHANCE,CH2.STAT_BONUS_GOLD_CHANCE,CH2.STAT_TREASURE_CHEST_GOLD,CH2.STAT_PIERCE_CHANCE,CH2.STAT_ITEM_WEAPON_DAMAGE,CH2.STAT_ITEM_HEAD_DAMAGE,CH2.STAT_ITEM_CHEST_DAMAGE,CH2.STAT_ITEM_RING_DAMAGE,CH2.STAT_ITEM_LEGS_DAMAGE,CH2.STAT_ITEM_HANDS_DAMAGE,CH2.STAT_ITEM_FEET_DAMAGE,CH2.STAT_ITEM_BACK_DAMAGE];
       
-      public static const VALUES_RESET_AT_ASCENSION:Array = ["State","timeSinceLastClickAttack","timeSinceLastSkill","timeSinceLastAutoAttack","consecutiveOneShottedMonsters","gold","mana","energy","gcdRemaining","castTimeRemaining","castTime","skillBeingCast","buffs","inventory","currentCatalogRank","catalogItemsForSale","isPurchasingLocked","currentZone","highestZone","totalRunDistance","totalGold","monstersKilled","monstersKilledPerZone","powerRuneActivated","speedRuneActivated","luckRuneActivated","timeMetalDetectorActive","zoneMetalDetectorActive"];
+      public static const VALUES_RESET_AT_ASCENSION:Array = ["State","timeSinceLastClickAttack","timeSinceLastSkill","timeSinceLastAutoAttack","consecutiveOneShottedMonsters","gold","mana","energy","gcdRemaining","castTimeRemaining","castTime","skillBeingCast","buffs","inventory","currentCatalogRank","catalogItemsForSale","isPurchasingLocked","currentZone","highestZone","totalRunDistance","totalGold","monstersKilled","monstersKilledPerZone","powerRuneActivated","speedRuneActivated","luckRuneActivated","timeMetalDetectorActive","zoneMetalDetectorActive","zoneStartGold"];
       
       public static var staticSkillInstances:Object = {};
       
-      public static var staticFields:Array = ["flavorName","flavorClass","flavor","gender","flair","characterSelectOrder","availableForCreation","visibleOnCharacterSelect","defaultSaveName","startingSkills","levelCostScaling","talentChoices","talentZones","upgradeableStats","damageMultiplierBase","maxManaMultiplierBase","maxEnergyMultiplierBase","attackMsDelay","gcdBase","autoAttackDamageMultiplierBase","damageMultiplierValueFunction","maxManaMultiplierValueFunction","maxEnergyMultiplierValueFunction","damageMultiplierCostFunction","maxManaMultiplierCostFunction","maxEnergyMultiplierCostFunction","statValueFunctions","statBaseValues","statCostFunctions","monstersPerZone","monsterHealthMultiplier","attackRange","levelGraph","levelGraphNodeTypes","recommendedLevelsForWorlds"];
+      public static var staticFields:Array = ["flavorName","flavorClass","flavor","gender","flair","characterSelectOrder","availableForCreation","visibleOnCharacterSelect","defaultSaveName","startingSkills","levelCostScaling","talentChoices","talentZones","upgradeableStats","assetGroupName","damageMultiplierBase","maxManaMultiplierBase","maxEnergyMultiplierBase","attackMsDelay","gcdBase","autoAttackDamageMultiplierBase","damageMultiplierValueFunction","maxManaMultiplierValueFunction","maxEnergyMultiplierValueFunction","damageMultiplierCostFunction","maxManaMultiplierCostFunction","maxEnergyMultiplierCostFunction","statValueFunctions","statBaseValues","statCostFunctions","monstersPerZone","monsterHealthMultiplier","attackRange","levelGraph","levelGraphNodeTypes","recommendedLevelsForWorlds"];
        
       
       public var state:int = 5;
@@ -131,8 +131,6 @@ package models
       
       public var consecutiveOneShottedMonsters:Number = 0;
       
-      public var attacksPerFrame:int = 0;
-      
       public var clickAttackEnergyCost:int = 1;
       
       public var name:String;
@@ -142,6 +140,8 @@ package models
       public var roller:Roller;
       
       public var startingRollerValue:int;
+      
+      public var hasEditedSave:Boolean = false;
       
       public var gold:BigNumber;
       
@@ -193,8 +193,6 @@ package models
       
       public var trackedManaUsed:TrackedStat;
       
-      public var drawCounts:TrackedStat;
-      
       public var trackedFrameMsec:TrackedStat;
       
       public var trackedXPEarned:TrackedStat;
@@ -218,6 +216,10 @@ package models
       public var isPurchasingLocked:Boolean = false;
       
       public var automator:Automator;
+      
+      public var currentWorldEndAutomationOption:int = -1;
+      
+      public var worldEndAutomationOptions:Array;
       
       public var timeOfLastRun:Number = 0;
       
@@ -314,6 +316,8 @@ package models
       public var shouldShowMainPanelAlertArrow:Function;
       
       public var shouldShowRightPanelAlertArrow:Function;
+      
+      public var assetGroupName:String;
       
       public var skills:Object;
       
@@ -465,6 +469,8 @@ package models
       
       public var onAutomatorUnlocked:Function;
       
+      public var populateWorldEndAutomationOptions:Function;
+      
       private var timeUntilDamageCache:int = 100;
       
       private var cachedDamage:Array;
@@ -547,6 +553,7 @@ package models
          this.inventory = new Items();
          this.catalogItemsForSale = [];
          this.automator = new Automator();
+         this.worldEndAutomationOptions = [];
          this.totalGold = new BigNumber(0);
          this.monstersKilledPerZone = {};
          this.isItemPanelUnlocked = this.isItemPanelUnlockedDefault;
@@ -588,6 +595,7 @@ package models
          this.triggerGlobalCooldown = this.triggerGlobalCooldownDefault;
          this.unlockCharacter = this.unlockCharacterDefault;
          this.onAutomatorUnlocked = this.onAutomatorUnlockedDefault;
+         this.populateWorldEndAutomationOptions = this.populateWorldEndAutomationOptionsDefault;
          this.cachedDamage = [];
          this.update = this.updateDefault;
          this.changeState = this.changeStateDefault;
@@ -630,14 +638,12 @@ package models
          registerDynamicString("name");
          registerDynamicChild("roller",Roller);
          registerDynamicNumber("startingRollerValue");
-         registerDynamicChild("eventLogger",EventLog);
          registerDynamicChild("trackedDps",TrackedStat);
          registerDynamicChild("trackedOverkill",TrackedStat);
          registerDynamicChild("trackedGoldGained",TrackedStat);
          registerDynamicChild("trackedGoldSpent",TrackedStat);
          registerDynamicChild("trackedEnergyUsed",TrackedStat);
          registerDynamicChild("trackedManaUsed",TrackedStat);
-         registerDynamicChild("drawCounts",TrackedStat);
          registerDynamicChild("trackedFrameMsec",TrackedStat);
          registerDynamicChild("trackedXPEarned",TrackedStat);
          registerDynamicBigNumber("gold");
@@ -648,6 +654,7 @@ package models
          registerDynamicNumber("totalRubies");
          registerDynamicChild("inventory",Items);
          registerDynamicChild("automator",Automator);
+         registerDynamicNumber("currentWorldEndAutomationOption");
          registerDynamicCollection("talents",Talent);
          registerDynamicCollection("skills",Skill);
          registerDynamicNumber("currentCatalogRank");
@@ -718,6 +725,7 @@ package models
          registerDynamicObject("monstersKilledPerZone");
          registerDynamicBoolean("hasNeverStartedWorld");
          registerDynamicBoolean("autoAttacksNotInterrupted");
+         registerDynamicBoolean("hasEditedSave");
          this.attackMsDelay = 600;
          this.gcdBase = 2000;
          this.gcdMinimum = 1000;
@@ -745,7 +753,7 @@ package models
          this.statBaseValues[CH2.STAT_TREASURE_CHEST_CHANCE] = 0.02;
          this.statBaseValues[CH2.STAT_TREASURE_CHEST_GOLD] = 1;
          this.statBaseValues[CH2.STAT_BOSS_GOLD] = 1;
-         this.statBaseValues[CH2.STAT_CLICKABLE_CHANCE] = 0.05;
+         this.statBaseValues[CH2.STAT_CLICKABLE_CHANCE] = 0;
          this.statBaseValues[CH2.STAT_ENERGY_REGEN] = 0;
          this.statBaseValues[CH2.STAT_DAMAGE] = 1;
          this.statBaseValues[CH2.STAT_ENERGY_COST_REDUCTION] = 0;
@@ -778,7 +786,7 @@ package models
          this.statValueFunctions[CH2.STAT_CRIT_CHANCE] = linear(0.02);
          this.statValueFunctions[CH2.STAT_TOTAL_ENERGY] = linear(25);
          this.statValueFunctions[CH2.STAT_TOTAL_MANA] = linear(25);
-         this.statValueFunctions[CH2.STAT_BONUS_GOLD_CHANCE] = linear(0.02);
+         this.statValueFunctions[CH2.STAT_BONUS_GOLD_CHANCE] = linear(0.01);
          this.statValueFunctions[CH2.STAT_ITEM_COST_REDUCTION] = exponentialMultiplier(0.92);
          this.statValueFunctions[CH2.STAT_CLICK_DAMAGE] = exponentialMultiplier(1.1);
          this.statValueFunctions[CH2.STAT_IDLE_DAMAGE] = exponentialMultiplier(1.25);
@@ -1083,11 +1091,6 @@ package models
          return AscensionWorlds.MILLISECONDS_TO_BEAT_WORLD - this.timeSinceMostRecentRunBegan;
       }
       
-      public function get assetGroupName() : String
-      {
-         return this.name.replace(" ","");
-      }
-      
       public function hasCompletedCurrentZone() : Boolean
       {
          return this.killedAllMonstersOnZone || !this.isOnHighestZone;
@@ -1151,9 +1154,13 @@ package models
       
       public function setupRoller() : void
       {
-         if(!this.roller.isInitialized)
+         if(!this.roller.isInitialized && this.roller.seedRoller.numUses == 0)
          {
-            this.startingRollerValue = Rnd.integer(ROLLER_SEED_MIN,ROLLER_SEED_MAX);
+            this.startingRollerValue = ROLLER_SEEDS[Rnd.integer(ROLLER_SEEDS.length)];
+            if(IdleHeroConsole.gameSeed > -1)
+            {
+               this.startingRollerValue = IdleHeroConsole.gameSeed;
+            }
             this.roller.initialize(this.startingRollerValue);
             CH2.user.remoteStatsTracking.addEvent({
                "type":"createCharacter",
@@ -1161,6 +1168,10 @@ package models
                "characterType":1,
                "startingSeed":this.startingRollerValue
             });
+         }
+         else
+         {
+            this.roller.isInitialized = true;
          }
       }
       
@@ -1175,27 +1186,22 @@ package models
       
       public function setupTrackedStats() : void
       {
-         if(!this.trackedDps)
-         {
-            this.trackedDps = new TrackedStat();
-            this.trackedDps.name = "DPS";
-            this.trackedOverkill = new TrackedStat();
-            this.trackedOverkill.name = "Overkill %";
-            this.trackedGoldGained = new TrackedStat();
-            this.trackedGoldGained.name = "Gold Gained";
-            this.trackedGoldSpent = new TrackedStat();
-            this.trackedGoldSpent.name = "Gold Spent";
-            this.trackedEnergyUsed = new TrackedStat();
-            this.trackedEnergyUsed.name = "Energy Used";
-            this.trackedManaUsed = new TrackedStat();
-            this.trackedManaUsed.name = "Mana Used";
-            this.drawCounts = new TrackedStat();
-            this.drawCounts.name = "Draw Counts";
-            this.trackedFrameMsec = new TrackedStat();
-            this.trackedFrameMsec.name = "Frame Msec";
-            this.trackedXPEarned = new TrackedStat();
-            this.trackedXPEarned.name = "XP Earned";
-         }
+         this.trackedDps = new TrackedStat();
+         this.trackedDps.name = "DPS";
+         this.trackedOverkill = new TrackedStat();
+         this.trackedOverkill.name = "Overkill %";
+         this.trackedGoldGained = new TrackedStat();
+         this.trackedGoldGained.name = "Gold Gained";
+         this.trackedGoldSpent = new TrackedStat();
+         this.trackedGoldSpent.name = "Gold Spent";
+         this.trackedEnergyUsed = new TrackedStat();
+         this.trackedEnergyUsed.name = "Energy Used";
+         this.trackedManaUsed = new TrackedStat();
+         this.trackedManaUsed.name = "Mana Used";
+         this.trackedFrameMsec = new TrackedStat();
+         this.trackedFrameMsec.name = "Frame Msec";
+         this.trackedXPEarned = new TrackedStat();
+         this.trackedXPEarned.name = "XP Earned";
       }
       
       public function getTrait(trait:String) : Number
@@ -1295,6 +1301,55 @@ package models
          this.timeSinceAutomatorWasUnlocked = 0;
       }
       
+      public function populateWorldEndAutomationOptionsDefault() : void
+      {
+         var rerunCurrentWorldOption:AutomatorWorldEndOption = new AutomatorWorldEndOption();
+         rerunCurrentWorldOption.name = "Rerun Current World";
+         rerunCurrentWorldOption.onWorldEndFunction = this.onWorldEndRerunCurrentWorld;
+         rerunCurrentWorldOption.isUnlockedFunction = this.isRerunCurrentWorldOnWorldEndUnlocked;
+         this.worldEndAutomationOptions.push(rerunCurrentWorldOption);
+         var attemptNextWorldOption:AutomatorWorldEndOption = new AutomatorWorldEndOption();
+         attemptNextWorldOption.name = "Attempt Next World";
+         attemptNextWorldOption.onWorldEndFunction = this.onWorldEndAttemptNextWorld;
+         attemptNextWorldOption.isUnlockedFunction = this.isAttemptNextWorldOnWorldEndUnlocked;
+         this.worldEndAutomationOptions.push(attemptNextWorldOption);
+         var attemptHighestWorldOption:AutomatorWorldEndOption = new AutomatorWorldEndOption();
+         attemptHighestWorldOption.name = "Attempt Highest World";
+         attemptHighestWorldOption.onWorldEndFunction = this.onWorldEndAttemptHighestWorld;
+         attemptHighestWorldOption.isUnlockedFunction = this.isAttemptHighestWorldOnWorldEndUnlocked;
+         this.worldEndAutomationOptions.push(attemptHighestWorldOption);
+      }
+      
+      public function onWorldEndRerunCurrentWorld() : void
+      {
+         this.ascend(this.currentWorldId);
+      }
+      
+      public function isRerunCurrentWorldOnWorldEndUnlocked() : Boolean
+      {
+         return this.highestWorldCompleted >= WORLD_END_AUTOMATION_OPTIONS_UNLOCK_WORLD;
+      }
+      
+      public function onWorldEndAttemptNextWorld() : void
+      {
+         this.ascend(this.currentWorldId + 1);
+      }
+      
+      public function isAttemptNextWorldOnWorldEndUnlocked() : Boolean
+      {
+         return this.highestWorldCompleted >= WORLD_END_AUTOMATION_OPTIONS_UNLOCK_WORLD;
+      }
+      
+      public function onWorldEndAttemptHighestWorld() : void
+      {
+         this.ascend(this.highestWorldCompleted + 1);
+      }
+      
+      public function isAttemptHighestWorldOnWorldEndUnlocked() : Boolean
+      {
+         return this.highestWorldCompleted >= WORLD_END_AUTOMATION_OPTIONS_UNLOCK_WORLD;
+      }
+      
       private function fillDamageCache(value:BigNumber) : void
       {
          for(var i:int = 0; i < 50; i++)
@@ -1350,7 +1405,6 @@ package models
                this.nextDamageCacheEntry = 0;
             }
          }
-         this.attacksPerFrame = 0;
          this.regenerateManaAndEnergy(dt);
          this.cooldownSkills(dt);
          this.gcdRemaining = this.gcdRemaining - dt;
@@ -1541,42 +1595,33 @@ package models
             }
             this.playRandomHitSound(attackData);
          }
-         if(monstersAttacked.length >= 1)
-         {
-            attackData = attackDatas[0].getCopy();
-         }
       }
       
       public function clickAttackDefault(doesCostEnergy:Boolean = true) : void
       {
-         var energyCost:Number = NaN;
          var closestMonster:Monster = null;
-         if(this.attacksPerFrame < 2)
+         var energyCost:Number = !!doesCostEnergy?Number(-1 * this.clickAttackEnergyCost):Number(0);
+         if(this.canAffordClickAttack || !doesCostEnergy)
          {
-            this.attacksPerFrame++;
-            energyCost = !!doesCostEnergy?Number(-1 * this.clickAttackEnergyCost):Number(0);
-            if(this.canAffordClickAttack || !doesCostEnergy)
+            this.timeSinceLastClickAttack = 0;
+            if(this.state == STATE_COMBAT)
             {
-               this.timeSinceLastClickAttack = 0;
-               if(this.state == STATE_COMBAT)
+               this.onClickAttack();
+               this.addEnergy(energyCost);
+            }
+            else if(this.isInTeleportClickAttackState)
+            {
+               closestMonster = CH2.world.getNextMonster();
+               if(!this.isNextMonsterInRange && closestMonster && (!closestMonster.isBoss || CH2.world.bossEncounter.isWithinAttackRange))
                {
-                  this.onClickAttack();
+                  this.onTeleportAttack();
                   this.addEnergy(energyCost);
                }
-               else if(this.isInTeleportClickAttackState)
-               {
-                  closestMonster = CH2.world.getNextMonster();
-                  if(!this.isNextMonsterInRange && closestMonster && (!closestMonster.isBoss || CH2.world.bossEncounter.isWithinAttackRange))
-                  {
-                     this.onTeleportAttack();
-                     this.addEnergy(energyCost);
-                  }
-               }
             }
-            else
-            {
-               IdleHeroUIManager.instance.mainUI.hud.showInsufficientEnergy();
-            }
+         }
+         else
+         {
+            IdleHeroUIManager.instance.mainUI.hud.showInsufficientEnergy();
          }
          this.buffs.onClick(null);
       }
@@ -1607,6 +1652,10 @@ package models
          attackData.isClickAttack = true;
          attackData.isTeleportAttack = true;
          attackData.damage = this.clickDamage;
+         if(!CH2.world.getNextMonster())
+         {
+            return;
+         }
          var previousY:Number = y;
          y = CH2.world.getNextMonster().y - this.attackRange;
          this.changeState(STATE_COMBAT);
@@ -1703,8 +1752,33 @@ package models
          this.totalOneShotMonsters++;
       }
       
+      public function calculateNewWorldBonusExperience() : BigNumber
+      {
+         var bonusExperience:BigNumber = null;
+         var i:int = 0;
+         var worldExperience:BigNumber = null;
+         var totalMonstersForBonus:Number = NaN;
+         if(this.highestWorldCompleted >= 1)
+         {
+            bonusExperience = new BigNumber(0);
+            for(i = 1; i <= this.highestWorldCompleted; i++)
+            {
+               worldExperience = Formulas.instance.getMonsterExperienceForWorld(i);
+               totalMonstersForBonus = this.monstersPerZone * 100 - this.highestMonstersKilled[i];
+               worldExperience.timesEqualsN(totalMonstersForBonus);
+               bonusExperience.plusEquals(worldExperience);
+            }
+            return bonusExperience;
+         }
+         return new BigNumber(0);
+      }
+      
       public function onWorldFinishedDefault() : void
       {
+         var bonusExperience:BigNumber = null;
+         var i:int = 0;
+         var worldExperience:BigNumber = null;
+         var totalMonstersForBonus:Number = NaN;
          this.didFinishWorld = true;
          this.highestMonstersKilled[this.currentWorldId] = 0;
          if(this.runsCompletedPerWorld.hasOwnProperty(this.currentWorldId))
@@ -1717,6 +1791,20 @@ package models
          }
          if(this.currentWorldId > this.highestWorldCompleted)
          {
+            if(this.currentWorldId > 1)
+            {
+               bonusExperience = new BigNumber(0);
+               for(i = 1; i < this.currentWorldId; i++)
+               {
+                  worldExperience = Formulas.instance.getMonsterExperienceForWorld(i);
+                  totalMonstersForBonus = this.monstersPerZone * 100 - this.highestMonstersKilled[i];
+                  worldExperience.timesEqualsN(totalMonstersForBonus);
+                  bonusExperience.plusEquals(worldExperience);
+                  this.runsCompletedPerWorld[i]++;
+                  this.highestMonstersKilled[i] = 0;
+               }
+               this.addExperience(bonusExperience);
+            }
             this.highestWorldCompleted = this.currentWorldId;
          }
          if(this.fastestWorldTimes.hasOwnProperty(this.currentWorldId))
@@ -1969,6 +2057,11 @@ package models
          return this.getStat(CH2.STAT_ENERGY_COST_REDUCTION);
       }
       
+      public function get clickableChance() : Number
+      {
+         return this.getStat(CH2.STAT_CLICKABLE_CHANCE);
+      }
+      
       public function getMultiplierForItemType(type:int) : Number
       {
          switch(type)
@@ -1981,7 +2074,7 @@ package models
                return this.getStat(CH2.STAT_ITEM_HEAD_DAMAGE);
             case Item.TYPE_CHEST:
                return this.getStat(CH2.STAT_ITEM_CHEST_DAMAGE);
-            case Item.TYPE_RING:
+            case Item.TYPE_FINGER:
                return this.getStat(CH2.STAT_ITEM_RING_DAMAGE);
             case Item.TYPE_LEGS:
                return this.getStat(CH2.STAT_ITEM_LEGS_DAMAGE);
@@ -2456,7 +2549,7 @@ package models
       {
          var distanceWalked:Number = this.walkSpeed * (dt / 1000) * ONE_METER_Y_DISTANCE;
          var closestMonster:Monster = CH2.world.getNextMonster();
-         var distanceToNextMonster:Number = closestMonster != null?Number(closestMonster.y - this.attackRange - y):Number(0);
+         var distanceToNextMonster:Number = closestMonster != null?Number(closestMonster.y - this.attackRange - y):Number(1000);
          distanceWalked = Math.min(distanceWalked,distanceToNextMonster);
          y = y + distanceWalked;
          this.totalRunDistance = this.totalRunDistance + distanceWalked;
@@ -2636,7 +2729,7 @@ package models
          {
             return new BigNumber(500000000);
          }
-         return new BigNumber(1400 + (level - 1) * 500);
+         return new BigNumber(600 + (level - 1) * 500);
       }
       
       public function getLevelUpCostToNextLevelOld(level:Number) : BigNumber
@@ -3052,7 +3145,6 @@ package models
          this.trackedGoldSpent.update(dt);
          this.trackedEnergyUsed.update(dt);
          this.trackedManaUsed.update(dt);
-         this.drawCounts.update(dt);
          this.trackedFrameMsec.update(dt);
          this.trackedXPEarned.update(dt);
       }

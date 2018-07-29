@@ -63,7 +63,7 @@ package
 			Characters.startingDefaultInstances[wizard.name] = wizard;
 		}
 		
-		public function onStaticDataLoaded():void
+		public function onStaticDataLoaded(staticData:Object):void
 		{
 			
 		}
