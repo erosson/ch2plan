@@ -173,7 +173,12 @@ initHome q { gameData } =
                                 }
                             , searchPrev = q.search
                             , searchString = q.search
-                            , zoom = 1
+                            , zoom =
+                                clampZoom <|
+                                    if selected == Set.empty then
+                                        1
+                                    else
+                                        0.1
                             , center = V2.vec2 0 0
                             , drag = Draggable.init
                             , tooltip = Nothing
@@ -326,7 +331,7 @@ update msg model =
                         newZoom =
                             home.zoom
                                 |> (+) (-factor * 0.01)
-                                |> clamp 0.2 3
+                                |> clampZoom
                     in
                         ( { model | route = Home { home | zoom = newZoom } }, Cmd.none )
 
@@ -365,6 +370,10 @@ update msg model =
 
                 _ ->
                     ( model, Cmd.none )
+
+
+clampZoom =
+    clamp 0.2 3
 
 
 redirect : G.GameData -> Route -> Maybe Route
