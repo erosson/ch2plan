@@ -279,27 +279,16 @@ update msg model =
                 SelectInput id ->
                     let
                         selected =
-                            if model.features.multiSelect then
-                                if Set.member id home.graph.selected then
-                                    -- remove the node, and any disconnected from the start by its removal
-                                    home.graph.selected
-                                        |> invert id
-                                        |> reachableSelectedNodes startNodes home.graph.char.graph
-                                else
-                                    -- add the node and any in between
-                                    Dijkstra.selectPathToNode (Lazy.force home.graph.dijkstra) id
-                                        |> Set.fromList
-                                        |> Set.union home.graph.selected
+                            if Set.member id home.graph.selected then
+                                -- remove the node, and any disconnected from the start by its removal
+                                home.graph.selected
+                                    |> invert id
+                                    |> reachableSelectedNodes startNodes home.graph.char.graph
                             else
-                                -- the old way - one node at a time. faster.
-                                let
-                                    s =
-                                        invert id home.graph.selected
-                                in
-                                    if isValidSelection startNodes home.graph.char.graph s then
-                                        s
-                                    else
-                                        home.graph.selected
+                                -- add the node and any in between
+                                Dijkstra.selectPathToNode (Lazy.force home.graph.dijkstra) id
+                                    |> Set.fromList
+                                    |> Set.union home.graph.selected
 
                         q =
                             home.params
@@ -318,10 +307,7 @@ update msg model =
                     -- but here the side effect is pre-computing dijkstra!
                     let
                         _ =
-                            if model.features.multiSelect then
-                                Lazy.force home.graph.dijkstra
-                            else
-                                Dijkstra.empty
+                            Lazy.force home.graph.dijkstra
                     in
                         ( model, Cmd.none )
 

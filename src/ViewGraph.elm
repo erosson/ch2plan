@@ -25,23 +25,20 @@ view windowSize model features =
     -- svg-container is for tooltip positioning. It must be exactly the same size as the svg itself.
     H.div [ HA.class "svg-container" ]
         ([ S.svg
-            (Route.ifFeature features.zoom
-                inputZoomAndPan
-                [ A.viewBox <| formatViewBox (iconSize // 2) model.graph.char.graph ]
-            )
+            inputZoomAndPan
             [ S.defs []
-                [ S.filter [ A.id "hueSelected" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values <| toString <| Maybe.withDefault 0 <| model.params.hueSelected ] [] ]
-                , S.filter [ A.id "hueSearch" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values <| toString <| Maybe.withDefault 0 <| model.params.hueSearch ] [] ]
-                , S.filter [ A.id "edge" ] [ S.feGaussianBlur [ A.in_ "SourceGraphic", A.stdDeviation "2" ] [] ]
+                -- hueSelected/hueSearch are gone now, but just in case we add multicolor searches later, here's a hint:
+                -- S.filter [ A.id "hueSearch" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values <| toString hueSearch ]
+                [ S.filter [ A.id "edge" ] [ S.feGaussianBlur [ A.in_ "SourceGraphic", A.stdDeviation "2" ] [] ]
                 , S.filter [ A.id "edgeSelected" ] [ S.feGaussianBlur [ A.in_ "SourceGraphic", A.stdDeviation "4" ] [] ]
                 ]
-            , S.g (Route.ifFeature features.zoom [ zoomAndPan windowSize model ] [])
+            , S.g [ zoomAndPan windowSize model ]
                 ([ model.graph |> L.lazy viewEdges
                  , model.graph |> L.lazy viewNodeBackgrounds
                  , model.graph |> L.lazy2 viewNodes features
                  ]
                 )
-            , (Route.ifFeature features.zoom (viewZoomButtons windowSize) <| S.g [] [])
+            , viewZoomButtons windowSize
             ]
          ]
             ++ Maybe.Extra.unwrap []

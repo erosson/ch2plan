@@ -15,11 +15,6 @@ type alias HomeParams =
     , hero : String
     , build : Maybe String
     , search : Maybe String
-
-    -- Hue rotation for these node colors, for accessibility.
-    -- https://github.com/erosson/ch2plan/issues/33
-    , hueSelected : Maybe Int
-    , hueSearch : Maybe Int
     }
 
 
@@ -27,8 +22,6 @@ type alias LegacyHomeParams =
     { hero : String
     , build : Maybe String
     , search : Maybe String
-    , hueSelected : Maybe Int
-    , hueSearch : Maybe Int
     }
 
 
@@ -38,8 +31,6 @@ delegacy version params =
     , hero = params.hero
     , build = params.build
     , search = params.search
-    , hueSelected = Nothing
-    , hueSearch = Nothing
     }
 
 
@@ -48,8 +39,6 @@ homeParams0 =
     { hero = "helpfulAdventurer"
     , build = Nothing
     , search = Nothing
-    , hueSelected = Nothing
-    , hueSearch = Nothing
     }
 
 
@@ -62,12 +51,12 @@ type Route
 
 
 type alias Features =
-    { multiSelect : Bool, zoom : Bool, fancyTooltips : Bool, fullscreen : Bool }
+    { fancyTooltips : Bool, fullscreen : Bool }
 
 
 features0 : Features
 features0 =
-    { multiSelect = True, zoom = True, fancyTooltips = False, fullscreen = False }
+    { fancyTooltips = False, fullscreen = False }
 
 
 parse : Navigation.Location -> Route
@@ -110,8 +99,6 @@ homeQS path =
     -- Query string for all skill tree urls
     path
         <?> P.stringParam "q"
-        <?> P.intParam "hueSelected"
-        <?> P.intParam "hueSearch"
 
 
 parser : P.Parser (Route -> a) a
@@ -167,8 +154,6 @@ featuresParser : P.Parser (Features -> a) a
 featuresParser =
     P.map Features <|
         P.top
-            <?> flagParam "enableMultiSelect" features0.multiSelect
-            <?> flagParam "enableZoom" features0.zoom
             <?> flagParam "enableFancyTooltips" features0.fancyTooltips
             <?> flagParam "enableFullscreen" features0.fullscreen
 

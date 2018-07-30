@@ -25,12 +25,6 @@ svg .node {
   stroke-width: 1;
   fill: #ddd;
 }
-svg .node-selected {
-  filter: url(#hueSelected)
-}
-svg .node-highlight {
-  filter: url(#hueSearch)
-}
 svg .zoom-buttons {
   fill: #222d;
   stroke: #ccc;
