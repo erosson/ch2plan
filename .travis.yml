@@ -54,4 +54,4 @@ deploy:
     on:
       branch: master
 after_deploy:
-  - yarn deploy:purge-cloudflare-cache
+  - ./scripts/deploy/purge-cloudflare-cache
