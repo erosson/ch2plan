@@ -25,6 +25,8 @@ These recently left beta, and are turned *on* by default. For now, you can disab
 
 ---
 ## 2018-07-30
+- Selecting/deselecting nodes feels faster now: triggers when the mouse is pressed, instead of when it's released.
+- The new beta tooltips now work on touch screens, using a long press.
 - The stats table more closely matches what's in-game.
 
 ## 2018-07-28

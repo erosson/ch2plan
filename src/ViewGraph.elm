@@ -44,7 +44,7 @@ view windowSize model features =
             ++ Maybe.Extra.unwrap []
                 (List.singleton << viewTooltip windowSize model)
                 -- (model.tooltip |> Maybe.withDefault 1 |> Just |> Maybe.andThen ((flip Dict.get) model.char.graph.nodes))
-                (Route.ifFeature features.fancyTooltips model.tooltip Nothing |> Maybe.andThen ((flip Dict.get) model.graph.char.graph.nodes))
+                (Route.ifFeature features.fancyTooltips (M.visibleTooltip model) Nothing |> Maybe.andThen ((flip Dict.get) model.graph.char.graph.nodes))
         )
 
 
@@ -291,8 +291,12 @@ viewNode : Route.Features -> M.HomeGraphModel -> G.Node -> S.Svg M.Msg
 viewNode features home { id, x, y, val } =
     S.g
         [ A.class <| String.join " " [ "node", nodeHighlightClass home.search val, nodeSelectedClass home.selected id, nodeNeighborClass home.neighbors id, nodeQualityClass val.quality ]
-        , E.onMouseOver <| M.Tooltip <| Just id
-        , E.onMouseOut <| M.Tooltip Nothing
+        , E.onMouseOver <| M.NodeMouseOver id
+        , E.onMouseOut <| M.NodeMouseOut id
+        , E.onMouseDown <| M.NodeMouseDown id
+        , E.onMouseUp <| M.NodeMouseUp id
+        , E.on "touchStart" <| Decode.succeed <| M.NodeMouseDown id
+        , E.on "touchEnd" <| Decode.succeed <| M.NodeMouseUp id
         ]
         ([ S.image
             [ A.xlinkHref <| iconUrl val
@@ -300,7 +304,6 @@ viewNode features home { id, x, y, val } =
             , A.y <| toString <| y - iconSize // 2
             , A.width <| toString iconSize
             , A.height <| toString iconSize
-            , E.onClick <| M.SelectInput id
             ]
             []
          ]

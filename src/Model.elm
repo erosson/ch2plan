@@ -23,13 +23,16 @@ import Model.Dijkstra as Dijkstra
 type Msg
     = SearchInput String
     | SearchNav (Maybe String) (Maybe String)
-    | SelectInput Int
+    | NodeMouseDown G.NodeId
+    | NodeMouseUp G.NodeId
+    | NodeMouseOver G.NodeId
+    | NodeMouseOut G.NodeId
+    | NodeLongPress G.NodeId
     | NavLocation Navigation.Location
     | Preprocess
     | OnDragBy V2.Vec2
     | DragMsg (Draggable.Msg ())
     | Zoom Float
-    | Tooltip (Maybe G.NodeId)
     | Resize Window.Size
     | ToggleSidebar
 
@@ -63,9 +66,15 @@ type alias HomeModel =
     , zoom : Float
     , center : V2.Vec2
     , drag : Draggable.State ()
-    , tooltip : Maybe G.NodeId
+    , tooltip : Maybe ( G.NodeId, TooltipState )
     , sidebarOpen : Bool
     }
+
+
+type TooltipState
+    = Hovering
+    | Shortpressing
+    | Longpressing
 
 
 type alias HomeGraphModel =
@@ -191,6 +200,19 @@ searchRegex =
     Maybe.map (Regex.regex >> Regex.caseInsensitive)
 
 
+visibleTooltip : HomeModel -> Maybe G.NodeId
+visibleTooltip { tooltip } =
+    case tooltip of
+        Just ( id, Hovering ) ->
+            Just id
+
+        Just ( id, Longpressing ) ->
+            Just id
+
+        _ ->
+            Nothing
+
+
 navFromHome : Model -> HomeModel -> Route -> ( RouteModel, Cmd Msg )
 navFromHome model old route =
     let
@@ -245,6 +267,30 @@ navFromHome model old route =
                 ( routeModel, redirectCmd model.gameData route )
 
 
+updateNode : G.NodeId -> HomeModel -> Model -> ( Model, Cmd Msg )
+updateNode id home model =
+    let
+        selected =
+            if Set.member id home.graph.selected then
+                -- remove the node, and any disconnected from the start by its removal
+                home.graph.selected
+                    |> invert id
+                    |> reachableSelectedNodes startNodes home.graph.char.graph
+            else
+                -- add the node and any in between
+                Dijkstra.selectPathToNode (Lazy.force home.graph.dijkstra) id
+                    |> Set.fromList
+                    |> Set.union home.graph.selected
+
+        q =
+            home.params
+
+        route =
+            Route.Home { q | build = nodesToBuild home.graph.char.graph selected }
+    in
+        ( model, Navigation.newUrl <| Route.stringify route )
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case model.route of
@@ -281,27 +327,69 @@ update msg model =
                         Cmd.none
                     )
 
-                SelectInput id ->
-                    let
-                        selected =
-                            if Set.member id home.graph.selected then
-                                -- remove the node, and any disconnected from the start by its removal
-                                home.graph.selected
-                                    |> invert id
-                                    |> reachableSelectedNodes startNodes home.graph.char.graph
+                NodeMouseOver id ->
+                    ( { model | route = Home { home | tooltip = Just ( id, Hovering ) } }, Cmd.none )
+
+                NodeMouseOut id ->
+                    ( { model | route = Home { home | tooltip = Nothing } }, Cmd.none )
+
+                NodeMouseDown id ->
+                    case home.tooltip of
+                        Nothing ->
+                            -- clicked without hovering - this could be mobile/longpress.
+                            -- (could also be a keyboard, but you want to tab through 700 nodes? sorry, not supported)
+                            ( { model | route = Home { home | tooltip = Just ( id, Shortpressing ) } }
+                            , Process.sleep (0.5 * Time.second) |> Task.perform (always <| NodeLongPress id)
+                            )
+
+                        Just ( tid, state ) ->
+                            if id /= tid then
+                                -- multitouch...? I only support one tooltip at a time
+                                ( { model | route = Home { home | tooltip = Just ( id, Shortpressing ) } }
+                                , Process.sleep (0.5 * Time.second) |> Task.perform (always <| NodeLongPress id)
+                                )
                             else
-                                -- add the node and any in between
-                                Dijkstra.selectPathToNode (Lazy.force home.graph.dijkstra) id
-                                    |> Set.fromList
-                                    |> Set.union home.graph.selected
+                                case state of
+                                    Hovering ->
+                                        -- Mouse-user, clicked while hovering. Select this node, don't wait for mouseout
+                                        updateNode id home model
 
-                        q =
-                            home.params
+                                    _ ->
+                                        -- Multitouch...? Ignore other mousedowns.
+                                        ( model, Cmd.none )
 
-                        route =
-                            Route.Home { q | build = nodesToBuild home.graph.char.graph selected }
-                    in
-                        ( model, Navigation.newUrl <| Route.stringify route )
+                NodeLongPress id ->
+                    case home.tooltip of
+                        -- waiting for the same longpress that sent this message?
+                        Just ( tid, Shortpressing ) ->
+                            ( { model | route = Home { home | tooltip = Just ( id, Longpressing ) } }, Cmd.none )
+
+                        _ ->
+                            ( model, Cmd.none )
+
+                NodeMouseUp id ->
+                    case home.tooltip of
+                        Nothing ->
+                            -- no idea how we got here, select the node I guess
+                            updateNode id home model
+
+                        Just ( tid, state ) ->
+                            if id /= tid then
+                                -- no idea how we got here, select the node I guess
+                                updateNode id home model
+                            else
+                                case state of
+                                    Hovering ->
+                                        -- mouse-user, clicked while hovering. Do nothing, mousedown already selected the node
+                                        ( model, Cmd.none )
+
+                                    Shortpressing ->
+                                        -- end of a quick tap - select the node and cancel the longpress
+                                        updateNode id home { model | route = Home { home | tooltip = Nothing } }
+
+                                    Longpressing ->
+                                        -- end of a tooltip longpress - hide the tooltip
+                                        ( { model | route = Home { home | tooltip = Nothing } }, Cmd.none )
 
                 Preprocess ->
                     -- calculate dijkstra immediately after the view renders, so we have it ready later, when the user clicks.
@@ -338,9 +426,6 @@ update msg model =
                 DragMsg dragMsg ->
                     Draggable.update dragConfig dragMsg home
                         |> Tuple.mapFirst (\home2 -> { model | route = Home home2 })
-
-                Tooltip node ->
-                    ( { model | route = Home { home | tooltip = node } }, Cmd.none )
 
                 NavLocation loc ->
                     let

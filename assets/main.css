@@ -2,6 +2,7 @@ body {
   /* background-image: url("./ch2data/img/starBG.png"); */
   background: #080010;
   color: #fff;
+  user-select: none;
 }
 h2 {
   white-space: nowrap;
@@ -30,6 +31,7 @@ svg .zoom-buttons {
   stroke: #ccc;
   stroke-width: 3;
   border-radius: 5;
+  user-select: none;
 }
 svg .zoom-buttons text {
   text-anchor: middle;
