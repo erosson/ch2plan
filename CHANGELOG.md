@@ -34,7 +34,7 @@ These recently left beta, and are turned *on* by default. For now, you can disab
 - Add support for multiple game versions, and for the new 0.06 PTR release.
 
 ## 2018-07-27
-- Added `?hueSelected=` and `?hueSearch=` parameters, intended to make life a little easier for the colorblind.
+- ~~Added `?hueSelected=` and `?hueSearch=` parameters, intended to make life a little easier for the colorblind.~~
 - Search should be much less laggy, and no longer skips letters.
 
 ## 2018-07-25
