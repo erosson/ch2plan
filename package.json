@@ -18,6 +18,7 @@
     "build": "rm -rf ./dist && mkdir -p ./dist && cp CHANGELOG.md ./dist && rsync -auv ./assets/ ./dist/ && elm-make ./src/Main.elm --output=./dist/elm.js",
     "//test": "you probably want to run this with --watch, like 'yarn test --watch'",
     "test": "elm-test",
+    "deploy:purge-cloudflare-cache": "scripty",
     "start": "yarn build && serve ./dist"
   },
   "//optionalDependencies": "because travis fails to install me, but doesn't actually need me",

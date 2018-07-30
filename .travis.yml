@@ -10,6 +10,7 @@ addons:
       key_url: 'https://dl.yarnpkg.com/debian/pubkey.gpg'
     packages:
     - yarn
+    - curl
 
 # https://8thlight.com/blog/rob-looby/2016/04/07/caching-elm-builds-on-travis-ci.html
 cache:
@@ -52,3 +53,5 @@ deploy:
     local_dir: dist/
     on:
       branch: master
+after_deploy:
+  - yarn deploy:purge-cloudflare-cache

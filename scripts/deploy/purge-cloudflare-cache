@@ -1,0 +1,8 @@
+#!/bin/sh -eu
+# https://api.cloudflare.com/#zone-purge-all-files
+# zone identifier - fed1bc67ffb2f62c6deaa5c7f8f9eb93 - is the cloudflare url for erosson.org
+curl -X POST "https://api.cloudflare.com/client/v4/zones/fed1bc67ffb2f62c6deaa5c7f8f9eb93/purge_cache" \
+     -H "X-Auth-Email: $CLOUDFLARE_EMAIL" \
+     -H "X-Auth-Key: $CLOUDFLARE_TOKEN" \
+     -H "Content-Type: application/json" \
+     --data '{"purge_everything":true}'
