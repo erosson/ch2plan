@@ -9,6 +9,7 @@ module GameData.Stats
         , decoder
         , calcStat
         , calcStats
+        , statTable
         )
 
 import Json.Decode as D
@@ -246,6 +247,26 @@ statList =
 statDict : Dict String Stat
 statDict =
     statList |> List.map (\s -> ( toString s, s )) |> Dict.fromList
+
+
+statTable : List StatTotal -> Stat -> StatTotal
+statTable stats =
+    let
+        dict : Dict String StatTotal
+        dict =
+            stats |> List.map (\s -> ( toString s.stat, s )) |> Dict.fromList
+    in
+        -- it's a dict-measuring contest lolol
+        if Dict.size dict /= List.length statList then
+            Debug.crash ("statTable expects a complete list of stats. Expected " ++ toString (List.length statList) ++ ", got " ++ toString (Dict.size dict)) dict
+        else
+            \stat ->
+                case Dict.get (toString stat) dict of
+                    Nothing ->
+                        Debug.crash "statTable had a complete list of stats, but somehow dict.get missed one" stat
+
+                    Just stat ->
+                        stat
 
 
 getStat : String -> Maybe Stat
