@@ -18,6 +18,7 @@ import GameData as G
 import GameData.Stats as GS
 import Route as Route exposing (Route)
 import Model.Dijkstra as Dijkstra
+import Ports
 
 
 type Msg
@@ -35,6 +36,8 @@ type Msg
     | Zoom Float
     | Resize Window.Size
     | ToggleSidebar
+    | SaveFileSelected String
+    | SaveFileImport Ports.SaveFileData
 
 
 type alias Model =
@@ -440,6 +443,16 @@ update msg model =
                 ToggleSidebar ->
                     ( { model | route = Home { home | sidebarOpen = not home.sidebarOpen } }, Cmd.none )
 
+                SaveFileSelected nodeId ->
+                    ( model, Ports.saveFileSelected nodeId )
+
+                SaveFileImport data ->
+                    let
+                        _ =
+                            Debug.log <| data.hero ++ "\n\n" ++ data.build
+                    in
+                        ( model, Cmd.none )
+
         _ ->
             -- all other routes have no state to preserve or update
             case msg of
@@ -628,6 +641,7 @@ subscriptions model =
             Sub.batch
                 [ Window.resizes Resize
                 , Draggable.subscriptions DragMsg home.drag
+                , Ports.saveFileContentRead SaveFileImport
                 ]
 
         _ ->
