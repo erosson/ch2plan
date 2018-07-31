@@ -32,12 +32,22 @@
      "STAT_ITEM_FEET_DAMAGE": [1, "exponentialMultiplier", 1.5],
      "STAT_ITEM_BACK_DAMAGE": [1, "exponentialMultiplier", 1.5],
      "STAT_AUTOMATOR_SPEED": [1, "exponentialMultiplier", 1.25],
-     "ExtraMulticlicks": [5, "linear", 3],
-     "MulticlickCost": [3, "linear", 1],
-     "BigClicksStacks": [3, "linear", 1],
-     "BigClicksDamage": [3, "exponentialMultiplier", 1.25],
-     "HugeClickDamage": [10, "exponentialMultiplier", 1.25],
-     "ManaCritDamage": [1, "linear", 1.25]
+     "MultiClick_stacks": [5, "linear", 3],
+     "MultiClick_energyCost": [0, "linear", 1],
+     "BigClicks_stacks": [3, "linear", 1],
+     "BigClicks_damage": [3, "exponentialMultiplier", 1.25],
+     "HugeClick_damage": [10, "exponentialMultiplier", 1.25],
+     "ManaCrit_damage": [1, "linear", 1.25],
+     "Clickstorm_cooldown": [1, "exponentialMultiplier", 0.8],
+     "Energize_cooldown": [1, "exponentialMultiplier", 0.8],
+     "Energize_manaCost": [1, "exponentialMultiplier", 0.8],
+     "Energize_duration": [60000, "exponentialMultiplier", 1.2],
+     "Powersurge_cooldown": [1, "exponentialMultiplier", 0.8],
+     "Powersurge_manaCost": [1, "exponentialMultiplier", 0.8],
+     "Powersurge_duration": [60000, "exponentialMultiplier", 1.2],
+     "Powersurge_damage": [2, "exponentialMultiplier", 1.25],
+     "Reload_effect": [0.4, "linear", 0.2],
+     "Reload_cooldown": [1, "exponentialMultiplier", 0.8]
   },
   "//characters": "based on ./ch2data/HelpfulAdventurerMain.as purchaseFunction()s",
   "characters": {
@@ -67,18 +77,26 @@
         "STAT_ITEM_FEET_DAMAGE": [["I7", 1]],
         "STAT_ITEM_BACK_DAMAGE": [["I8", 1]],
         "STAT_AUTOMATOR_SPEED": [["Az", 1]],
-        "ExtraMulticlicks": [["Mu", 1], ["qMu", 3]],
-        "MulticlickCost": [["Mu", 1], ["qMu", 3]],
-        "BigClicksStacks": [["Bc", 1], ["qBc", 3]],
-        "BigClicksDamage": [["Bd", 1], ["qBd", 3]],
-        "HugeClickDamage": [["Hd", 1], ["qHd", 3]],
-        "ManaCritDamage": [["Md", 1], ["qMd", 3]]
-      },
-      "traits": {}
+        "MultiClick_stacks": [["Mu", 1], ["qMu", 3]],
+        "MultiClick_energyCost": [["Mu", 1], ["qMu", 3]],
+        "BigClicks_stacks": [["Bc", 1], ["qBc", 3]],
+        "BigClicks_damage": [["Bd", 1], ["qBd", 3]],
+        "HugeClick_damage": [["Hd", 1], ["qHd", 3]],
+        "ManaCrit_damage": [["Md", 1], ["qMd", 3]],
+        "Clickstorm_cooldown": [["Kh", 1]],
+        "Energize_cooldown": [["Eh", 1]],
+        "Energize_manaCost": [["Eh", 1]],
+        "Energize_duration": [["Ea", 1]],
+        "Powersurge_cooldown": [["Ph", 1]],
+        "Powersurge_manaCost": [["Ph", 1]],
+        "Powersurge_duration": [["Pt", 1]],
+        "Powersurge_damage": [["Pa", 1]],
+        "Reload_effect": [["Ra", 1]],
+        "Reload_cooldown": [["Rh", 1]]
+      }
     },
     "wizard": {
-      "stats": {},
-      "traits": {}
+      "stats": {}
     }
   }
 }

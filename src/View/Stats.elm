@@ -20,28 +20,77 @@ view model params =
         Err err ->
             H.div [] [ H.text <| "error: " ++ err ]
 
-        Ok { selected, stats, nodes } ->
-            H.div []
-                [ H.p [] [ H.a [ Route.href <| Route.Home params ] [ H.text "View Skill Tree" ] ]
-                , H.div [ A.class "stats-flex" ]
-                    [ H.div [ A.class "stats-box" ]
-                        [ H.p [] [ H.text "Statistics:" ]
-                        , viewStatsSummary stats
+        Ok { char, selected, stats, nodes } ->
+            let
+                getStat =
+                    GS.statTable stats
+            in
+                H.div []
+                    [ H.p []
+                        [ H.a [ Route.href <| Route.Home params ] [ H.text "View Skill Tree" ] ]
+                    , H.p [ A.title "I haven't seen an official name for those blue nodes in CH2, so I stole Path of Exile's name for nodes like that." ]
+                        [ H.text "⚠ Warning: most of the blue "
+                        , H.span [ A.class "node-Keystone" ] [ H.text "Keystone Nodes" ]
+                        , H.text " have no effect on these stat calculations yet. Work is in progress. Please be patient."
                         ]
-                    , H.div [ A.class "stats-box" ]
-                        [ H.p [] [ H.a [ Route.href <| Route.Home params ] [ H.text <| toString (Set.size selected) ++ " skill points:" ] ]
-                        , viewNodeSummary True nodes
+                    , H.div [ A.class "stats-flex" ]
+                        [ H.div [ A.class "stats-box" ]
+                            [ H.p [] [ H.text "Skills:" ]
+                            , H.ul [] (List.map (viewSkillSummary getStat) <| List.filter (\s -> not <| Set.member s.id skillBlacklist) <| Dict.values char.skills)
+                            ]
+                        , H.div [ A.class "stats-box" ]
+                            [ H.p [] [ H.text "Statistics:" ]
+                            , viewStatsSummary getStat
+                            ]
+                        , H.div [ A.class "stats-box" ]
+                            [ H.p [] [ H.a [ Route.href <| Route.Home params ] [ H.text <| toString (Set.size selected) ++ " skill points:" ] ]
+                            , viewNodeSummary True nodes
+                            ]
                         ]
                     ]
-                ]
 
 
-viewStatsSummary : List GS.StatTotal -> H.Html msg
-viewStatsSummary statList =
+
+-- quick-and-dirty way to avoid rendering unused skills
+
+
+skillBlacklist =
+    Set.fromList [ "Clickdrizzle", "EnergizeExtend", "EnergizeRush" ]
+
+
+viewSkillSummary : (GS.Stat -> GS.StatTotal) -> G.Skill -> H.Html msg
+viewSkillSummary getStat skill =
     let
-        getStat =
-            GS.statTable statList
+        skillVal : String -> Maybe Float
+        skillVal name =
+            -- fetch a skill-stat, if the stat exists. Skill-stats are specially named stats, for example "BigClicks_damage".
+            skill.id ++ "_" ++ name |> GS.getStat |> Maybe.map (getStat >> .val)
 
+        skillValOr : Float -> String -> Float
+        skillValOr default =
+            -- fetch a skill-stat or a default value.
+            skillVal >> Maybe.withDefault default
+
+        lines =
+            -- all of these lines are conditional: displayed if and only if the far-left skill-field or stat exists (ie. is not Nothing).
+            [ skill.energyCost |> Maybe.map (toFloat >> (+) (skillValOr 0 "energyCost") >> int >> (,) "Energy Cost")
+            , skill.manaCost |> Maybe.map (toFloat >> (*) (skillValOr 1 "manaCost") >> int >> (,) "Mana Cost")
+            , skill.cooldown |> Maybe.map (toFloat >> (*) (skillValOr 1 "cooldown" / 1000 / (getStat STAT_HASTE).val) >> sec 1 >> (,) "Cooldown")
+            , skillVal "duration" |> Maybe.map ((*) (1 / 1000) >> sec 1 >> (,) "Duration")
+            , skillVal "damage" |> Maybe.map (pct >> (,) "Damage")
+            , skillVal "stacks" |> Maybe.map (int >> (,) "Stacks")
+            , skillVal "effect" |> Maybe.map (pct >> (,) "Effect")
+            ]
+                |> Maybe.Extra.values
+                |> List.map (\( label, value ) -> H.li [] [ H.text <| label ++ ": " ++ value ])
+    in
+        H.li []
+            [ H.text skill.name, H.ul [] lines ]
+
+
+viewStatsSummary : (GS.Stat -> GS.StatTotal) -> H.Html msg
+viewStatsSummary getStat =
+    let
         toEntry ( label, statIds, format ) =
             let
                 stats =
@@ -53,7 +102,7 @@ viewStatsSummary statList =
                 { label = label, level = level, value = format stats }
     in
         -- H.table [ A.class "stats-summary" ] (statEntrySpecs |> List.map (toEntry >> viewStatEntry) |> Maybe.Extra.values)
-        H.table [ A.class "stats-summary" ] (statEntrySpecs ++ skillEntrySpecs |> List.map (toEntry >> viewStatEntry) |> Maybe.Extra.values)
+        H.table [ A.class "stats-summary" ] (statEntrySpecs |> List.map (toEntry >> viewStatEntry) |> Maybe.Extra.values)
 
 
 type alias StatsEntrySpec =
@@ -105,18 +154,6 @@ statEntrySpecs =
     ]
 
 
-skillEntrySpecs : List StatsEntrySpec
-skillEntrySpecs =
-    -- I made these up, no basis on in-game ui
-    [ ( "Multiclick Clicks (no flurry/frenzy yet)", [ ExtraMulticlicks ], entryInt )
-    , ( "Multiclick Energy Cost", [ MulticlickCost ], entryInt )
-    , ( "Big Clicks Stacks", [ BigClicksStacks ], entryInt )
-    , ( "Big Clicks Damage Multiplier", [ BigClicksDamage ], entryPct )
-    , ( "Huge Click Damage Multiplier", [ HugeClickDamage ], entryPct )
-    , ( "Mana Crit Damage Multiplier", [ ManaCritDamage ], entryPct )
-    ]
-
-
 stat1 : List GS.StatTotal -> GS.StatTotal
 stat1 stats =
     case stats of
@@ -142,11 +179,11 @@ entryPct =
 
 
 entryFloat =
-    stat1 >> \stat -> Just <| float stat.val
+    stat1 >> \stat -> Just <| float 3 stat.val
 
 
 entrySec base =
-    stat1 >> \stat -> Just <| sec <| base / Time.second / stat.val
+    stat1 >> \stat -> Just <| sec 1 <| base / Time.second / stat.val
 
 
 entryInt =
@@ -175,21 +212,18 @@ pct f =
     (f * 100 |> floor |> toString) ++ "%"
 
 
-float : Float -> String
-float f =
+float : Int -> Float -> String
+float sigfigs f =
     let
-        sigfigs =
-            3
-
         exp =
-            10 ^ sigfigs
+            10 ^ toFloat sigfigs
     in
         (f * exp |> floor |> toFloat) / exp |> toString
 
 
-sec : Float -> String
-sec f =
-    float f ++ "s"
+sec : Int -> Float -> String
+sec sigfigs f =
+    float sigfigs f ++ "s"
 
 
 pct0 f =

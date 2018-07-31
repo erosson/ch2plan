@@ -34,7 +34,7 @@ viewOldTree header ({ features, lastUpdatedVersion } as model) home =
                     [ View.Graph.view { width = 1000, height = 1000 } home features ]
                , viewSearch home
                , H.p [] [ H.a [ Route.href <| Route.Stats home.params ] [ H.text "Statistics:" ] ]
-               , View.Stats.viewStatsSummary <| M.statsSummary home.graph
+               , View.Stats.viewStatsSummary <| GS.statTable <| M.statsSummary home.graph
                , H.p [] [ H.a [ Route.href <| Route.Stats home.params ] [ H.text <| toString (Set.size home.graph.selected) ++ " skill points" ] ]
                ]
 
@@ -52,7 +52,7 @@ viewFullscreenTree header ({ windowSize, features } as model) home =
                        , viewVersionNav home.graph.game home.params
                        , viewSearch home
                        , H.p [] [ H.a [ Route.href <| Route.Stats home.params ] [ H.text "Statistics:" ] ]
-                       , View.Stats.viewStatsSummary <| M.statsSummary home.graph
+                       , View.Stats.viewStatsSummary <| GS.statTable <| M.statsSummary home.graph
                        , H.p [] [ H.a [ Route.href <| Route.Stats home.params ] [ H.text <| toString (Set.size home.graph.selected) ++ " skill points" ] ]
                        ]
                 )

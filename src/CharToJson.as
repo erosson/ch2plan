@@ -11,7 +11,7 @@ package {
 
   public class CharToJson extends Sprite {
     private var pending: int = 0
-    private var json: Object = {heroes: {}}
+    private var json: Object = {heroes: {}, skills: {}}
     private var fields:Array = ['name', 'flavorName', 'flavorClass', 'flavor', 'levelGraphNodeTypes', 'levelGraphObject']
 
     public function CharToJson () {
@@ -41,9 +41,10 @@ package {
       try {
         var cls:Class = e.target.applicationDomain.getDefinition("HelpfulAdventurerMain") as Class;
         new cls().onStartup(null);
-        var chars:Class = e.target.applicationDomain.getDefinition("models.Characters") as Class;
-        var char:Object = chars.startingDefaultInstances['Helpful Adventurer']
+        var Characters:Class = e.target.applicationDomain.getDefinition("models.Characters") as Class;
+        var char:Object = Characters.startingDefaultInstances['Helpful Adventurer']
         this.json.heroes.helpfulAdventurer = pick(char, fields)
+        loadSkills(e, "helpfulAdventurer")
         loadComplete()
       }
       catch(e:Error) {
@@ -54,14 +55,13 @@ package {
       try {
         var cls:Class = e.target.applicationDomain.getDefinition("WizardMain") as Class;
         new cls().onStartup(null)
-        var chars:Class = e.target.applicationDomain.getDefinition("models.Characters") as Class;
-        var char:Object = chars.startingDefaultInstances['Wizard']
-        log('prepick')
+        var Characters:Class = e.target.applicationDomain.getDefinition("models.Characters") as Class;
+        var char:Object = Characters.startingDefaultInstances['Wizard']
         this.json.heroes.wizard = pick(char, fields)
-        log('postpick')
         // until wizard's working, fake its graph
         this.json.heroes.wizard.levelGraphObject = {edges:[], nodes:[]}
         this.json.heroes.wizard.levelGraphNodeTypes = {}
+        loadSkills(e, "wizard")
         loadComplete()
       }
       catch(e:Error) {
@@ -77,6 +77,16 @@ package {
       log("")
       log("CharToJson success! Copy-paste that big mess above into the json file that we just opened for you, please:")
       log("./assets/ch2data/chars/latest.json")
+    }
+
+    private function loadSkills(e: Event, char: String) {
+      var Character:Class = e.target.applicationDomain.getDefinition("models.Character") as Class;
+      for (var key:String in Character.staticSkillInstances) {
+        if (!this.json.skills[key]) {
+          this.json.skills[key] = pick(Character.staticSkillInstances[key], ['modName', 'uid', 'name', 'description', 'cooldown', 'duration', 'manaCost', 'energyCost', 'ignoresGCD', 'iconId']);
+          this.json.skills[key].char = char
+        }
+      }
     }
 
     // https://stackoverflow.com/questions/1634757/as3-instantiate-class-from-external-swf

@@ -2,6 +2,200 @@
   "ch2": {
     "GAME_VERSION": "0.052 beta"
   },
+  "skills": {
+    "Energize": {
+      "energyCost": 0,
+      "name": "Energize",
+      "cooldown": 60000,
+      "char": "helpfulAdventurer",
+      "ignoresGCD": false,
+      "iconId": 35,
+      "manaCost": 25,
+      "description": "",
+      "uid": "Energize",
+      "modName": "Helpful Adventurer"
+    },
+    "Reload": {
+      "energyCost": 0,
+      "name": "Reload",
+      "cooldown": 1800000,
+      "char": "helpfulAdventurer",
+      "ignoresGCD": false,
+      "iconId": 168,
+      "manaCost": 0,
+      "description": "",
+      "uid": "Reload",
+      "modName": "Helpful Adventurer"
+    },
+    "Energize: Rush": {
+      "energyCost": 0,
+      "name": "Energize: Rush",
+      "cooldown": 30000,
+      "char": "helpfulAdventurer",
+      "ignoresGCD": false,
+      "iconId": 35,
+      "manaCost": 25,
+      "description": "",
+      "uid": "Energize: Rush",
+      "modName": "Helpful Adventurer"
+    },
+    "Big Clicks": {
+      "energyCost": 4,
+      "name": "Big Clicks",
+      "cooldown": 8000,
+      "char": "helpfulAdventurer",
+      "ignoresGCD": false,
+      "iconId": 198,
+      "manaCost": 0,
+      "description": "",
+      "uid": "Big Clicks",
+      "modName": "Helpful Adventurer"
+    },
+    "Mana Crit": {
+      "energyCost": 0,
+      "name": "Mana Crit",
+      "cooldown": 60000,
+      "char": "helpfulAdventurer",
+      "ignoresGCD": false,
+      "iconId": 1,
+      "manaCost": 5,
+      "description": "",
+      "uid": "Mana Crit",
+      "modName": "Helpful Adventurer"
+    },
+    "Clickdrizzle": {
+      "energyCost": 0,
+      "name": "Clickdrizzle",
+      "cooldown": 600000,
+      "char": "helpfulAdventurer",
+      "ignoresGCD": false,
+      "iconId": 201,
+      "manaCost": 0,
+      "description": "",
+      "uid": "Clickdrizzle",
+      "modName": "Helpful Adventurer"
+    },
+    "Huge Click": {
+      "energyCost": 3,
+      "name": "Huge Click",
+      "cooldown": 8000,
+      "char": "helpfulAdventurer",
+      "ignoresGCD": false,
+      "iconId": 199,
+      "manaCost": 0,
+      "description": "",
+      "uid": "Huge Click",
+      "modName": "Helpful Adventurer"
+    },
+    "Critstorm": {
+      "energyCost": 0,
+      "name": "Critstorm",
+      "cooldown": 600000,
+      "char": "helpfulAdventurer",
+      "ignoresGCD": false,
+      "iconId": 201,
+      "manaCost": 0,
+      "description": "",
+      "uid": "Critstorm",
+      "modName": "Helpful Adventurer"
+    },
+    "Managize": {
+      "energyCost": 120,
+      "name": "Managize",
+      "cooldown": 60000,
+      "char": "helpfulAdventurer",
+      "ignoresGCD": false,
+      "iconId": 35,
+      "manaCost": 0,
+      "description": "",
+      "uid": "Managize",
+      "modName": "Helpful Adventurer"
+    },
+    "Clicktorrent": {
+      "energyCost": 0,
+      "name": "Clicktorrent",
+      "cooldown": 600000,
+      "char": "helpfulAdventurer",
+      "ignoresGCD": false,
+      "iconId": 202,
+      "manaCost": 0,
+      "description": "",
+      "uid": "Clicktorrent",
+      "modName": "Helpful Adventurer"
+    },
+    "GoldenClicks": {
+      "energyCost": 0,
+      "name": "GoldenClicks",
+      "cooldown": 600000,
+      "char": "helpfulAdventurer",
+      "ignoresGCD": false,
+      "iconId": 201,
+      "manaCost": 0,
+      "description": "",
+      "uid": "GoldenClicks",
+      "modName": "Helpful Adventurer"
+    },
+    "Powersurge": {
+      "energyCost": 0,
+      "name": "Powersurge",
+      "cooldown": 900000,
+      "char": "helpfulAdventurer",
+      "ignoresGCD": false,
+      "iconId": 150,
+      "manaCost": 50,
+      "description": "",
+      "uid": "Powersurge",
+      "modName": "Helpful Adventurer"
+    },
+    "Autoattackstorm": {
+      "energyCost": 0,
+      "name": "Autoattackstorm",
+      "cooldown": 600000,
+      "char": "helpfulAdventurer",
+      "ignoresGCD": false,
+      "iconId": 201,
+      "manaCost": 0,
+      "description": "",
+      "uid": "Autoattackstorm",
+      "modName": "Helpful Adventurer"
+    },
+    "MultiClick": {
+      "energyCost": 3,
+      "name": "MultiClick",
+      "cooldown": 0,
+      "char": "helpfulAdventurer",
+      "ignoresGCD": false,
+      "iconId": 197,
+      "manaCost": 0,
+      "description": "",
+      "uid": "MultiClick",
+      "modName": "Helpful Adventurer"
+    },
+    "Clickstorm": {
+      "energyCost": 0,
+      "name": "Clickstorm",
+      "cooldown": 600000,
+      "char": "helpfulAdventurer",
+      "ignoresGCD": false,
+      "iconId": 200,
+      "manaCost": 0,
+      "description": "",
+      "uid": "Clickstorm",
+      "modName": "Helpful Adventurer"
+    },
+    "Energize: Extend": {
+      "energyCost": 0,
+      "name": "Energize: Extend",
+      "cooldown": 0,
+      "char": "helpfulAdventurer",
+      "ignoresGCD": false,
+      "iconId": 35,
+      "manaCost": 25,
+      "description": "",
+      "uid": "Energize: Extend",
+      "modName": "Helpful Adventurer"
+    }
+  },
   "heroes": {
     "helpfulAdventurer": {
       "flavorClass": "The Helpful Adventurer",
@@ -10423,35 +10617,85 @@
         "exponentialMultiplier",
         1.25
       ],
-      "ExtraMulticlicks": [
+      "MultiClick_stacks": [
         5,
         "linear",
         3
       ],
-      "MulticlickCost": [
+      "MultiClick_energyCost": [
+        0,
+        "linear",
+        1
+      ],
+      "BigClicks_stacks": [
         3,
         "linear",
         1
       ],
-      "BigClicksStacks": [
-        3,
-        "linear",
-        1
-      ],
-      "BigClicksDamage": [
+      "BigClicks_damage": [
         3,
         "exponentialMultiplier",
         1.25
       ],
-      "HugeClickDamage": [
+      "HugeClick_damage": [
         10,
         "exponentialMultiplier",
         1.25
       ],
-      "ManaCritDamage": [
+      "ManaCrit_damage": [
         1,
         "linear",
         1.25
+      ],
+      "Clickstorm_cooldown": [
+        1,
+        "exponentialMultiplier",
+        0.8
+      ],
+      "Energize_cooldown": [
+        1,
+        "exponentialMultiplier",
+        0.8
+      ],
+      "Energize_manaCost": [
+        1,
+        "exponentialMultiplier",
+        0.8
+      ],
+      "Energize_duration": [
+        60000,
+        "exponentialMultiplier",
+        1.2
+      ],
+      "Powersurge_cooldown": [
+        1,
+        "exponentialMultiplier",
+        0.8
+      ],
+      "Powersurge_manaCost": [
+        1,
+        "exponentialMultiplier",
+        0.8
+      ],
+      "Powersurge_duration": [
+        60000,
+        "exponentialMultiplier",
+        1.2
+      ],
+      "Powersurge_damage": [
+        2,
+        "exponentialMultiplier",
+        1.25
+      ],
+      "Reload_effect": [
+        0.1,
+        "exponentialMultiplier",
+        1.1
+      ],
+      "Reload_cooldown": [
+        1,
+        "exponentialMultiplier",
+        0.8
       ]
     },
     "characters": {
@@ -10621,6 +10865,7 @@
               1
             ]
           ],
+          "STAT_ITEM_RING_DAMAGE": [],
           "STAT_ITEM_LEGS_DAMAGE": [
             [
               "I5",
@@ -10655,7 +10900,7 @@
               1
             ]
           ],
-          "ExtraMulticlicks": [
+          "MultiClick_stacks": [
             [
               "Mu",
               1
@@ -10665,7 +10910,7 @@
               3
             ]
           ],
-          "MulticlickCost": [
+          "MultiClick_energyCost": [
             [
               "Mu",
               1
@@ -10675,7 +10920,7 @@
               3
             ]
           ],
-          "BigClicksStacks": [
+          "BigClicks_stacks": [
             [
               "Bc",
               1
@@ -10685,7 +10930,7 @@
               3
             ]
           ],
-          "BigClicksDamage": [
+          "BigClicks_damage": [
             [
               "Bd",
               1
@@ -10695,7 +10940,7 @@
               3
             ]
           ],
-          "HugeClickDamage": [
+          "HugeClick_damage": [
             [
               "Hd",
               1
@@ -10705,7 +10950,7 @@
               3
             ]
           ],
-          "ManaCritDamage": [
+          "ManaCrit_damage": [
             [
               "Md",
               1
@@ -10714,13 +10959,71 @@
               "qMd",
               3
             ]
+          ],
+          "Clickstorm_cooldown": [
+            [
+              "Kh",
+              1
+            ]
+          ],
+          "Energize_cooldown": [
+            [
+              "Eh",
+              1
+            ]
+          ],
+          "Energize_manaCost": [
+            [
+              "Eh",
+              1
+            ]
+          ],
+          "Energize_duration": [
+            [
+              "Ea",
+              1
+            ]
+          ],
+          "Powersurge_cooldown": [
+            [
+              "Ph",
+              1
+            ]
+          ],
+          "Powersurge_manaCost": [
+            [
+              "Ph",
+              1
+            ]
+          ],
+          "Powersurge_duration": [
+            [
+              "Pt",
+              1
+            ]
+          ],
+          "Powersurge_damage": [
+            [
+              "Pa",
+              1
+            ]
+          ],
+          "Reload_effect": [
+            [
+              "Ra",
+              1
+            ]
+          ],
+          "Reload_cooldown": [
+            [
+              "Rh",
+              1
+            ]
           ]
-        },
-        "traits": {}
+        }
       },
       "wizard": {
-        "stats": {},
-        "traits": {}
+        "stats": {}
       }
     }
   }

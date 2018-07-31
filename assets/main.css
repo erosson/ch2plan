@@ -2,7 +2,6 @@ body {
   /* background-image: url("./ch2data/img/starBG.png"); */
   background: #080010;
   color: #fff;
-  user-select: none;
 }
 h2 {
   white-space: nowrap;
@@ -31,7 +30,6 @@ svg .zoom-buttons {
   stroke: #ccc;
   stroke-width: 3;
   border-radius: 5;
-  user-select: none;
 }
 svg .zoom-buttons text {
   text-anchor: middle;
@@ -120,6 +118,7 @@ html {
 .stats-summary {
   margin-left: 1em;
 }
+.node-Keystone,
 .node-summary .node-Keystone,
 .stats-summary .level-high {
   color: cyan;
@@ -162,4 +161,5 @@ nav {
   display: flex;
 }
 .stats-flex .stats-box {
+  white-space: nowrap;
 }

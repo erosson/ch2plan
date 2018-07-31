@@ -9,6 +9,7 @@ module GameData
         , NodeId
         , NodeType
         , NodeQuality(..)
+        , Skill
         , decoder
         , neighbors
         , latestVersionId
@@ -50,6 +51,18 @@ type alias Character =
     , flavor : String
     , nodeTypes : NodeTypes
     , graph : Graph
+    , skills : Dict String Skill
+    }
+
+
+type alias Skill =
+    { id : String
+    , name : String
+    , iconId : Int
+    , char : String
+    , manaCost : Maybe Int
+    , energyCost : Maybe Int
+    , cooldown : Maybe Int
     }
 
 
@@ -136,21 +149,56 @@ decoder =
 gameVersionDecoder : D.Decoder GameVersionData
 gameVersionDecoder =
     let
-        decoder : GS.Stats -> D.Decoder GameVersionData
-        decoder stats =
+        decoder : ( GS.Stats, Dict String Skill ) -> D.Decoder GameVersionData
+        decoder ( stats, skills ) =
             P.decode GameVersionData
                 |> P.required "versionSlug" D.string
                 |> P.custom (D.succeed stats)
-                |> P.required "heroes" (heroesDecoder stats)
+                |> P.required "heroes" (heroesDecoder stats skills)
     in
-        D.field "stats" GS.decoder
+        D.map2 (,)
+            (D.field "stats" GS.decoder)
+            (D.field "skills" (D.dict skillDecoder)
+                -- when 0.052 was exported, I hadn't yet implemented skills, so they're missing
+                |> D.maybe
+                |> D.map (Maybe.withDefault Dict.empty)
+            )
             |> D.andThen decoder
 
 
-heroesDecoder : GS.Stats -> D.Decoder (Dict String Character)
-heroesDecoder stats =
+nonzeroIntDecoder : D.Decoder (Maybe Int)
+nonzeroIntDecoder =
+    D.int
+        |> D.map
+            (\i ->
+                if i == 0 then
+                    Nothing
+                else
+                    Just i
+            )
+
+
+skillNameToId : String -> String
+skillNameToId =
+    Regex.replace Regex.All (Regex.regex "\\W+") (always "")
+
+
+skillDecoder : D.Decoder Skill
+skillDecoder =
+    P.decode Skill
+        |> P.required "name" (D.string |> D.map skillNameToId)
+        |> P.required "name" D.string
+        |> P.required "iconId" D.int
+        |> P.required "char" D.string
+        |> P.required "manaCost" nonzeroIntDecoder
+        |> P.required "energyCost" nonzeroIntDecoder
+        |> P.required "cooldown" nonzeroIntDecoder
+
+
+heroesDecoder : GS.Stats -> Dict String Skill -> D.Decoder (Dict String Character)
+heroesDecoder stats skills =
     --D.dict characterDecoder
-    dictKeyDecoder (\name -> Dict.get name stats.characters |> characterDecoder)
+    dictKeyDecoder (\name -> Dict.get name stats.characters |> characterDecoder (Dict.filter (\k v -> v.char == name) skills))
 
 
 dictKeyDecoder : (String -> D.Decoder a) -> D.Decoder (Dict String a)
@@ -171,8 +219,8 @@ dictKeyDecoder decoder =
             |> D.map Dict.fromList
 
 
-characterDecoder : Maybe GS.Character -> D.Decoder Character
-characterDecoder stats =
+characterDecoder : Dict String Skill -> Maybe GS.Character -> D.Decoder Character
+characterDecoder skills stats =
     P.decode Character
         |> P.required "name" D.string
         |> P.required "flavorName" D.string
@@ -185,6 +233,7 @@ characterDecoder stats =
                 |> P.required "levelGraphNodeTypes" (nodeTypesDecoder stats)
                 |> P.required "levelGraphObject" levelGraphObjectDecoder
             )
+        |> P.custom (D.succeed skills)
 
 
 parseNodeQuality : String -> NodeQuality

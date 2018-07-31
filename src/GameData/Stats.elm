@@ -10,11 +10,13 @@ module GameData.Stats
         , calcStat
         , calcStats
         , statTable
+        , getStat
         )
 
 import Json.Decode as D
 import Json.Decode.Pipeline as P
 import Dict as Dict exposing (Dict)
+import Maybe.Extra
 import List.Extra
 import Dict.Extra
 
@@ -74,16 +76,10 @@ charStatsByNodeType =
     Dict.toList
         >> List.concatMap
             (\( statName, nodes ) ->
-                let
-                    stat =
-                        case getStat statName of
-                            Nothing ->
-                                Debug.crash <| "character had a stat missing from the GameData/Stats enum: " ++ statName
-
-                            Just s ->
-                                s
-                in
-                    nodes |> List.map (\( node, levels ) -> ( node, ( stat, levels ) ))
+                -- stats in the stats.json but not the GameData/Stats enum are ignored - old stats.json snapshots may have out-of-date old stats.
+                nodes
+                    |> List.map (\( node, levels ) -> getStat statName |> Maybe.map (\stat -> ( node, ( stat, levels ) )))
+                    |> Maybe.Extra.values
             )
         >> Dict.Extra.groupBy Tuple.first
         >> Dict.map (always <| List.map Tuple.second)
@@ -193,13 +189,24 @@ type Stat
     | STAT_ITEM_FEET_DAMAGE
     | STAT_ITEM_BACK_DAMAGE
     | STAT_AUTOMATOR_SPEED
-      -- below are not defined as stats in-game, but it's convenient to calculate them as stats
-    | ExtraMulticlicks
-    | MulticlickCost
-    | BigClicksStacks
-    | BigClicksDamage
-    | HugeClickDamage
-    | ManaCritDamage
+      -- everything below is not defined as stats in-game, but it's convenient to calculate them as stats
+      -- skill-stats. Not actually stats in the ch2 code, but it's convenient for me to treat them as stats
+    | MultiClick_stacks
+    | MultiClick_energyCost
+    | BigClicks_stacks
+    | BigClicks_damage
+    | HugeClick_damage
+    | ManaCrit_damage
+    | Clickstorm_cooldown
+    | Energize_cooldown
+    | Energize_manaCost
+    | Energize_duration
+    | Powersurge_cooldown
+    | Powersurge_manaCost
+    | Powersurge_duration
+    | Powersurge_damage
+    | Reload_effect
+    | Reload_cooldown
 
 
 statList : List Stat
@@ -235,13 +242,40 @@ statList =
     , STAT_ITEM_FEET_DAMAGE
     , STAT_ITEM_BACK_DAMAGE
     , STAT_AUTOMATOR_SPEED
-    , ExtraMulticlicks
-    , MulticlickCost
-    , BigClicksStacks
-    , BigClicksDamage
-    , HugeClickDamage
-    , ManaCritDamage
+    , MultiClick_stacks
+    , MultiClick_energyCost
+    , BigClicks_stacks
+    , BigClicks_damage
+    , HugeClick_damage
+    , ManaCrit_damage
+    , Clickstorm_cooldown
+    , Energize_cooldown
+    , Energize_manaCost
+    , Energize_duration
+    , Powersurge_cooldown
+    , Powersurge_manaCost
+    , Powersurge_duration
+    , Powersurge_damage
+    , Reload_effect
+    , Reload_cooldown
     ]
+
+
+statsBySkill : Dict String (Dict String Stat)
+statsBySkill =
+    statList
+        |> List.map
+            (\s ->
+                case toString s |> String.split "_" of
+                    [ skill, stat ] ->
+                        Just ( skill, stat, s )
+
+                    _ ->
+                        Nothing
+            )
+        |> Maybe.Extra.values
+        |> Dict.Extra.groupBy (\( skill, stat, id ) -> skill)
+        |> Dict.map (always <| Dict.fromList << List.map (\( skill, stat, id ) -> ( stat, id )))
 
 
 statDict : Dict String Stat
