@@ -24,19 +24,19 @@ infinity =
     1 / 0 |> floor
 
 
-dijkstra : Set G.NodeId -> G.Graph -> Set G.NodeId -> Maybe G.NodeId -> Result
-dijkstra startNodes graph selected0 target =
+dijkstra : G.Graph -> Set G.NodeId -> Maybe G.NodeId -> Result
+dijkstra graph selected0 target =
     let
         allNodes =
             Dict.keys graph.nodes
 
         startOrSelected =
-            Set.union startNodes selected0
+            Set.union graph.startNodes selected0
 
         distances0 : Dict G.NodeId Int
         distances0 =
             -- missing = infinity distance
-            startNodes
+            graph.startNodes
                 |> Set.toList
                 |> List.map (\id -> ( id, 0 ))
                 |> Dict.fromList

@@ -1,4 +1,4 @@
-module ViewSkillTree exposing (view)
+module View.Stats exposing (view, viewStatsSummary, viewNodeSummary)
 
 import Dict as Dict exposing (Dict)
 import Set as Set exposing (Set)
@@ -7,78 +7,53 @@ import Html as H
 import Html.Attributes as A
 import Html.Events as E
 import Maybe.Extra
-import Model as M
 import Route
+import Model as M
 import GameData as G
 import GameData.Stats as GS exposing (Stat(..))
-import ViewGraph
+import View.Graph
 
 
-view : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
-view header model home =
-    if model.features.fullscreen then
-        viewFullscreenTree header model home
-    else
-        viewOldTree header model home
+view : M.Model -> Route.HomeParams -> H.Html msg
+view model params =
+    case M.parseStatsSummary model params of
+        Err err ->
+            H.div [] [ H.text <| "error: " ++ err ]
+
+        Ok { selected, stats, nodes } ->
+            H.div []
+                [ H.p [] [ H.a [ Route.href <| Route.Home params ] [ H.text "View Skill Tree" ] ]
+                , H.div [ A.class "stats-flex" ]
+                    [ H.div [ A.class "stats-box" ]
+                        [ H.p [] [ H.text "Statistics:" ]
+                        , viewStatsSummary stats
+                        ]
+                    , H.div [ A.class "stats-box" ]
+                        [ H.p [] [ H.a [ Route.href <| Route.Home params ] [ H.text <| toString (Set.size selected) ++ " skill points:" ] ]
+                        , viewNodeSummary True nodes
+                        ]
+                    ]
+                ]
 
 
-viewOldTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
-viewOldTree header ({ features, lastUpdatedVersion } as model) home =
-    H.div [] <|
-        header
-            ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
-               , H.p [] [ H.text <| home.graph.char.flavor ]
-               , viewVersionNav home.graph.game home.params
-               , viewSearch home
-               , H.div [ A.style [ ( "width", "1000px" ), ( "height", "1000px" ) ] ]
-                    [ ViewGraph.view { width = 1000, height = 1000 } home features ]
-               , viewSearch home
-               , viewStatsSummary <| M.statsSummary home
-               , viewSummary <| M.nodeSummary home
-               , H.p [] [ H.text <| "Last updated: " ++ lastUpdatedVersion ]
-               ]
-
-
-viewFullscreenTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
-viewFullscreenTree header ({ windowSize, features } as model) home =
-    H.div [ A.class "skill-tree-main" ]
-        [ ViewGraph.view windowSize home features
-        , if home.sidebarOpen then
-            H.div [ A.class "sidebar" ]
-                ([ H.button [ A.class "sidebar-hide", A.title "hide", E.onClick M.ToggleSidebar ] [ H.text "<<" ] ]
-                    ++ header
-                    ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
-                       , H.p [] [ H.text <| home.graph.char.flavor ]
-                       , viewVersionNav home.graph.game home.params
-                       , viewSearch home
-                       , viewStatsSummary <| M.statsSummary home
-                       , viewSummary <| M.nodeSummary home
-                       ]
-                )
-          else
-            H.button [ A.class "sidebar-show", A.title "show", E.onClick M.ToggleSidebar ] [ H.text ">>" ]
-        ]
-
-
-ver =
-    { live = "0.052-beta"
-    , ptr = "0.06-(2)-beta-PTR"
-    }
-
-
-viewVersionNav : G.GameVersionData -> Route.HomeParams -> H.Html msg
-viewVersionNav g q =
+viewStatsSummary : List GS.StatTotal -> H.Html msg
+viewStatsSummary statList =
     let
-        _ =
-            Debug.log "viewVersionNav" ( q, g.versionSlug )
+        getStat =
+            GS.statTable statList
+
+        toEntry ( label, statIds, format ) =
+            let
+                stats =
+                    statIds |> List.map getStat
+
+                level =
+                    (stats |> List.map .level |> List.sum) // max 1 (List.length stats)
+            in
+                { label = label, level = level, value = format stats }
     in
-        H.div []
-            [ H.text <| "Your game version: " ++ g.versionSlug ++ ". "
-            , if g.versionSlug == ver.live then
-                H.a [ Route.href <| Route.Home { q | version = ver.ptr } ] [ H.text <| "Use PTR: " ++ ver.ptr ]
-              else
-                H.a [ Route.href <| Route.Home { q | version = ver.live } ] [ H.text <| "Use live: " ++ ver.live ]
-            ]
+        -- H.table [ A.class "stats-summary" ] (statEntrySpecs |> List.map (toEntry >> viewStatEntry) |> Maybe.Extra.values)
+        H.table [ A.class "stats-summary" ] (statEntrySpecs ++ skillEntrySpecs |> List.map (toEntry >> viewStatEntry) |> Maybe.Extra.values)
 
 
 type alias StatsEntrySpec =
@@ -108,6 +83,8 @@ statEntrySpecs =
     , ( "Mana Regeneration", [ GS.STAT_MANA_REGEN ], entryPct )
     , ( "Run Speed", [ GS.STAT_MOVEMENT_SPEED ], entryPct ) -- currently a constant
     , ( "Gold from All Sources", [ STAT_GOLD ], entryPct )
+
+    -- the x5 is datamined from heroclickerlib/managers/Formulas.as
     , ( "Bonus Gold Chance (×5)", [ STAT_GOLD ], entryPct )
     , ( "Boss Gold", [ STAT_BOSS_GOLD ], entryPct )
     , ( "Clickable Find Chance", [ STAT_CLICKABLE_CHANCE ], entryPct ) -- not in total stats; skill-tree-stats only
@@ -176,28 +153,6 @@ entryInt =
     stat1 >> \stat -> Just <| int stat.val
 
 
-viewStatsSummary : List GS.StatTotal -> H.Html msg
-viewStatsSummary statList =
-    let
-        getStat =
-            GS.statTable statList
-
-        toEntry ( label, statIds, format ) =
-            let
-                stats =
-                    statIds |> List.map getStat
-
-                level =
-                    (stats |> List.map .level |> List.sum) // max 1 (List.length stats)
-            in
-                { label = label, level = level, value = format stats }
-    in
-        H.div [ A.class "stats-summary" ]
-            [ H.p [] [ H.text "Stats summary:" ]
-            , H.table [] (statEntrySpecs ++ skillEntrySpecs |> List.map (toEntry >> viewStatEntry) |> Maybe.Extra.values)
-            ]
-
-
 viewStatEntry : { label : String, level : Int, value : Maybe String } -> Maybe (H.Html msg)
 viewStatEntry { label, level, value } =
     Maybe.map
@@ -262,58 +217,42 @@ statLevelTier level =
         "low"
 
 
-viewSearch : M.HomeModel -> H.Html M.Msg
-viewSearch home =
-    H.div []
-        [ H.div [] [ H.text <| toString (Set.size home.graph.selected) ++ " points spent." ]
-        , H.div []
-            [ H.text "Highlight: "
-            , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" home.searchString, E.onInput M.SearchInput ] []
-            ]
-        ]
-
-
-viewNodeType : String -> G.NodeType -> H.Html msg
-viewNodeType key nodetype =
-    H.text <| key ++ ": " ++ toString nodetype
-
-
-viewSummary : List ( Int, G.NodeType ) -> H.Html msg
-viewSummary ns =
-    H.div [ A.class "summary" ] <|
+viewNodeSummary : Bool -> List ( Int, G.NodeType ) -> H.Html msg
+viewNodeSummary showTooltips ns =
+    H.ul [ A.class "node-summary" ] <|
         if List.length ns == 0 then
             []
         else
-            [ H.p [] [ H.text "Build summary: " ]
-            , H.ul [] (List.map (uncurry viewSummaryLine) ns)
+            List.map (uncurry <| viewNodeSummaryLine showTooltips) ns
+
+
+viewNodeSummaryLine : Bool -> Int -> G.NodeType -> H.Html msg
+viewNodeSummaryLine showTooltips count nodeType =
+    let
+        tooltip =
+            if showTooltips then
+                nodeType.tooltip
+            else
+                Nothing
+    in
+        H.li [ A.class <| View.Graph.nodeQualityClass nodeType.quality ]
+            [ H.div [ A.class "icon" ]
+                [ H.img [ A.class "icon-background", A.src <| View.Graph.nodeBackgroundImage nodeType False False False ] []
+                , H.img [ A.class "icon-main", A.src <| View.Graph.iconUrl nodeType ] []
+                ]
+            , H.div []
+                [ H.text <|
+                    " "
+                        ++ if count /= 1 then
+                            toString count ++ "× "
+                           else
+                            ""
+                , H.b [] [ H.text nodeType.name ]
+                , H.span [] [ H.text <| Maybe.Extra.unwrap "" ((++) ": ") tooltip ]
+                ]
+
+            -- , H.div [] [ H.text <| Maybe.withDefault "" nodeType.tooltip ]
+            , H.div [ A.class "clear" ] []
+
+            -- , H.text <| toString nodeType
             ]
-
-
-viewSummaryLine : Int -> G.NodeType -> H.Html msg
-viewSummaryLine count nodeType =
-    H.li [ A.class <| ViewGraph.nodeQualityClass nodeType.quality ]
-        [ H.div [ A.class "icon" ]
-            [ H.img [ A.class "icon-background", A.src <| ViewGraph.nodeBackgroundImage nodeType False False False ] []
-            , H.img [ A.class "icon-main", A.src <| ViewGraph.iconUrl nodeType ] []
-            ]
-        , H.div []
-            [ H.text <|
-                " "
-                    ++ if count /= 1 then
-                        toString count ++ "x "
-                       else
-                        ""
-            , H.b [] [ H.text nodeType.name ]
-            , H.span [] [ H.text <| Maybe.Extra.unwrap "" ((++) ": ") nodeType.tooltip ]
-            ]
-
-        -- , H.div [] [ H.text <| Maybe.withDefault "" nodeType.tooltip ]
-        , H.div [ A.class "clear" ] []
-
-        -- , H.text <| toString nodeType
-        ]
-
-
-dumpModel : M.Model -> H.Html msg
-dumpModel =
-    H.text << toString

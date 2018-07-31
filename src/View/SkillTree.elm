@@ -1,0 +1,100 @@
+module View.SkillTree exposing (view)
+
+import Dict as Dict exposing (Dict)
+import Set as Set exposing (Set)
+import Html as H
+import Html.Attributes as A
+import Html.Events as E
+import Maybe.Extra
+import Model as M
+import Route
+import GameData as G
+import GameData.Stats as GS exposing (Stat(..))
+import View.Stats
+import View.Graph
+
+
+view : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
+view header model home =
+    if model.features.fullscreen then
+        viewFullscreenTree header model home
+    else
+        viewOldTree header model home
+
+
+viewOldTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
+viewOldTree header ({ features, lastUpdatedVersion } as model) home =
+    H.div [] <|
+        header
+            ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
+               , H.p [] [ H.text <| home.graph.char.flavor ]
+               , viewVersionNav home.graph.game home.params
+               , viewSearch home
+               , H.div [ A.style [ ( "width", "1000px" ), ( "height", "1000px" ) ] ]
+                    [ View.Graph.view { width = 1000, height = 1000 } home features ]
+               , viewSearch home
+               , H.p [] [ H.a [ Route.href <| Route.Stats home.params ] [ H.text "Statistics:" ] ]
+               , View.Stats.viewStatsSummary <| M.statsSummary home.graph
+               , H.p [] [ H.a [ Route.href <| Route.Stats home.params ] [ H.text <| toString (Set.size home.graph.selected) ++ " skill points" ] ]
+               ]
+
+
+viewFullscreenTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
+viewFullscreenTree header ({ windowSize, features } as model) home =
+    H.div [ A.class "skill-tree-main" ]
+        [ View.Graph.view windowSize home features
+        , if home.sidebarOpen then
+            H.div [ A.class "sidebar" ]
+                ([ H.button [ A.class "sidebar-hide", A.title "hide", E.onClick M.ToggleSidebar ] [ H.text "<<" ] ]
+                    ++ header
+                    ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
+                       , H.p [] [ H.text <| home.graph.char.flavor ]
+                       , viewVersionNav home.graph.game home.params
+                       , viewSearch home
+                       , H.p [] [ H.a [ Route.href <| Route.Stats home.params ] [ H.text "Statistics:" ] ]
+                       , View.Stats.viewStatsSummary <| M.statsSummary home.graph
+                       , H.p [] [ H.a [ Route.href <| Route.Stats home.params ] [ H.text <| toString (Set.size home.graph.selected) ++ " skill points" ] ]
+                       ]
+                )
+          else
+            H.button [ A.class "sidebar-show", A.title "show", E.onClick M.ToggleSidebar ] [ H.text ">>" ]
+        ]
+
+
+ver =
+    { live = "0.052-beta"
+    , ptr = "0.06-(2)-beta-PTR"
+    }
+
+
+viewVersionNav : G.GameVersionData -> Route.HomeParams -> H.Html msg
+viewVersionNav g q =
+    let
+        _ =
+            Debug.log "viewVersionNav" ( q, g.versionSlug )
+    in
+        H.div []
+            [ H.text <| "Your game version: " ++ g.versionSlug ++ ". "
+            , if g.versionSlug == ver.live then
+                H.a [ Route.href <| Route.Home { q | version = ver.ptr } ] [ H.text <| "Use PTR: " ++ ver.ptr ]
+              else
+                H.a [ Route.href <| Route.Home { q | version = ver.live } ] [ H.text <| "Use live: " ++ ver.live ]
+            ]
+
+
+viewSearch : M.HomeModel -> H.Html M.Msg
+viewSearch home =
+    H.div []
+        [ H.text "Highlight: "
+        , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" home.searchString, E.onInput M.SearchInput ] []
+        ]
+
+
+viewNodeType : String -> G.NodeType -> H.Html msg
+viewNodeType key nodetype =
+    H.text <| key ++ ": " ++ toString nodetype
+
+
+dumpModel : M.Model -> H.Html msg
+dumpModel =
+    H.text << toString

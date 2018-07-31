@@ -90,6 +90,7 @@ type alias NodeTypes =
 type alias Graph =
     { edges : Dict NodeId Edge
     , nodes : Dict NodeId Node
+    , startNodes : Set NodeId
 
     -- precalculated/derived from edges/nodes
     , bounds : GraphBounds
@@ -297,6 +298,7 @@ graph nodeTypes graphSpec =
     in
         { nodes = nodes
         , edges = edges
+        , startNodes = Set.singleton 1 -- TODO happens to work for helpfulAdventurer, but where does this come from?
         , neighbors = calcNeighbors <| Dict.values edges
         , bounds = calcBounds <| Dict.values nodes
         }

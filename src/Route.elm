@@ -44,6 +44,7 @@ homeParams0 =
 
 type Route
     = Home HomeParams
+    | Stats HomeParams
     | Changelog
     | NotFound
     | Root LegacyHomeParams
@@ -123,7 +124,8 @@ parser =
         -- a modern versioned url, with build
         , P.map Home <| P.map HomeParams <| homeQS <| P.s "g" </> P.string </> P.string </> maybeString
 
-        -- other urls.
+        -- other non-skilltree urls.
+        , P.map Stats <| P.map HomeParams <| homeQS <| P.s "s" </> P.string </> P.string </> maybeString
         , P.map Changelog <| P.s "changelog"
         ]
 
@@ -166,24 +168,32 @@ ifFeature pred t f =
         f
 
 
+stringifyHomePath : HomeParams -> String
+stringifyHomePath { version, hero, build, search } =
+    let
+        qs =
+            Maybe.Extra.unwrap "" ((++) "?q=" << Http.encodeUri) search
+    in
+        "/"
+            ++ version
+            ++ case ( hero, build ) of
+                -- ( "helpfulAdventurer", Nothing ) ->
+                -- qs
+                ( _, Nothing ) ->
+                    "/" ++ hero ++ qs
+
+                ( _, Just b ) ->
+                    "/" ++ hero ++ "/" ++ b ++ qs
+
+
 stringify : Route -> String
 stringify route =
     case route of
-        Home { version, hero, build, search } ->
-            let
-                qs =
-                    Maybe.Extra.unwrap "" ((++) "?q=" << Http.encodeUri) search
-            in
-                "#/g/"
-                    ++ version
-                    ++ case ( hero, build ) of
-                        -- ( "helpfulAdventurer", Nothing ) ->
-                        -- qs
-                        ( _, Nothing ) ->
-                            "/" ++ hero ++ qs
+        Home params ->
+            "#/g" ++ stringifyHomePath params
 
-                        ( _, Just b ) ->
-                            "/" ++ hero ++ "/" ++ b ++ qs
+        Stats params ->
+            "#/s" ++ stringifyHomePath params
 
         Changelog ->
             "#/changelog"
