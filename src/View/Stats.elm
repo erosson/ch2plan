@@ -31,7 +31,7 @@ view model params =
                     , H.p [ A.title "I haven't seen an official name for those blue nodes in CH2, so I stole Path of Exile's name for nodes like that." ]
                         [ H.text "⚠ Warning: most of the blue "
                         , H.span [ A.class "node-Keystone" ] [ H.text "Keystone Nodes" ]
-                        , H.text " have no effect on these stat calculations yet. Work is in progress. Please be patient."
+                        , H.text " have no effect on these stat calculations yet. Work is in progress. Please be patient. (All other nodes should work.)"
                         ]
                     , H.div [ A.class "stats-flex" ]
                         [ H.div [ A.class "stats-box" ]
