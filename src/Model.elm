@@ -11,6 +11,7 @@ import Json.Decode as Decode
 import Navigation
 import Maybe.Extra
 import List.Extra
+import Dict.Extra
 import Math.Vector2 as V2
 import Draggable
 import Window
@@ -443,15 +444,41 @@ update msg model =
                 ToggleSidebar ->
                     ( { model | route = Home { home | sidebarOpen = not home.sidebarOpen } }, Cmd.none )
 
-                SaveFileSelected nodeId ->
-                    ( model, Ports.saveFileSelected nodeId )
+                SaveFileSelected elemId ->
+                    ( model, Ports.saveFileSelected elemId )
 
                 SaveFileImport data ->
                     let
                         _ =
-                            Debug.log <| data.hero ++ "\n\n" ++ data.build
+                            Debug.log "SaveFileImport" data
+
+                        saveHero =
+                            case model.route of
+                                Home { params } ->
+                                    Dict.get params.version model.gameData.byVersion
+                                        |> Maybe.withDefault (G.latestVersion model.gameData)
+                                        |> (\gvd -> Dict.Extra.find (\k v -> v.name == data.hero) gvd.heroes)
+
+                                _ ->
+                                    Nothing
+
+                        saveBuild =
+                            String.join "&" data.build
+
+                        q =
+                            home.params
+
+                        cmd =
+                            case saveHero of
+                                Just hero ->
+                                    Route.Home { q | hero = Tuple.first hero, build = Just saveBuild }
+                                        |> Route.stringify
+                                        |> Navigation.newUrl
+
+                                _ ->
+                                    Cmd.none
                     in
-                        ( model, Cmd.none )
+                        ( model, cmd )
 
         _ ->
             -- all other routes have no state to preserve or update
