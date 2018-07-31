@@ -17,6 +17,7 @@ These are at least partially working, but turned *off* by default.
 
 - [Full-screen skill tree](https://ch2.erosson.org/?enableFullscreen=1).
 - [Prettier-looking, faster-activating skill info tooltips/mouseover text](https://ch2.erosson.org/?enableFancyTooltips=1).
+- [Importing your build from a saved game](https://ch2.erosson.org/?enableSaveImport=1).
 
 ### New features
 These recently left beta, and are turned *on* by default. For now, you can disable them if they're causing trouble.
@@ -24,6 +25,9 @@ These recently left beta, and are turned *on* by default. For now, you can disab
 - None, for now.
 
 ---
+## 2018-07-31
+- New beta feature: import your build from a saved game. Thanks, [@Judgy53](https://github.com/Judgy53)!
+
 ## 2018-07-30
 - Selecting/deselecting nodes feels faster now: triggers when the mouse is pressed, instead of when it's released.
 - The new beta tooltips now work on touch screens, using a long press.
