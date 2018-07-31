@@ -6,6 +6,7 @@ import Html as H
 import Html.Attributes as A
 import Html.Events as E
 import Maybe.Extra
+import Json.Decode as Decode
 import Model as M
 import Route
 import GameData as G
@@ -26,6 +27,7 @@ viewOldTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
 viewOldTree header ({ features, lastUpdatedVersion } as model) home =
     H.div [] <|
         header
+            ++ viewSelectSave features
             ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
                , H.p [] [ H.text <| home.graph.char.flavor ]
                , viewVersionNav home.graph.game home.params
@@ -47,6 +49,7 @@ viewFullscreenTree header ({ windowSize, features } as model) home =
             H.div [ A.class "sidebar" ]
                 ([ H.button [ A.class "sidebar-hide", A.title "hide", E.onClick M.ToggleSidebar ] [ H.text "<<" ] ]
                     ++ header
+                    ++ viewSelectSave features
                     ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
                        , H.p [] [ H.text <| home.graph.char.flavor ]
                        , viewVersionNav home.graph.game home.params
@@ -80,6 +83,28 @@ viewVersionNav g q =
               else
                 H.a [ Route.href <| Route.Home { q | version = ver.live } ] [ H.text <| "Use live: " ++ ver.live ]
             ]
+
+
+viewSelectSave : Route.Features -> List (H.Html M.Msg)
+viewSelectSave features =
+    if features.saveImport then
+        [ H.div []
+            [ H.text "Import build from game save : "
+            , H.input
+                [ A.type_ "file"
+                , A.id inputSaveSelectId
+                , E.on "change"
+                    (Decode.succeed <| M.SaveFileSelected inputSaveSelectId)
+                ]
+                []
+            ]
+        ]
+    else
+        []
+
+
+inputSaveSelectId =
+    "inputSaveSelect"
 
 
 viewSearch : M.HomeModel -> H.Html M.Msg
