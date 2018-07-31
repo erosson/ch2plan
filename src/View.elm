@@ -7,8 +7,9 @@ import Html.Events as E
 import GameData as G
 import Model as M
 import Route as Route exposing (Route)
-import ViewSkillTree
-import ViewChangelog
+import View.SkillTree
+import View.Changelog
+import View.Stats
 
 
 view : M.Model -> H.Html M.Msg
@@ -26,7 +27,7 @@ view model =
     in
         case model.route of
             M.Home home ->
-                ViewSkillTree.view header model home
+                View.SkillTree.view header model home
 
             M.HomeError q ->
                 H.div [] (header ++ [ H.text "404" ])
@@ -35,13 +36,19 @@ view model =
                 H.div [] (header ++ [ H.text "404" ])
 
             M.StatelessRoute Route.Changelog ->
-                H.div [] (header ++ [ ViewChangelog.view model.changelog ])
+                H.div [] (header ++ [ View.Changelog.view model.changelog ])
 
             M.StatelessRoute (Route.Home _) ->
                 Debug.crash "home is not stateless. How did this happen?"
 
-            M.StatelessRoute route ->
+            M.StatelessRoute (Route.LegacyHome _) ->
                 H.div [] [ H.text "loading..." ]
+
+            M.StatelessRoute (Route.Root _) ->
+                H.div [] [ H.text "loading..." ]
+
+            M.StatelessRoute (Route.Stats params) ->
+                H.div [] (header ++ [ View.Stats.view model params ])
 
 
 gameVersion : M.Model -> G.GameVersionData

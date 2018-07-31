@@ -94,36 +94,37 @@ html {
   color: #999;
 }
 
-.summary .icon {
+.node-summary .icon {
   float: left;
 }
-.summary .icon .icon-main {
+.node-summary .icon .icon-main {
   width: 1em;
   height: 1em;
 }
-.summary .icon .icon-background {
+.node-summary .icon .icon-background {
   /* original plan was to put the background behind the icon, but separately actually works better for visibility and the background looks like a bullet point */
   width: 1em;
   height: 1em;
 }
-.summary .clear {
+.node-summary .clear {
   clear: left;
 }
-.summary ul {
+.node-summary {
   list-style-type: none;
+  padding-left: 1em;
 }
-.summary li {
+.node-summary li {
   margin: 0.2em;
 }
 
-.stats-summary table {
+.stats-summary {
   margin-left: 1em;
 }
-.summary .node-Keystone,
+.node-summary .node-Keystone,
 .stats-summary .level-high {
   color: cyan;
 }
-.summary .node-Notable,
+.node-summary .node-Notable,
 .stats-summary .level-mid {
   color: yellow;
 }
@@ -155,4 +156,10 @@ nav {
   margin: 0.5em;
   padding-left: 0;
   margin-left: 0;
+}
+
+.stats-flex {
+  display: flex;
+}
+.stats-flex .stats-box {
 }

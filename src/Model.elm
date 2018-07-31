@@ -1,4 +1,22 @@
-module Model exposing (..)
+module Model
+    exposing
+    -- types
+        ( Msg(..)
+        , Model
+        , Flags
+        , RouteModel(..)
+        , HomeModel
+        , HomeGraphModel
+          -- selectors
+        , visibleTooltip
+        , nodeSummary
+        , statsSummary
+        , parseStatsSummary
+          -- elm architecture
+        , init
+        , update
+        , subscriptions
+        )
 
 import Regex as Regex exposing (Regex)
 import Set as Set exposing (Set)
@@ -158,8 +176,8 @@ invert id set =
         Set.insert id set
 
 
-initHome : Route.HomeParams -> { m | gameData : G.GameData } -> Result String HomeModel
-initHome q { gameData } =
+parseSelected : Route.HomeParams -> { m | gameData : G.GameData } -> Result String { game : G.GameVersionData, char : G.Character, selected : Set G.NodeId }
+parseSelected q { gameData } =
     case Dict.get q.version gameData.byVersion of
         Nothing ->
             Err <| "no such game-version: " ++ toString q.version
@@ -170,33 +188,39 @@ initHome q { gameData } =
                     Err <| "no such hero: " ++ q.hero
 
                 Just char ->
-                    let
-                        selected =
-                            buildToNodes startNodes char.graph q.build
-                    in
-                        Ok
-                            { params = q
-                            , graph =
-                                { game = game
-                                , char = char
-                                , search = searchRegex q.search
-                                , selected = selected
-                                , neighbors = neighborNodes startNodes char.graph selected
-                                , dijkstra = Lazy.lazy (\() -> Dijkstra.dijkstra startNodes char.graph selected Nothing)
-                                }
-                            , searchPrev = q.search
-                            , searchString = q.search
-                            , zoom =
-                                clampZoom <|
-                                    if selected == Set.empty then
-                                        1
-                                    else
-                                        0.1
-                            , center = V2.vec2 0 0
-                            , drag = Draggable.init
-                            , tooltip = Nothing
-                            , sidebarOpen = True
-                            }
+                    Ok { game = game, char = char, selected = buildToNodes char.graph q.build }
+
+
+initHome : Route.HomeParams -> { m | gameData : G.GameData } -> Result String HomeModel
+initHome q m =
+    parseSelected q m
+        |> Result.map (\{ game, char, selected } -> createHomeModel q game char selected)
+
+
+createHomeModel : Route.HomeParams -> G.GameVersionData -> G.Character -> Set G.NodeId -> HomeModel
+createHomeModel q game char selected =
+    { params = q
+    , graph =
+        { game = game
+        , char = char
+        , search = searchRegex q.search
+        , selected = selected
+        , neighbors = neighborNodes char.graph selected
+        , dijkstra = Lazy.lazy (\() -> Dijkstra.dijkstra char.graph selected Nothing)
+        }
+    , searchPrev = q.search
+    , searchString = q.search
+    , zoom =
+        clampZoom <|
+            if selected == Set.empty then
+                1
+            else
+                0.1
+    , center = V2.vec2 0 0
+    , drag = Draggable.init
+    , tooltip = Nothing
+    , sidebarOpen = True
+    }
 
 
 searchRegex : Maybe String -> Maybe Regex
@@ -279,7 +303,7 @@ updateNode id home model =
                 -- remove the node, and any disconnected from the start by its removal
                 home.graph.selected
                     |> invert id
-                    |> reachableSelectedNodes startNodes home.graph.char.graph
+                    |> reachableSelectedNodes home.graph.char.graph
             else
                 -- add the node and any in between
                 Dijkstra.selectPathToNode (Lazy.force home.graph.dijkstra) id
@@ -549,16 +573,10 @@ v2Clamp minV maxV v =
         V2.vec2 (clamp minX maxX x) (clamp minY maxY y)
 
 
-startNodes : Set G.NodeId
-startNodes =
-    -- TODO is this defined in the actual data?
-    Set.singleton 1
-
-
 {-| Remove any selected nodes that can't be reached from the start location.
 -}
-reachableSelectedNodes : Set G.NodeId -> G.Graph -> Set G.NodeId -> Set G.NodeId
-reachableSelectedNodes startNodes graph selected =
+reachableSelectedNodes : G.Graph -> Set G.NodeId -> Set G.NodeId
+reachableSelectedNodes graph selected =
     let
         loop : G.NodeId -> { reachable : Set G.NodeId, tried : Set G.NodeId } -> { reachable : Set G.NodeId, tried : Set G.NodeId }
         loop id res =
@@ -573,27 +591,27 @@ reachableSelectedNodes startNodes graph selected =
                     Set.foldr loop { tried = Set.insert id res.tried, reachable = Set.union res.reachable nextIds } nextIds
 
         startReachable =
-            Set.intersect selected startNodes
+            Set.intersect selected graph.startNodes
     in
         Set.foldr loop { tried = Set.empty, reachable = startReachable } startReachable
             |> .reachable
 
 
-isValidSelection : Set G.NodeId -> G.Graph -> Set G.NodeId -> Bool
-isValidSelection startNodes graph selected =
-    reachableSelectedNodes startNodes graph selected == selected
+isValidSelection : G.Graph -> Set G.NodeId -> Bool
+isValidSelection graph selected =
+    reachableSelectedNodes graph selected == selected
 
 
-neighborNodes : Set G.NodeId -> G.Graph -> Set G.NodeId -> Set G.NodeId
-neighborNodes startNodes graph selected =
-    Set.foldr (\id res -> G.neighbors id graph |> Set.union res) startNodes selected
+neighborNodes : G.Graph -> Set G.NodeId -> Set G.NodeId
+neighborNodes graph selected =
+    Set.foldr (\id res -> G.neighbors id graph |> Set.union res) graph.startNodes selected
         |> \res -> Set.diff res selected
 
 
 nodesToBuild : G.Graph -> Set G.NodeId -> Maybe String
 nodesToBuild graph =
     Set.toList
-        >> List.map nodeToString
+        >> List.map toString
         >> String.join "&"
         >> (\s ->
                 if s == "" then
@@ -603,14 +621,8 @@ nodesToBuild graph =
            )
 
 
-nodeToString : G.NodeId -> String
-nodeToString =
-    -- Char.fromCode >> String.fromChar
-    toString
-
-
-buildToNodes : Set G.NodeId -> G.Graph -> Maybe String -> Set G.NodeId
-buildToNodes startNodes graph =
+buildToNodes : G.Graph -> Maybe String -> Set G.NodeId
+buildToNodes graph =
     Maybe.withDefault ""
         >> String.split "&"
         >> List.map (String.toInt >> Result.toMaybe)
@@ -619,16 +631,16 @@ buildToNodes startNodes graph =
                 ids =
                     ids0 |> Maybe.Extra.values |> Set.fromList
             in
-                if List.length ids0 == Set.size ids && isValidSelection startNodes graph ids then
+                if List.length ids0 == Set.size ids && isValidSelection graph ids then
                     ids
                 else
                     Set.empty
 
 
-nodeSummary : HomeModel -> List ( Int, G.NodeType )
-nodeSummary { graph } =
-    graph.char.graph.nodes
-        |> Dict.filter (\id nodeType -> Set.member id graph.selected)
+nodeSummary : { a | selected : Set G.NodeId, char : G.Character } -> List ( Int, G.NodeType )
+nodeSummary { selected, char } =
+    char.graph.nodes
+        |> Dict.filter (\id nodeType -> Set.member id selected)
         |> Dict.values
         |> List.map .val
         |> List.sortBy .name
@@ -653,12 +665,35 @@ nodeSummary { graph } =
             )
 
 
-statsSummary : HomeModel -> List GS.StatTotal
-statsSummary home =
-    home
-        |> nodeSummary
+statsSummary : { a | selected : Set G.NodeId, char : G.Character, game : G.GameVersionData } -> List GS.StatTotal
+statsSummary g =
+    nodeSummary g
         |> List.concatMap (\( count, node ) -> node.stats |> List.map (\( stat, level ) -> ( stat, count * level )))
-        |> GS.calcStats home.graph.game.stats
+        |> GS.calcStats g.game.stats
+
+
+parseStatsSummary :
+    Model
+    -> Route.HomeParams
+    ->
+        Result String
+            { selected : Set G.NodeId
+            , char : G.Character
+            , game : G.GameVersionData
+            , nodes : List ( Int, G.NodeType )
+            , stats : List GS.StatTotal
+            }
+parseStatsSummary model params =
+    parseSelected params model
+        |> Result.map
+            (\m ->
+                { selected = m.selected
+                , char = m.char
+                , game = m.game
+                , nodes = nodeSummary m
+                , stats = statsSummary m
+                }
+            )
 
 
 subscriptions : Model -> Sub Msg

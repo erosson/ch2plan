@@ -44,6 +44,7 @@ homeParams0 =
 
 type Route
     = Home HomeParams
+    | Stats HomeParams
     | Changelog
     | NotFound
     | Root LegacyHomeParams
@@ -51,12 +52,12 @@ type Route
 
 
 type alias Features =
-    { fancyTooltips : Bool, fullscreen : Bool, importSave : Bool }
+    { fancyTooltips : Bool, fullscreen : Bool, saveImport : Bool }
 
 
 features0 : Features
 features0 =
-    { fancyTooltips = False, fullscreen = False, importSave = False }
+    { fancyTooltips = False, fullscreen = False, saveImport = False }
 
 
 parse : Navigation.Location -> Route
@@ -123,7 +124,8 @@ parser =
         -- a modern versioned url, with build
         , P.map Home <| P.map HomeParams <| homeQS <| P.s "g" </> P.string </> P.string </> maybeString
 
-        -- other urls.
+        -- other non-skilltree urls.
+        , P.map Stats <| P.map HomeParams <| homeQS <| P.s "s" </> P.string </> P.string </> maybeString
         , P.map Changelog <| P.s "changelog"
         ]
 
@@ -156,7 +158,7 @@ featuresParser =
         P.top
             <?> flagParam "enableFancyTooltips" features0.fancyTooltips
             <?> flagParam "enableFullscreen" features0.fullscreen
-            <?> flagParam "enableImportSave" features0.importSave
+            <?> flagParam "enableSaveImport" features0.saveImport
 
 
 ifFeature : Bool -> a -> a -> a
@@ -167,24 +169,32 @@ ifFeature pred t f =
         f
 
 
+stringifyHomePath : HomeParams -> String
+stringifyHomePath { version, hero, build, search } =
+    let
+        qs =
+            Maybe.Extra.unwrap "" ((++) "?q=" << Http.encodeUri) search
+    in
+        "/"
+            ++ version
+            ++ case ( hero, build ) of
+                -- ( "helpfulAdventurer", Nothing ) ->
+                -- qs
+                ( _, Nothing ) ->
+                    "/" ++ hero ++ qs
+
+                ( _, Just b ) ->
+                    "/" ++ hero ++ "/" ++ b ++ qs
+
+
 stringify : Route -> String
 stringify route =
     case route of
-        Home { version, hero, build, search } ->
-            let
-                qs =
-                    Maybe.Extra.unwrap "" ((++) "?q=" << Http.encodeUri) search
-            in
-                "#/g/"
-                    ++ version
-                    ++ case ( hero, build ) of
-                        -- ( "helpfulAdventurer", Nothing ) ->
-                        -- qs
-                        ( _, Nothing ) ->
-                            "/" ++ hero ++ qs
+        Home params ->
+            "#/g" ++ stringifyHomePath params
 
-                        ( _, Just b ) ->
-                            "/" ++ hero ++ "/" ++ b ++ qs
+        Stats params ->
+            "#/s" ++ stringifyHomePath params
 
         Changelog ->
             "#/changelog"

@@ -1,4 +1,10 @@
-module ViewGraph exposing (..)
+module View.Graph
+    exposing
+        ( view
+        , nodeBackgroundImage
+        , nodeQualityClass
+        , iconUrl
+        )
 
 import Dict as Dict exposing (Dict)
 import Set as Set exposing (Set)
