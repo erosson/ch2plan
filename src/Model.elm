@@ -29,6 +29,7 @@ import Json.Decode as Decode
 import Navigation
 import Maybe.Extra
 import List.Extra
+import Dict.Extra
 import Math.Vector2 as V2
 import Draggable
 import Window
@@ -36,6 +37,7 @@ import GameData as G
 import GameData.Stats as GS
 import Route as Route exposing (Route)
 import Model.Dijkstra as Dijkstra
+import Ports
 
 
 type Msg
@@ -53,6 +55,8 @@ type Msg
     | Zoom Float
     | Resize Window.Size
     | ToggleSidebar
+    | SaveFileSelected String
+    | SaveFileImport Ports.SaveFileData
 
 
 type alias Model =
@@ -464,6 +468,42 @@ update msg model =
                 ToggleSidebar ->
                     ( { model | route = Home { home | sidebarOpen = not home.sidebarOpen } }, Cmd.none )
 
+                SaveFileSelected elemId ->
+                    ( model, Ports.saveFileSelected elemId )
+
+                SaveFileImport data ->
+                    let
+                        _ =
+                            Debug.log "SaveFileImport" data
+
+                        saveHero =
+                            case model.route of
+                                Home { params } ->
+                                    Dict.get params.version model.gameData.byVersion
+                                        |> Maybe.withDefault (G.latestVersion model.gameData)
+                                        |> (\gvd -> Dict.Extra.find (\k v -> v.name == data.hero) gvd.heroes)
+
+                                _ ->
+                                    Nothing
+
+                        saveBuild =
+                            String.join "&" data.build
+
+                        q =
+                            home.params
+
+                        cmd =
+                            case saveHero of
+                                Just hero ->
+                                    Route.Home { q | hero = Tuple.first hero, build = Just saveBuild }
+                                        |> Route.stringify
+                                        |> Navigation.newUrl
+
+                                _ ->
+                                    Cmd.none
+                    in
+                        ( model, cmd )
+
         _ ->
             -- all other routes have no state to preserve or update
             case msg of
@@ -663,6 +703,7 @@ subscriptions model =
             Sub.batch
                 [ Window.resizes Resize
                 , Draggable.subscriptions DragMsg home.drag
+                , Ports.saveFileContentRead SaveFileImport
                 ]
 
         _ ->
