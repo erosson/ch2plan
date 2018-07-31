@@ -14,8 +14,9 @@
     "export:chars": "scripty",
     "export:post-chars": "./scripts/postexport/chars ./assets/ch2data/chars/latest.json",
     "export:as3": "scripty",
-    "dev": "cp CHANGELOG.md ./assets && elm-live ./src/Main.elm --output=./assets/elm.js --dir=./assets --open",
-    "build": "rm -rf ./dist && mkdir -p ./dist && cp CHANGELOG.md ./dist && rsync -auv ./assets/ ./dist/ && elm-make ./src/Main.elm --output=./dist/elm.js",
+    "copyDeps":"mkdir -p assets/lib && cp ./node_modules/amf-js/src/amf.js ./assets/lib && cp ./node_modules/zlibjs/bin/rawinflate.min.js ./assets/lib",
+    "dev": "yarn copyDeps && cp CHANGELOG.md ./assets && elm-live ./src/Main.elm --output=./assets/elm.js --dir=./assets --open",
+    "build": "rm -rf ./dist && mkdir -p ./dist && yarn copyDeps && cp CHANGELOG.md ./dist && rsync -auv ./assets/ ./dist/ && elm-make ./src/Main.elm --output=./dist/elm.js",
     "//test": "you probably want to run this with --watch, like 'yarn test --watch'",
     "test": "elm-test",
     "deploy:purge-cloudflare-cache": "scripty",
@@ -25,7 +26,10 @@
   "optionalDependencies": {
     "terraform-npm": "0.2.6"
   },
-  "dependencies": {},
+  "dependencies": {
+    "amf-js": "^1.0.4",
+    "zlibjs": "^0.3.1"
+  },
   "devDependencies": {
     "elm": "^0.18.0",
     "elm-live": "^2.7.5",
