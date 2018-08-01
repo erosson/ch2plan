@@ -43,6 +43,7 @@ import Ports
 type Msg
     = SearchInput String
     | SearchNav (Maybe String) (Maybe String)
+    | SearchRegex Ports.SearchRegex
     | NodeMouseDown G.NodeId
     | NodeMouseUp G.NodeId
     | NodeMouseOver G.NodeId
@@ -204,7 +205,7 @@ createHomeModel q game char selected =
     , graph =
         { game = game
         , char = char
-        , search = searchRegex q.search
+        , search = Nothing -- this has its own message, parsed in js for https://github.com/erosson/ch2plan/issues/44
         , selected = selected
         , neighbors = neighborNodes char.graph selected
         , dijkstra = Lazy.lazy (\() -> Dijkstra.dijkstra char.graph selected Nothing)
@@ -262,8 +263,7 @@ navFromHome model old route =
                         , searchPrev = new.searchPrev
                         , graph =
                             { og
-                                | search = new.graph.search
-                                , char = new.graph.char
+                                | char = new.graph.char
                                 , game = new.graph.game
                             }
                       }
@@ -337,9 +337,10 @@ update msg model =
                         g =
                             home.graph
                     in
-                        -- don't update searchRegex: wait to actually perform the search, for performance's sake.
+                        -- don't update searchRegex: wait for performance, and for safety.
                         -- https://github.com/erosson/ch2plan/issues/31
                         -- https://github.com/erosson/ch2plan/issues/36
+                        -- https://github.com/erosson/ch2plan/issues/44
                         ( { model | route = Home { home | searchPrev = home.searchString, searchString = search } }
                         , Process.sleep (0.3 * Time.second) |> Task.perform (always <| SearchNav home.searchString search)
                         )
@@ -347,15 +348,29 @@ update msg model =
                 SearchNav from to ->
                     ( model
                     , if home.searchPrev == from then
-                        let
-                            _ =
-                                Debug.log "searchNav accepted" ( home.searchPrev, from, to )
-                        in
-                            { params | search = to } |> Route.Home |> Route.stringify |> Navigation.modifyUrl
+                        Cmd.batch
+                            [ { params | search = to } |> Route.Home |> Route.stringify |> Navigation.modifyUrl
+                            , Ports.searchUpdated ()
+                            ]
                       else
                         -- they typed something since the delay, do not update the url
                         Cmd.none
                     )
+
+                SearchRegex { string, error } ->
+                    let
+                        g =
+                            home.graph
+
+                        home2 =
+                            case ( string, error ) of
+                                ( _, Just error ) ->
+                                    { home | error = Just <| "Search error: " ++ error }
+
+                                ( string, Nothing ) ->
+                                    { home | error = Nothing, graph = { g | search = searchRegex string } }
+                    in
+                        ( { model | route = Home home2 }, Cmd.none )
 
                 NodeMouseOver id ->
                     ( { model | route = Home { home | tooltip = Just ( id, Hovering ) } }, Cmd.none )
@@ -706,6 +721,7 @@ subscriptions model =
                 [ Window.resizes Resize
                 , Draggable.subscriptions DragMsg home.drag
                 , Ports.saveFileContentRead SaveFileImport
+                , Ports.searchRegex SearchRegex
                 ]
 
         _ ->

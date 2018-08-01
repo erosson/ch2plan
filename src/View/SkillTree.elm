@@ -115,14 +115,15 @@ inputSaveSelectId =
 
 viewError : M.HomeModel -> List (H.Html M.Msg)
 viewError home =
-    case home.error of
-        Just error ->
-            [ H.p [ A.class "error" ]
+    [ H.p [ A.class "error" ]
+        (case home.error of
+            Just error ->
                 [ H.text <| "Error : " ++ error ]
-            ]
 
-        _ ->
-            []
+            _ ->
+                []
+        )
+    ]
 
 
 viewSearch : M.HomeModel -> H.Html M.Msg
