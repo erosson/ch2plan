@@ -97,6 +97,11 @@ viewSelectSave features =
                     (Decode.succeed <| M.SaveFileSelected inputSaveSelectId)
                 ]
                 []
+            , H.p [ A.class "saveSelectHint" ]
+                [ H.text "Hint: your save files are probably located in"
+                , H.br [] []
+                , H.text "C:\\Users\\$USERNAME\\AppData\\Roaming\\ClickerHeroes2\\Local Store\\saves"
+                ]
             ]
         ]
     else
