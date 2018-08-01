@@ -1,15 +1,15 @@
-# TODO: finish writing CONTRIBUTING file
+# Contributing to the CH2 tree planner
 
-## Getting started
+Want to add something/fix something in the skill tree planner? I take pull requests. Thanks for your interest!
 
-Thanks for your interest!
+## Getting started/Running the website locally
 
 - Install Ubuntu Linux, probably: https://www.ubuntu.com/
   - I haven't tested anything on Windows or other flavors of Linux, but feel free to try! A VM should work fine too.
 - Install NodeJS: https://nodejs.org/en/download/
 - Install Yarn: https://yarnpkg.com/lang/en/docs/install/#debian-stable
 - Configure your editor for Elm: https://guide.elm-lang.org/install.html . Most of our code is written in Elm.
-  - No need to _install_ Elm - that happens automatically in the next step.
+  - No need to _install_ Elm - that happens automatically in the next step, running `yarn`.
   - Elm code that hasn't been run through `elm-format` will fail automated tests!
 - Configure your editor to run [prettier](https://prettier.io) on save: https://prettier.io/docs/en/editors.html
   - JS and JSON that hasn't been run through `prettier` will fail automated tests!
@@ -17,7 +17,7 @@ Thanks for your interest!
 - Install Elm and other dependencies: `yarn`
 - Finally, run the planner in development mode: `yarn dev`
 
-## Development
+## Development commands
 
 - `yarn dev` runs things in development mode. You'll need to restart it when changing `index.html` or `CHANGELOG.md`, but everything else should auto-reload when changed. I spend most of my time here.
 - `yarn start` creates a production build, and runs it with no development features. Useful to see exactly how the app will behave when deployed.
@@ -26,7 +26,7 @@ Thanks for your interest!
 
 ## Releasing
 
-All code pushed to master is released immediately after [Travis](https://travis-ci.org/erosson/ch2plan) has run its tests and built it. There is no development environment. Instead, you should aggressively use feature-flags (`?enableXYZ=1`) for new things you're uncertain about.
+All code pushed to master is released immediately after [Travis](https://travis-ci.org/erosson/ch2plan) has run its tests and built it. There is no development or preprod environment, other than your local machine. Instead, you should use feature-flags (`?enableXYZ=1`) for new things you're even a little uncertain about - take a look at Route.elm for examples.
 
 ## Updating the planner for a new CH2 version
 
