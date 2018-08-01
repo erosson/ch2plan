@@ -90,6 +90,7 @@ type alias HomeModel =
     , drag : Draggable.State ()
     , tooltip : Maybe ( G.NodeId, TooltipState )
     , sidebarOpen : Bool
+    , error : Maybe String
     }
 
 
@@ -220,6 +221,7 @@ createHomeModel q game char selected =
     , drag = Draggable.init
     , tooltip = Nothing
     , sidebarOpen = True
+    , error = Nothing
     }
 
 
@@ -316,7 +318,7 @@ updateNode id home model =
         route =
             Route.Home { q | build = nodesToBuild home.graph.char.graph selected }
     in
-        ( model, Navigation.newUrl <| Route.stringify route )
+        ( { model | route = Home { home | error = Nothing } }, Navigation.newUrl <| Route.stringify route )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -477,8 +479,8 @@ update msg model =
                             Debug.log "SaveFileImport" data
 
                         saveHero =
-                            case model.route of
-                                Home { params } ->
+                            case ( data.error, model.route ) of
+                                ( Nothing, Home { params } ) ->
                                     Dict.get params.version model.gameData.byVersion
                                         |> Maybe.withDefault (G.latestVersion model.gameData)
                                         |> (\gvd -> Dict.Extra.find (\k v -> v.name == data.hero) gvd.heroes)
@@ -502,7 +504,7 @@ update msg model =
                                 _ ->
                                     Cmd.none
                     in
-                        ( model, cmd )
+                        ( { model | route = Home { home | error = data.error } }, cmd )
 
         _ ->
             -- all other routes have no state to preserve or update
