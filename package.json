@@ -18,7 +18,9 @@
     "dev": "yarn copyDeps && cp CHANGELOG.md ./assets && elm-live ./src/Main.elm --output=./assets/elm.js --dir=./assets --open",
     "build": "rm -rf ./dist && mkdir -p ./dist && yarn copyDeps && cp CHANGELOG.md ./dist && rsync -auv ./assets/ ./dist/ && elm-make ./src/Main.elm --output=./dist/elm.js",
     "//test": "you probably want to run this with --watch, like 'yarn test --watch'",
-    "test": "elm-test",
+    "format": "elm-format --yes src && prettier --write assets/ports.js assets/stats.json",
+    "lint": "elm-format --validate src && prettier --list-different assets/ports.js assets/stats.json",
+    "test": "yarn lint && elm-test",
     "deploy:purge-cloudflare-cache": "scripty",
     "start": "yarn build && serve ./dist"
   },
@@ -32,8 +34,10 @@
   },
   "devDependencies": {
     "elm": "^0.18.0",
+    "elm-format": "^0.6.1-alpha",
     "elm-live": "^2.7.5",
     "elm-test": "^0.18.12",
+    "prettier": "^1.14.0",
     "scripty": "^1.7.2"
   }
 }
