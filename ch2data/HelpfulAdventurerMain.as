@@ -671,8 +671,8 @@ package
 				},
 				"Q28": { 
 					"name": "Jerator's Enchantment",
-					"tooltip": "Critical Hits from Auto Attacks restore 1 mana." ,
-					"flavorText": null,
+					"tooltip": "Critical Hits from Auto Attacks can restore 1 mana one time per second." ,
+					"flavorText": "This effect can not occur more than once every second.",
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.addTrait("AutoAttackCritMana", 1);},  
 					"icon": "damagex3"
@@ -1203,9 +1203,9 @@ package
 				},
 				"K16": { 
 					"name": "Stone: Big Clicks less than 200",
-					"tooltip": "A stone that can activate when Big Clicks has more than 200 stacks." ,
+					"tooltip": "A stone that can activate when Big Clicks has less than 200 stacks." ,
 					"flavorText": null,
-					"setupFunction": function() {addBuffComparisonStone("BigClicksLT10", "Big Clicks < 200", "A stone that can activate when Big Clicks has less than 200 stacks.", "Big Clicks", CH2.COMPARISON_LT, 200); },
+					"setupFunction": function() {addBuffComparisonStone("BigClicksLT200", "Big Clicks < 200", "A stone that can activate when Big Clicks has less than 200 stacks.", "Big Clicks", CH2.COMPARISON_LT, 200); },
 					"purchaseFunction": function() { CH2.currentCharacter.automator.unlockStone("BigClicksLT200");  },
 					"icon": "gemGameBigClicks"
 				},
@@ -1318,7 +1318,7 @@ package
 					"tooltip": "Automates upgrading the Newest Item." ,
 					"flavorText": null,
 					"setupFunction": function() {addUpgradeNewestItemGem(); },
-					"purchaseFunction": function() { CH2.currentCharacter.automator.unlockGem(CHARACTER_NAME+"_54");  },
+					"purchaseFunction": function() { CH2.currentCharacter.automator.unlockGem(CHARACTER_NAME+"_53");  },
 					"icon": "gemUpgradeCheapest"
 				},
 				"K38": { 
@@ -1326,7 +1326,7 @@ package
 					"tooltip": "Automates upgrading All Items." ,
 					"flavorText": null,
 					"setupFunction": function() {addUpgradeAllItemsGem(); },
-					"purchaseFunction": function() { CH2.currentCharacter.automator.unlockGem(CHARACTER_NAME+"_53");  },
+					"purchaseFunction": function() { CH2.currentCharacter.automator.unlockGem(CHARACTER_NAME+"_54");  },
 					"icon": "gemUpgradeCheapest"
 				},
 				//###################################################################
@@ -1915,8 +1915,8 @@ package
 				var monster:Monster = CH2.world.getNextMonster();
 				if (monster)
 				{
-					var healthPercent:Number = (monster.health / monster.maxHealth);
-					if (healthPercent > 0.5)
+					var healthPercent:BigNumber = monster.health.divideToPercent(monster.maxHealth);
+					if (healthPercent.gtN(0.5))
 					{
 						return true;
 					}
@@ -1932,8 +1932,8 @@ package
 				var monster:Monster = CH2.world.getNextMonster();
 				if (monster)
 				{
-					var healthPercent:Number = (monster.health / monster.maxHealth);
-					if (healthPercent < 0.5)
+					var healthPercent:BigNumber = monster.health.divideToPercent(monster.maxHealth);
+					if (healthPercent.ltN(0.5))
 					{
 						return true;
 					}
@@ -2123,7 +2123,7 @@ package
 			buff.iconId = 21;
 			buff.isUntimedBuff = true;
 			buff.name = "Mana Crit From Crits";
-			buff.onCrit = function(attackData:AttackData)
+			buff.critFunction = function(attackData:AttackData)
 			{
 				var manaCrit:Skill = CH2.currentCharacter.getSkill("Mana Crit");
 				manaCrit.cooldownRemaining -= 1000;
@@ -2133,10 +2133,13 @@ package
 		
 		public function applyCritChanceFromNonCritsTalent():void
 		{
+			// there is no onHit buff function
+			/*
 			var buff:Buff = new Buff();
 			buff.iconId = 21;
 			buff.isUntimedBuff = true;
 			buff.name = "Crit Chance From Non-Crits";
+			
 			buff.onHit = function(attackData:AttackData)
 			{
 				if (!attackData.isCritical) 
@@ -2148,7 +2151,7 @@ package
 					buff.buffStat(CH2.STAT_CRIT_CHANCE, 0);
 				}
 			}
-			CH2.currentCharacter.buffs.addBuff(buff);
+			CH2.currentCharacter.buffs.addBuff(buff);*/
 		}
 		
 		public function applyUninterruptedAutoAttacksTalent():void
@@ -2239,9 +2242,21 @@ package
 			
 			CH2.currentCharacter.attackDefault(attackData);
 			
-			if (attackData.isAutoAttack && attackData.isCritical && CH2.currentCharacter.getTrait("AutoAttackCritMana"))
+			if (attackData.isAutoAttack && attackData.isCritical && CH2.currentCharacter.getTrait("AutoAttackCritMana") && !(CH2.currentCharacter.buffs.hasBuffByName("AutoAttackCritMana")))
 			{
 				CH2.currentCharacter.addMana(1);
+				var buff:Buff = new Buff();
+				buff.name = "AutoAttackCritMana";
+				buff.iconId = 23;
+				buff.isUntimedBuff = false;
+				buff.duration = 1000;
+						buff.tooltipFunction = function() {
+							return {
+								"header": "AutoAttackCritMana",
+								"body": "Gained 1 mana."
+							};
+						}
+				CH2.currentCharacter.buffs.addBuff(buff);
 			}
 			
 			if (attackData.isCritical && (CH2.currentCharacter.getTrait("BhaalsRise") || CH2.currentCharacter.getTrait("BhallsRise")))
@@ -2291,7 +2306,7 @@ package
 		
 		public function helpfulAdventurerAddGold(goldToAdd:BigNumber):void
 		{
-			if (CH2.currentCharacter.getTrait("HighEnergyGoldBonus") && (goldToAdd > 0) && CH2.currentCharacter.energy > 0.40 * CH2.currentCharacter.maxEnergy)
+			if (CH2.currentCharacter.getTrait("HighEnergyGoldBonus") && (goldToAdd.gtN(0)) && CH2.currentCharacter.energy > 0.40 * CH2.currentCharacter.maxEnergy)
 			{
 				goldToAdd.timesEqualsN(2);
 			}
@@ -2715,7 +2730,7 @@ package
 				}
 				if (buff.timeLeft < 400) {
 					buff.timeSinceActivated = 0;
-					//tickSpeed++;
+					tickSpeed++;
 					buff.tickRate = 400 / tickSpeed;
 				}
 			}
@@ -2857,13 +2872,17 @@ package
 			}
 			if (character.getTrait("Preload"))
 			{
-				var buff:Buff = new Buff();							
-				buff.iconId = 35;
+				var buff:Buff = new Buff();		
+				buff.name = "Preload";
+				buff.iconId = 168;
 				buff.isUntimedBuff = true;
 				buff.skillUseFunction = function(skill:Skill) {
-					skill.cooldownRemaining = skill.cooldown * 0.5;
-					buff.isFinished = true;
-					buff.onFinish();
+					if (skill.name != "Reload")
+					{
+						skill.cooldownRemaining = skill.cooldown * 0.5;
+						buff.isFinished = true;
+						buff.onFinish();
+					}
 				}
 				buff.tooltipFunction = function() {
 					return {
@@ -2921,7 +2940,15 @@ package
 								clickTorrent.cooldownRemaining -= 1000;
 							}
 						}
-						if (!character.buffs.hasBuffByName("Huge Click"))
+						var shouldDisplay:Boolean = true;
+						if (character.buffs.hasBuffByName("Huge Click"))
+						{
+							var hugeClickBuff:Buff = character.buffs.getBuff("Huge Click");
+							if (hugeClickBuff.stacks <= 1) {
+								shouldDisplay = false;
+							}
+						}
+						if (shouldDisplay)
 						{
 							SoundManager.instance.playSound("Big Click Hits");
 							var effect:GpuMovieClip = CH2AssetManager.instance.getGpuMovieClip(BIG_CLICK);

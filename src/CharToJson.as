@@ -48,7 +48,7 @@ package {
         loadComplete()
       }
       catch(e:Error) {
-        log("failed to load character: "+e)
+        log("failed to load helpfulAdventurer: "+e)
       }
     }
     private function loadWizard(e:Event):void {
@@ -65,7 +65,7 @@ package {
         loadComplete()
       }
       catch(e:Error) {
-        log("failed to load character: "+e)
+        log("failed to load wizard: "+e)
       }
     }
     private function loadComplete():void {
@@ -79,11 +79,11 @@ package {
       log("./assets/ch2data/chars/latest.json")
     }
 
-    private function loadSkills(e: Event, char: String) {
+    private function loadSkills(e: Event, char: String): void {
       var Character:Class = e.target.applicationDomain.getDefinition("models.Character") as Class;
       for (var key:String in Character.staticSkillInstances) {
         if (!this.json.skills[key]) {
-          this.json.skills[key] = pick(Character.staticSkillInstances[key], ['modName', 'uid', 'name', 'description', 'cooldown', 'duration', 'manaCost', 'energyCost', 'ignoresGCD', 'iconId']);
+          this.json.skills[key] = pick(Character.staticSkillInstances[key], ['modName', 'uid', 'name', 'description', 'cooldown', 'manaCost', 'energyCost', 'ignoresGCD', 'iconId']);
           this.json.skills[key].char = char
         }
       }

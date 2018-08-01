@@ -65,17 +65,16 @@ viewFullscreenTree header ({ windowSize, features } as model) home =
 
 
 ver =
-    { live = "0.052-beta"
-    , ptr = "0.06-(2)-beta-PTR"
+    { live = "0.06-beta"
+    , ptr = ""
     }
 
 
 viewVersionNav : G.GameVersionData -> Route.HomeParams -> H.Html msg
 viewVersionNav g q =
-    let
-        _ =
-            Debug.log "viewVersionNav" ( q, g.versionSlug )
-    in
+    if ver.ptr == "" then
+        H.div [] []
+    else
         H.div []
             [ H.text <| "Your game version: " ++ g.versionSlug ++ ". "
             , if g.versionSlug == ver.live then

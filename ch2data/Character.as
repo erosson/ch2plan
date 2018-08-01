@@ -2434,6 +2434,7 @@ package models
             this.timeSinceLastItemInteraction = 0;
             this.totalUpgradesToItems++;
             IdleHeroUIManager.instance.mainUI.mainPanel.itemsPanel.updateAllEquipAndCatalogSlots();
+            IdleHeroUIManager.instance.mainUI.mainPanel.itemsPanel.equipSlots[item.type].updateMultiplierMeter();
          }
          else
          {
