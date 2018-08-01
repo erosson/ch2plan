@@ -163,3 +163,14 @@ nav {
 .stats-flex .stats-box {
   white-space: nowrap;
 }
+
+.saveSelectHint {
+  margin-top: 5px;
+  font-size: 75%;
+  color: lightgrey;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}

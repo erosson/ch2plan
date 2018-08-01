@@ -5,5 +5,6 @@
 /game
 /node_modules
 elm-stuff
+/assets/lib
 /assets/elm.js
 /assets/CHANGELOG.md

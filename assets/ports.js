@@ -37,10 +37,16 @@ Promise.all([
 
           app.ports.saveFileContentRead.send({
             hero: json.name,
-            build: Object.keys(json.nodesPurchased)
+            build: Object.keys(json.nodesPurchased),
+            error: null
           });
         } catch (error) {
           console.error("Error while reading savefile : " + error);
+          app.ports.saveFileContentRead.send({
+            hero: "",
+            build: [],
+            error: "Save game could not be loaded."
+          });
         }
       };
       reader.readAsArrayBuffer(document.getElementById(elemId).files[0]);
