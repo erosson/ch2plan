@@ -45,7 +45,7 @@ Promise.all([
           app.ports.saveFileContentRead.send({
             hero: "", 
             build: [], 
-            error: "Save gave could not be loaded."
+            error: "Save game could not be loaded."
           });
         }
       };
