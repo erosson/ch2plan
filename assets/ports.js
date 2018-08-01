@@ -68,7 +68,6 @@ Promise.all([
  * https://github.com/erosson/ch2plan/issues/44
  */
 function parseSearchRegex(app, q0) {
-  console.log("PARSESEARCHREGEX");
   var q = parseQS(window.location.hash).q || null;
   var error = null;
   if (q !== q0) {

@@ -8,7 +8,8 @@ h2 {
 }
 svg {
   background: url("./ch2data/img/starBG.png");
-  margin: 0; padding: 0;
+  margin: 0;
+  padding: 0;
 }
 svg .edge {
   stroke: #8888;
@@ -38,7 +39,8 @@ svg .zoom-buttons text {
 }
 .svg-container {
   position: relative;
-  margin: 0; padding: 0;
+  margin: 0;
+  padding: 0;
   /* border: 1px solid grey; */
 }
 .svg-container,
@@ -48,12 +50,15 @@ body,
 html {
   width: 100%;
   height: 100%;
-  border: 0; padding: 0; margin: 0;
-    /* overflow: hidden; */
+  border: 0;
+  padding: 0;
+  margin: 0;
+  /* overflow: hidden; */
 }
 .skill-tree-main .sidebar {
   position: fixed;
-  left: 0; top: 0;
+  left: 0;
+  top: 0;
   width: 480px;
   height: 100%;
   background: #080010f0;
@@ -64,9 +69,11 @@ html {
 }
 .sidebar-show {
   position: absolute;
-  top: 4px; left: 4px;
+  top: 4px;
+  left: 4px;
 }
-.sidebar-show, .sidebar-hide {
+.sidebar-show,
+.sidebar-hide {
   border: 3px solid #ccc;
   border-radius: 5px;
   background: #080010f0;
@@ -92,14 +99,24 @@ html {
   color: #999;
 }
 
-.node-highlight0 {filter: url(#highlight0)}
-.node-highlight1 {filter: url(#highlight1)}
-.node-highlight2 {filter: url(#highlight2)}
-.node-highlight3 {filter: url(#highlight3)}
-.node-highlight4 {filter: url(#highlight4)}
-.node-highlight5 {filter: url(#highlight5)}
-.node-highlight6 {filter: url(#highlight6)}
-.node-highlight7 {filter: url(#highlight7)}
+.node-highlight0 {
+  filter: url(#highlight0);
+}
+.node-highlight1 {
+  filter: url(#highlight1);
+}
+.node-highlight2 {
+  filter: url(#highlight2);
+}
+.node-highlight3 {
+  filter: url(#highlight3);
+}
+.node-highlight4 {
+  filter: url(#highlight4);
+}
+.node-highlight5 {
+  filter: url(#highlight5);
+}
 .node-summary .icon {
   float: left;
 }

@@ -169,11 +169,17 @@ ifFeature pred t f =
         f
 
 
+replace : String -> String -> String -> String
+replace search replace =
+    Regex.replace Regex.All (Regex.regex <| Regex.escape search) (always replace)
+
+
 stringifyHomePath : HomeParams -> String
 stringifyHomePath { version, hero, build, search } =
     let
         qs =
-            Maybe.Extra.unwrap "" ((++) "?q=" << Http.encodeUri) search
+            -- in addition to normal escaping, replace parens so urls and markdown don't break
+            Maybe.Extra.unwrap "" (Http.encodeUri >> replace "(" "%28" >> replace ")" "%29" >> (++) "?q=") search
     in
         "/"
             ++ version

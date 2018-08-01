@@ -37,12 +37,14 @@ view windowSize model features =
                 , S.filter [ A.id "edgeSelected" ] [ S.feGaussianBlur [ A.in_ "SourceGraphic", A.stdDeviation "4" ] [] ]
                 , S.filter [ A.id "highlight0" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "0" ] [] ]
                 , S.filter [ A.id "highlight1" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "180" ] [] ]
-                , S.filter [ A.id "highlight2" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "90" ] [] ]
-                , S.filter [ A.id "highlight3" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "270" ] [] ]
-                , S.filter [ A.id "highlight4" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "45" ] [] ]
-                , S.filter [ A.id "highlight5" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "135" ] [] ]
-                , S.filter [ A.id "highlight6" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "225" ] [] ]
-                , S.filter [ A.id "highlight7" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "315" ] [] ]
+
+                -- , S.filter [ A.id "highlight2" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "90" ] [] ] -- selected-green
+                , S.filter [ A.id "highlight2" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "270" ] [] ]
+                , S.filter [ A.id "highlight3" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "45" ] [] ]
+
+                -- , S.filter [ A.id "highlight4" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "135" ] [] ] -- selected-green again
+                , S.filter [ A.id "highlight4" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "225" ] [] ]
+                , S.filter [ A.id "highlight5" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "315" ] [] ]
                 ]
             , S.g [ zoomAndPan windowSize model ]
                 ([ model.graph |> L.lazy viewEdges
@@ -377,8 +379,8 @@ nodeHighlightGroup regex0 t =
                     submatches
                         |> List.indexedMap (,)
                         |> Debug.log ("nodeHighlightGroup match: " ++ t.name)
-                        -- maximum 8 groups. ~~640k~~ 8 ought to be enough for anybody
-                        |> List.filterMap (\( i, match ) -> match |> Maybe.map (always <| i % 8))
+                        -- maximum 6 groups. ~~640k~~ 6 ought to be enough for anybody
+                        |> List.filterMap (\( i, match ) -> match |> Maybe.map (always <| i % 6))
                         |> List.head
                         -- it matched, but has no subgroups
                         |> Maybe.withDefault 0
