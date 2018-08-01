@@ -4,6 +4,7 @@ port module Ports exposing (..)
 type alias SaveFileData =
     { hero : String
     , build : List String
+    , error : Maybe String
     }
 
 

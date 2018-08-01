@@ -28,6 +28,7 @@ viewOldTree header ({ features, lastUpdatedVersion } as model) home =
     H.div [] <|
         header
             ++ viewSelectSave features
+            ++ viewError home
             ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
                , H.p [] [ H.text <| home.graph.char.flavor ]
                , viewVersionNav home.graph.game home.params
@@ -50,6 +51,7 @@ viewFullscreenTree header ({ windowSize, features } as model) home =
                 ([ H.button [ A.class "sidebar-hide", A.title "hide", E.onClick M.ToggleSidebar ] [ H.text "<<" ] ]
                     ++ header
                     ++ viewSelectSave features
+                    ++ viewError home
                     ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
                        , H.p [] [ H.text <| home.graph.char.flavor ]
                        , viewVersionNav home.graph.game home.params
@@ -110,6 +112,18 @@ viewSelectSave features =
 
 inputSaveSelectId =
     "inputSaveSelect"
+
+
+viewError : M.HomeModel -> List (H.Html M.Msg)
+viewError home =
+    case home.error of
+        Just error ->
+            [ H.p [ A.class "error" ]
+                [ H.text <| "Error : " ++ error ]
+            ]
+
+        _ ->
+            []
 
 
 viewSearch : M.HomeModel -> H.Html M.Msg

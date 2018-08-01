@@ -26,10 +26,11 @@ Promise.all([
 	        var plain = inflate.decompress();
 	        var json = AMF.deserialize(plain.buffer);
 
-	  		app.ports.saveFileContentRead.send({hero: json.name, build: Object.keys(json.nodesPurchased)});
+	  		app.ports.saveFileContentRead.send({hero: json.name, build: Object.keys(json.nodesPurchased), error: null});
     	}
     	catch(error) {
     		console.error("Error while reading savefile : " + error);
+        app.ports.saveFileContentRead.send({hero: "", build: [], error: "Save gave could not be loaded."});
     	}
     };
     reader.readAsArrayBuffer(document.getElementById(elemId).files[0]);

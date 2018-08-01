@@ -169,3 +169,8 @@ nav {
   font-size: 75%;
   color: lightgrey;
 }
+
+.error {
+  color: red;
+  font-weight: bold;
+}
