@@ -92,6 +92,14 @@ html {
   color: #999;
 }
 
+.node-highlight0 {filter: url(#highlight0)}
+.node-highlight1 {filter: url(#highlight1)}
+.node-highlight2 {filter: url(#highlight2)}
+.node-highlight3 {filter: url(#highlight3)}
+.node-highlight4 {filter: url(#highlight4)}
+.node-highlight5 {filter: url(#highlight5)}
+.node-highlight6 {filter: url(#highlight6)}
+.node-highlight7 {filter: url(#highlight7)}
 .node-summary .icon {
   float: left;
 }

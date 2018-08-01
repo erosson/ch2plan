@@ -33,10 +33,16 @@ view windowSize model features =
         ([ S.svg
             inputZoomAndPan
             [ S.defs []
-                -- hueSelected/hueSearch are gone now, but just in case we add multicolor searches later, here's a hint:
-                -- S.filter [ A.id "hueSearch" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values <| toString hueSearch ]
                 [ S.filter [ A.id "edge" ] [ S.feGaussianBlur [ A.in_ "SourceGraphic", A.stdDeviation "2" ] [] ]
                 , S.filter [ A.id "edgeSelected" ] [ S.feGaussianBlur [ A.in_ "SourceGraphic", A.stdDeviation "4" ] [] ]
+                , S.filter [ A.id "highlight0" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "0" ] [] ]
+                , S.filter [ A.id "highlight1" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "180" ] [] ]
+                , S.filter [ A.id "highlight2" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "90" ] [] ]
+                , S.filter [ A.id "highlight3" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "270" ] [] ]
+                , S.filter [ A.id "highlight4" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "45" ] [] ]
+                , S.filter [ A.id "highlight5" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "135" ] [] ]
+                , S.filter [ A.id "highlight6" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "225" ] [] ]
+                , S.filter [ A.id "highlight7" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "315" ] [] ]
                 ]
             , S.g [ zoomAndPan windowSize model ]
                 ([ model.graph |> L.lazy viewEdges
@@ -357,12 +363,38 @@ isNodeHighlighted q0 t =
     Maybe.Extra.unwrap False (\q -> Regex.contains q <| nodeSearchText t) q0
 
 
+{-| `(searches) (with) (subgroups)` can be highlighted different colors. Give each group a number.
+-}
+nodeHighlightGroup : Maybe Regex -> G.NodeType -> Maybe Int
+nodeHighlightGroup regex0 t =
+    let
+        find regex =
+            case nodeSearchText t |> Regex.find (Regex.AtMost 1) regex of
+                [] ->
+                    Nothing
+
+                { submatches } :: _ ->
+                    submatches
+                        |> List.indexedMap (,)
+                        |> Debug.log ("nodeHighlightGroup match: " ++ t.name)
+                        -- maximum 8 groups. ~~640k~~ 8 ought to be enough for anybody
+                        |> List.filterMap (\( i, match ) -> match |> Maybe.map (always <| i % 8))
+                        |> List.head
+                        -- it matched, but has no subgroups
+                        |> Maybe.withDefault 0
+                        |> Just
+    in
+        Maybe.Extra.unwrap Nothing find regex0
+
+
 nodeHighlightClass : Maybe Regex -> G.NodeType -> String
 nodeHighlightClass q t =
-    if isNodeHighlighted q t then
-        "node-highlight"
-    else
-        "node-nohighlight"
+    case nodeHighlightGroup q t of
+        Nothing ->
+            "node-nohighlight"
+
+        Just i ->
+            "node-highlight node-highlight" ++ toString i
 
 
 nodeSelectedClass : Set Int -> Int -> String
