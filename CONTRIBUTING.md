@@ -24,9 +24,13 @@ Want to add something/fix something in the skill tree planner? I take pull reque
 - `yarn test` or `yarn test --watch` to run automated tests.
 - If your editor doesn't support the autoformatting configuration we did in the above section, run `yarn format` before sending a pull request.
 
+## Choosing what to work on
+
+Before you start working, please file an issue, or otherwise talk to me (@erosson). I like accepting pull requests, and I'd hate to turn away your hard work if there's a better approach to the problem you're solving!
+
 ## Releasing
 
-All code pushed to master is released immediately after [Travis](https://travis-ci.org/erosson/ch2plan) has run its tests and built it. There is no development or preprod environment, other than your local machine. Instead, you should use feature-flags (`?enableXYZ=1`) for new things you're even a little uncertain about - take a look at Route.elm for examples.
+All code pushed to the master branch is released immediately, automatically, after [Travis](https://travis-ci.org/erosson/ch2plan) runs the tests and build. There is no development or preprod environment, other than your local machine. Instead, you should use feature-flags (`?enableXYZ=1`) for new things you're even a little uncertain about - take a look at Route.elm for examples.
 
 ## Updating the planner for a new CH2 version
 
