@@ -36,15 +36,15 @@ Promise.all([
           var json = AMF.deserialize(plain.buffer);
 
           app.ports.saveFileContentRead.send({
-            hero: json.name, 
-            build: Object.keys(json.nodesPurchased), 
+            hero: json.name,
+            build: Object.keys(json.nodesPurchased),
             error: null
           });
         } catch (error) {
           console.error("Error while reading savefile : " + error);
           app.ports.saveFileContentRead.send({
-            hero: "", 
-            build: [], 
+            hero: "",
+            build: [],
             error: "Save game could not be loaded."
           });
         }
