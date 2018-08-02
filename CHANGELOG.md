@@ -33,6 +33,7 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 - Broken searches now display an error, instead of crashing the website.
 - A search can now highlight results in up to 7 different colors. An example with 4 colors: [`(big)|(huge)|(multiclick)|(energize)`](https://ch2.erosson.org/#/g/0.06-beta/helpfulAdventurer?q=%28big%29%7C%28huge%29%7C%28multiclick%29%7C%28energize%29)
+- The stats screen now has icons for each skill.
 
 ## 2018-07-31
 
