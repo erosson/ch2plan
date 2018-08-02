@@ -76,8 +76,8 @@ function parseSearchRegex(app, q0) {
     } catch (e) {
       error = e.message;
     }
+    app.ports.searchRegex.send({ string: q, error: error });
   }
-  app.ports.searchRegex.send({ string: q, error: error });
   return q;
 }
 function parseQS(hash) {
