@@ -152,6 +152,24 @@ html {
 .stats-summary .level-mid {
   color: yellow;
 }
+.skills-summary > ul {
+  padding: 0;
+}
+.skills-summary .stat-line {
+  width: 100%;
+  display: flex;
+  flex-wrap: nowrap;
+}
+.skills-summary .stat-label {
+  flex-grow: 1;
+  margin-left: 0.5em;
+}
+.skills-summary .stat-value {
+  text-align: right;
+  flex-grow: 1;
+  padding-left: 1em;
+  padding-right: 2em;
+}
 .stats-summary .stat-value {
   text-align: right;
   padding-left: 1em;
@@ -187,6 +205,17 @@ nav {
 }
 .stats-flex .stats-box {
   white-space: nowrap;
+}
+.skills-summary ul {
+  list-style-type: none;
+}
+.skill-icon {
+  height: 2em;
+  width: 2em;
+  border: 0.2em ridge gold;
+  border-radius: 0.5em;
+  margin-right: 0.3em;
+  float: left;
 }
 
 .saveSelectHint {

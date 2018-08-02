@@ -34,7 +34,7 @@ view model params =
                         , H.text " have no effect on these stat calculations yet. Work is in progress. Please be patient. (All other nodes should work.)"
                         ]
                     , H.div [ A.class "stats-flex" ]
-                        [ H.div [ A.class "stats-box" ]
+                        [ H.div [ A.class "stats-box skills-summary" ]
                             [ H.p [] [ H.text "Skills:" ]
                             , H.ul [] (List.map (viewSkillSummary getStat) <| List.filter (\s -> not <| Set.member s.id skillBlacklist) <| Dict.values char.skills)
                             ]
@@ -50,11 +50,8 @@ view model params =
                     ]
 
 
-
--- quick-and-dirty way to avoid rendering unused skills
-
-
 skillBlacklist =
+    -- quick-and-dirty way to avoid rendering unused skills
     Set.fromList [ "Clickdrizzle", "EnergizeExtend", "EnergizeRush" ]
 
 
@@ -82,10 +79,16 @@ viewSkillSummary getStat skill =
             , skillVal "effect" |> Maybe.map (pct >> (,) "Effect")
             ]
                 |> Maybe.Extra.values
-                |> List.map (\( label, value ) -> H.li [] [ H.text <| label ++ ": " ++ value ])
+                |> List.map
+                    (\( label, value ) ->
+                        H.li [ A.class "stat-line" ]
+                            [ H.span [ A.class "stat-label" ] [ H.text <| label ++ ": " ]
+                            , H.span [ A.class "stat-value" ] [ H.text value ]
+                            ]
+                    )
     in
         H.li []
-            [ H.text skill.name, H.ul [] lines ]
+            [ H.img [ A.class "skill-icon", A.src <| "./ch2data/img/skills/" ++ toString skill.iconId ++ ".png" ] [], H.b [] [ H.text skill.name ], H.ul [] lines ]
 
 
 viewStatsSummary : (GS.Stat -> GS.StatTotal) -> H.Html msg
@@ -101,7 +104,6 @@ viewStatsSummary getStat =
             in
                 { label = label, level = level, value = format stats }
     in
-        -- H.table [ A.class "stats-summary" ] (statEntrySpecs |> List.map (toEntry >> viewStatEntry) |> Maybe.Extra.values)
         H.table [ A.class "stats-summary" ] (statEntrySpecs |> List.map (toEntry >> viewStatEntry) |> Maybe.Extra.values)
 
 
