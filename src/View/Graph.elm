@@ -16,6 +16,7 @@ import Svg.Attributes as A
 import Svg.Events as E
 import Svg.Lazy as L
 import Maybe.Extra
+import List.Extra
 import Math.Vector2 as V2
 import Draggable
 import VirtualDom
@@ -47,7 +48,8 @@ view windowSize model features =
                 , S.filter [ A.id "highlight5" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "315" ] [] ]
                 ]
             , S.g [ zoomAndPan windowSize model ]
-                ([ model.graph |> L.lazy viewEdges
+                ([ model.graph |> L.lazy2 viewEdges False
+                 , model.graph |> L.lazy2 viewEdges True
                  , model.graph |> L.lazy viewNodeBackgrounds
                  , model.graph |> L.lazy2 viewNodes features
                  ]
@@ -80,13 +82,24 @@ viewNodes features home =
         home.char.graph.nodes |> Dict.toList |> List.map (viewNode features home << Tuple.second) |> S.g []
 
 
-viewEdges : M.HomeGraphModel -> S.Svg msg
-viewEdges home =
+viewEdges : Bool -> M.HomeGraphModel -> S.Svg msg
+viewEdges selected home =
     let
         _ =
             Debug.log "redraw edges" ()
+
+        ( edges, classes ) =
+            if selected then
+                ( List.filter (\e -> isEdgeSelected home e) <| Dict.values home.char.graph.edges, "edge edge-selected" )
+            else
+                ( List.Extra.filterNot (\e -> isEdgeSelected home e) <| Dict.values home.char.graph.edges, "edge" )
+
+        path =
+            edges
+                |> List.map viewEdge
+                |> String.join " "
     in
-        S.g [] (List.map (viewEdge home << Tuple.second) <| Dict.toList home.char.graph.edges)
+        S.path [ A.class classes, A.d path ] []
 
 
 viewTooltip : Window.Size -> M.HomeModel -> G.Node -> H.Html msg
@@ -222,51 +235,28 @@ formatViewBox margin g =
         |> String.join " "
 
 
-viewEdge : M.HomeGraphModel -> G.Edge -> S.Svg msg
-viewEdge home ( a, b ) =
+isEdgeSelected : M.HomeGraphModel -> G.Edge -> Bool
+isEdgeSelected home ( a, b ) =
     let
-        -- the SVG blur filter does not work on vertical or horizontal lines. Ugh.
-        -- To work around this, don't draw the line between a and b. Instead, draw
-        -- a line of the same length at 45 degrees - a square diagonal - and
-        -- transform it to the correct angle. What a pain.
-        ( ax, ay, bx, by ) =
-            ( toFloat a.x, toFloat a.y, toFloat b.x, toFloat b.y )
+        aSelected =
+            Set.member a.id home.selected
 
-        ( length, radians ) =
-            toPolar ( ax - bx, ay - by )
-
-        ( x2, y2 ) =
-            -- a diagonal line. Workaround svg filter problem below.
-            fromPolar ( length, pi / 4 )
-                |> \( dx, dy ) -> ( ax + dx, ay + dy )
-
-        transformDegrees =
-            -- transform the 45% angle back to the original angle
-            radians
-                - (pi / 4)
-                |> (+) pi
-                -- svg insists on degrees, not radians
-                |> (*) (180 / pi)
+        bSelected =
+            Set.member b.id home.selected
     in
-        S.line
-            [ A.x1 <| toString ax
-            , A.y1 <| toString ay
+        aSelected && bSelected
 
-            -- , A.x2 <| toString <| b.x + 1
-            -- , A.y2 <| toString <| b.y + 1
-            , A.x2 <| toString x2
-            , A.y2 <| toString y2
-            , A.transform <| "rotate(" ++ (String.join " " <| List.map toString [ transformDegrees, ax, ay ]) ++ ")"
-            , A.class <|
-                String.join " " <|
-                    [ "edge"
-                    , if Set.member a.id home.selected && Set.member b.id home.selected then
-                        "edge-selected"
-                      else
-                        "edge-unselected"
-                    ]
-            ]
-            []
+
+viewEdge : G.Edge -> String
+viewEdge ( a, b ) =
+    let
+        startPoint =
+            "M" ++ toString a.x ++ " " ++ toString a.y
+
+        endPoint =
+            "L" ++ toString b.x ++ " " ++ toString b.y
+    in
+        startPoint ++ " " ++ endPoint
 
 
 nodeQualityClass : G.NodeQuality -> String
