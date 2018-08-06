@@ -12,6 +12,10 @@ module Model
         , nodeSummary
         , statsSummary
         , parseStatsSummary
+        , center
+        , zoom
+        , graphSize
+        , nodeIconSize
           -- elm architecture
         , init
         , update
@@ -193,14 +197,14 @@ parseSelected q { gameData } =
                     Ok { game = game, char = char, selected = buildToNodes char.graph q.build }
 
 
-initHome : Route.HomeParams -> { m | gameData : G.GameData } -> Result String HomeModel
+initHome : Route.HomeParams -> Model -> Result String HomeModel
 initHome q m =
     parseSelected q m
-        |> Result.map (\{ game, char, selected } -> createHomeModel q game char selected)
+        |> Result.map (\{ game, char, selected } -> createHomeModel q (graphSize m) game char selected)
 
 
-createHomeModel : Route.HomeParams -> G.GameVersionData -> G.Character -> Set G.NodeId -> HomeModel
-createHomeModel q game char selected =
+createHomeModel : Route.HomeParams -> Window.Size -> G.GameVersionData -> G.Character -> Set G.NodeId -> HomeModel
+createHomeModel q window game char selected =
     { params = q
     , graph =
         { game = game
@@ -213,7 +217,7 @@ createHomeModel q game char selected =
     , searchPrev = q.search
     , searchString = q.search
     , zoom =
-        clampZoom <|
+        clampZoom window char.graph <|
             if selected == Set.empty then
                 1
             else
@@ -455,7 +459,7 @@ update msg model =
                             rawDelta |> V2.scale (-1 / home.zoom)
 
                         center =
-                            home.center |> V2.add delta |> clampCenter home.graph.char.graph
+                            home.center |> V2.add delta |> clampCenter (graphSize model) home
                     in
                         ( { model | route = Home { home | center = center } }, Cmd.none )
 
@@ -464,7 +468,7 @@ update msg model =
                         newZoom =
                             home.zoom
                                 |> (+) (-factor * 0.01)
-                                |> clampZoom
+                                |> clampZoom (graphSize model) home.graph.char.graph
                     in
                         ( { model | route = Home { home | zoom = newZoom } }, Cmd.none )
 
@@ -480,7 +484,7 @@ update msg model =
                         ( { model | route = route, features = Route.parseFeatures loc }, cmd )
 
                 Resize windowSize ->
-                    ( { model | windowSize = windowSize |> Debug.log "resize" }, Cmd.none )
+                    ( { model | windowSize = windowSize }, Cmd.none )
 
                 ToggleSidebar ->
                     ( { model | route = Home { home | sidebarOpen = not home.sidebarOpen } }, Cmd.none )
@@ -538,8 +542,37 @@ update msg model =
                     ( model, Cmd.none )
 
 
-clampZoom =
-    clamp 0.2 3
+graphSize : { a | features : Route.Features, windowSize : Window.Size } -> Window.Size
+graphSize { features, windowSize } =
+    if features.fullscreen then
+        windowSize
+    else
+        { width = 1000, height = 1000 }
+
+
+nodeIconSize =
+    50
+
+
+zoomedGraphSize : HomeModel -> Window.Size -> { width : Float, height : Float }
+zoomedGraphSize home window =
+    { height = toFloat window.height / home.zoom
+    , width = toFloat window.width / home.zoom
+    }
+
+
+clampZoom : Window.Size -> G.Graph -> Float -> Float
+clampZoom window graph =
+    -- Small windows can zoom out farther, so they can fit the entire graph on screen
+    let
+        minZoom =
+            min
+                (toFloat window.width / toFloat (G.graphWidth graph + nodeIconSize * 4))
+                (toFloat window.height / toFloat (G.graphHeight graph + nodeIconSize * 4))
+                |> min 0.5
+                |> Debug.log "clampZoom"
+    in
+        clamp minZoom 3
 
 
 redirect : G.GameData -> Route -> Maybe Route
@@ -562,17 +595,37 @@ redirectCmd gameData route =
         |> Maybe.Extra.unwrap Cmd.none (Route.stringify >> Navigation.modifyUrl)
 
 
-clampCenter : G.Graph -> V2.Vec2 -> V2.Vec2
-clampCenter g =
-    v2Clamp (graphMinXY g) (graphMaxXY g)
+zoom : Window.Size -> HomeModel -> Float
+zoom window home =
+    clampZoom window home.graph.char.graph home.zoom
 
 
-graphMinXY g =
-    V2.vec2 (G.graphMinX g |> toFloat) (G.graphMinY g |> toFloat)
+center : Window.Size -> HomeModel -> V2.Vec2
+center window home =
+    clampCenter window home home.center
 
 
-graphMaxXY g =
-    V2.vec2 (G.graphMaxX g |> toFloat) (G.graphMaxY g |> toFloat)
+clampCenter : Window.Size -> HomeModel -> V2.Vec2 -> V2.Vec2
+clampCenter window0 home =
+    let
+        ( minXY, maxXY ) =
+            centerBounds (window0 |> zoomedGraphSize home) home.graph.char.graph
+    in
+        -- >> Debug.log "clampCenter"
+        v2Clamp minXY maxXY
+
+
+centerBounds w g =
+    -- when panning, for any zoom level, we should stop scrolling around the
+    -- edge of the graph, where empty space begins. That means the center is
+    -- clamped to a smaller area as zoom gets more distant.
+    ( V2.vec2
+        ((G.graphMinX g |> toFloat) + w.width / 2 - nodeIconSize |> min 0)
+        ((G.graphMinY g |> toFloat) + w.height / 2 - nodeIconSize |> min 0)
+    , V2.vec2
+        ((G.graphMaxX g |> toFloat) - w.width / 2 + nodeIconSize |> max 0)
+        ((G.graphMaxY g |> toFloat) - w.height / 2 + nodeIconSize |> max 0)
+    )
 
 
 v2Clamp : V2.Vec2 -> V2.Vec2 -> V2.Vec2 -> V2.Vec2

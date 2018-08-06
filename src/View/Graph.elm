@@ -116,8 +116,11 @@ viewTooltip win model node =
         ( w, h ) =
             ( toFloat win.width, toFloat win.height )
 
+        zoom =
+            M.zoom win model
+
         ( x, y ) =
-            ( (toFloat node.x + panX) * model.zoom, (toFloat node.y + panY) * model.zoom )
+            ( (toFloat node.x + panX) * zoom, (toFloat node.y + panY) * zoom )
 
         style =
             [ if x > w / 2 then
@@ -173,10 +176,13 @@ inputZoomAndPan =
 
 
 panOffsets : Window.Size -> M.HomeModel -> ( Float, Float )
-panOffsets w { center, zoom } =
+panOffsets w home =
     let
         ( cx, cy ) =
-            V2.toTuple center
+            home |> M.center w |> V2.toTuple
+
+        zoom =
+            M.zoom w home
 
         ( left, top ) =
             ( cx - toFloat w.width / zoom / 2, cy - toFloat w.height / zoom / 2 )
@@ -190,11 +196,14 @@ zoomAndPan w model =
         ( panX, panY ) =
             panOffsets w model
 
+        zoom =
+            M.zoom w model
+
         panning =
             "translate(" ++ toString panX ++ ", " ++ toString panY ++ ")"
 
         zooming =
-            "scale(" ++ toString model.zoom ++ ")"
+            "scale(" ++ toString zoom ++ ")"
     in
         A.transform (zooming ++ " " ++ panning)
 
@@ -265,7 +274,7 @@ nodeQualityClass =
 
 
 iconSize =
-    50
+    M.nodeIconSize
 
 
 nodeBGSize =

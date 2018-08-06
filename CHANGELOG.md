@@ -23,11 +23,16 @@ These are at least partially working, but turned _off_ by default.
 
 ### New features
 
-These recently left beta, and are turned _on_ by default. For now, you can disable them if they're causing trouble.
+These recently left beta, and are turned _on_ by default. For now, you can disable them if they're causing trouble - that won't be possible forever, so [contact the developer](https://www.reddit.com/user/kawaritai) if they're broken!
 
 - None, for now.
 
 ---
+
+## 2018-08-06
+
+- Small screens can zoom out farther.
+- You can no longer scroll as far into empty space.
 
 ## 2018-08-01
 
