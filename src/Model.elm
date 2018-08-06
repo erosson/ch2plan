@@ -6,7 +6,6 @@ module Model
         , Flags
         , RouteModel(..)
         , HomeModel
-        , HomeGraphModel
         , Error(..)
           -- selectors
         , visibleTooltip
@@ -42,6 +41,7 @@ import GameData as G
 import GameData.Stats as GS
 import Route as Route exposing (Route)
 import Model.Dijkstra as Dijkstra
+import Model.Graph as Graph
 import Ports
 
 
@@ -87,7 +87,7 @@ type alias HomeModel =
     -- This is deliberate - Elm does not have memoization (pure functional!)
     -- so this speeds things up a bit. Be careful when updating.
     { params : Route.HomeParams
-    , graph : HomeGraphModel
+    , graph : Graph.GraphModel
     , searchPrev : Maybe String
     , searchString : Maybe String
     , zoom : Float
@@ -109,21 +109,6 @@ type TooltipState
     = Hovering
     | Shortpressing
     | Longpressing
-
-
-type alias HomeGraphModel =
-    -- These should really be fields on HomeModel, but they're split for efficiently
-    -- re-rendering with Svg.Lazy. It cares about referential equality. Modifying
-    -- this object means the graph will be redrawn - but if this object isn't updated,
-    -- as when zooming/panning, we can efficiently skip that step. Redrawing the
-    -- edges and nodes is slow enough that this really is worth the trouble.
-    { game : G.GameVersionData
-    , char : G.Character
-    , search : Maybe Regex
-    , selected : Set G.NodeId
-    , neighbors : Set G.NodeId
-    , dijkstra : Lazy Dijkstra.Result
-    }
 
 
 type alias Flags =
@@ -167,7 +152,7 @@ routeToModel : Model -> Route -> RouteModel
 routeToModel model route =
     case route of
         Route.Home params ->
-            case initHome params model of
+            case initHome model params of
                 Ok m ->
                     Home m
 
@@ -186,74 +171,28 @@ invert id set =
         Set.insert id set
 
 
-{-| Two kinds of errors here:
-
-  - unrecoverable string-errors; couldn't parse the game or the char. Give up.
-  - recoverable build-errors; couldn't parse selected nodes, but we can display an empty skill-tree.
-
-we're mimicking part of HomeError's structure here.
-
--}
-parseSelected : Route.HomeParams -> { m | gameData : G.GameData } -> Result String { game : G.GameVersionData, char : G.Character, selected : Set G.NodeId, error : Maybe Error }
-parseSelected q { gameData } =
-    case Dict.get q.version gameData.byVersion of
-        Nothing ->
-            Err <| "no such game-version: " ++ toString q.version
-
-        Just game ->
-            case Dict.get q.hero game.heroes of
-                Nothing ->
-                    Err <| "no such hero: " ++ q.hero
-
-                Just char ->
-                    let
-                        ( selected, error ) =
-                            case buildToNodes char.graph q.build of
-                                Ok selected ->
-                                    ( selected, Nothing )
-
-                                Err err ->
-                                    ( Set.empty, Just err )
-                    in
-                        Ok { game = game, char = char, selected = selected, error = error }
-
-
-initHome : Route.HomeParams -> Model -> Result String HomeModel
-initHome q m =
-    parseSelected q m
-        |> Result.map (\{ game, char, selected, error } -> createHomeModel q (graphSize m) game char selected error)
-
-
-createHomeModel : Route.HomeParams -> Window.Size -> G.GameVersionData -> G.Character -> Set G.NodeId -> Maybe Error -> HomeModel
-createHomeModel q window game char selected error =
-    { params = q
-    , graph =
-        { game = game
-        , char = char
-        , search = Nothing -- this has its own message, parsed in js for https://github.com/erosson/ch2plan/issues/44
-        , selected = selected
-        , neighbors = neighborNodes char.graph selected
-        , dijkstra = Lazy.lazy (\() -> Dijkstra.dijkstra char.graph selected Nothing)
-        }
-    , searchPrev = q.search
-    , searchString = q.search
-    , zoom =
-        clampZoom window char.graph <|
-            if selected == Set.empty then
-                1
-            else
-                0.1
-    , center = V2.vec2 0 0
-    , drag = Draggable.init
-    , tooltip = Nothing
-    , sidebarOpen = True
-    , error = error
-    }
-
-
-searchRegex : Maybe String -> Maybe Regex
-searchRegex =
-    Maybe.map (Regex.regex >> Regex.caseInsensitive)
+initHome : Model -> Route.HomeParams -> Result String HomeModel
+initHome model params =
+    let
+        create ( graph, partialError ) =
+            { params = params
+            , graph = graph
+            , searchPrev = params.search
+            , searchString = params.search
+            , zoom =
+                clampZoom model.windowSize graph.char.graph <|
+                    if graph.selected == Set.empty then
+                        1
+                    else
+                        0
+            , center = V2.vec2 0 0
+            , drag = Draggable.init
+            , tooltip = Nothing
+            , sidebarOpen = True
+            , error = partialError |> Maybe.map BuildNodesError
+            }
+    in
+        Graph.parse model params |> Result.map create
 
 
 visibleTooltip : HomeModel -> Maybe G.NodeId
@@ -277,47 +216,16 @@ navFromHome model old route =
     in
         case route |> routeToModel model of
             Home new ->
-                let
-                    isBuildEqual =
-                        old.params.build == new.params.build && old.params.version == new.params.version
-                in
-                    -- preserve non-url state, like zoom/pan
-                    ( { old
-                        | params = new.params
-                        , searchString = new.searchString
-                        , searchPrev = new.searchPrev
-                        , error = Maybe.Extra.or old.error new.error
-                        , graph =
-                            { og
-                                | char = new.graph.char
-                                , game = new.graph.game
-                            }
-                      }
-                        -- avoid needless recomputing, ex. on search
-                        |> (\h ->
-                                if isBuildEqual then
-                                    h
-                                else
-                                    let
-                                        g =
-                                            h.graph
-                                    in
-                                        { h
-                                            | graph =
-                                                { g
-                                                    | selected = new.graph.selected
-                                                    , neighbors = new.graph.neighbors
-                                                    , dijkstra = new.graph.dijkstra
-                                                }
-                                        }
-                           )
-                        |> Home
-                      -- compute dijkstra's after the view renders
-                    , if isBuildEqual then
-                        Cmd.none
-                      else
-                        preprocessCmd
-                    )
+                ( { old
+                    | params = new.params
+                    , searchString = new.searchString
+                    , searchPrev = new.searchPrev
+                    , error = Maybe.Extra.or new.error old.error
+                    , graph = Graph.updateOnChange new.graph old.graph
+                  }
+                    |> Home
+                , preprocessCmd
+                )
 
             routeModel ->
                 ( routeModel, redirectCmd model.gameData route )
@@ -331,7 +239,7 @@ updateNode id home model =
                 -- remove the node, and any disconnected from the start by its removal
                 home.graph.selected
                     |> invert id
-                    |> reachableSelectedNodes home.graph.char.graph
+                    |> Graph.reachableSelectedNodes home.graph.char.graph
             else
                 -- add the node and any in between
                 Dijkstra.selectPathToNode (Lazy.force home.graph.dijkstra) id
@@ -342,7 +250,7 @@ updateNode id home model =
             home.params
 
         route =
-            Route.Home { q | build = nodesToBuild home.graph.char.graph selected }
+            Route.Home { q | build = Graph.nodesToBuild home.graph.char.graph selected }
     in
         ( { model | route = Home { home | error = Nothing } }, Navigation.newUrl <| Route.stringify route )
 
@@ -383,20 +291,17 @@ update msg model =
                         Cmd.none
                     )
 
-                SearchRegex { string, error } ->
-                    let
-                        g =
-                            home.graph
-
-                        home2 =
-                            case ( string, error ) of
-                                ( _, Just error ) ->
-                                    { home | error = Just <| SearchRegexError error }
-
-                                ( string, Nothing ) ->
-                                    { home | error = Nothing, graph = { g | search = searchRegex string } }
-                    in
-                        ( { model | route = Home home2 }, Cmd.none )
+                SearchRegex search ->
+                    ( { model
+                        | route =
+                            Home
+                                { home
+                                    | graph = Graph.search search home.graph
+                                    , error = search.error |> Maybe.map SearchRegexError
+                                }
+                      }
+                    , Cmd.none
+                    )
 
                 NodeMouseOver id ->
                     ( { model | route = Home { home | tooltip = Just ( id, Hovering ) } }, Cmd.none )
@@ -592,7 +497,6 @@ clampZoom window graph =
                 (toFloat window.width / toFloat (G.graphWidth graph + nodeIconSize * 4))
                 (toFloat window.height / toFloat (G.graphHeight graph + nodeIconSize * 4))
                 |> min 0.5
-                |> Debug.log "clampZoom"
     in
         clamp minZoom 3
 
@@ -665,73 +569,6 @@ v2Clamp minV maxV v =
         V2.vec2 (clamp minX maxX x) (clamp minY maxY y)
 
 
-{-| Remove any selected nodes that can't be reached from the start location.
--}
-reachableSelectedNodes : G.Graph -> Set G.NodeId -> Set G.NodeId
-reachableSelectedNodes graph selected =
-    let
-        loop : G.NodeId -> { reachable : Set G.NodeId, tried : Set G.NodeId } -> { reachable : Set G.NodeId, tried : Set G.NodeId }
-        loop id res =
-            if Set.member id res.tried then
-                res
-            else
-                let
-                    -- loop with all selected immediate neighbors
-                    nextIds =
-                        G.neighbors id graph |> Set.intersect selected
-                in
-                    Set.foldr loop { tried = Set.insert id res.tried, reachable = Set.union res.reachable nextIds } nextIds
-
-        startReachable =
-            Set.intersect selected graph.startNodes
-    in
-        Set.foldr loop { tried = Set.empty, reachable = startReachable } startReachable
-            |> .reachable
-
-
-isValidSelection : G.Graph -> Set G.NodeId -> Bool
-isValidSelection graph selected =
-    reachableSelectedNodes graph selected == selected
-
-
-neighborNodes : G.Graph -> Set G.NodeId -> Set G.NodeId
-neighborNodes graph selected =
-    Set.foldr (\id res -> G.neighbors id graph |> Set.union res) graph.startNodes selected
-        |> \res -> Set.diff res selected
-
-
-nodesToBuild : G.Graph -> Set G.NodeId -> Maybe String
-nodesToBuild graph =
-    Set.toList
-        >> List.map toString
-        >> String.join "&"
-        >> (\s ->
-                if s == "" then
-                    Nothing
-                else
-                    Just s
-           )
-
-
-buildToNodes : G.Graph -> Maybe String -> Result Error (Set G.NodeId)
-buildToNodes graph =
-    Maybe.withDefault ""
-        >> String.split "&"
-        >> List.map (String.toInt >> Result.toMaybe)
-        >> Maybe.Extra.values
-        >> \ids0 ->
-            let
-                ids =
-                    ids0 |> Set.fromList
-            in
-                if List.length ids0 /= Set.size ids then
-                    Err <| BuildNodesError "can't select a node twice"
-                else if not <| isValidSelection graph ids then
-                    Err <| BuildNodesError "some nodes in this build aren't connected to the start location"
-                else
-                    Ok ids
-
-
 nodeSummary : { a | selected : Set G.NodeId, char : G.Character } -> List ( Int, G.NodeType )
 nodeSummary { selected, char } =
     char.graph.nodes
@@ -779,15 +616,16 @@ parseStatsSummary :
             , stats : List GS.StatTotal
             }
 parseStatsSummary model params =
-    parseSelected params model
+    Graph.parse model params
         |> Result.map
-            (\m ->
-                { selected = m.selected
-                , char = m.char
-                , game = m.game
-                , nodes = nodeSummary m
-                , stats = statsSummary m
-                }
+            (Tuple.first
+                >> \m ->
+                    { selected = m.selected
+                    , char = m.char
+                    , game = m.game
+                    , nodes = nodeSummary m
+                    , stats = statsSummary m
+                    }
             )
 
 

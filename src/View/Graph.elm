@@ -23,6 +23,7 @@ import VirtualDom
 import Json.Decode as Decode
 import Window
 import Model as M
+import Model.Graph as MG
 import GameData as G
 import Route
 
@@ -64,7 +65,7 @@ view windowSize model features =
         )
 
 
-viewNodeBackgrounds : M.HomeGraphModel -> S.Svg msg
+viewNodeBackgrounds : MG.GraphModel -> S.Svg msg
 viewNodeBackgrounds home =
     let
         _ =
@@ -73,7 +74,7 @@ viewNodeBackgrounds home =
         home.char.graph.nodes |> Dict.toList |> List.map (viewNodeBackground home << Tuple.second) |> S.g []
 
 
-viewNodes : Route.Features -> M.HomeGraphModel -> S.Svg M.Msg
+viewNodes : Route.Features -> MG.GraphModel -> S.Svg M.Msg
 viewNodes features home =
     let
         _ =
@@ -82,7 +83,7 @@ viewNodes features home =
         home.char.graph.nodes |> Dict.toList |> List.map (viewNode features home << Tuple.second) |> S.g []
 
 
-viewEdges : Bool -> M.HomeGraphModel -> S.Svg msg
+viewEdges : Bool -> MG.GraphModel -> S.Svg msg
 viewEdges selected home =
     let
         _ =
@@ -244,7 +245,7 @@ formatViewBox margin g =
         |> String.join " "
 
 
-isEdgeSelected : M.HomeGraphModel -> G.Edge -> Bool
+isEdgeSelected : MG.GraphModel -> G.Edge -> Bool
 isEdgeSelected home ( a, b ) =
     let
         aSelected =
@@ -286,7 +287,7 @@ iconUrl node =
     "./ch2data/img/" ++ node.icon ++ ".png"
 
 
-viewNodeBackground : M.HomeGraphModel -> G.Node -> S.Svg msg
+viewNodeBackground : MG.GraphModel -> G.Node -> S.Svg msg
 viewNodeBackground { selected, search, neighbors } { id, x, y, val } =
     -- Backgrounds are drawn separately from the rest of the node, so they don't interfere with other nodes' clicks
     S.image
@@ -300,7 +301,7 @@ viewNodeBackground { selected, search, neighbors } { id, x, y, val } =
         []
 
 
-viewNode : Route.Features -> M.HomeGraphModel -> G.Node -> S.Svg M.Msg
+viewNode : Route.Features -> MG.GraphModel -> G.Node -> S.Svg M.Msg
 viewNode features home { id, x, y, val } =
     S.g
         [ A.class <| String.join " " [ "node", nodeHighlightClass home.search val, nodeSelectedClass home.selected id, nodeNeighborClass home.neighbors id, nodeQualityClass val.quality ]
@@ -377,7 +378,7 @@ nodeHighlightGroup regex0 t =
                 { submatches } :: _ ->
                     submatches
                         |> List.indexedMap (,)
-                        |> Debug.log ("nodeHighlightGroup match: " ++ t.name)
+                        -- |> Debug.log ("nodeHighlightGroup match: " ++ t.name)
                         -- maximum 6 groups. ~~640k~~ 6 ought to be enough for anybody
                         |> List.filterMap (\( i, match ) -> match |> Maybe.map (always <| i % 6))
                         |> List.head
