@@ -7,6 +7,7 @@ module Model
         , RouteModel(..)
         , HomeModel
         , HomeGraphModel
+        , Error(..)
           -- selectors
         , visibleTooltip
         , nodeSummary
@@ -95,8 +96,14 @@ type alias HomeModel =
     , drag : Draggable.State ()
     , tooltip : Maybe ( G.NodeId, TooltipState )
     , sidebarOpen : Bool
-    , error : Maybe String
+    , error : Maybe Error
     }
+
+
+type Error
+    = SearchRegexError String
+    | SaveImportError String
+    | BuildNodesError String
 
 
 type TooltipState
@@ -182,7 +189,15 @@ invert id set =
         Set.insert id set
 
 
-parseSelected : Route.HomeParams -> { m | gameData : G.GameData } -> Result String { game : G.GameVersionData, char : G.Character, selected : Set G.NodeId }
+{-| Two kinds of errors here:
+
+  - unrecoverable string-errors; couldn't parse the game or the char. Give up.
+  - recoverable build-errors; couldn't parse selected nodes, but we can display an empty skill-tree.
+
+we're mimicking part of HomeError's structure here.
+
+-}
+parseSelected : Route.HomeParams -> { m | gameData : G.GameData } -> Result String { game : G.GameVersionData, char : G.Character, selected : Set G.NodeId, error : Maybe Error }
 parseSelected q { gameData } =
     case Dict.get q.version gameData.byVersion of
         Nothing ->
@@ -194,17 +209,26 @@ parseSelected q { gameData } =
                     Err <| "no such hero: " ++ q.hero
 
                 Just char ->
-                    Ok { game = game, char = char, selected = buildToNodes char.graph q.build }
+                    let
+                        ( selected, error ) =
+                            case buildToNodes char.graph q.build of
+                                Ok selected ->
+                                    ( selected, Nothing )
+
+                                Err err ->
+                                    ( Set.empty, Just err )
+                    in
+                        Ok { game = game, char = char, selected = selected, error = error }
 
 
 initHome : Route.HomeParams -> Model -> Result String HomeModel
 initHome q m =
     parseSelected q m
-        |> Result.map (\{ game, char, selected } -> createHomeModel q (graphSize m) game char selected)
+        |> Result.map (\{ game, char, selected, error } -> createHomeModel q (graphSize m) game char selected error)
 
 
-createHomeModel : Route.HomeParams -> Window.Size -> G.GameVersionData -> G.Character -> Set G.NodeId -> HomeModel
-createHomeModel q window game char selected =
+createHomeModel : Route.HomeParams -> Window.Size -> G.GameVersionData -> G.Character -> Set G.NodeId -> Maybe Error -> HomeModel
+createHomeModel q window game char selected error =
     { params = q
     , graph =
         { game = game
@@ -226,7 +250,7 @@ createHomeModel q window game char selected =
     , drag = Draggable.init
     , tooltip = Nothing
     , sidebarOpen = True
-    , error = Nothing
+    , error = error
     }
 
 
@@ -265,6 +289,7 @@ navFromHome model old route =
                         | params = new.params
                         , searchString = new.searchString
                         , searchPrev = new.searchPrev
+                        , error = Maybe.Extra.or old.error new.error
                         , graph =
                             { og
                                 | char = new.graph.char
@@ -369,7 +394,7 @@ update msg model =
                         home2 =
                             case ( string, error ) of
                                 ( _, Just error ) ->
-                                    { home | error = Just <| "Search error: " ++ error }
+                                    { home | error = Just <| SearchRegexError error }
 
                                 ( string, Nothing ) ->
                                     { home | error = Nothing, graph = { g | search = searchRegex string } }
@@ -523,7 +548,7 @@ update msg model =
                                 _ ->
                                     Cmd.none
                     in
-                        ( { model | route = Home { home | error = data.error } }, cmd )
+                        ( { model | route = Home { home | error = data.error |> Maybe.map SaveImportError } }, cmd )
 
         _ ->
             -- all other routes have no state to preserve or update
@@ -691,20 +716,23 @@ nodesToBuild graph =
            )
 
 
-buildToNodes : G.Graph -> Maybe String -> Set G.NodeId
+buildToNodes : G.Graph -> Maybe String -> Result Error (Set G.NodeId)
 buildToNodes graph =
     Maybe.withDefault ""
         >> String.split "&"
         >> List.map (String.toInt >> Result.toMaybe)
+        >> Maybe.Extra.values
         >> \ids0 ->
             let
                 ids =
-                    ids0 |> Maybe.Extra.values |> Set.fromList
+                    ids0 |> Set.fromList
             in
-                if List.length ids0 == Set.size ids && isValidSelection graph ids then
-                    ids
+                if List.length ids0 /= Set.size ids then
+                    Err <| BuildNodesError "can't select a node twice"
+                else if not <| isValidSelection graph ids then
+                    Err <| BuildNodesError "some nodes in this build aren't connected to the start location"
                 else
-                    Set.empty
+                    Ok ids
 
 
 nodeSummary : { a | selected : Set G.NodeId, char : G.Character } -> List ( Int, G.NodeType )

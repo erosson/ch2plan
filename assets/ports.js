@@ -41,11 +41,11 @@ Promise.all([
             error: null
           });
         } catch (error) {
-          console.error("Error while reading savefile : " + error);
+          console.error("Error while reading savefile", error);
           app.ports.saveFileContentRead.send({
             hero: "",
             build: [],
-            error: "Save game could not be loaded."
+            error: error.message
           });
         }
       };

@@ -32,6 +32,7 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 - Small screens can zoom out farther.
 - You can no longer scroll as far into empty space.
+- Invalid builds now display an error, instead of silently ignoring the build.
 - New feature's out of beta: prettier tooltips/mouseover text.
 - New feature's out of beta: import your build from a saved game. Thanks, [@Judgy53](https://github.com/Judgy53)!
 

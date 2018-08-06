@@ -118,7 +118,18 @@ viewError home =
     [ H.p [ A.class "error" ]
         (case home.error of
             Just error ->
-                [ H.text <| "Error : " ++ error ]
+                [ H.text <|
+                    case error of
+                        M.SearchRegexError err ->
+                            "Search error: " ++ err
+
+                        M.SaveImportError _ ->
+                            -- the string here is only meaningful to devs
+                            "Couldn't load that saved game."
+
+                        M.BuildNodesError err ->
+                            "Invalid build: " ++ err
+                ]
 
             _ ->
                 []
