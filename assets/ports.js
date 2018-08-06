@@ -19,7 +19,6 @@ Promise.all([
     // console.log(chars)
     var app = Elm.Main.fullscreen({
       changelog: changelog,
-      lastUpdatedVersion: game.versionList[game.versionList.length - 1],
       gameData: game,
       windowSize: {
         width: document.documentElement.clientWidth,

@@ -24,17 +24,17 @@ view header model home =
 
 
 viewOldTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
-viewOldTree header ({ features, lastUpdatedVersion } as model) home =
+viewOldTree header model home =
     H.div [] <|
         header
-            ++ viewSelectSave features
+            ++ viewSelectSave model.features
             ++ viewError home
             ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
                , H.p [] [ H.text <| home.graph.char.flavor ]
                , viewVersionNav home.graph.game home.params
                , viewSearch home
                , H.div [ A.style [ ( "width", "1000px" ), ( "height", "1000px" ) ] ]
-                    [ View.Graph.view { width = 1000, height = 1000 } home features ]
+                    [ View.Graph.view { width = 1000, height = 1000 } home model.features ]
                , viewSearch home
                , H.p [] [ H.a [ Route.href <| Route.Stats home.params ] [ H.text "Statistics:" ] ]
                , View.Stats.viewStatsSummary <| GS.statTable <| M.statsSummary home.graph

@@ -67,7 +67,6 @@ type Msg
 
 type alias Model =
     { changelog : String
-    , lastUpdatedVersion : String
     , gameData : G.GameData
     , route : RouteModel
     , features : Route.Features
@@ -129,7 +128,6 @@ type alias HomeGraphModel =
 
 type alias Flags =
     { gameData : Decode.Value
-    , lastUpdatedVersion : String
     , changelog : String
     , windowSize : Window.Size
     }
@@ -144,7 +142,6 @@ init flags loc =
                     Route.parse loc
             in
                 ( { changelog = flags.changelog
-                  , lastUpdatedVersion = flags.lastUpdatedVersion
                   , windowSize = flags.windowSize
                   , gameData = gameData
                   , features = Route.parseFeatures loc
