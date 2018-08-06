@@ -18,14 +18,13 @@ Now also on [Android](https://play.google.com/store/apps/details?id=com.ironhors
 These are at least partially working, but turned _off_ by default.
 
 - [Full-screen skill tree](https://ch2.erosson.org/?enableFullscreen=1).
-- [Prettier-looking, faster-activating skill info tooltips/mouseover text](https://ch2.erosson.org/?enableFancyTooltips=1).
-- [Importing your build from a saved game](https://ch2.erosson.org/?enableSaveImport=1).
 
 ### New features
 
-These recently left beta, and are turned _on_ by default. For now, you can disable them if they're causing trouble - that won't be possible forever, so [contact the developer](https://www.reddit.com/user/kawaritai) if they're broken!
+These recently left beta, and are turned _on_ by default. For now, you can disable them if they're causing trouble - that won't be possible forever, so if they're broken, please [contact the developer](https://www.reddit.com/user/kawaritai)!
 
-- None, for now.
+- [Prettier-looking, faster-activating skill info tooltips/mouseover text](https://ch2.erosson.org/?enableFancyTooltips=0).
+- [Import your build from a saved game](https://ch2.erosson.org/?enableSaveImport=0).
 
 ---
 
@@ -33,6 +32,8 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 - Small screens can zoom out farther.
 - You can no longer scroll as far into empty space.
+- New feature's out of beta: prettier tooltips/mouseover text.
+- New feature's out of beta: import your build from a saved game. Thanks, [@Judgy53](https://github.com/Judgy53)!
 
 ## 2018-08-01
 
