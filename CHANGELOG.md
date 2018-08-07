@@ -15,9 +15,9 @@ Now also on [Android](https://play.google.com/store/apps/details?id=com.ironhors
 
 ### Beta/experimental features
 
-These are at least partially working, but turned _off_ by default.
+These new features are at least partially working, but turned _off_ by default.
 
-- [Full-screen skill tree](https://ch2.erosson.org/?enableFullscreen=1).
+- Nothing, for now.
 
 ### New features
 
@@ -25,6 +25,7 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 - [Prettier-looking, faster-activating skill info tooltips/mouseover text](https://ch2.erosson.org/?enableFancyTooltips=0).
 - [Import your build from a saved game](https://ch2.erosson.org/?enableSaveImport=0).
+- [Full-screen skill tree](https://ch2.erosson.org/?enableFullscreen=0).
 
 ---
 
@@ -32,6 +33,7 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 - Added the 0.07 PTR patch to the planner. Biggest change is haste's effect on skill duration.
 - Added _uptime_ - duration / cooldown - to skill calculations.
+- New feature's out of beta: full-screen skill tree.
 
 ## 2018-08-06
 

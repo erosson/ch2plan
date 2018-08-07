@@ -57,7 +57,7 @@ type alias Features =
 
 features0 : Features
 features0 =
-    { fancyTooltips = True, fullscreen = False, saveImport = True }
+    { fancyTooltips = True, fullscreen = True, saveImport = True }
 
 
 parse : Navigation.Location -> Route
