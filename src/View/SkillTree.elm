@@ -68,7 +68,7 @@ viewFullscreenTree header ({ windowSize, features } as model) home =
 
 ver =
     { live = "0.06-beta"
-    , ptr = ""
+    , ptr = "0.07-(2)-beta-PTR"
     }
 
 

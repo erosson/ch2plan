@@ -75,8 +75,11 @@ package
 		
 		public function onCharacterCreated(characterInstance:Character):void
 		{
-			characterInstance.onCharacterDisplayCreated = setUpDisplay;
-			characterInstance.onUsedSkill = onSkillUsed;
+			if (characterInstance.name == "Wizard")
+			{
+				characterInstance.onCharacterDisplayCreated = setUpDisplay;
+				characterInstance.onUsedSkill = onSkillUsed;
+			}
 		}
 		
 		public function onSkillUsed(skill:Skill):void

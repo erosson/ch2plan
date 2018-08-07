@@ -215,7 +215,7 @@ package heroclickerlib.managers
          var totalGold:BigNumber = CH2.currentCharacter.totalGold;
          var coinCountBN:BigNumber = goldAmount.divide(totalGold.addN(1)).multiplyN(200).sqrt().multiplyN(1.5);
          var coinCountInt:int = 0;
-         if(totalGold.numberValue() < 64)
+         if(totalGold.numberValue() < 64 && goldAmount.numberValue() < 64)
          {
             coinCountInt = goldAmount.numberValue();
          }

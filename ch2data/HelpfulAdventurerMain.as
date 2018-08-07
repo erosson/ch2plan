@@ -648,7 +648,7 @@ package
 				"Q25": { 
 					"name": "Gift of Chronos",
 					"tooltip": "Spending mana increases haste for 5 seconds." ,
-					"flavorText": "To clarify, this multiplies your haste by 100% plus 1% per point of mana spent in the previous 5 seconds.",
+					"flavorText": "To clarify, this multiplies your haste by 100% plus 1% per point of mana spent in the previous 5 seconds. Gift of Chronos's duration is not decreased by haste.",
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.addTrait("SpendManaHaste", 1);},  
 					"icon": "damagex3"
@@ -703,8 +703,8 @@ package
 				},
 				"Q42": { 
 					"name": "Huge Click Discount",
-					"tooltip": "Huge Click reduces the cost of items by a portion of your Huge Click's damage bonus for four seconds." ,
-					"flavorText": null,
+					"tooltip": "Huge Click reduces the cost of items by a portion of your Huge Click's damage bonus for 4 seconds." ,
+					"flavorText": "Huge Click Discount's duration is not decreased by haste.",
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.addTrait("HugeClickDiscount", 1);},  
 					"icon": "damagex3"
@@ -799,8 +799,8 @@ package
 				},
 				"Q83": { 
 					"name": "Killing Frenzy",
-					"tooltip": "Gain 100% haste upon killing a monster. Lasts 5 seconds." ,
-					"flavorText": null,
+					"tooltip": "Multiply your haste by 150% upon killing a monster. Lasts 5 seconds. Does not stack, but the timer will reset with each kill." ,
+					"flavorText": "Killing Frenzy's duration is not decreased by haste.",
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.addTrait("KillingFrenzy", 1);},  
 					"icon": "damagex3"
@@ -891,7 +891,7 @@ package
 				},
 				"Av": { 
 					"name": "Gem: Upgrade Cheapest Item",
-					"tooltip": "Automates Upgrading the Cheapest Item." ,
+					"tooltip": "Automates Upgrading the Cheapest Item. It can also purchase a new item, if that is cheaper than all of your upgrades." ,
 					"flavorText": null,
 					"setupFunction": function() { addUpgradeCheapestItemGem(); },
 					"purchaseFunction": function() { CH2.currentCharacter.automator.unlockGem(CHARACTER_NAME+"_5");  },
@@ -1453,7 +1453,7 @@ package
 			];
 			helpfulAdventurer.talentZones = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90];
 			helpfulAdventurer.upgradeableStats = Character.DEFAULT_UPGRADEABLE_STATS;
-			helpfulAdventurer.assetGroupName = CHARACTER_ASSET_GROUP;
+			helpfulAdventurer.assetGroupName = CHARACTER_ASSET_GROUP
 			helpfulAdventurer.onCharacterDisplayCreated = null;
 			
 			//types
@@ -2176,7 +2176,7 @@ package
 			if (character.buffs.hasBuffByName("Curse Of The Juggernaut"))
 			{
 				var juggernautBuff:Buff = character.buffs.getBuff("Curse Of The Juggernaut");
-				return (character.canUseSkillDefault(skill) && (character.energy >= (skill.energyCost + juggernautBuff.stacks)));
+				return (character.canUseSkillDefault(skill) && (character.energy >= (skill.getCalculatedEnergyCost() + juggernautBuff.stacks)));
 			}
 			else
 			{
@@ -2200,6 +2200,7 @@ package
 				{
 					var buff:Buff = new Buff();
 					buff.name = "Killing Frenzy";
+					buff.unhastened = true;
 					buff.iconId = 23;
 					buff.tooltipFunction = function() {
 						return {
@@ -2264,7 +2265,6 @@ package
 				var manaCrit:Skill = CH2.currentCharacter.getSkill("Mana Crit");
 				if (manaCrit)
 				{	
-					
 					manaCrit.cooldownRemaining -= 1000;
 				}
 			}
@@ -2359,6 +2359,7 @@ package
 						buff.iconId = 23;
 						buff.isUntimedBuff = false;
 						buff.duration = 5000;
+						buff.unhastened = true;
 						buff.tooltipFunction = function() {
 							return {
 								"header": "Gift of Chronos",
@@ -2916,7 +2917,7 @@ package
 			if (character.getTrait("UnlimitedBigClicks") && character.buffs.hasBuffByName("Big Clicks"))
 			{
 				var buff:Buff = character.buffs.getBuff("Big Clicks");
-				trace("Unlimited Big Clicks");
+				//trace("Unlimited Big Clicks");
 				buff.maximumStacks += stacksPerUse;
 				buff.stacks += stacksPerUse;
 				
@@ -2940,15 +2941,7 @@ package
 								clickTorrent.cooldownRemaining -= 1000;
 							}
 						}
-						var shouldDisplay:Boolean = true;
-						if (character.buffs.hasBuffByName("Huge Click"))
-						{
-							var hugeClickBuff:Buff = character.buffs.getBuff("Huge Click");
-							if (hugeClickBuff.stacks <= 1) {
-								shouldDisplay = false;
-							}
-						}
-						if (shouldDisplay)
+						if (!character.buffs.hasBuffByName("Huge Click"))
 						{
 							SoundManager.instance.playSound("Big Click Hits");
 							var effect:GpuMovieClip = CH2AssetManager.instance.getGpuMovieClip(BIG_CLICK);
@@ -2959,7 +2952,7 @@ package
 							{
 								effect.scaleX = -1;
 							}
-							CH2.world.addEffect(effect, CH2.world.roomsFront, attackDatas[0].monster.x, attackDatas[0].monster.y);
+							CH2.world.addEffect(effect, CH2.world.roomsFront, attackDatas[0].monster.x, attackDatas[0].monster.y, World.REMOVE_EFFECT_WHEN_FINISHED, 1, 10);
 							CH2.world.camera.shake(0.5, -25, 25);
 						}
 						
@@ -3119,6 +3112,7 @@ package
 							discountBuff.name = "Huge Click Discount";
 							discountBuff.iconId = 99;
 							discountBuff.duration = 4000;
+							discountBuff.unhastened = true;
 //							discountBuff.buffStat(CH2.STAT_ITEM_COST_REDUCTION, 0.02 * 10.00 * (Math.pow(1.25, character.getTrait("HugeClickDamage"))));
 							discountBuff.buffStat(CH2.STAT_ITEM_COST_REDUCTION, 1 / (1 + (0.02 * 10.00 * Math.pow(1.25, character.getTrait("HugeClickDamage")))));
 							discountBuff.tooltipFunction = function() {
@@ -3235,7 +3229,7 @@ package
 				var indicatorAsset:GpuMovieClip = CH2AssetManager.instance.getGpuMovieClip(BUFF_INDICATOR);
 				indicatorAsset.playScene("launch", true);
 				indicatorAsset.isLooping = false;
-				CH2.world.addEffect(indicatorAsset, CH2.world.roomsFront, bigClicksIndicators[num].worldX, bigClicksIndicators[num].worldY);
+				CH2.world.addEffect(indicatorAsset, CH2.world.roomsFront, bigClicksIndicators[num].worldX, bigClicksIndicators[num].worldY, World.REMOVE_EFFECT_WHEN_FINISHED_OR_HITS_CAP, 2, 20);
 				
 				CH2.currentCharacter.characterDisplay.characterUI.removeUIElement(bigClicksIndicators[num]);
 				bigClicksIndicators[num] = null;
@@ -3285,23 +3279,26 @@ package
 		
 		public function onCharacterCreated(characterInstance:Character):void
 		{
-			characterInstance.assetGroupName = CHARACTER_ASSET_GROUP;
-			characterInstance.onCharacterDisplayCreated = setUpDisplay;
-			characterInstance.autoAttack = autoAttack;
-			characterInstance.clickAttack = clickAttack;
-			
-			characterInstance.attack = helpfulAdventurerAttack;
-			characterInstance.onKilledMonster = helpfulAdventurerOnKilledMonster;
-			characterInstance.addGold = helpfulAdventurerAddGold;
-			characterInstance.addEnergy = helpfulAdventurerAddEnergy;
-			characterInstance.canUseSkill = helpfulAdventurerCanUseSkill;
-			characterInstance.addMana = helpfulAdventurerAddMana;
-			characterInstance.onZoneChanged = helpfulAdventurerZoneChanged;
-			
-			//setup ascension functionality
-			for (var key:String in characterInstance.levelGraphNodeTypes)
+			if (characterInstance.name == "Helpful Adventurer")
 			{
-				helpfulAdventurer.levelGraphNodeTypes[key].setupFunction();
+				characterInstance.assetGroupName = CHARACTER_ASSET_GROUP;
+				characterInstance.onCharacterDisplayCreated = setUpDisplay;
+				characterInstance.autoAttack = autoAttack;
+				characterInstance.clickAttack = clickAttack;
+				
+				characterInstance.attack = helpfulAdventurerAttack;
+				characterInstance.onKilledMonster = helpfulAdventurerOnKilledMonster;
+				characterInstance.addGold = helpfulAdventurerAddGold;
+				characterInstance.addEnergy = helpfulAdventurerAddEnergy;
+				characterInstance.canUseSkill = helpfulAdventurerCanUseSkill;
+				characterInstance.addMana = helpfulAdventurerAddMana;
+				characterInstance.onZoneChanged = helpfulAdventurerZoneChanged;
+				
+				//setup ascension functionality
+				for (var key:String in characterInstance.levelGraphNodeTypes)
+				{
+					helpfulAdventurer.levelGraphNodeTypes[key].setupFunction();
+				}
 			}
 		}
 		

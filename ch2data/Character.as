@@ -14,6 +14,7 @@ package models
    import heroclickerlib.managers.MusicManager;
    import heroclickerlib.managers.SoundManager;
    import heroclickerlib.managers.Trace;
+   import heroclickerlib.managers.TransientEffects;
    import heroclickerlib.world.CharacterDisplay;
    import it.sephiroth.gettext._;
    import lib.managers.TextManager;
@@ -21,6 +22,10 @@ package models
    
    public dynamic class Character extends WorldEntity
    {
+      
+      public static const GILD_PERSISTING_TRUE:Boolean = true;
+      
+      public static const GILD_PERSISTING_FALSE:Boolean = false;
       
       public static const TIME_UNTIL_PLAYER_NEEDS_HINT_MS:Number = 300000;
       
@@ -56,7 +61,7 @@ package models
       
       public static const ZONES_BETWEEN_TALENTS:Number = 10;
       
-      private static const WORLD_END_AUTOMATION_OPTIONS_UNLOCK_WORLD:Number = 3;
+      public static const WORLD_END_AUTOMATION_OPTIONS_UNLOCK_WORLD:Number = 3;
       
       public static const WALK_SPEED_METERS_PER_SECOND:Number = 4.5;
       
@@ -132,6 +137,8 @@ package models
       public var consecutiveOneShottedMonsters:Number = 0;
       
       public var clickAttackEnergyCost:int = 1;
+      
+      public var heroId:int = 1;
       
       public var name:String;
       
@@ -359,6 +366,8 @@ package models
       
       public var timeSinceAutomatorWasUnlocked:Number = 0;
       
+      public var lostOnGilding:Array;
+      
       public var flavorName:String;
       
       public var flavorClass:String;
@@ -501,6 +510,8 @@ package models
       
       public var onWorldFinished:Function;
       
+      public var getCalculatedEnergyCost:Function;
+      
       public var onAscension:Function;
       
       public var addGold:Function;
@@ -582,6 +593,7 @@ package models
          this.statLevels = {};
          this.spentStatPoints = new BigNumber(0);
          this.gildedDamageMultiplier = new BigNumber(1);
+         this.lostOnGilding = [];
          this.statValueFunctions = new Array();
          this.statCostFunctions = new Array();
          this.statBaseValues = new Array();
@@ -607,6 +619,7 @@ package models
          this.onKilledMonster = this.onKilledMonsterDefault;
          this.onZoneChanged = this.onZoneChangedDefault;
          this.onWorldFinished = this.onWorldFinishedDefault;
+         this.getCalculatedEnergyCost = this.getCalculatedEnergyCostDefault;
          this.onAscension = this.onAscensionDefault;
          this.addGold = this.addGoldDefault;
          this.addRubies = this.addRubiesDefault;
@@ -634,98 +647,98 @@ package models
          x = 20;
          y = CHARACTER_ZONE_START_Y;
          removeOnZoneChanges = false;
-         registerDynamicBigNumber("unarmedDamage");
-         registerDynamicString("name");
-         registerDynamicChild("roller",Roller);
-         registerDynamicNumber("startingRollerValue");
-         registerDynamicChild("trackedDps",TrackedStat);
-         registerDynamicChild("trackedOverkill",TrackedStat);
-         registerDynamicChild("trackedGoldGained",TrackedStat);
-         registerDynamicChild("trackedGoldSpent",TrackedStat);
-         registerDynamicChild("trackedEnergyUsed",TrackedStat);
-         registerDynamicChild("trackedManaUsed",TrackedStat);
-         registerDynamicChild("trackedFrameMsec",TrackedStat);
-         registerDynamicChild("trackedXPEarned",TrackedStat);
-         registerDynamicBigNumber("gold");
-         registerDynamicBigNumber("zoneStartGold");
-         registerDynamicNumber("rubies");
-         registerDynamicNumber("energy");
-         registerDynamicNumber("mana");
-         registerDynamicNumber("totalRubies");
-         registerDynamicChild("inventory",Items);
-         registerDynamicChild("automator",Automator);
-         registerDynamicNumber("currentWorldEndAutomationOption");
-         registerDynamicCollection("talents",Talent);
-         registerDynamicCollection("skills",Skill);
-         registerDynamicNumber("currentCatalogRank");
-         registerDynamicCollection("catalogItemsForSale",Item);
-         registerDynamicNumber("onlineTimeAsOfLastRubyShopMilliseconds");
-         registerDynamicNumber("timeOfLastRun");
-         registerDynamicNumber("timeOfLastAscension");
-         registerDynamicNumber("timeCharacterWasUnlocked");
-         registerDynamicNumber("timeOnlineMilliseconds");
-         registerDynamicNumber("timeOfflineMilliseconds");
-         registerDynamicNumber("timeOfflineMilliseconds");
-         registerDynamicNumber("serverTimeOfLastUpdate");
-         registerDynamicNumber("creationTime");
-         registerDynamicNumber("timeSinceLastRubyShopAppearance");
-         registerDynamicNumber("timeSinceLastAncientShardPurchase");
-         registerDynamicNumber("ancientShards");
-         registerDynamicBoolean("powerRuneActivated");
-         registerDynamicBoolean("speedRuneActivated");
-         registerDynamicBoolean("luckRuneActivated");
-         registerDynamicBoolean("timeMetalDetectorActive");
-         registerDynamicNumber("timeSinceTimeMetalDetectorActivated");
-         registerDynamicBoolean("zoneMetalDetectorActive");
-         registerDynamicNumber("zoneOfZoneMetalDetectorActivation");
-         registerDynamicBoolean("didFinishWorld");
-         registerDynamicNumber("currentZone");
-         registerDynamicNumber("highestZone");
-         registerDynamicNumber("totalRunDistance");
-         registerDynamicBigNumber("totalGold");
-         registerDynamicNumber("monstersKilled");
-         registerDynamicNumber("totalUpgradesToItems");
-         registerDynamicNumber("totalCatalogItemsPurchased");
-         registerDynamicNumber("totalOneShotMonsters");
-         registerDynamicNumber("totalSkillsUsed");
-         registerDynamicNumber("consecutiveOneShottedMonsters");
-         registerDynamicNumber("currentWorldId");
-         registerDynamicNumber("attemptsOnCurrrentBoss");
-         registerDynamicNumber("timeSinceRegularMonsterHasDroppedRubies");
-         registerDynamicNumber("timeSinceLastOrangeFishAppearance");
-         registerDynamicBoolean("hasPurchasedFirstSkill");
-         registerDynamicBoolean("hasUnlockedAutomator");
-         registerDynamicBoolean("hasSeenMainPanel");
-         registerDynamicBoolean("hasSeenItemsPanel");
-         registerDynamicBoolean("hasSeenGraphPanel");
-         registerDynamicBoolean("hasSeenSkillsPanel");
-         registerDynamicBoolean("hasSeenAutomatorPanel");
-         registerDynamicBoolean("hasSeenWorldsPanel");
-         registerDynamicBoolean("hasSeenMiscPanel");
-         registerDynamicBoolean("hasReceivedFirstTimeEnergy");
-         registerDynamicBoolean("hasSeenRubyShopPanel");
-         registerDynamicString("name");
-         registerDynamicNumber("level");
-         registerDynamicBigNumber("experience");
-         registerDynamicBigNumber("totalExperience");
-         registerDynamicBigNumber("experienceForCurrentWorld");
-         registerDynamicBigNumber("experienceAtRunStart");
-         registerDynamicNumber("highestWorldCompleted");
-         registerDynamicObject("fastestWorldTimes");
-         registerDynamicObject("highestMonstersKilled");
-         registerDynamicObject("runsCompletedPerWorld");
-         registerDynamicObject("statLevels");
-         registerDynamicNumber("gcdMinimum");
-         registerDynamicBoolean("isLocked");
-         registerDynamicBigNumber("spentStatPoints");
-         registerDynamicNumber("gilds");
-         registerDynamicBigNumber("gildedDamageMultiplier");
-         registerDynamicObject("nodesPurchased");
-         registerDynamicObject("traits");
-         registerDynamicObject("monstersKilledPerZone");
-         registerDynamicBoolean("hasNeverStartedWorld");
-         registerDynamicBoolean("autoAttacksNotInterrupted");
-         registerDynamicBoolean("hasEditedSave");
+         this.persist(GILD_PERSISTING_FALSE,registerDynamicBigNumber,"unarmedDamage");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicString,"name");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"roller",Roller);
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"startingRollerValue");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"trackedDps",TrackedStat);
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"trackedOverkill",TrackedStat);
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"trackedGoldGained",TrackedStat);
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"trackedGoldSpent",TrackedStat);
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"trackedEnergyUsed",TrackedStat);
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"trackedManaUsed",TrackedStat);
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"trackedFrameMsec",TrackedStat);
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"trackedXPEarned",TrackedStat);
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBigNumber,"gold");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBigNumber,"zoneStartGold");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"rubies");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"energy");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"mana");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"totalRubies");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"inventory",Items);
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"automator",Automator);
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"currentWorldEndAutomationOption");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicCollection,"talents",Talent);
+         this.persist(GILD_PERSISTING_FALSE,registerDynamicCollection,"skills",Skill);
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"currentCatalogRank");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicCollection,"catalogItemsForSale",Item);
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"onlineTimeAsOfLastRubyShopMilliseconds");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeOfLastRun");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeOfLastAscension");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeCharacterWasUnlocked");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeOnlineMilliseconds");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeOfflineMilliseconds");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeOfflineMilliseconds");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"serverTimeOfLastUpdate");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"creationTime");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeSinceLastRubyShopAppearance");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeSinceLastAncientShardPurchase");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"ancientShards");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"powerRuneActivated");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"speedRuneActivated");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"luckRuneActivated");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"timeMetalDetectorActive");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeSinceTimeMetalDetectorActivated");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"zoneMetalDetectorActive");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"zoneOfZoneMetalDetectorActivation");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"didFinishWorld");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"currentZone");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"highestZone");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"totalRunDistance");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBigNumber,"totalGold");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"monstersKilled");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"totalUpgradesToItems");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"totalCatalogItemsPurchased");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"totalOneShotMonsters");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"totalSkillsUsed");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"consecutiveOneShottedMonsters");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"currentWorldId");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"attemptsOnCurrrentBoss");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeSinceRegularMonsterHasDroppedRubies");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeSinceLastOrangeFishAppearance");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasPurchasedFirstSkill");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasUnlockedAutomator");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasSeenMainPanel");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasSeenItemsPanel");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasSeenGraphPanel");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasSeenSkillsPanel");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasSeenAutomatorPanel");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasSeenWorldsPanel");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasSeenMiscPanel");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasReceivedFirstTimeEnergy");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasSeenRubyShopPanel");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicString,"name");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"level");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBigNumber,"experience");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBigNumber,"totalExperience");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBigNumber,"experienceForCurrentWorld");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBigNumber,"experienceAtRunStart");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"highestWorldCompleted");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicObject,"fastestWorldTimes");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicObject,"highestMonstersKilled");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicObject,"runsCompletedPerWorld");
+         this.persist(GILD_PERSISTING_FALSE,registerDynamicObject,"statLevels");
+         this.persist(GILD_PERSISTING_FALSE,registerDynamicNumber,"gcdMinimum");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"isLocked");
+         this.persist(GILD_PERSISTING_FALSE,registerDynamicBigNumber,"spentStatPoints");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"gilds");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBigNumber,"gildedDamageMultiplier");
+         this.persist(GILD_PERSISTING_FALSE,registerDynamicObject,"nodesPurchased");
+         this.persist(GILD_PERSISTING_FALSE,registerDynamicObject,"traits");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicObject,"monstersKilledPerZone");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasNeverStartedWorld");
+         this.persist(GILD_PERSISTING_FALSE,registerDynamicBoolean,"autoAttacksNotInterrupted");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasEditedSave");
          this.attackMsDelay = 600;
          this.gcdBase = 2000;
          this.gcdMinimum = 1000;
@@ -1618,6 +1631,10 @@ package models
                   this.addEnergy(energyCost);
                }
             }
+            else if(this.state == STATE_PAUSED)
+            {
+               TransientEffects.instance.showFadingText(_("Press the \'%s\' key to unpause",KeyCodeNames.instance.getKeyCodeName(CH2.user.keyBindings.mappings["Pause"]["keyCode"])),5000,1000);
+            }
          }
          else
          {
@@ -1827,6 +1844,23 @@ package models
             "characterLevel":this.level,
             "ancientShardsPurchased":this.ancientShards
          });
+      }
+      
+      public function getCalculatedEnergyCostDefault(skill:Skill) : Number
+      {
+         var cost:* = undefined;
+         var juggernautBuff:Buff = null;
+         if(!skill.usesMaxEnergy)
+         {
+            cost = skill.energyCost * (1 - this.energyCostReduction);
+            if(this.buffs.hasBuffByName("Curse Of The Juggernaut"))
+            {
+               juggernautBuff = CH2.currentCharacter.buffs.getBuff("Curse Of The Juggernaut");
+               cost = cost + juggernautBuff.stacks;
+            }
+            return cost;
+         }
+         return this.maxEnergy;
       }
       
       public function onAscensionDefault() : void
@@ -2484,6 +2518,7 @@ package models
             IdleHeroUIManager.instance.mainUI.mainPanel.itemsPanel.updateAllEquipAndCatalogSlots();
             IdleHeroUIManager.instance.mainUI.mainPanel.itemsPanel.updateEquipSlotDisplay();
             IdleHeroUIManager.instance.mainUI.mainPanel.itemsPanel.updateCatalogSlot();
+            IdleHeroUIManager.instance.refreshDamageDisplays();
             this.timeSinceLastItemInteraction = 0;
             this.totalCatalogItemsPurchased++;
          }
@@ -2726,10 +2761,6 @@ package models
       
       public function getLevelUpCostToNextLevel(level:Number) : BigNumber
       {
-         if(level >= 199)
-         {
-            return new BigNumber(500000000);
-         }
          return new BigNumber(600 + (level - 1) * 500);
       }
       
@@ -2754,10 +2785,42 @@ package models
       
       public function addGild() : void
       {
+         var _loc3_:int = 0;
+         var _loc5_:Skill = null;
+         var _loc6_:Number = NaN;
+         var _loc1_:Number = this.statLevels[CH2.STAT_AUTOMATOR_SPEED];
+         var _loc2_:Character = new Character();
+         _loc2_.name = this.name;
+         Characters.populateStaticFields(_loc2_);
+         this.buffs.removeAllBuffs();
+         for(_loc3_ = 0; _loc3_ < this.activeSkills.length; _loc3_++)
+         {
+            _loc5_ = this.activeSkills[_loc3_];
+            _loc6_ = null;
+            if(_loc5_ && _loc5_.isActive)
+            {
+               _loc6_ = _loc5_.slot;
+               if(_loc6_ >= 0)
+               {
+                  IdleHeroUIManager.instance.mainUI.hud.skillBar.skillSlots[_loc6_].removeChild(IdleHeroUIManager.instance.mainUI.hud.skillBar.skillSlots[_loc6_].skillSlotUI);
+                  IdleHeroUIManager.instance.mainUI.hud.skillBar.skillSlots[_loc6_].onDropRemoved(IdleHeroUIManager.instance.mainUI.hud.skillBar.skillSlots[_loc6_].skillSlotUI);
+               }
+            }
+         }
+         this.deactivateAllSkills();
+         for(_loc3_ = 0; _loc3_ < this.lostOnGilding.length; _loc3_++)
+         {
+            this[this.lostOnGilding[_loc3_]] = _loc2_[this.lostOnGilding[_loc3_]];
+         }
+         this.setupSkills();
+         this.statLevels[CH2.STAT_AUTOMATOR_SPEED] = _loc1_;
          this.gilds++;
-         this.gildedDamageMultiplier.timesEquals(new BigNumber("2e31"));
-         this.statLevels = {};
-         this.spentStatPoints = new BigNumber(0);
+         var _loc4_:Number = 218750000;
+         this.gildedDamageMultiplier.timesEquals(new BigNumber("7.34631e34").multiplyN(_loc4_));
+         if(this.gilds == 1)
+         {
+            IdleHeroUIManager.instance.showSimpleGamePopup("Congratulations!",_("Congratulations! You\'ve reached 200 and gilded. Your base damage has been multiplied by %s%, and your skill tree has been reset, but your Automator upgrades remain.",_loc4_ * 100),null,"Continue");
+         }
       }
       
       public function playCastAnimation() : void
@@ -3200,6 +3263,22 @@ package models
          this.cooldownSkills(1000000000);
          CH2.game.doGameStateAction(IdleHeroMain.ACTION_PLAYER_CLICKED_START_RUN);
          this.eventLogger.logEvent(EventLog.ASCENDED);
+      }
+      
+      public function persist(persistThroughGilding:Boolean, registerDynamicFunction:Function, ... registerDynamicArgs) : *
+      {
+         if(registerDynamicArgs.length == 2)
+         {
+            registerDynamicFunction(registerDynamicArgs[0],registerDynamicArgs[1]);
+         }
+         else
+         {
+            registerDynamicFunction(registerDynamicArgs[0]);
+         }
+         if(!persistThroughGilding)
+         {
+            this.lostOnGilding.push(registerDynamicArgs[0]);
+         }
       }
    }
 }
