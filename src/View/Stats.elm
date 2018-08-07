@@ -9,6 +9,7 @@ import Html.Events as E
 import Maybe.Extra
 import Route
 import Model as M
+import Model.Skill as Skill
 import GameData as G
 import GameData.Stats as GS exposing (Stat(..))
 import View.Graph
@@ -55,43 +56,24 @@ skillBlacklist =
     Set.fromList [ "Clickdrizzle", "EnergizeExtend", "EnergizeRush" ]
 
 
-ternary : Bool -> a -> a -> a
-ternary pred t f =
-    if pred then
-        t
-    else
-        f
-
-
 viewSkillSummary : GS.Rules -> (GS.Stat -> GS.StatTotal) -> G.Skill -> H.Html msg
 viewSkillSummary rules getStat skill =
     let
-        skillVal : String -> Maybe Float
-        skillVal name =
-            -- fetch a skill-stat, if the stat exists. Skill-stats are specially named stats, for example "BigClicks_damage".
-            skill.id ++ "_" ++ name |> GS.getStat |> Maybe.map (getStat >> .val)
-
-        skillValOr : Float -> String -> Float
-        skillValOr default =
-            -- fetch a skill-stat or a default value.
-            skillVal >> Maybe.withDefault default
-
         lines =
             -- all of these lines are conditional: displayed if and only if the far-left skill-field or stat exists (ie. is not Nothing).
-            [ skill.energyCost |> Maybe.map (toFloat >> (+) (skillValOr 0 "energyCost") >> int >> (,) "Energy Cost")
-            , skill.manaCost |> Maybe.map (toFloat >> (*) (skillValOr 1 "manaCost") >> int >> (,) "Mana Cost")
-            , skill.cooldown |> Maybe.map (toFloat >> (*) (skillValOr 1 "cooldown" / 1000 / (getStat STAT_HASTE).val) >> sec 1 >> (,) "Cooldown")
-
-            -- since 0.07, haste reduces skill duration
-            , skillVal "duration" |> Maybe.map ((*) (1 / 1000 / ternary rules.hasteAffectsDuration (getStat STAT_HASTE).val 1) >> sec 1 >> (,) "Duration")
-            , skillVal "damage" |> Maybe.map (pct >> (,) "Damage")
-            , skillVal "stacks" |> Maybe.map (int >> (,) "Stacks")
-            , skillVal "effect" |> Maybe.map (pct >> (,) "Effect")
+            [ Skill.energyCost getStat skill |> Maybe.map (int >> (,,) "Energy Cost" "")
+            , Skill.manaCost getStat skill |> Maybe.map (int >> (,,) "Mana Cost" "")
+            , Skill.cooldown getStat skill |> Maybe.map (sec 1 >> (,,) "Cooldown" "")
+            , Skill.duration rules getStat skill |> Maybe.map (sec 1 >> (,,) "Duration" "")
+            , Skill.uptime rules getStat skill |> Maybe.map (pct >> (,,) "Uptime" "Duration / cooldown. The amount of time this buff can be active. 100% means it's always active, if you can pay its mana cost.")
+            , Skill.damage getStat skill |> Maybe.map (pct >> (,,) "Damage" "")
+            , Skill.stacks getStat skill |> Maybe.map (int >> (,,) "Stacks" "")
+            , Skill.effect getStat skill |> Maybe.map (pct >> (,,) "Effect" "")
             ]
                 |> Maybe.Extra.values
                 |> List.map
-                    (\( label, value ) ->
-                        H.li [ A.class "stat-line" ]
+                    (\( label, tooltip, value ) ->
+                        H.li [ A.class "stat-line", A.title tooltip ]
                             [ H.span [ A.class "stat-label" ] [ H.text <| label ++ ": " ]
                             , H.span [ A.class "stat-value" ] [ H.text value ]
                             ]
