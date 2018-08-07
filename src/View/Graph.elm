@@ -48,7 +48,7 @@ view windowSize model features =
                 , S.filter [ A.id "highlight4" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "225" ] [] ]
                 , S.filter [ A.id "highlight5" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "315" ] [] ]
                 ]
-            , S.g [ zoomAndPan windowSize model ]
+            , S.g [ zoomAndPan features windowSize model ]
                 ([ model.graph |> L.lazy2 viewEdges False
                  , model.graph |> L.lazy2 viewEdges True
                  , model.graph |> L.lazy viewNodeBackgrounds
@@ -59,7 +59,7 @@ view windowSize model features =
             ]
          ]
             ++ Maybe.Extra.unwrap []
-                (List.singleton << viewTooltip windowSize model)
+                (List.singleton << viewTooltip features windowSize model)
                 -- (model.tooltip |> Maybe.withDefault 1 |> Just |> Maybe.andThen ((flip Dict.get) model.char.graph.nodes))
                 (Route.ifFeature features.fancyTooltips (M.visibleTooltip model) Nothing |> Maybe.andThen ((flip Dict.get) model.graph.char.graph.nodes))
         )
@@ -103,16 +103,16 @@ viewEdges selected home =
         S.path [ A.class classes, A.d path ] []
 
 
-viewTooltip : Window.Size -> M.HomeModel -> G.Node -> H.Html msg
-viewTooltip win model node =
+viewTooltip : Route.Features -> Window.Size -> M.HomeModel -> G.Node -> H.Html msg
+viewTooltip features win0 model node =
     -- no css-scaling here - tooltips don't scale with zoom.
     -- no svg here - svg can't word-wrap, and <foreignObject> has screwy browser support.
     --
     -- svg has no viewbox and the html container size == the svg size,
     -- so coordinates in both should match.
     let
-        ( panX, panY ) =
-            panOffsets win model
+        ( win, panX, panY ) =
+            panOffsets features win0 model
 
         ( w, h ) =
             ( toFloat win.width, toFloat win.height )
@@ -123,11 +123,17 @@ viewTooltip win model node =
         ( x, y ) =
             ( (toFloat node.x + panX) * zoom, (toFloat node.y + panY) * zoom )
 
+        sidebarOffset =
+            if features.fullscreen && model.sidebarOpen then
+                sidebarWidth
+            else
+                0
+
         style =
             [ if x > w / 2 then
                 ( "right", w - x )
               else
-                ( "left", x )
+                ( "left", sidebarOffset + x )
             , if y > h / 2 then
                 ( "bottom", h - y )
               else
@@ -176,9 +182,19 @@ inputZoomAndPan =
     ]
 
 
-panOffsets : Window.Size -> M.HomeModel -> ( Float, Float )
-panOffsets w home =
+panOffsets : Route.Features -> Window.Size -> M.HomeModel -> ( Window.Size, Float, Float )
+panOffsets features w0 home =
     let
+        ( w, sidebarXOffset ) =
+            if features.fullscreen && home.sidebarOpen then
+                ( { height = w0.height
+                  , width = w0.width - sidebarWidth
+                  }
+                , sidebarWidth
+                )
+            else
+                ( w0, 0 )
+
         ( cx, cy ) =
             home |> M.center w |> V2.toTuple
 
@@ -186,16 +202,22 @@ panOffsets w home =
             M.zoom w home
 
         ( left, top ) =
-            ( cx - toFloat w.width / zoom / 2, cy - toFloat w.height / zoom / 2 )
+            ( cx - (toFloat w.width / 2 + sidebarXOffset) / zoom
+            , cy - toFloat w.height / 2 / zoom
+            )
     in
-        ( -left, -top )
+        ( w, -left, -top )
 
 
-zoomAndPan : Window.Size -> M.HomeModel -> S.Attribute msg
-zoomAndPan w model =
+sidebarWidth =
+    480
+
+
+zoomAndPan : Route.Features -> Window.Size -> M.HomeModel -> S.Attribute msg
+zoomAndPan features w0 model =
     let
-        ( panX, panY ) =
-            panOffsets w model
+        ( w, panX, panY ) =
+            panOffsets features w0 model
 
         zoom =
             M.zoom w model

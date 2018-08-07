@@ -43,14 +43,14 @@ viewOldTree header model home =
 
 
 viewFullscreenTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
-viewFullscreenTree header ({ windowSize, features } as model) home =
+viewFullscreenTree header model home =
     H.div [ A.class "skill-tree-main" ]
-        [ View.Graph.view windowSize home features
+        [ View.Graph.view model.windowSize home model.features
         , if home.sidebarOpen then
             H.div [ A.class "sidebar" ]
                 ([ H.button [ A.class "sidebar-hide", A.title "hide", E.onClick M.ToggleSidebar ] [ H.text "<<" ] ]
                     ++ header
-                    ++ viewSelectSave features
+                    ++ viewSelectSave model.features
                     ++ viewError home
                     ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
                        , H.p [] [ H.text <| home.graph.char.flavor ]

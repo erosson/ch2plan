@@ -503,7 +503,7 @@ clampZoom window graph =
 
 redirect : G.GameData -> Route -> Maybe Route
 redirect gameData route =
-    case route |> Debug.log "redir" of
+    case route of
         Route.Root params ->
             Just <| Route.Home <| Route.delegacy (G.latestVersionId gameData) params
 
