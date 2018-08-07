@@ -28,6 +28,11 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 ---
 
+## 2018-08-07
+
+- Added the 0.07 PTR patch to the planner. Biggest change is haste's effect on skill duration.
+- Added _uptime_ - duration / cooldown - to skill calculations.
+
 ## 2018-08-06
 
 - Small screens can zoom out farther.
