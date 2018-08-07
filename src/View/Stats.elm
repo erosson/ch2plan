@@ -128,7 +128,7 @@ statEntrySpecs =
     , ( "Gold from All Sources", [ STAT_GOLD ], entryPct )
 
     -- the x5 is datamined from heroclickerlib/managers/Formulas.as
-    , ( "Bonus Gold Chance (×5)", [ STAT_GOLD ], entryPct )
+    , ( "Bonus Gold Chance (×5)", [ STAT_BONUS_GOLD_CHANCE ], entryPct )
     , ( "Boss Gold", [ STAT_BOSS_GOLD ], entryPct )
     , ( "Clickable Find Chance", [ STAT_CLICKABLE_CHANCE ], entryPct ) -- not in total stats; skill-tree-stats only
     , ( "Clickable Gold Multiplier", [ STAT_CLICKABLE_GOLD ], entryPct ) -- not in total stats; skill-tree-stats only
