@@ -1,4 +1,9 @@
 {
+  "//rules": "enable different behavior for different ch2 versions. Kind of like feature-flags between ch2 versions.",
+  "rules": {
+    "//hasteAffectsDuration": "since 0.07. https://www.reddit.com/r/ClickerHeroes/comments/9587av/clicker_heroes_2_007_can_now_be_tested/",
+    "hasteAffectsDuration": true
+  },
   "//statValueFunctions": "based on ./ch2data/Character.as. First number is the statBaseValue.",
   "statValueFunctions": {
     "STAT_IDLE_GOLD": [1, "exponentialMultiplier", 1.25],

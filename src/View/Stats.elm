@@ -20,7 +20,7 @@ view model params =
         Err err ->
             H.div [] [ H.text <| "error: " ++ err ]
 
-        Ok { char, selected, stats, nodes } ->
+        Ok { game, char, selected, stats, nodes } ->
             let
                 getStat =
                     GS.statTable stats
@@ -36,7 +36,7 @@ view model params =
                     , H.div [ A.class "stats-flex" ]
                         [ H.div [ A.class "stats-box skills-summary" ]
                             [ H.p [] [ H.text "Skills:" ]
-                            , H.ul [] (List.map (viewSkillSummary getStat) <| List.filter (\s -> not <| Set.member s.id skillBlacklist) <| Dict.values char.skills)
+                            , H.ul [] (List.map (viewSkillSummary game.stats.rules getStat) <| List.filter (\s -> not <| Set.member s.id skillBlacklist) <| Dict.values char.skills)
                             ]
                         , H.div [ A.class "stats-box" ]
                             [ H.p [] [ H.text "Statistics:" ]
@@ -55,8 +55,16 @@ skillBlacklist =
     Set.fromList [ "Clickdrizzle", "EnergizeExtend", "EnergizeRush" ]
 
 
-viewSkillSummary : (GS.Stat -> GS.StatTotal) -> G.Skill -> H.Html msg
-viewSkillSummary getStat skill =
+ternary : Bool -> a -> a -> a
+ternary pred t f =
+    if pred then
+        t
+    else
+        f
+
+
+viewSkillSummary : GS.Rules -> (GS.Stat -> GS.StatTotal) -> G.Skill -> H.Html msg
+viewSkillSummary rules getStat skill =
     let
         skillVal : String -> Maybe Float
         skillVal name =
@@ -73,7 +81,9 @@ viewSkillSummary getStat skill =
             [ skill.energyCost |> Maybe.map (toFloat >> (+) (skillValOr 0 "energyCost") >> int >> (,) "Energy Cost")
             , skill.manaCost |> Maybe.map (toFloat >> (*) (skillValOr 1 "manaCost") >> int >> (,) "Mana Cost")
             , skill.cooldown |> Maybe.map (toFloat >> (*) (skillValOr 1 "cooldown" / 1000 / (getStat STAT_HASTE).val) >> sec 1 >> (,) "Cooldown")
-            , skillVal "duration" |> Maybe.map ((*) (1 / 1000) >> sec 1 >> (,) "Duration")
+
+            -- since 0.07, haste reduces skill duration
+            , skillVal "duration" |> Maybe.map ((*) (1 / 1000 / ternary rules.hasteAffectsDuration (getStat STAT_HASTE).val 1) >> sec 1 >> (,) "Duration")
             , skillVal "damage" |> Maybe.map (pct >> (,) "Damage")
             , skillVal "stacks" |> Maybe.map (int >> (,) "Stacks")
             , skillVal "effect" |> Maybe.map (pct >> (,) "Effect")

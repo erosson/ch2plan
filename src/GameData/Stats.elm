@@ -6,6 +6,7 @@ module GameData.Stats
         , Character
         , Stat(..)
         , StatTotal
+        , Rules
         , decoder
         , calcStat
         , calcStats
@@ -31,7 +32,8 @@ type alias StatValue =
 
 
 type alias Stats =
-    { statValueFunctions : Dict String StatValue
+    { rules : Rules
+    , statValueFunctions : Dict String StatValue
     , characters : Dict String Character
     }
 
@@ -40,9 +42,19 @@ type alias Character =
     { stats : Dict NodeType (List ( Stat, Int )) }
 
 
+type alias Rules =
+    { hasteAffectsDuration : Bool }
+
+
+rules0 : Rules
+rules0 =
+    { hasteAffectsDuration = False }
+
+
 decoder : D.Decoder Stats
 decoder =
     P.decode Stats
+        |> P.optional "rules" rulesDecoder rules0
         |> P.required "statValueFunctions" (D.dict statValueDecoder)
         |> P.required "characters" (D.dict charDecoder)
 
@@ -52,6 +64,12 @@ charDecoder =
     P.decode Character
         -- TODO traits
         |> P.required "stats" (charStatsDecoder |> D.map charStatsByNodeType)
+
+
+rulesDecoder : D.Decoder Rules
+rulesDecoder =
+    P.decode Rules
+        |> P.optional "hasteAffectsDuration" D.bool rules0.hasteAffectsDuration
 
 
 type alias NodeType =
