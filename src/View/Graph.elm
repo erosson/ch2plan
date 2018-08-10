@@ -130,10 +130,10 @@ viewTooltip features win0 model node =
                 0
 
         style =
-            [ if x > w / 2 then
-                ( "right", w - x )
+            [ if x > sidebarOffset + w / 2 then
+                ( "right", sidebarOffset + w - x )
               else
-                ( "left", sidebarOffset + x )
+                ( "left", x )
             , if y > h / 2 then
                 ( "bottom", h - y )
               else

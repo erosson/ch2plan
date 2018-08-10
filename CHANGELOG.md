@@ -29,6 +29,10 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 ---
 
+## 2018-08-10
+
+- Tooltips should now be positioned correctly.
+
 ## 2018-08-07
 
 - Added the 0.07 PTR patch to the planner. Biggest change is haste's effect on skill duration.
