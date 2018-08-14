@@ -32,6 +32,7 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 ## 2018-08-14
 
 - You can now export your build to a spreadsheet (tab-separated). Look for the "spreadsheet format" link.
+- PTR build urls now escape (parentheses) properly, and should no longer break Markdown-formatted text (like Reddit posts).
 
 ## 2018-08-10
 

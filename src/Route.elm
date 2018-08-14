@@ -119,19 +119,24 @@ parser =
         , P.map LegacyHome <| P.map LegacyHomeParams <| homeQS <| P.s "h" </> P.string </> maybeString
 
         -- a modern versioned url, no build
-        , P.map Home <| P.map (\v -> HomeParams v homeParams0.hero Nothing) <| homeQS <| P.s "g" </> P.string
-        , P.map Home <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "g" </> P.string </> P.string
+        , P.map Home <| P.map (\v -> HomeParams v homeParams0.hero Nothing) <| homeQS <| P.s "g" </> encodedString
+        , P.map Home <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "g" </> encodedString </> P.string
 
         -- a modern versioned url, with build
-        , P.map Home <| P.map HomeParams <| homeQS <| P.s "g" </> P.string </> P.string </> maybeString
+        , P.map Home <| P.map HomeParams <| homeQS <| P.s "g" </> encodedString </> P.string </> maybeString
 
         -- other non-skilltree urls.
-        , P.map Stats <| P.map HomeParams <| homeQS <| P.s "s" </> P.string </> P.string </> maybeString
-        , P.map Stats <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "s" </> P.string </> P.string
-        , P.map StatsTSV <| P.map HomeParams <| homeQS <| P.s "tsv" </> P.string </> P.string </> maybeString
-        , P.map StatsTSV <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "tsv" </> P.string </> P.string
+        , P.map Stats <| P.map HomeParams <| homeQS <| P.s "s" </> encodedString </> P.string </> maybeString
+        , P.map Stats <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "s" </> encodedString </> P.string
+        , P.map StatsTSV <| P.map HomeParams <| homeQS <| P.s "tsv" </> encodedString </> P.string </> maybeString
+        , P.map StatsTSV <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "tsv" </> encodedString </> P.string
         , P.map Changelog <| P.s "changelog"
         ]
+
+
+encodedString =
+    -- if the string doesn't decode, skip decoding and use it as-is
+    P.custom "ENCODED_STRING" (\s -> Http.decodeUri s |> Maybe.withDefault s)
 
 
 falseBools =
@@ -178,15 +183,20 @@ replace search replace =
     Regex.replace Regex.All (Regex.regex <| Regex.escape search) (always replace)
 
 
+encode : String -> String
+encode =
+    Http.encodeUri >> replace "(" "%28" >> replace ")" "%29"
+
+
 stringifyHomePath : HomeParams -> String
 stringifyHomePath { version, hero, build, search } =
     let
         qs =
             -- in addition to normal escaping, replace parens so urls and markdown don't break
-            Maybe.Extra.unwrap "" (Http.encodeUri >> replace "(" "%28" >> replace ")" "%29" >> (++) "?q=") search
+            Maybe.Extra.unwrap "" (encode >> (++) "?q=") search
     in
         "/"
-            ++ version
+            ++ encode version
             ++ case ( hero, build ) of
                 -- ( "helpfulAdventurer", Nothing ) ->
                 -- qs
