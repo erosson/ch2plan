@@ -7,6 +7,7 @@ module Model
         , RouteModel(..)
         , HomeModel
         , Error(..)
+        , StatsSummary
           -- selectors
         , visibleTooltip
         , nodeSummary
@@ -604,17 +605,17 @@ statsSummary g =
         |> GS.calcStats g.game.stats
 
 
-parseStatsSummary :
-    Model
-    -> Route.HomeParams
-    ->
-        Result String
-            { selected : Set G.NodeId
-            , char : G.Character
-            , game : G.GameVersionData
-            , nodes : List ( Int, G.NodeType )
-            , stats : List GS.StatTotal
-            }
+type alias StatsSummary =
+    { selected : Set G.NodeId
+    , char : G.Character
+    , game : G.GameVersionData
+    , nodes : List ( Int, G.NodeType )
+    , stats : List GS.StatTotal
+    , params : Route.HomeParams
+    }
+
+
+parseStatsSummary : Model -> Route.HomeParams -> Result String StatsSummary
 parseStatsSummary model params =
     Graph.parse model params
         |> Result.map
@@ -625,6 +626,7 @@ parseStatsSummary model params =
                     , game = m.game
                     , nodes = nodeSummary m
                     , stats = statsSummary m
+                    , params = params
                     }
             )
 

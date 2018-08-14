@@ -29,6 +29,10 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 ---
 
+## 2018-08-14
+
+- You can now export your build to a spreadsheet (tab-separated). Look for the "spreadsheet format" link.
+
 ## 2018-08-10
 
 - Tooltips should now be positioned correctly.

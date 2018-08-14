@@ -230,3 +230,15 @@ nav {
   color: red;
   font-weight: bold;
 }
+
+.spreadsheet {
+  user-select: none;
+  height: 100%;
+}
+.spreadsheet .tsv {
+  user-select: all;
+  width: 120em;
+  height: 50%;
+  color: inherit;
+  background: inherit;
+}

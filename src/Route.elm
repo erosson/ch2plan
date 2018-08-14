@@ -45,6 +45,7 @@ homeParams0 =
 type Route
     = Home HomeParams
     | Stats HomeParams
+    | StatsTSV HomeParams
     | Changelog
     | NotFound
     | Root LegacyHomeParams
@@ -126,6 +127,9 @@ parser =
 
         -- other non-skilltree urls.
         , P.map Stats <| P.map HomeParams <| homeQS <| P.s "s" </> P.string </> P.string </> maybeString
+        , P.map Stats <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "s" </> P.string </> P.string
+        , P.map StatsTSV <| P.map HomeParams <| homeQS <| P.s "tsv" </> P.string </> P.string </> maybeString
+        , P.map StatsTSV <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "tsv" </> P.string </> P.string
         , P.map Changelog <| P.s "changelog"
         ]
 
@@ -201,6 +205,9 @@ stringify route =
 
         Stats params ->
             "#/s" ++ stringifyHomePath params
+
+        StatsTSV params ->
+            "#/tsv" ++ stringifyHomePath params
 
         Changelog ->
             "#/changelog"

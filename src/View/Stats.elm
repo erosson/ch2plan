@@ -13,6 +13,7 @@ import Model.Skill as Skill
 import GameData as G
 import GameData.Stats as GS exposing (Stat(..))
 import View.Graph
+import View.Spreadsheet
 
 
 view : M.Model -> Route.HomeParams -> H.Html msg
@@ -21,7 +22,7 @@ view model params =
         Err err ->
             H.div [] [ H.text <| "error: " ++ err ]
 
-        Ok { game, char, selected, stats, nodes } ->
+        Ok ({ game, char, selected, stats, nodes } as summary) ->
             let
                 getStat =
                     GS.statTable stats
@@ -44,7 +45,14 @@ view model params =
                             , viewStatsSummary getStat
                             ]
                         , H.div [ A.class "stats-box" ]
-                            [ H.p [] [ H.a [ Route.href <| Route.Home params ] [ H.text <| toString (Set.size selected) ++ " skill points:" ] ]
+                            [ H.p []
+                                [ H.a [ Route.href <| Route.Home params ] [ H.text <| toString (Set.size selected) ++ " skill points:" ]
+                                , H.text " ("
+                                , H.a [ Route.href <| Route.StatsTSV params ] [ H.text "spreadsheet format" ]
+
+                                -- , H.textarea [ A.rows 1, A.cols 5, A.readonly True ] [ H.text <| View.Spreadsheet.format model summary ]
+                                , H.text ")"
+                                ]
                             , viewNodeSummary True nodes
                             ]
                         ]

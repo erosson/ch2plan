@@ -10,6 +10,7 @@ import Route as Route exposing (Route)
 import View.SkillTree
 import View.Changelog
 import View.Stats
+import View.Spreadsheet
 
 
 view : M.Model -> H.Html M.Msg
@@ -49,6 +50,9 @@ view model =
 
             M.StatelessRoute (Route.Stats params) ->
                 H.div [] (header ++ [ View.Stats.view model params ])
+
+            M.StatelessRoute (Route.StatsTSV params) ->
+                View.Spreadsheet.view model params
 
 
 gameVersion : M.Model -> G.GameVersionData

@@ -81,7 +81,8 @@ type alias NodeSpec =
 
 
 type alias NodeType =
-    { name : String
+    { key : String
+    , name : String
     , icon : String
     , tooltip : Maybe String
     , flavorText : Maybe String
@@ -307,6 +308,7 @@ nodeDecoder =
 nodeTypeDecoder : Maybe GS.Character -> String -> D.Decoder (NodeQuality -> NodeType)
 nodeTypeDecoder stats key =
     P.decode NodeType
+        |> P.custom (D.succeed key)
         |> P.required "name" D.string
         |> P.required "icon" D.string
         |> P.optional "tooltip" (D.nullable D.string) Nothing

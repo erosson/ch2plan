@@ -59,6 +59,7 @@ viewFullscreenTree header model home =
                        , H.p [] [ H.a [ Route.href <| Route.Stats home.params ] [ H.text "Statistics:" ] ]
                        , View.Stats.viewStatsSummary <| GS.statTable <| M.statsSummary home.graph
                        , H.p [] [ H.a [ Route.href <| Route.Stats home.params ] [ H.text <| toString (Set.size home.graph.selected) ++ " skill points" ] ]
+                       , H.p [] [ H.a [ Route.href <| Route.StatsTSV home.params ] [ H.text "Spreadsheet format" ] ]
                        ]
                 )
           else
