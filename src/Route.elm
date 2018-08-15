@@ -136,7 +136,7 @@ parser =
 
 encodedString =
     -- if the string doesn't decode, skip decoding and use it as-is
-    P.custom "ENCODED_STRING" (\s -> Http.decodeUri s |> Maybe.withDefault s)
+    P.custom "ENCODED_STRING" (\s -> Http.decodeUri s |> Maybe.withDefault s |> Ok)
 
 
 falseBools =
