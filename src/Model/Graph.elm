@@ -26,8 +26,11 @@ import Model.Dijkstra as Dijkstra
 This is separate from Model to allow efficiently re-rendering with Svg.Lazy,
 which cares about referential equality in a way nothing else in Elm does.
 Updating this object means the graph will be redrawn - but if this object isn't
-updated, as when zooming/panning, we can efficiently skip that step. Redrawing
-the edges and nodes is slow enough that this really is worth the trouble.
+updated, as when zooming/panning, we can efficiently skip that step. Normally
+the Right Way/the Elm Way to do this is to put it all this in Model and
+manipulate it with extensible records, but redrawing the edges and nodes is
+slow enough that deviating from the Right Way to avoid it really is worth the
+trouble.
 
 -}
 type alias GraphModel =

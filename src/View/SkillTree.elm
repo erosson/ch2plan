@@ -17,29 +17,7 @@ import View.Graph
 
 view : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
 view header model home =
-    if model.features.fullscreen then
-        viewFullscreenTree header model home
-    else
-        viewOldTree header model home
-
-
-viewOldTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
-viewOldTree header model home =
-    H.div [] <|
-        header
-            ++ viewSelectSave model.features
-            ++ viewError home
-            ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
-               , H.p [] [ H.text <| home.graph.char.flavor ]
-               , viewVersionNav home.graph.game home.params
-               , viewSearch home
-               , H.div [ A.style [ ( "width", "1000px" ), ( "height", "1000px" ) ] ]
-                    [ View.Graph.view { model | windowSize = { width = 1000, height = 1000 } } home ]
-               , viewSearch home
-               , H.p [] [ H.a [ Route.href <| Route.Stats home.params ] [ H.text "Statistics:" ] ]
-               , View.Stats.viewStatsSummary <| GS.statTable <| M.statsSummary home.graph
-               , H.p [] [ H.a [ Route.href <| Route.Stats home.params ] [ H.text <| toString (Set.size home.graph.selected) ++ " skill points" ] ]
-               ]
+    viewFullscreenTree header model home
 
 
 viewFullscreenTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
@@ -50,7 +28,7 @@ viewFullscreenTree header model home =
             H.div [ A.class "sidebar" ]
                 ([ H.button [ A.class "sidebar-hide", A.title "hide", E.onClick M.ToggleSidebar ] [ H.text "<<" ] ]
                     ++ header
-                    ++ viewSelectSave model.features
+                    ++ [ viewSelectSave ]
                     ++ viewError home
                     ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
                        , H.p [] [ H.text <| home.graph.char.flavor ]
@@ -87,27 +65,23 @@ viewVersionNav g q =
             ]
 
 
-viewSelectSave : Route.Features -> List (H.Html M.Msg)
-viewSelectSave features =
-    if features.saveImport then
-        [ H.div []
-            [ H.text "Import build from game save : "
-            , H.input
-                [ A.type_ "file"
-                , A.id inputSaveSelectId
-                , E.on "change"
-                    (Decode.succeed <| M.SaveFileSelected inputSaveSelectId)
-                ]
-                []
-            , H.p [ A.class "saveSelectHint" ]
-                [ H.text "Hint: your save files are probably located in"
-                , H.br [] []
-                , H.text "C:\\Users\\$USERNAME\\AppData\\Roaming\\ClickerHeroes2\\Local Store\\saves"
-                ]
+viewSelectSave : H.Html M.Msg
+viewSelectSave =
+    H.div []
+        [ H.text "Import build from game save : "
+        , H.input
+            [ A.type_ "file"
+            , A.id inputSaveSelectId
+            , E.on "change"
+                (Decode.succeed <| M.SaveFileSelected inputSaveSelectId)
+            ]
+            []
+        , H.p [ A.class "saveSelectHint" ]
+            [ H.text "Hint: your save files are probably located in"
+            , H.br [] []
+            , H.text "C:\\Users\\$USERNAME\\AppData\\Roaming\\ClickerHeroes2\\Local Store\\saves"
             ]
         ]
-    else
-        []
 
 
 inputSaveSelectId =

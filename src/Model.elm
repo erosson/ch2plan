@@ -15,7 +15,6 @@ module Model
         , parseStatsSummary
         , center
         , zoom
-        , graphSize
         , nodeIconSize
           -- elm architecture
         , init
@@ -387,7 +386,7 @@ update msg model =
                             rawDelta |> V2.scale (-1 / home.zoom)
 
                         center =
-                            home.center |> V2.add delta |> clampCenter (graphSize model) home
+                            home.center |> V2.add delta |> clampCenter model.windowSize home
                     in
                         ( { model | route = Home { home | center = center } }, Cmd.none )
 
@@ -396,7 +395,7 @@ update msg model =
                         newZoom =
                             home.zoom
                                 |> (+) (-factor * 0.01)
-                                |> clampZoom (graphSize model) home.graph.char.graph
+                                |> clampZoom model.windowSize home.graph.char.graph
                     in
                         ( { model | route = Home { home | zoom = newZoom } }, Cmd.none )
 
@@ -468,14 +467,6 @@ update msg model =
 
                 _ ->
                     ( model, Cmd.none )
-
-
-graphSize : { a | features : Route.Features, windowSize : Window.Size } -> Window.Size
-graphSize { features, windowSize } =
-    if features.fullscreen then
-        windowSize
-    else
-        { width = 1000, height = 1000 }
 
 
 nodeIconSize =

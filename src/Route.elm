@@ -71,12 +71,14 @@ type Route
 
 
 type alias Features =
-    { fancyTooltips : Bool, fullscreen : Bool, saveImport : Bool }
+    -- { fancyTooltips : Bool }
+    {}
 
 
 features0 : Features
 features0 =
-    { fancyTooltips = True, fullscreen = True, saveImport = True }
+    -- { fancyTooltips = True }
+    {}
 
 
 parse : Navigation.Location -> Route
@@ -182,10 +184,8 @@ parseFeatures =
 featuresParser : P.Parser (Features -> a) a
 featuresParser =
     P.map Features <|
+        -- <?> flagParam "enableFancyTooltips" features0.fancyTooltips
         P.top
-            <?> flagParam "enableFancyTooltips" features0.fancyTooltips
-            <?> flagParam "enableFullscreen" features0.fullscreen
-            <?> flagParam "enableSaveImport" features0.saveImport
 
 
 ifFeature : Bool -> a -> a -> a

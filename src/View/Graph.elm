@@ -60,7 +60,7 @@ view model home =
          ]
             ++ Maybe.Extra.unwrap []
                 (List.singleton << viewTooltip model home)
-                (Route.ifFeature model.features.fancyTooltips (M.visibleTooltip model) Nothing |> Maybe.andThen ((flip Dict.get) home.graph.char.graph.nodes))
+                (M.visibleTooltip model |> Maybe.andThen ((flip Dict.get) home.graph.char.graph.nodes))
         )
 
 
@@ -123,7 +123,7 @@ viewTooltip model home node =
             ( (toFloat node.x + panX) * zoom, (toFloat node.y + panY) * zoom )
 
         sidebarOffset =
-            if model.features.fullscreen && model.sidebarOpen then
+            if model.sidebarOpen then
                 sidebarWidth
             else
                 0
@@ -185,7 +185,7 @@ panOffsets : M.Model -> M.HomeModel -> ( Window.Size, Float, Float )
 panOffsets model home =
     let
         ( w, sidebarXOffset ) =
-            if model.features.fullscreen && model.sidebarOpen then
+            if model.sidebarOpen then
                 ( { height = model.windowSize.height
                   , width = model.windowSize.width - sidebarWidth
                   }
@@ -333,7 +333,7 @@ viewNode features home { id, x, y, val } =
         , E.on "touchStart" <| Decode.succeed <| M.NodeMouseDown id
         , E.on "touchEnd" <| Decode.succeed <| M.NodeMouseUp id
         ]
-        ([ S.image
+        [ S.image
             [ A.xlinkHref <| iconUrl val
             , A.x <| toString <| x - iconSize // 2
             , A.y <| toString <| y - iconSize // 2
@@ -341,9 +341,7 @@ viewNode features home { id, x, y, val } =
             , A.height <| toString iconSize
             ]
             []
-         ]
-            ++ Route.ifFeature features.fancyTooltips [] [ S.title [] [ S.text <| nodeSearchText val ] ]
-        )
+        ]
 
 
 nodeBackgroundImage : G.NodeType -> Bool -> Bool -> Bool -> String
