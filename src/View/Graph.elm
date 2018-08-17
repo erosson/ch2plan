@@ -28,8 +28,8 @@ import GameData as G
 import Route
 
 
-view : Window.Size -> M.HomeModel -> Route.Features -> H.Html M.Msg
-view windowSize model features =
+view : M.Model -> M.HomeModel -> H.Html M.Msg
+view model home =
     -- svg-container is for tooltip positioning. It must be exactly the same size as the svg itself.
     H.div [ HA.class "svg-container" ]
         ([ S.svg
@@ -48,20 +48,19 @@ view windowSize model features =
                 , S.filter [ A.id "highlight4" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "225" ] [] ]
                 , S.filter [ A.id "highlight5" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "315" ] [] ]
                 ]
-            , S.g [ zoomAndPan features windowSize model ]
-                ([ model.graph |> L.lazy2 viewEdges False
-                 , model.graph |> L.lazy2 viewEdges True
-                 , model.graph |> L.lazy viewNodeBackgrounds
-                 , model.graph |> L.lazy2 viewNodes features
+            , S.g [ zoomAndPan model home ]
+                ([ home.graph |> L.lazy2 viewEdges False
+                 , home.graph |> L.lazy2 viewEdges True
+                 , home.graph |> L.lazy viewNodeBackgrounds
+                 , home.graph |> L.lazy2 viewNodes model.features
                  ]
                 )
-            , viewZoomButtons windowSize
+            , viewZoomButtons model.windowSize
             ]
          ]
             ++ Maybe.Extra.unwrap []
-                (List.singleton << viewTooltip features windowSize model)
-                -- (model.tooltip |> Maybe.withDefault 1 |> Just |> Maybe.andThen ((flip Dict.get) model.char.graph.nodes))
-                (Route.ifFeature features.fancyTooltips (M.visibleTooltip model) Nothing |> Maybe.andThen ((flip Dict.get) model.graph.char.graph.nodes))
+                (List.singleton << viewTooltip model home)
+                (Route.ifFeature model.features.fancyTooltips (M.visibleTooltip model) Nothing |> Maybe.andThen ((flip Dict.get) home.graph.char.graph.nodes))
         )
 
 
@@ -103,8 +102,8 @@ viewEdges selected home =
         S.path [ A.class classes, A.d path ] []
 
 
-viewTooltip : Route.Features -> Window.Size -> M.HomeModel -> G.Node -> H.Html msg
-viewTooltip features win0 model node =
+viewTooltip : M.Model -> M.HomeModel -> G.Node -> H.Html msg
+viewTooltip model home node =
     -- no css-scaling here - tooltips don't scale with zoom.
     -- no svg here - svg can't word-wrap, and <foreignObject> has screwy browser support.
     --
@@ -112,19 +111,19 @@ viewTooltip features win0 model node =
     -- so coordinates in both should match.
     let
         ( win, panX, panY ) =
-            panOffsets features win0 model
+            panOffsets model home
 
         ( w, h ) =
             ( toFloat win.width, toFloat win.height )
 
         zoom =
-            M.zoom win model
+            M.zoom win home
 
         ( x, y ) =
             ( (toFloat node.x + panX) * zoom, (toFloat node.y + panY) * zoom )
 
         sidebarOffset =
-            if features.fullscreen && model.sidebarOpen then
+            if model.features.fullscreen && model.sidebarOpen then
                 sidebarWidth
             else
                 0
@@ -182,18 +181,18 @@ inputZoomAndPan =
     ]
 
 
-panOffsets : Route.Features -> Window.Size -> M.HomeModel -> ( Window.Size, Float, Float )
-panOffsets features w0 home =
+panOffsets : M.Model -> M.HomeModel -> ( Window.Size, Float, Float )
+panOffsets model home =
     let
         ( w, sidebarXOffset ) =
-            if features.fullscreen && home.sidebarOpen then
-                ( { height = w0.height
-                  , width = w0.width - sidebarWidth
+            if model.features.fullscreen && model.sidebarOpen then
+                ( { height = model.windowSize.height
+                  , width = model.windowSize.width - sidebarWidth
                   }
                 , sidebarWidth
                 )
             else
-                ( w0, 0 )
+                ( model.windowSize, 0 )
 
         ( cx, cy ) =
             home |> M.center w |> V2.toTuple
@@ -213,14 +212,14 @@ sidebarWidth =
     480
 
 
-zoomAndPan : Route.Features -> Window.Size -> M.HomeModel -> S.Attribute msg
-zoomAndPan features w0 model =
+zoomAndPan : M.Model -> M.HomeModel -> S.Attribute msg
+zoomAndPan model home =
     let
         ( w, panX, panY ) =
-            panOffsets features w0 model
+            panOffsets model home
 
         zoom =
-            M.zoom w model
+            M.zoom w home
 
         panning =
             "translate(" ++ toString panX ++ ", " ++ toString panY ++ ")"

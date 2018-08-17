@@ -72,6 +72,8 @@ type alias Model =
     , route : RouteModel
     , features : Route.Features
     , windowSize : Window.Size
+    , tooltip : Maybe ( G.NodeId, TooltipState )
+    , sidebarOpen : Bool
     }
 
 
@@ -94,8 +96,6 @@ type alias HomeModel =
     , zoom : Float
     , center : V2.Vec2
     , drag : Draggable.State ()
-    , tooltip : Maybe ( G.NodeId, TooltipState )
-    , sidebarOpen : Bool
     , error : Maybe Error
     }
 
@@ -132,6 +132,8 @@ init flags loc =
                   , gameData = gameData
                   , features = Route.parseFeatures loc
                   , route = StatelessRoute Route.NotFound -- placeholder, modified just below
+                  , sidebarOpen = True
+                  , tooltip = Nothing
                   }
                     |> \model -> { model | route = route |> routeToModel model }
                 , Cmd.batch [ preprocessCmd, Task.perform Resize Window.size, redirectCmd gameData route ]
@@ -188,15 +190,13 @@ initHome model params =
                         0
             , center = V2.vec2 0 0
             , drag = Draggable.init
-            , tooltip = Nothing
-            , sidebarOpen = True
             , error = partialError |> Maybe.map BuildNodesError
             }
     in
         Graph.parse model params |> Result.map create
 
 
-visibleTooltip : HomeModel -> Maybe G.NodeId
+visibleTooltip : Model -> Maybe G.NodeId
 visibleTooltip { tooltip } =
     case tooltip of
         Just ( id, Hovering ) ->
@@ -305,24 +305,24 @@ update msg model =
                     )
 
                 NodeMouseOver id ->
-                    ( { model | route = Home { home | tooltip = Just ( id, Hovering ) } }, Cmd.none )
+                    ( { model | tooltip = Just ( id, Hovering ) }, Cmd.none )
 
                 NodeMouseOut id ->
-                    ( { model | route = Home { home | tooltip = Nothing } }, Cmd.none )
+                    ( { model | tooltip = Nothing }, Cmd.none )
 
                 NodeMouseDown id ->
-                    case home.tooltip of
+                    case model.tooltip of
                         Nothing ->
                             -- clicked without hovering - this could be mobile/longpress.
                             -- (could also be a keyboard, but you want to tab through 700 nodes? sorry, not supported)
-                            ( { model | route = Home { home | tooltip = Just ( id, Shortpressing ) } }
+                            ( { model | tooltip = Just ( id, Shortpressing ) }
                             , Process.sleep (0.5 * Time.second) |> Task.perform (always <| NodeLongPress id)
                             )
 
                         Just ( tid, state ) ->
                             if id /= tid then
                                 -- multitouch...? I only support one tooltip at a time
-                                ( { model | route = Home { home | tooltip = Just ( id, Shortpressing ) } }
+                                ( { model | tooltip = Just ( id, Shortpressing ) }
                                 , Process.sleep (0.5 * Time.second) |> Task.perform (always <| NodeLongPress id)
                                 )
                             else
@@ -336,16 +336,16 @@ update msg model =
                                         ( model, Cmd.none )
 
                 NodeLongPress id ->
-                    case home.tooltip of
+                    case model.tooltip of
                         -- waiting for the same longpress that sent this message?
                         Just ( tid, Shortpressing ) ->
-                            ( { model | route = Home { home | tooltip = Just ( id, Longpressing ) } }, Cmd.none )
+                            ( { model | tooltip = Just ( id, Longpressing ) }, Cmd.none )
 
                         _ ->
                             ( model, Cmd.none )
 
                 NodeMouseUp id ->
-                    case home.tooltip of
+                    case model.tooltip of
                         Nothing ->
                             -- no idea how we got here, select the node I guess
                             updateNode id home model
@@ -362,11 +362,11 @@ update msg model =
 
                                     Shortpressing ->
                                         -- end of a quick tap - select the node and cancel the longpress
-                                        updateNode id home { model | route = Home { home | tooltip = Nothing } }
+                                        updateNode id home { model | tooltip = Nothing }
 
                                     Longpressing ->
                                         -- end of a tooltip longpress - hide the tooltip
-                                        ( { model | route = Home { home | tooltip = Nothing } }, Cmd.none )
+                                        ( { model | tooltip = Nothing }, Cmd.none )
 
                 Preprocess ->
                     -- calculate dijkstra immediately after the view renders, so we have it ready later, when the user clicks.
@@ -415,7 +415,7 @@ update msg model =
                     ( { model | windowSize = windowSize }, Cmd.none )
 
                 ToggleSidebar ->
-                    ( { model | route = Home { home | sidebarOpen = not home.sidebarOpen } }, Cmd.none )
+                    ( { model | sidebarOpen = not model.sidebarOpen }, Cmd.none )
 
                 SaveFileSelected elemId ->
                     ( model, Ports.saveFileSelected elemId )

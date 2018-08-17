@@ -34,7 +34,7 @@ viewOldTree header model home =
                , viewVersionNav home.graph.game home.params
                , viewSearch home
                , H.div [ A.style [ ( "width", "1000px" ), ( "height", "1000px" ) ] ]
-                    [ View.Graph.view { width = 1000, height = 1000 } home model.features ]
+                    [ View.Graph.view { model | windowSize = { width = 1000, height = 1000 } } home ]
                , viewSearch home
                , H.p [] [ H.a [ Route.href <| Route.Stats home.params ] [ H.text "Statistics:" ] ]
                , View.Stats.viewStatsSummary <| GS.statTable <| M.statsSummary home.graph
@@ -45,8 +45,8 @@ viewOldTree header model home =
 viewFullscreenTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
 viewFullscreenTree header model home =
     H.div [ A.class "skill-tree-main" ]
-        [ View.Graph.view model.windowSize home model.features
-        , if home.sidebarOpen then
+        [ View.Graph.view model home
+        , if model.sidebarOpen then
             H.div [ A.class "sidebar" ]
                 ([ H.button [ A.class "sidebar-hide", A.title "hide", E.onClick M.ToggleSidebar ] [ H.text "<<" ] ]
                     ++ header
