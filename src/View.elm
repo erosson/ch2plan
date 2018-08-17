@@ -75,7 +75,7 @@ viewCharacterNavEntry : String -> String -> G.Character -> H.Html msg
 viewCharacterNavEntry version key char =
     let
         q =
-            Route.delegacy version Route.homeParams0
+            Route.defaultParams version
     in
         viewNavEntry char.flavorClass (Route.Home { q | hero = key })
 

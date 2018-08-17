@@ -1,4 +1,17 @@
-module Route exposing (..)
+module Route
+    exposing
+        ( Route(..)
+        , Features
+        , HomeParams
+        , LegacyHomeParams
+        , parse
+        , parseFeatures
+        , fromLegacyParams
+        , defaultParams
+        , stringify
+        , href
+        , ifFeature
+        )
 
 import Set as Set exposing (Set)
 import Navigation
@@ -25,13 +38,18 @@ type alias LegacyHomeParams =
     }
 
 
-delegacy : String -> LegacyHomeParams -> HomeParams
-delegacy version params =
+fromLegacyParams : String -> LegacyHomeParams -> HomeParams
+fromLegacyParams version params =
     { version = version
     , hero = params.hero
     , build = params.build
     , search = params.search
     }
+
+
+defaultParams : String -> HomeParams
+defaultParams version =
+    fromLegacyParams version homeParams0
 
 
 homeParams0 : LegacyHomeParams

@@ -506,11 +506,11 @@ redirect : G.GameData -> Route -> Maybe Route
 redirect gameData route =
     case route of
         Route.Root params ->
-            Just <| Route.Home <| Route.delegacy (G.latestVersionId gameData) params
+            Just <| Route.Home <| Route.fromLegacyParams (G.latestVersionId gameData) params
 
         Route.LegacyHome params ->
             -- legacy urls are assigned a legacy version
-            Just <| Route.Home <| Route.delegacy "0.052-beta" params
+            Just <| Route.Home <| Route.fromLegacyParams "0.052-beta" params
 
         _ ->
             Nothing
