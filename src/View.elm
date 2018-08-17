@@ -27,43 +27,36 @@ view model =
             ]
     in
         case model.route of
-            M.Home home ->
-                View.SkillTree.view header model home
+            Route.Home home ->
+                case model.graph of
+                    Nothing ->
+                        H.div [] (header ++ [ H.text "404" ])
 
-            M.HomeError q ->
+                    Just graph ->
+                        View.SkillTree.view header model graph
+
+            Route.NotFound ->
                 H.div [] (header ++ [ H.text "404" ])
 
-            M.StatelessRoute Route.NotFound ->
-                H.div [] (header ++ [ H.text "404" ])
-
-            M.StatelessRoute Route.Changelog ->
+            Route.Changelog ->
                 H.div [] (header ++ [ View.Changelog.view model.changelog ])
 
-            M.StatelessRoute (Route.Home _) ->
-                Debug.crash "home is not stateless. How did this happen?"
-
-            M.StatelessRoute (Route.LegacyHome _) ->
+            Route.LegacyHome _ ->
                 H.div [] [ H.text "loading..." ]
 
-            M.StatelessRoute (Route.Root _) ->
+            Route.Root _ ->
                 H.div [] [ H.text "loading..." ]
 
-            M.StatelessRoute (Route.Stats params) ->
+            Route.Stats params ->
                 H.div [] (header ++ [ View.Stats.view model params ])
 
-            M.StatelessRoute (Route.StatsTSV params) ->
+            Route.StatsTSV params ->
                 View.Spreadsheet.view model params
 
 
 gameVersion : M.Model -> G.GameVersionData
-gameVersion m =
-    case m.route of
-        M.Home { params } ->
-            Dict.get params.version m.gameData.byVersion
-                |> Maybe.withDefault (G.latestVersion m.gameData)
-
-        _ ->
-            G.latestVersion m.gameData
+gameVersion model =
+    model.graph |> Maybe.map .game |> Maybe.withDefault (G.latestVersion model.gameData)
 
 
 viewCharacterNav : G.GameVersionData -> List (H.Html msg)

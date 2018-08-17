@@ -8,6 +8,7 @@ import Html.Events as E
 import Maybe.Extra
 import Json.Decode as Decode
 import Model as M
+import Model.Graph as MG
 import Route
 import GameData as G
 import GameData.Stats as GS exposing (Stat(..))
@@ -15,34 +16,38 @@ import View.Stats
 import View.Graph
 
 
-view : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
-view header model home =
-    viewFullscreenTree header model home
+view : List (H.Html M.Msg) -> M.Model -> MG.GraphModel -> H.Html M.Msg
+view header model graph =
+    let
+        params =
+            case Route.params model.route of
+                Nothing ->
+                    Debug.crash "wtf"
 
-
-viewFullscreenTree : List (H.Html M.Msg) -> M.Model -> M.HomeModel -> H.Html M.Msg
-viewFullscreenTree header model home =
-    H.div [ A.class "skill-tree-main" ]
-        [ View.Graph.view model home
-        , if model.sidebarOpen then
-            H.div [ A.class "sidebar" ]
-                ([ H.button [ A.class "sidebar-hide", A.title "hide", E.onClick M.ToggleSidebar ] [ H.text "<<" ] ]
-                    ++ header
-                    ++ [ viewSelectSave ]
-                    ++ viewError home
-                    ++ [ H.h4 [] [ H.text <| home.graph.char.flavorName ++ ", " ++ home.graph.char.flavorClass ]
-                       , H.p [] [ H.text <| home.graph.char.flavor ]
-                       , viewVersionNav home.graph.game home.params
-                       , viewSearch home
-                       , H.p [] [ H.a [ Route.href <| Route.Stats home.params ] [ H.text "Statistics:" ] ]
-                       , View.Stats.viewStatsSummary <| GS.statTable <| M.statsSummary home.graph
-                       , H.p [] [ H.a [ Route.href <| Route.Stats home.params ] [ H.text <| toString (Set.size home.graph.selected) ++ " skill points" ] ]
-                       , H.p [] [ H.a [ Route.href <| Route.StatsTSV home.params ] [ H.text "Spreadsheet format" ] ]
-                       ]
-                )
-          else
-            H.button [ A.class "sidebar-show", A.title "show", E.onClick M.ToggleSidebar ] [ H.text ">>" ]
-        ]
+                Just params ->
+                    params
+    in
+        H.div [ A.class "skill-tree-main" ]
+            [ View.Graph.view model graph
+            , if model.sidebarOpen then
+                H.div [ A.class "sidebar" ]
+                    ([ H.button [ A.class "sidebar-hide", A.title "hide", E.onClick M.ToggleSidebar ] [ H.text "<<" ] ]
+                        ++ header
+                        ++ [ viewSelectSave ]
+                        ++ viewError model.error
+                        ++ [ H.h4 [] [ H.text <| graph.char.flavorName ++ ", " ++ graph.char.flavorClass ]
+                           , H.p [] [ H.text <| graph.char.flavor ]
+                           , viewVersionNav graph.game params
+                           , viewSearch model
+                           , H.p [] [ H.a [ Route.href <| Route.Stats params ] [ H.text "Statistics:" ] ]
+                           , View.Stats.viewStatsSummary <| GS.statTable <| M.statsSummary graph
+                           , H.p [] [ H.a [ Route.href <| Route.Stats params ] [ H.text <| toString (Set.size graph.selected) ++ " skill points" ] ]
+                           , H.p [] [ H.a [ Route.href <| Route.StatsTSV params ] [ H.text "Spreadsheet format" ] ]
+                           ]
+                    )
+              else
+                H.button [ A.class "sidebar-show", A.title "show", E.onClick M.ToggleSidebar ] [ H.text ">>" ]
+            ]
 
 
 ver =
@@ -88,10 +93,10 @@ inputSaveSelectId =
     "inputSaveSelect"
 
 
-viewError : M.HomeModel -> List (H.Html M.Msg)
-viewError home =
+viewError : Maybe M.Error -> List (H.Html M.Msg)
+viewError error =
     [ H.p [ A.class "error" ]
-        (case home.error of
+        (case error of
             Just error ->
                 [ H.text <|
                     case error of
@@ -104,19 +109,22 @@ viewError home =
 
                         M.BuildNodesError err ->
                             "Invalid build: " ++ err
+
+                        M.GraphError err ->
+                            "Can't graph that: " ++ err
                 ]
 
-            _ ->
+            Nothing ->
                 []
         )
     ]
 
 
-viewSearch : M.HomeModel -> H.Html M.Msg
-viewSearch home =
+viewSearch : M.Model -> H.Html M.Msg
+viewSearch model =
     H.div []
         [ H.text "Highlight: "
-        , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" home.searchString, E.onInput M.SearchInput ] []
+        , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" model.searchString, E.onInput M.SearchInput ] []
         ]
 
 

@@ -28,8 +28,8 @@ import GameData as G
 import Route
 
 
-view : M.Model -> M.HomeModel -> H.Html M.Msg
-view model home =
+view : M.Model -> MG.GraphModel -> H.Html M.Msg
+view model graph =
     -- svg-container is for tooltip positioning. It must be exactly the same size as the svg itself.
     H.div [ HA.class "svg-container" ]
         ([ S.svg
@@ -48,19 +48,19 @@ view model home =
                 , S.filter [ A.id "highlight4" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "225" ] [] ]
                 , S.filter [ A.id "highlight5" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "315" ] [] ]
                 ]
-            , S.g [ zoomAndPan model home ]
-                ([ home.graph |> L.lazy2 viewEdges False
-                 , home.graph |> L.lazy2 viewEdges True
-                 , home.graph |> L.lazy viewNodeBackgrounds
-                 , home.graph |> L.lazy2 viewNodes model.features
+            , S.g [ zoomAndPan model graph ]
+                ([ graph |> L.lazy2 viewEdges False
+                 , graph |> L.lazy2 viewEdges True
+                 , graph |> L.lazy viewNodeBackgrounds
+                 , graph |> L.lazy2 viewNodes model.features
                  ]
                 )
             , viewZoomButtons model.windowSize
             ]
          ]
             ++ Maybe.Extra.unwrap []
-                (List.singleton << viewTooltip model home)
-                (M.visibleTooltip model |> Maybe.andThen ((flip Dict.get) home.graph.char.graph.nodes))
+                (List.singleton << viewTooltip model graph)
+                (M.visibleTooltip model |> Maybe.andThen ((flip Dict.get) graph.char.graph.nodes))
         )
 
 
@@ -102,8 +102,8 @@ viewEdges selected home =
         S.path [ A.class classes, A.d path ] []
 
 
-viewTooltip : M.Model -> M.HomeModel -> G.Node -> H.Html msg
-viewTooltip model home node =
+viewTooltip : M.Model -> MG.GraphModel -> G.Node -> H.Html msg
+viewTooltip model graph node =
     -- no css-scaling here - tooltips don't scale with zoom.
     -- no svg here - svg can't word-wrap, and <foreignObject> has screwy browser support.
     --
@@ -111,13 +111,13 @@ viewTooltip model home node =
     -- so coordinates in both should match.
     let
         ( win, panX, panY ) =
-            panOffsets model home
+            panOffsets model graph
 
         ( w, h ) =
             ( toFloat win.width, toFloat win.height )
 
         zoom =
-            M.zoom win home
+            M.zoom { model | windowSize = win } graph
 
         ( x, y ) =
             ( (toFloat node.x + panX) * zoom, (toFloat node.y + panY) * zoom )
@@ -181,8 +181,8 @@ inputZoomAndPan =
     ]
 
 
-panOffsets : M.Model -> M.HomeModel -> ( Window.Size, Float, Float )
-panOffsets model home =
+panOffsets : M.Model -> MG.GraphModel -> ( Window.Size, Float, Float )
+panOffsets model graph =
     let
         ( w, sidebarXOffset ) =
             if model.sidebarOpen then
@@ -195,10 +195,10 @@ panOffsets model home =
                 ( model.windowSize, 0 )
 
         ( cx, cy ) =
-            home |> M.center w |> V2.toTuple
+            M.center { model | windowSize = w } graph |> V2.toTuple
 
         zoom =
-            M.zoom w home
+            M.zoom { model | windowSize = w } graph
 
         ( left, top ) =
             ( cx - (toFloat w.width / 2 + sidebarXOffset) / zoom
@@ -212,14 +212,14 @@ sidebarWidth =
     480
 
 
-zoomAndPan : M.Model -> M.HomeModel -> S.Attribute msg
-zoomAndPan model home =
+zoomAndPan : M.Model -> MG.GraphModel -> S.Attribute msg
+zoomAndPan model graph =
     let
         ( w, panX, panY ) =
-            panOffsets model home
+            panOffsets model graph
 
         zoom =
-            M.zoom w home
+            M.zoom { model | windowSize = w } graph
 
         panning =
             "translate(" ++ toString panX ++ ", " ++ toString panY ++ ")"

@@ -29,6 +29,10 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 ---
 
+## 2018-08-17
+
+- Zoom/pan/search-highlights are now preserved when entering and leaving the build statistics page.
+
 ## 2018-08-14
 
 - You can now export your build to a spreadsheet (tab-separated). Look for the "spreadsheet format" link.

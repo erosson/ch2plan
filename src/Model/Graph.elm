@@ -150,9 +150,9 @@ Return type here is a bit weird. We can have two kinds of errors:
   - partial failure: the skill tree *can* be rendered, but there's a problem. Bad search, bad node selections.
 
 -}
-parse : { m | gameData : G.GameData } -> Route.HomeParams -> Result String ( GraphModel, Maybe String )
-parse context q =
-    case Dict.get q.version context.gameData.byVersion of
+parse : G.GameData -> Route.HomeParams -> Result String ( GraphModel, Maybe String )
+parse gameData q =
+    case Dict.get q.version gameData.byVersion of
         Nothing ->
             Err <| "no such game-version: " ++ toString q.version
 

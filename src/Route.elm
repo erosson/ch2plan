@@ -8,6 +8,7 @@ module Route
         , parseFeatures
         , fromLegacyParams
         , defaultParams
+        , params
         , stringify
         , href
         , ifFeature
@@ -50,6 +51,22 @@ fromLegacyParams version params =
 defaultParams : String -> HomeParams
 defaultParams version =
     fromLegacyParams version homeParams0
+
+
+params : Route -> Maybe HomeParams
+params route =
+    case route of
+        Home params ->
+            Just params
+
+        Stats params ->
+            Just params
+
+        StatsTSV params ->
+            Just params
+
+        _ ->
+            Nothing
 
 
 homeParams0 : LegacyHomeParams
