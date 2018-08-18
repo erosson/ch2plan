@@ -6,6 +6,7 @@ module Route
         , LegacyHomeParams
         , parse
         , parseFeatures
+        , flagParam
         , fromLegacyParams
         , defaultParams
         , params
