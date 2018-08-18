@@ -112,6 +112,9 @@ init flags loc =
                 route =
                     Route.parse loc
 
+                search =
+                    Route.params route |> Maybe.Extra.unwrap Nothing .search
+
                 ( graph, error ) =
                     parseGraph gameData route
             in
@@ -123,9 +126,9 @@ init flags loc =
                   , graph = graph
                   , sidebarOpen = True
                   , tooltip = Nothing
-                  , searchString = Nothing
-                  , searchPrev = Nothing
-                  , searchRegex = Nothing
+                  , searchString = search
+                  , searchPrev = search
+                  , searchRegex = Nothing -- this is populated later, from ports/SearchRegex message
                   , searchHelp = False
                   , zoom =
                         graph
