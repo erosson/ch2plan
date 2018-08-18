@@ -29,8 +29,9 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 ---
 
-## 2018-08-17
+## 2018-08-18
 
+- Search now displays some help text when clicked.
 - Zoom/pan/search-highlights are now preserved when entering and leaving the build statistics page.
 
 ## 2018-08-14

@@ -22,7 +22,7 @@ view header model graph =
         params =
             case Route.params model.route of
                 Nothing ->
-                    Debug.crash "wtf"
+                    Debug.crash "viewing skilltree without a skilltree url?"
 
                 Just params ->
                     params
@@ -38,7 +38,7 @@ view header model graph =
                         ++ [ H.h4 [] [ H.text <| graph.char.flavorName ++ ", " ++ graph.char.flavorClass ]
                            , H.p [] [ H.text <| graph.char.flavor ]
                            , viewVersionNav graph.game params
-                           , viewSearch model
+                           , viewSearch model params.version
                            , H.p [] [ H.a [ Route.href <| Route.Stats params ] [ H.text "Statistics:" ] ]
                            , View.Stats.viewStatsSummary <| GS.statTable <| M.statsSummary graph
                            , H.p [] [ H.a [ Route.href <| Route.Stats params ] [ H.text <| toString (Set.size graph.selected) ++ " skill points" ] ]
@@ -120,11 +120,33 @@ viewError error =
     ]
 
 
-viewSearch : M.Model -> H.Html M.Msg
-viewSearch model =
+viewSearch : M.Model -> String -> H.Html M.Msg
+viewSearch model version =
     H.div []
-        [ H.text "Highlight: "
+        [ H.a [ A.href "javascript:void", E.onClick <| M.SearchHelp <| not model.searchHelp ] [ H.text "Search" ]
+        , H.text ": "
         , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" model.searchString, E.onInput M.SearchInput ] []
+        , H.div []
+            (if model.searchHelp then
+                [ H.p []
+                    [ H.text "Use "
+                    , H.a [ A.href "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Writing_a_regular_expression_pattern" ]
+                        [ H.text "regular expressions" ]
+                    , H.text " for advanced searches."
+                    ]
+                , H.p []
+                    [ H.text "To highlight searches with different colors, (parenthesize) up to 6 groups, separated by |vertical bars|. For example, try a search for:"
+                    , H.div []
+                        [ H.code []
+                            [ H.a [ A.target "_blank", A.href <| "#/g/" ++ version ++ "/helpfulAdventurer?q=(big)|(huge)|(multiclick)|(energize)" ]
+                                [ H.text "(big)|(huge)|(multiclick)|(energize)" ]
+                            ]
+                        ]
+                    ]
+                ]
+             else
+                []
+            )
         ]
 
 

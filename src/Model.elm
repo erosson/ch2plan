@@ -47,6 +47,7 @@ type Msg
     = SearchInput String
     | SearchNav (Maybe String) (Maybe String)
     | SearchRegex Ports.SearchRegex
+    | SearchHelp Bool
     | NodeMouseDown G.NodeId
     | NodeMouseUp G.NodeId
     | NodeMouseOver G.NodeId
@@ -75,6 +76,7 @@ type alias Model =
     , searchString : Maybe String
     , searchPrev : Maybe String
     , searchRegex : Maybe Regex
+    , searchHelp : Bool
     , zoom : Float
     , center : V2.Vec2
     , drag : Draggable.State ()
@@ -124,6 +126,7 @@ init flags loc =
                   , searchString = Nothing
                   , searchPrev = Nothing
                   , searchRegex = Nothing
+                  , searchHelp = False
                   , zoom =
                         graph
                             |> Maybe.Extra.unwrap 1
@@ -234,6 +237,9 @@ updateNode id model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        SearchHelp open ->
+            ( { model | searchHelp = open }, Cmd.none )
+
         SearchInput search0 ->
             -- Typing out a search in the search box. Do nothing while
             -- they type; when they stop typing, perform the search.
