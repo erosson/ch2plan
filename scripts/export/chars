@@ -22,7 +22,7 @@ gedit assets/ch2data/chars/latest.json &
 # https://stackoverflow.com/questions/14702148/how-to-fire-a-command-when-a-shell-script-is-interrupted
 onExit() {
   trap INT
-  ./scripts/postexport/chars assets/ch2data/chars/latest.json
+  ./scripts/export/postchars assets/ch2data/chars/latest.json
 }
 trap onExit INT
 serve build/chars

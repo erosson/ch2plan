@@ -1,6 +1,7 @@
 #!/bin/sh -eux
-cp ./game/mods/active/*.as ch2data/
-ffdec -export script ./build/extract/ClickerHeroes2 ./game/ClickerHeroes2.swf
-cp ./build/extract/ClickerHeroes2/scripts/models/Character.as ch2data/
-cp ./build/extract/ClickerHeroes2/scripts/heroclickerlib/managers/Formulas.as ch2data/
-cp ./build/extract/ClickerHeroes2/scripts/heroclickerlib/CH2.as ch2data/
+game=${1-game}
+cp "$game"/mods/active/*.as ch2data/
+ffdec -cli -export script build/extract/ClickerHeroes2 "$game"/ClickerHeroes2.swf
+cp build/extract/ClickerHeroes2/scripts/models/Character.as ch2data/
+cp build/extract/ClickerHeroes2/scripts/heroclickerlib/managers/Formulas.as ch2data/
+cp build/extract/ClickerHeroes2/scripts/heroclickerlib/CH2.as ch2data/

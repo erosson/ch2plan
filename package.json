@@ -12,17 +12,18 @@
     "tf:apply": "terraform apply -auto-approve",
     "export:icons": "scripty",
     "export:chars": "scripty",
-    "export:post-chars": "./scripts/postexport/chars ./assets/ch2data/chars/latest.json",
+    "export:postchars": "scripty assets/ch2data/chars/latest.json",
     "export:as3": "scripty",
-    "copyDeps":"mkdir -p assets/lib && cp ./node_modules/amf-js/src/amf.js ./assets/lib && cp ./node_modules/zlibjs/bin/rawinflate.min.js ./assets/lib",
-    "dev": "yarn copyDeps && cp CHANGELOG.md ./assets && elm-live ./src/Main.elm --output=./assets/elm.js --dir=./assets --open",
-    "build": "rm -rf ./dist && mkdir -p ./dist && yarn copyDeps && cp CHANGELOG.md ./dist && rsync -auv ./assets/ ./dist/ && elm-make ./src/Main.elm --output=./dist/elm.js",
+    "//dev": "All this `bash -xc '... && true '` boilerplate makes things work on windows, with git-for-windows bash installed. I'm not a real windows dev, sorry - happy to take nicer pull requests here",
+    "copyDeps": "bash -xc 'mkdir -p assets/lib && cp node_modules/amf-js/src/amf.js assets/lib && cp node_modules/zlibjs/bin/rawinflate.min.js assets/lib && true '",
+    "dev": "bash -xc 'yarn copyDeps && cp CHANGELOG.md ./assets && elm-live src/Main.elm --open --dir=assets -- --output elm.js && true'",
+    "build": "bash -xc 'rm -rf dist && mkdir dist && yarn copyDeps && cp CHANGELOG.md dist/ && cp -rp assets/* dist/ && elm-make src/Main.elm --output dist/elm.js && true'",
     "//test": "you probably want to run this with --watch, like 'yarn test --watch'",
-    "format": "elm-format --yes src && prettier --write assets/ports.js assets/stats.json",
-    "lint": "elm-format --validate src && prettier --list-different assets/ports.js assets/stats.json",
-    "test": "yarn lint && elm-test",
+    "format": "bash -xc 'elm-format --yes src && prettier --write assets/ports.js assets/stats.json && true '",
+    "lint": "bash -xc 'elm-format --validate src && prettier --list-different assets/ports.js assets/stats.json && true '",
+    "test": "bash -xc 'yarn lint && elm-test && true '",
     "deploy:purge-cloudflare-cache": "scripty",
-    "start": "yarn build && serve ./dist"
+    "start": "bash -xc 'yarn build && serve dist && true '"
   },
   "//optionalDependencies": "because travis fails to install me, but doesn't actually need me",
   "optionalDependencies": {
@@ -38,6 +39,7 @@
     "elm-live": "^2.7.5",
     "elm-test": "^0.18.12",
     "prettier": "^1.14.0",
-    "scripty": "^1.7.2"
+    "scripty": "^1.7.2",
+    "serve": "^9.6.0"
   }
 }
