@@ -5,6 +5,8 @@ package
 	import flash.filesystem.FileMode;
 	import flash.display.Sprite;
 	import heroclickerlib.CH2;
+	import IdleHeroConsole;
+	import heroclickerlib.managers.Trace;
 	import models.Character;
 	import models.Characters;
 
@@ -36,11 +38,31 @@ package
 				this.json.skills[skey].char = slugs[skill.modName];
 			}
 			
-			var file:File = File.desktopDirectory.resolvePath("latest.json");
+			var config: Object = {};
+			var file:File = File.applicationDirectory.resolvePath("mods\\active\\ch2plan-exporter.json")
+			try {
+				config = JSON.parse(this.readFile(file));
+			}
+			catch (e: Error) {
+				config._error = e;
+				config._nativePath = file.nativePath;
+				//this.writeFile(File.desktopDirectory.resolvePath("config.json"), JSON.stringify(config, null, 2));
+			}
+			var outDir:File = config["ch2plan-path"] ? new File(config["ch2plan-path"]).resolvePath("assets\\ch2data\\chars") : File.desktopDirectory;
+			this.writeFile(outDir.resolvePath("latest.json"), JSON.stringify(json, null, 2));
+		}
+		private function writeFile(file: File, content: String):void {
 			var stream:FileStream = new FileStream();
 			stream.open(file, FileMode.WRITE);
-			stream.writeUTFBytes(JSON.stringify(json, null, 2));
+			stream.writeUTFBytes(content);
 			stream.close();
+		}
+		private function readFile(file: File): String {
+			var stream:FileStream = new FileStream();
+			stream.open(file, FileMode.READ);
+			var content:String = stream.readUTFBytes(stream.bytesAvailable);
+			stream.close();
+			return content;
 		}
 		public function onStaticDataLoaded(staticData:Object):void {}
 		public function onUserDataLoaded():void {}
