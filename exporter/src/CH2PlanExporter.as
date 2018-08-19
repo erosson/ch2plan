@@ -31,6 +31,8 @@ package
 				var char:Object = Characters.startingDefaultInstances[ckey];
 				var slug:String = slugs[ckey];
 				json.heroes[slug] = pick(char, ['name', 'flavorName', 'flavorClass', 'flavor', 'levelGraphNodeTypes', 'levelGraphObject']);
+				json.heroes[slug].levelGraphObject = json.heroes[slug].levelGraphObject || {nodes:[], edges:[]};
+				json.heroes[slug].levelGraphNodeTypes = json.heroes[slug].levelGraphNodeTypes || {};
 			}
 			for (var skey:String in Character.staticSkillInstances) {
 				var skill:Object = Character.staticSkillInstances[skey];

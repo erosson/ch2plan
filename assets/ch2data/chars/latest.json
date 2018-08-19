@@ -1,207 +1,13 @@
 {
-  "ch2": {
-    "GAME_VERSION": "0.07 (8) beta PTR"
-  },
-  "skills": {
-    "Clickstorm": {
-      "uid": "Clickstorm",
-      "manaCost": 0,
-      "modName": "Helpful Adventurer",
-      "energyCost": 0,
-      "iconId": 200,
-      "cooldown": 600000,
-      "description": "",
-      "ignoresGCD": false,
-      "name": "Clickstorm",
-      "char": "helpfulAdventurer"
-    },
-    "Clickdrizzle": {
-      "uid": "Clickdrizzle",
-      "manaCost": 0,
-      "modName": "Helpful Adventurer",
-      "energyCost": 0,
-      "iconId": 201,
-      "cooldown": 600000,
-      "description": "",
-      "ignoresGCD": false,
-      "name": "Clickdrizzle",
-      "char": "helpfulAdventurer"
-    },
-    "Energize: Extend": {
-      "uid": "Energize: Extend",
-      "manaCost": 25,
-      "modName": "Helpful Adventurer",
-      "energyCost": 0,
-      "iconId": 35,
-      "cooldown": 0,
-      "description": "",
-      "ignoresGCD": false,
-      "name": "Energize: Extend",
-      "char": "helpfulAdventurer"
-    },
-    "Clicktorrent": {
-      "uid": "Clicktorrent",
-      "manaCost": 0,
-      "modName": "Helpful Adventurer",
-      "energyCost": 0,
-      "iconId": 202,
-      "cooldown": 600000,
-      "description": "",
-      "ignoresGCD": false,
-      "name": "Clicktorrent",
-      "char": "helpfulAdventurer"
-    },
-    "Powersurge": {
-      "uid": "Powersurge",
-      "manaCost": 50,
-      "modName": "Helpful Adventurer",
-      "energyCost": 0,
-      "iconId": 150,
-      "cooldown": 900000,
-      "description": "",
-      "ignoresGCD": false,
-      "name": "Powersurge",
-      "char": "helpfulAdventurer"
-    },
-    "Energize": {
-      "uid": "Energize",
-      "manaCost": 25,
-      "modName": "Helpful Adventurer",
-      "energyCost": 0,
-      "iconId": 35,
-      "cooldown": 60000,
-      "description": "",
-      "ignoresGCD": false,
-      "name": "Energize",
-      "char": "helpfulAdventurer"
-    },
-    "Big Clicks": {
-      "uid": "Big Clicks",
-      "manaCost": 0,
-      "modName": "Helpful Adventurer",
-      "energyCost": 4,
-      "iconId": 198,
-      "cooldown": 8000,
-      "description": "",
-      "ignoresGCD": false,
-      "name": "Big Clicks",
-      "char": "helpfulAdventurer"
-    },
-    "Huge Click": {
-      "uid": "Huge Click",
-      "manaCost": 0,
-      "modName": "Helpful Adventurer",
-      "energyCost": 3,
-      "iconId": 199,
-      "cooldown": 8000,
-      "description": "",
-      "ignoresGCD": false,
-      "name": "Huge Click",
-      "char": "helpfulAdventurer"
-    },
-    "Reload": {
-      "uid": "Reload",
-      "manaCost": 0,
-      "modName": "Helpful Adventurer",
-      "energyCost": 0,
-      "iconId": 168,
-      "cooldown": 1800000,
-      "description": "",
-      "ignoresGCD": false,
-      "name": "Reload",
-      "char": "helpfulAdventurer"
-    },
-    "Mana Crit": {
-      "uid": "Mana Crit",
-      "manaCost": 5,
-      "modName": "Helpful Adventurer",
-      "energyCost": 0,
-      "iconId": 1,
-      "cooldown": 60000,
-      "description": "",
-      "ignoresGCD": false,
-      "name": "Mana Crit",
-      "char": "helpfulAdventurer"
-    },
-    "Critstorm": {
-      "uid": "Critstorm",
-      "manaCost": 0,
-      "modName": "Helpful Adventurer",
-      "energyCost": 0,
-      "iconId": 201,
-      "cooldown": 600000,
-      "description": "",
-      "ignoresGCD": false,
-      "name": "Critstorm",
-      "char": "helpfulAdventurer"
-    },
-    "MultiClick": {
-      "uid": "MultiClick",
-      "manaCost": 0,
-      "modName": "Helpful Adventurer",
-      "energyCost": 3,
-      "iconId": 197,
-      "cooldown": 0,
-      "description": "",
-      "ignoresGCD": false,
-      "name": "MultiClick",
-      "char": "helpfulAdventurer"
-    },
-    "GoldenClicks": {
-      "uid": "GoldenClicks",
-      "manaCost": 0,
-      "modName": "Helpful Adventurer",
-      "energyCost": 0,
-      "iconId": 201,
-      "cooldown": 600000,
-      "description": "",
-      "ignoresGCD": false,
-      "name": "GoldenClicks",
-      "char": "helpfulAdventurer"
-    },
-    "Managize": {
-      "uid": "Managize",
-      "manaCost": 0,
-      "modName": "Helpful Adventurer",
-      "energyCost": 120,
-      "iconId": 35,
-      "cooldown": 60000,
-      "description": "",
-      "ignoresGCD": false,
-      "name": "Managize",
-      "char": "helpfulAdventurer"
-    },
-    "Autoattackstorm": {
-      "uid": "Autoattackstorm",
-      "manaCost": 0,
-      "modName": "Helpful Adventurer",
-      "energyCost": 0,
-      "iconId": 201,
-      "cooldown": 600000,
-      "description": "",
-      "ignoresGCD": false,
-      "name": "Autoattackstorm",
-      "char": "helpfulAdventurer"
-    },
-    "Energize: Rush": {
-      "uid": "Energize: Rush",
-      "manaCost": 25,
-      "modName": "Helpful Adventurer",
-      "energyCost": 0,
-      "iconId": 35,
-      "cooldown": 30000,
-      "description": "",
-      "ignoresGCD": false,
-      "name": "Energize: Rush",
-      "char": "helpfulAdventurer"
-    }
-  },
   "heroes": {
     "wizard": {
       "flavorClass": "The Cursed Wizard",
-      "levelGraphObject": null,
+      "levelGraphObject": {
+        "edges": [],
+        "nodes": []
+      },
       "flavor": "Coming Soon!",
-      "levelGraphNodeTypes": null,
+      "levelGraphNodeTypes": {},
       "name": "Wizard",
       "flavorName": "???"
     },
@@ -10059,95 +9865,28 @@
       },
       "flavor": "A character who uses her energy to empower rapid click attacks.",
       "levelGraphNodeTypes": {
+        "S8": {
+          "tooltip": "A stone that can activate during the first half of a zone.",
+          "icon": "zoneStart",
+          "name": "Stone: Zone Start",
+          "flavorText": null
+        },
+        "Q86": {
+          "tooltip": "Small Clicks decreases the remaining cooldown of ClickTorrent by 1 second each.",
+          "icon": "damagex3",
+          "name": "Stormbringer",
+          "flavorText": null
+        },
         "Hd": {
           "tooltip": "Multiplies the damage done by Huge Click by 125%",
           "icon": "hugeClicks",
           "name": "Huger Huge Click",
           "flavorText": "It actually gets bigger. But there is an unusual visual side effect that the rest of the world increases in size proportionally."
         },
-        "Q41": {
-          "tooltip": "Consumes 1.25 energy per second to click 2.5 times per second, until you run out of energy. Doubles gold gained while active. Speed increases every minute.",
-          "icon": "damagex3",
-          "name": "Golden Clicks",
-          "flavorText": "Replaces Clickstorm."
-        },
-        "Ax": {
-          "tooltip": "Switch to the previous Automator Set.",
-          "icon": "gemSwitchPrev",
-          "name": "Gem: Previous Set",
-          "flavorText": null
-        },
-        "K18": {
-          "tooltip": "A stone that can activate when Big Clicks has more stacks than MultiClick can click.",
+        "K14": {
+          "tooltip": "A stone that can activate when Big Clicks has less than 100 stacks.",
           "icon": "gemGameBigClicks",
-          "name": "Stone: Big Clicks more than MultiClick",
-          "flavorText": null
-        },
-        "Q88": {
-          "tooltip": "Consumes 10 energy per second to click 30 times per second, until you run out of energy.",
-          "icon": "damagex3",
-          "name": "ClickTorrent",
-          "flavorText": "Replaces Clickstorm."
-        },
-        "qCl": {
-          "tooltip": "Multiplies your click damage by 133%.",
-          "icon": "clickDamage",
-          "name": "The Wrath of Fragsworth",
-          "flavorText": null
-        },
-        "T1": {
-          "alwaysAvailable": true,
-          "tooltip": "Causes your next 6 clicks to deal 300% damage.",
-          "icon": "bigClicks",
-          "name": "Skill: Big Clicks",
-          "flavorText": "When activated, press your mouse button harder for added effect."
-        },
-        "Q27": {
-          "tooltip": "Big Clicks has no cooldown and can stack infinitely.",
-          "icon": "damagex3",
-          "name": "Limitless Big Clicks",
-          "flavorText": null
-        },
-        "Cc": {
-          "tooltip": "Adds 2% to your chance to score a critical hit.",
-          "icon": "critChance",
-          "name": "Crit Chance",
-          "flavorText": "Ever wonder what happens when you get over 100% Crit Chance? The Ancients once knew, but that is ancient history."
-        },
-        "Kh": {
-          "tooltip": "Multiplies the cooldown of Clickstorm by 0.8",
-          "icon": "clickstorm",
-          "name": "Hastened Clickstorm",
-          "flavorText": "If a fixed positive amount less than 1 is multiplied to a number many times, that number is said to \"approach zero\". Enough applications and your number will get very close to, but never actually reach, zero."
-        },
-        "K19": {
-          "tooltip": "A stone that can activate when Big Clicks does not have more stacks than MultiClick can click.",
-          "icon": "gemGameBigClicks",
-          "name": "Stone: Big Clicks is less than MultiClick",
-          "flavorText": null
-        },
-        "A0": {
-          "tooltip": "Unlocks the Automator.",
-          "icon": "automator",
-          "name": "Automator",
-          "flavorText": null
-        },
-        "qBc": {
-          "tooltip": "Increases the number of clicks empowered by Big Clicks by 3.",
-          "icon": "bigClicks",
-          "name": "Mega More Big Clicks",
-          "flavorText": null
-        },
-        "I4": {
-          "tooltip": "Multiplies the damage you deal with rings by 150%",
-          "icon": "damageAccesory",
-          "name": "Equipment: Ring",
-          "flavorText": null
-        },
-        "Se": {
-          "tooltip": "A stone that can activate once every 40 seconds.",
-          "icon": "CD40S",
-          "name": "Stone: 40s CD",
+          "name": "Stone: Big Clicks less than 100",
           "flavorText": null
         },
         "Q42": {
@@ -10156,22 +9895,82 @@
           "name": "Huge Click Discount",
           "flavorText": "Huge Click Discount's duration is not decreased by haste."
         },
-        "K20": {
-          "tooltip": "A stone that can activate when Juggernaut has more than 20 stacks.",
-          "icon": "automator",
-          "name": "Stone: Juggernaut more than 20",
-          "flavorText": null
-        },
-        "A1": {
-          "tooltip": "Automates MultiClick.",
-          "icon": "gemNineClicks",
-          "name": "Gem: MultiClick",
-          "flavorText": null
-        },
-        "Q43": {
-          "tooltip": "Reload also returns your current gold to the amount you had at the beginning of the zone, then increases it by Reload's bonus.",
+        "Q87": {
+          "tooltip": "Huge Click, when activated, also triggers on every 20th click for the next 100 clicks.",
           "icon": "damagex3",
-          "name": "Reload Rampage",
+          "name": "Hecaton's Echo",
+          "flavorText": null
+        },
+        "qBc": {
+          "tooltip": "Increases the number of clicks empowered by Big Clicks by 3.",
+          "icon": "bigClicks",
+          "name": "Mega More Big Clicks",
+          "flavorText": null
+        },
+        "Pt": {
+          "tooltip": "Multiplies the duration of Powersurge by 120%.",
+          "icon": "powersurgeDuration",
+          "name": "Sustained Powersurge",
+          "flavorText": null
+        },
+        "Gc": {
+          "tooltip": "Multiplies your gold received from clickables by 150%.",
+          "icon": "clickableGold",
+          "name": "Clickable Gold",
+          "flavorText": "If only someone could click on them before they go off the screen."
+        },
+        "K35": {
+          "tooltip": "Automates Managize. ",
+          "icon": "gemEnergize",
+          "name": "Gem: Managize",
+          "flavorText": null
+        },
+        "S7": {
+          "tooltip": "A stone that can activate when your mana is below 10%.",
+          "icon": "manaLower10",
+          "name": "Stone: Mana less than 10%",
+          "flavorText": null
+        },
+        "K13": {
+          "tooltip": "A stone that can activate when Big Clicks has more than 50 stacks.",
+          "icon": "gemGameBigClicks",
+          "name": "Stone: Big Clicks more than 50",
+          "flavorText": null
+        },
+        "qCc": {
+          "tooltip": "This Node does not actually exist in the game.",
+          "icon": "critChance",
+          "name": "+20% Crit Chance",
+          "flavorText": null
+        },
+        "qBd": {
+          "tooltip": "Multiplies the damage done by Big Clicks by 195%",
+          "icon": "bigClicks",
+          "name": "Mega Bigger Big Clicks",
+          "flavorText": null
+        },
+        "S6": {
+          "tooltip": "A stone that can activate when your mana is above 90%.",
+          "icon": "manaGreater90",
+          "name": "Stone: Mana more than 90%",
+          "flavorText": null
+        },
+        "Ir": {
+          "tooltip": "Multiplies the gold costs of buying and leveling equipment by 0.92.",
+          "icon": "itemCostReduction",
+          "name": "Item Cost Reduction",
+          "flavorText": "Rufus sometimes wonders why he can't compete in the Gold market. He always felt like there was a mysterious seller undercutting him."
+        },
+        "Q85": {
+          "tooltip": "Haste increases the number of charges from Small Clicks, by the percentage of haste you have.",
+          "icon": "damagex3",
+          "name": "Expandable Small Clicks",
+          "flavorText": null
+        },
+        "K12": {
+          "tooltip": "A stone that can activate when Big Clicks has less than 50 stacks.",
+          "icon": "gemGameBigClicks",
+          "name": "Stone: Big Clicks less than 50",
           "flavorText": null
         },
         "q": {
@@ -10186,118 +9985,154 @@
           "name": "Gold Piles",
           "flavorText": "This only affects piles of gold. Not other clickables."
         },
-        "Gc": {
-          "tooltip": "Multiplies your gold received from clickables by 150%.",
-          "icon": "clickableGold",
-          "name": "Clickable Gold",
-          "flavorText": "If only someone could click on them before they go off the screen."
-        },
-        "K21": {
-          "tooltip": "A stone that can activate when Juggernaut has more than 50 stacks.",
-          "icon": "automator",
-          "name": "Stone: Juggernaut more than 50",
+        "Q84": {
+          "tooltip": "Makes your Big Clicks smaller. Small Clicks are half as strong, but there are twice as many of them.",
+          "icon": "damagex3",
+          "name": "Small Clicks",
           "flavorText": null
         },
-        "qGb": {
-          "tooltip": "Multiplies your gold received from bosses by 800%.",
-          "icon": "bossGold",
-          "name": "Mimzee's Kindness",
+        "K34": {
+          "tooltip": "Automates Critstorm.",
+          "icon": "gemClickstorm",
+          "name": "Gem: Critstorm",
           "flavorText": null
         },
-        "Gb": {
-          "tooltip": "Multiplies your gold received from bosses by 200%.",
-          "icon": "bossGold",
-          "name": "Boss Gold",
-          "flavorText": "If you're tired of farming bosses, this will roughly cut it in half. Can you prove this?"
+        "qMu": {
+          "tooltip": "Adds 9 clicks to your multiclick, at the cost of 3 additional energy.",
+          "icon": "nineClicks",
+          "name": "Mega Increased MultiClicks",
+          "flavorText": null
         },
-        "Eh": {
-          "tooltip": "Multiplies the cooldown and mana cost of Energize by 0.8",
-          "icon": "energize",
-          "name": "Hastened Energize",
+        "Q41": {
+          "tooltip": "Consumes 1.25 energy per second to click 2.5 times per second, until you run out of energy. Doubles gold gained while active. Speed increases every minute.",
+          "icon": "damagex3",
+          "name": "Golden Clicks",
+          "flavorText": "Replaces Clickstorm."
+        },
+        "Q30": {
+          "tooltip": "Energize becomes Managize, which restores 25% of your mana at the cost of 120 energy.",
+          "icon": "damagex3",
+          "name": "Managize",
+          "flavorText": null
+        },
+        "K11": {
+          "tooltip": "A stone that can activate when Big Clicks has more than 10 stacks.",
+          "icon": "gemGameBigClicks",
+          "name": "Stone: Big Clicks more than 10",
+          "flavorText": null
+        },
+        "Ax": {
+          "tooltip": "Switch to the previous Automator Set.",
+          "icon": "gemSwitchPrev",
+          "name": "Gem: Previous Set",
+          "flavorText": null
+        },
+        "T6": {
+          "tooltip": "Causes your clicks within 60 seconds to deal 200% damage.",
+          "icon": "powersurgeDamage",
+          "name": "Skill: Powersurge",
+          "flavorText": null
+        },
+        "T7": {
+          "tooltip": "Clicks with a 100% chance to score a critical hit.",
+          "icon": "manaClick",
+          "name": "Skill: Mana Crit",
+          "flavorText": "It stacks. Everything stacks."
+        },
+        "qTg": {
+          "tooltip": "Multiplies your gold received from treasure chests by 195%.",
+          "icon": "treasureGold",
+          "name": "Mimzee's Blessing",
+          "flavorText": null
+        },
+        "Ph": {
+          "tooltip": "Multiplies the cooldown and mana cost of Powersurge by 0.8",
+          "icon": "powersurgeDuration",
+          "name": "Hastened Powersurge",
           "flavorText": "If a fixed positive amount less than 1 is multiplied to a number many times, that number is said to \"approach zero\". Enough applications and your number will get very close to, but never actually reach, zero."
         },
-        "Sf": {
-          "tooltip": "A stone that can activate once every 90 seconds.",
-          "icon": "CD90S",
-          "name": "Stone: 90s CD",
-          "flavorText": null
-        },
-        "K22": {
-          "tooltip": "A stone that can activate when Juggernaut has more than 100 stacks.",
-          "icon": "automator",
-          "name": "Stone: Juggernaut more than 100",
-          "flavorText": null
-        },
-        "Bg": {
-          "tooltip": "Adds 1% to your chance of finding bonus gold.",
-          "icon": "goldChance",
-          "name": "Bonus Gold Chance",
-          "flavorText": "When killing monsters, bonus gold may appear. This is a linear bonus, like Crit Chance."
-        },
-        "T2": {
-          "tooltip": "Restores 2 energy per second for 60 seconds.",
-          "icon": "energize",
-          "name": "Skill: Energize.",
-          "flavorText": "This skill consumes Mana to create Energy."
-        },
-        "Ay": {
-          "tooltip": "Unlocks an additional set for the Automator.",
-          "icon": "gemAddSet",
-          "name": "Automator Set",
-          "flavorText": null
-        },
-        "Q44": {
-          "tooltip": "Reload reduces the cooldown of the next skill used by 50%.",
-          "icon": "damagex3",
-          "name": "Preload",
-          "flavorText": null
-        },
-        "K23": {
-          "tooltip": "A stone that can activate when Juggernaut has more than 200 stacks.",
-          "icon": "automator",
-          "name": "Stone: Juggernaut more than 200",
-          "flavorText": null
-        },
-        "Q45": {
-          "tooltip": "Reload's effects and cooldown are reduced by 80%.",
-          "icon": "damagex3",
-          "name": "Quick Reload",
-          "flavorText": null
-        },
-        "Sg": {
-          "tooltip": "A stone that can activate once every 10 minutes.",
-          "icon": "CD10M",
-          "name": "Stone: 10m CD",
-          "flavorText": null
-        },
-        "A3": {
-          "tooltip": "Automates Big Clicks.",
+        "K10": {
+          "tooltip": "A stone that can activate when Big Clicks has less than 10 stacks.",
           "icon": "gemGameBigClicks",
-          "name": "Gem: Big Clicks",
+          "name": "Stone: Big Clicks less than 10",
           "flavorText": null
         },
-        "qIr": {
-          "tooltip": "Reduces the cost of buying and leveling items by 22%.",
-          "icon": "itemCostReduction",
-          "name": "The Thrift of Dogcog",
+        "I4": {
+          "tooltip": "Multiplies the damage you deal with rings by 150%",
+          "icon": "damageAccesory",
+          "name": "Equipment: Ring",
           "flavorText": null
         },
-        "K31": {
-          "tooltip": "Automates AutoAttack Storm. ",
+        "Q83": {
+          "tooltip": "Multiply your haste by 150% upon killing a monster. Lasts 5 seconds. Does not stack, but the timer will reset with each kill.",
+          "icon": "damagex3",
+          "name": "Killing Frenzy",
+          "flavorText": "Killing Frenzy's duration is not decreased by haste."
+        },
+        "K33": {
+          "tooltip": "Automates Golden Clicks.",
           "icon": "gemClickstorm",
-          "name": "Gem: AutoAttack Storm",
+          "name": "Gem: Golden Clicks",
           "flavorText": null
         },
-        "I1": {
-          "tooltip": "Multiplies the damage you deal with swords by 150%",
-          "icon": "damageWeapon",
-          "name": "Equipment: Sword",
+        "Bd": {
+          "tooltip": "Multiplies the damage done by Big Clicks by 125%",
+          "icon": "bigClicks",
+          "name": "Bigger Big Clicks",
+          "flavorText": "They might not look any bigger when you get this upgrade. They're bigger on the inside. In fact, they weigh a lot more."
+        },
+        "I7": {
+          "tooltip": "Multiplies the damage you deal with boots by 150%",
+          "icon": "damageFeet",
+          "name": "Equipment: Boots",
           "flavorText": null
         },
-        "qHd": {
-          "tooltip": "Multiplies the damage of Huge Click by 195%",
-          "icon": "hugeClicks",
-          "name": "Mega Huger Huge Click",
+        "T8": {
+          "tooltip": "Restores energy and mana and reduces the remaining cooldown of all skills by 40%.",
+          "icon": "reload",
+          "name": "Skill: Reload",
+          "flavorText": null
+        },
+        "qTc": {
+          "tooltip": "Adds 6% to the chance that a monster happens to be a treasure chest.",
+          "icon": "treasureChance",
+          "name": "Mimzee's Favor",
+          "flavorText": null
+        },
+        "Aw": {
+          "tooltip": "Switch to the next Automator Set.",
+          "icon": "gemSwitchNext",
+          "name": "Gem: Next Set",
+          "flavorText": null
+        },
+        "Z00": {
+          "tooltip": "Unlocks an additional slot for the Automator.",
+          "icon": "gemAddSlot",
+          "name": "Automator Slot",
+          "flavorText": null
+        },
+        "Q82": {
+          "tooltip": "Haste increases the number of clicks in a MultiClick by the percentage of haste you have.",
+          "icon": "damagex3",
+          "name": "Flurry",
+          "flavorText": "Rounded up or rounded down? Only the Ancients know."
+        },
+        "A8": {
+          "tooltip": "Automates Reload.",
+          "icon": "gemReload",
+          "name": "Gem: Reload",
+          "flavorText": null
+        },
+        "Bc": {
+          "tooltip": "Increases the number of clicks empowered by Big Clicks by 1.",
+          "icon": "bigClicks",
+          "name": "More Big Clicks",
+          "flavorText": "They march loyally behind you in unison, each one prepared to sacrifice itself for your cause."
+        },
+        "S5": {
+          "tooltip": "A stone that can activate when your energy is below 10%.",
+          "icon": "energyLower10",
+          "name": "Stone: Energy less than 10%",
           "flavorText": null
         },
         "K32": {
@@ -10306,130 +10141,82 @@
           "name": "Gem: ClickTorrent",
           "flavorText": null
         },
-        "K01": {
-          "tooltip": "A stone that can activate when Energize is not active.",
-          "icon": "gemEnergize",
-          "name": "Stone: Energize is not active.",
+        "T4": {
+          "tooltip": "Consumes 1.25 energy per second to click 2.5 times per second, until you run out of energy. Speed increases every minute.",
+          "icon": "clickstorm",
+          "name": "Skill: Clickstorm",
           "flavorText": null
         },
-        "Mt": {
-          "tooltip": "Increases your maximum mana by 25.",
-          "icon": "totalMana",
-          "name": "Total Mana",
+        "Tp": {
+          "tooltip": "(GONE) Increases the number of talent points you start the world with by 1.",
+          "icon": "talentPoint",
+          "name": "Talent Point",
+          "flavorText": null
+        },
+        "En": {
+          "tooltip": "Increases your maximum energy by 25.",
+          "icon": "totalEnergy",
+          "name": "Total Energy",
           "flavorText": "If a fixed amount is added to a number many times, that number is said to grow \"linearly\". This is because if you plot it out on an x/y graph, you'll see a line."
         },
-        "Ea": {
-          "tooltip": "Increases the duration of Energize by 20% of its original duration.",
-          "icon": "energize",
-          "name": "Improved Energize",
+        "Q81": {
+          "tooltip": "Removes the 1-second minimum limit on Global Cooldown, allowing Haste to reduce it below 1 second.",
+          "icon": "damagex3",
+          "name": "Limitless Haste",
           "flavorText": null
         },
-        "Az": {
-          "tooltip": "Speeds up the Automator by 25%.",
-          "icon": "automatorSpeed",
-          "name": "Automator Speed",
+        "A7": {
+          "tooltip": "Automates Mana Crit.",
+          "icon": "gemManaClick",
+          "name": "Gem: Mana Crit",
           "flavorText": null
         },
-        "K33": {
-          "tooltip": "Automates Golden Clicks.",
+        "K31": {
+          "tooltip": "Automates AutoAttack Storm. ",
           "icon": "gemClickstorm",
-          "name": "Gem: Golden Clicks",
+          "name": "Gem: AutoAttack Storm",
           "flavorText": null
         },
-        "Mu": {
-          "tooltip": "Adds 3 clicks to your multiclick, at the cost of 1 additional energy.",
-          "icon": "nineClicks",
-          "name": "Increased MultiClicks",
-          "flavorText": "No matter how many of these upgrades you get, MultiClick will take the same amount of time to perform all of its clicks."
+        "qBg": {
+          "tooltip": "Adds 3% to your chance of finding bonus gold.",
+          "icon": "goldChance",
+          "name": "Fortuna's Luck",
+          "flavorText": "When killing monsters, bonus gold may appear. This is a linear bonus, like Crit Chance."
         },
-        "K02": {
-          "tooltip": "A stone that can activate when Huge Click is not active.",
-          "icon": "gemHugeClicks",
-          "name": "Stone: Huge Click is not active.",
-          "flavorText": null
-        },
-        "I5": {
-          "tooltip": "Multiplies the damage you deal with pants by 150%",
-          "icon": "damageLegs",
-          "name": "Equipment: Pants",
-          "flavorText": "Pants shouldn't do damage, that's ridiculous."
-        },
-        "S1": {
-          "tooltip": "A stone that can always activate.",
-          "icon": "always",
-          "name": "Stone: Always",
-          "flavorText": null
-        },
-        "qMd": {
-          "tooltip": "Multiplies the damage done by Mana Crits by 195%",
-          "icon": "manaClick",
-          "name": "Mega Mana Crit Damage",
-          "flavorText": null
-        },
-        "Q61": {
-          "tooltip": "Scoring a Critical Hit reduces the remaining cooldown of Mana Crit by 1 second.",
+        "Q29": {
+          "tooltip": "Consumes 1.25 mana per second to auto attack 2.5 times per second, until you run out of mana. Speed increases every minute.",
           "icon": "damagex3",
-          "name": "Bhaal's Rise",
-          "flavorText": "Casting a cooldown-improved Mana Crit will reset the cooldown of your *next* Mana Crit to its original duration."
+          "name": "AutoAttackStorm",
+          "flavorText": "AutoAttackStorm is like Clickstorm, but does not replace it and can be used in conjunction with Clickstorm."
         },
-        "K34": {
-          "tooltip": "Automates Critstorm.",
-          "icon": "gemClickstorm",
-          "name": "Gem: Critstorm",
-          "flavorText": null
-        },
-        "qBd": {
-          "tooltip": "Multiplies the damage done by Big Clicks by 195%",
-          "icon": "bigClicks",
-          "name": "Mega Bigger Big Clicks",
-          "flavorText": null
-        },
-        "Av": {
-          "tooltip": "Automates Upgrading the Cheapest Item. It can also purchase a new item, if that is cheaper than all of your upgrades.",
-          "icon": "gemUpgradeCheapest",
-          "name": "Gem: Upgrade Cheapest Item",
-          "flavorText": null
-        },
-        "K03": {
-          "tooltip": "A stone that can activate when Huge Click is active.",
-          "icon": "gemHugeClicks",
-          "name": "Stone: Huge Click more than 0",
-          "flavorText": null
-        },
-        "Q62": {
-          "tooltip": "Crit Chance increases the damage of Mana Crit and gives a chance to refund its mana cost, by the amount of Crit Chance you have.",
+        "Q28": {
+          "tooltip": "Critical Hits from Auto Attacks can restore 1 mana one time per second.",
           "icon": "damagex3",
-          "name": "Improved Mana Crit",
-          "flavorText": null
+          "name": "Jerator's Enchantment",
+          "flavorText": "This effect can not occur more than once every second."
         },
-        "K35": {
-          "tooltip": "Automates Managize. ",
-          "icon": "gemEnergize",
-          "name": "Gem: Managize",
-          "flavorText": null
-        },
-        "qMr": {
-          "tooltip": "Multiplies your mana regeneration by 133%.",
-          "icon": "manaRegen",
-          "name": "Energon's Grace",
-          "flavorText": null
-        },
-        "S2": {
-          "tooltip": "A stone that can activate when the next monster's health is greater than 50%.",
-          "icon": "mhGreater50",
-          "name": "Stone: MH more than 50%",
-          "flavorText": null
-        },
-        "Q21": {
-          "tooltip": "Skills do not interrupt Auto Attacks.",
+        "Q66": {
+          "tooltip": "PowerSurge, upon activating, increases Crit Chance by 1% every second until it ends.",
           "icon": "damagex3",
-          "name": "Synchrony",
+          "name": "Critical Powersurge",
           "flavorText": null
         },
-        "I2": {
-          "tooltip": "Multiplies the damage you deal with helmets by 150%",
-          "icon": "damageHead",
-          "name": "Equipment: Helmet",
+        "A9": {
+          "tooltip": "Automates Dash.",
+          "icon": "gemDash",
+          "name": "Gem: Dash",
+          "flavorText": null
+        },
+        "Q65": {
+          "tooltip": "Consumes 1.25 energy per second to click 2.5 times per second, until you run out of energy. Clicks from this skill have +100% chance of being critical strikes. Speed increases every minute.",
+          "icon": "damagex3",
+          "name": "CritStorm",
+          "flavorText": "Replaces Clickstorm."
+        },
+        "K23": {
+          "tooltip": "A stone that can activate when Juggernaut has more than 200 stacks.",
+          "icon": "automator",
+          "name": "Stone: Juggernaut more than 200",
           "flavorText": null
         },
         "": {
@@ -10438,29 +10225,78 @@
           "name": "TBD",
           "flavorText": null
         },
-        "K36": {
-          "tooltip": "Automates upgrading the Cheapest Item to the next Multiplier.",
-          "icon": "gemUpgradeCheapest",
-          "name": "Gem: Upgrading Cheapest Item to next Multiplier",
+        "T5": {
+          "tooltip": "Causes your next click to deal 1000% damage.",
+          "icon": "hugeClicks",
+          "name": "Skill: Huge Click",
+          "flavorText": "It stacks. Everything stacks."
+        },
+        "K22": {
+          "tooltip": "A stone that can activate when Juggernaut has more than 100 stacks.",
+          "icon": "automator",
+          "name": "Stone: Juggernaut more than 100",
           "flavorText": null
         },
-        "K04": {
-          "tooltip": "A stone that can activate when Clickstorm is not active.",
-          "icon": "gemClickstorm",
-          "name": "Stone: Clickstorm is not active.",
+        "K09": {
+          "tooltip": "A stone that can activate when Big Clicks is active.",
+          "icon": "gemGameBigClicks",
+          "name": "Stone: Big Clicks more than 0",
           "flavorText": null
         },
-        "Q63": {
-          "tooltip": "Monsters killed with a Critical Hit reduces the cooldown of Powersurge by 5 seconds.",
+        "K08": {
+          "tooltip": "A stone that can activate when Big Clicks is not active.",
+          "icon": "gemGameBigClicks",
+          "name": "Stone: Big Clicks is not active.",
+          "flavorText": null
+        },
+        "A2": {
+          "tooltip": "Automates Energize.",
+          "icon": "gemEnergize",
+          "name": "Gem: Energize.",
+          "flavorText": null
+        },
+        "Test": {
+          "alwaysAvailable": true,
+          "tooltip": "Easy access test nodes that you can find scattered throughout the tree.",
+          "icon": "",
+          "name": "Test Cheats",
+          "flavorText": null
+        },
+        "Eh": {
+          "tooltip": "Multiplies the cooldown and mana cost of Energize by 0.8",
+          "icon": "energize",
+          "name": "Hastened Energize",
+          "flavorText": "If a fixed positive amount less than 1 is multiplied to a number many times, that number is said to \"approach zero\". Enough applications and your number will get very close to, but never actually reach, zero."
+        },
+        "qGp": {
+          "tooltip": "Multiplies the number of gold piles found by 130%.",
+          "icon": "goldPiles",
+          "name": "The Vision of Iris",
+          "flavorText": null
+        },
+        "Tg": {
+          "tooltip": "Multiplies the gold received from treasure chest monsters by 125%.",
+          "icon": "treasureGold",
+          "name": "Treasure Chest Gold",
+          "flavorText": null
+        },
+        "Mu": {
+          "tooltip": "Adds 3 clicks to your multiclick, at the cost of 1 additional energy.",
+          "icon": "nineClicks",
+          "name": "Increased MultiClicks",
+          "flavorText": "No matter how many of these upgrades you get, MultiClick will take the same amount of time to perform all of its clicks."
+        },
+        "Q27": {
+          "tooltip": "Big Clicks has no cooldown and can stack infinitely.",
           "icon": "damagex3",
-          "name": "Critical Killing Surge",
-          "flavorText": "Casting a cooldown-improved Powersurge will reset the cooldown of your *next* Powersurge to its original duration."
+          "name": "Limitless Big Clicks",
+          "flavorText": null
         },
-        "Au": {
-          "tooltip": "Automates Buying a Random Catalog Item.",
-          "icon": "gemBuyRandom",
-          "name": "Gem: Buy Random Catalog",
-          "flavorText": "The Catalog is that area on the bottom left of the UI where you purchase new items."
+        "Ea": {
+          "tooltip": "Increases the duration of Energize by 20% of its original duration.",
+          "icon": "energize",
+          "name": "Improved Energize",
+          "flavorText": null
         },
         "Q64": {
           "tooltip": "Overkill from Mana Crit damages the next monster.",
@@ -10468,22 +10304,16 @@
           "name": "Mana Crit Overflow",
           "flavorText": "It will not spill damage over to more than one additional monster."
         },
-        "T4": {
-          "tooltip": "Consumes 1.25 energy per second to click 2.5 times per second, until you run out of energy. Speed increases every minute.",
-          "icon": "clickstorm",
-          "name": "Skill: Clickstorm",
+        "K07": {
+          "tooltip": "A stone that can activate when Powersurge is active.",
+          "icon": "gemPowersurge",
+          "name": "Stone: Powersurge more than 0",
           "flavorText": null
         },
-        "qEn": {
-          "tooltip": "Increases your maximum Energy by 100.",
-          "icon": "totalEnergy",
-          "name": "Juggernaut's Pittance",
-          "flavorText": null
-        },
-        "K37": {
-          "tooltip": "Automates upgrading the Newest Item.",
-          "icon": "gemUpgradeCheapest",
-          "name": "Gem: Upgrading Newest Item",
+        "Q26": {
+          "tooltip": "While Big Clicks is active, all skills cost 1 additional energy per skill that has been activated since Big Clicks began.",
+          "icon": "damagex3",
+          "name": "Curse of the Juggernaut",
           "flavorText": null
         },
         "Mo": {
@@ -10491,6 +10321,73 @@
           "icon": "clickableGold",
           "name": "Mousing over Clickables",
           "flavorText": "The ancients left some of their greatest powers behind for you to discover."
+        },
+        "Au": {
+          "tooltip": "Automates Buying a Random Catalog Item.",
+          "icon": "gemBuyRandom",
+          "name": "Gem: Buy Random Catalog",
+          "flavorText": "The Catalog is that area on the bottom left of the UI where you purchase new items."
+        },
+        "T2": {
+          "tooltip": "Restores 2 energy per second for 60 seconds.",
+          "icon": "energize",
+          "name": "Skill: Energize.",
+          "flavorText": "This skill consumes Mana to create Energy."
+        },
+        "Q63": {
+          "tooltip": "Monsters killed with a Critical Hit reduces the cooldown of Powersurge by 5 seconds.",
+          "icon": "damagex3",
+          "name": "Critical Killing Surge",
+          "flavorText": "Casting a cooldown-improved Powersurge will reset the cooldown of your *next* Powersurge to its original duration."
+        },
+        "K06": {
+          "tooltip": "A stone that can activate when Powersurge is not active.",
+          "icon": "gemPowersurge",
+          "name": "Stone: Powersurge is not active.",
+          "flavorText": null
+        },
+        "K21": {
+          "tooltip": "A stone that can activate when Juggernaut has more than 50 stacks.",
+          "icon": "automator",
+          "name": "Stone: Juggernaut more than 50",
+          "flavorText": null
+        },
+        "T1": {
+          "alwaysAvailable": true,
+          "tooltip": "Causes your next 6 clicks to deal 300% damage.",
+          "icon": "bigClicks",
+          "name": "Skill: Big Clicks",
+          "flavorText": "When activated, press your mouse button harder for added effect."
+        },
+        "qEn": {
+          "tooltip": "Increases your maximum Energy by 100.",
+          "icon": "totalEnergy",
+          "name": "Juggernaut's Pittance",
+          "flavorText": null
+        },
+        "Q62": {
+          "tooltip": "Crit Chance increases the damage of Mana Crit and gives a chance to refund its mana cost, by the amount of Crit Chance you have.",
+          "icon": "damagex3",
+          "name": "Improved Mana Crit",
+          "flavorText": null
+        },
+        "Av": {
+          "tooltip": "Automates Upgrading the Cheapest Item. It can also purchase a new item, if that is cheaper than all of your upgrades.",
+          "icon": "gemUpgradeCheapest",
+          "name": "Gem: Upgrade Cheapest Item",
+          "flavorText": null
+        },
+        "S4": {
+          "tooltip": "A stone that can activate when your energy is above 90%.",
+          "icon": "energyGreater90",
+          "name": "Stone: Energy more than 90%",
+          "flavorText": null
+        },
+        "Z01": {
+          "tooltip": "Automates Attempting a Boss.",
+          "icon": "gemAttemptBoss",
+          "name": "Gem: Attempt Boss",
+          "flavorText": null
         },
         "K05": {
           "tooltip": "A stone that can activate when Clickstorm is active.",
@@ -10504,59 +10401,11 @@
           "name": "Energon's Ions",
           "flavorText": null
         },
-        "T5": {
-          "tooltip": "Causes your next click to deal 1000% damage.",
-          "icon": "hugeClicks",
-          "name": "Skill: Huge Click",
-          "flavorText": "It stacks. Everything stacks."
-        },
-        "S3": {
-          "tooltip": "A stone that can activate when the next monster's health is less than 50%.",
-          "icon": "mhLower50",
-          "name": "Stone: MH less than 50%",
-          "flavorText": null
-        },
-        "K38": {
-          "tooltip": "Automates upgrading All Items.",
-          "icon": "gemUpgradeCheapest",
-          "name": "Gem: Upgrading All Items ",
-          "flavorText": null
-        },
-        "T6": {
-          "tooltip": "Causes your clicks within 60 seconds to deal 200% damage.",
-          "icon": "powersurgeDamage",
-          "name": "Skill: Powersurge",
-          "flavorText": null
-        },
-        "qGp": {
-          "tooltip": "Multiplies the number of gold piles found by 130%.",
-          "icon": "goldPiles",
-          "name": "The Vision of Iris",
-          "flavorText": null
-        },
-        "K06": {
-          "tooltip": "A stone that can activate when Powersurge is not active.",
-          "icon": "gemPowersurge",
-          "name": "Stone: Powersurge is not active.",
-          "flavorText": null
-        },
-        "Pc": {
-          "tooltip": "Adds 1% to your chance to hit an additional monster.",
-          "icon": "pierceChance",
-          "name": "Pierce Chance (NOT IN GAME)",
-          "flavorText": null
-        },
-        "Q22": {
-          "tooltip": "Damage is increased by 100% while you have less than 60% of your total energy.",
+        "Q25": {
+          "tooltip": "Spending mana increases haste for 5 seconds.",
           "icon": "damagex3",
-          "name": "Release",
-          "flavorText": null
-        },
-        "En": {
-          "tooltip": "Increases your maximum energy by 25.",
-          "icon": "totalEnergy",
-          "name": "Total Energy",
-          "flavorText": "If a fixed amount is added to a number many times, that number is said to grow \"linearly\". This is because if you plot it out on an x/y graph, you'll see a line."
+          "name": "Gift of Chronos",
+          "flavorText": "To clarify, this multiplies your haste by 100% plus 1% per point of mana spent in the previous 5 seconds. Gift of Chronos's duration is not decreased by haste."
         },
         "Tc": {
           "tooltip": "Adds 2% to the chance that a monster happens to be a treasure chest.",
@@ -10564,329 +10413,22 @@
           "name": "Treasure Chest Chance",
           "flavorText": "Making good use of the lingering powers of a once-loathed ancient known as Thusia."
         },
-        "A2": {
-          "tooltip": "Automates Energize.",
-          "icon": "gemEnergize",
-          "name": "Gem: Energize.",
+        "Mr": {
+          "tooltip": "Multiplies your mana regeneration rate by 110%.",
+          "icon": "manaRegen",
+          "name": "Mana Regeneration",
+          "flavorText": "You will get 10% more mana per minute than before you had this upgrade."
+        },
+        "K20": {
+          "tooltip": "A stone that can activate when Juggernaut has more than 20 stacks.",
+          "icon": "automator",
+          "name": "Stone: Juggernaut more than 20",
           "flavorText": null
-        },
-        "Q65": {
-          "tooltip": "Consumes 1.25 energy per second to click 2.5 times per second, until you run out of energy. Clicks from this skill have +100% chance of being critical strikes. Speed increases every minute.",
-          "icon": "damagex3",
-          "name": "CritStorm",
-          "flavorText": "Replaces Clickstorm."
-        },
-        "Test": {
-          "alwaysAvailable": true,
-          "tooltip": "Easy access test nodes that you can find scattered throughout the tree.",
-          "icon": "",
-          "name": "Test Cheats",
-          "flavorText": null
-        },
-        "T7": {
-          "tooltip": "Clicks with a 100% chance to score a critical hit.",
-          "icon": "manaClick",
-          "name": "Skill: Mana Crit",
-          "flavorText": "It stacks. Everything stacks."
-        },
-        "Ph": {
-          "tooltip": "Multiplies the cooldown and mana cost of Powersurge by 0.8",
-          "icon": "powersurgeDuration",
-          "name": "Hastened Powersurge",
-          "flavorText": "If a fixed positive amount less than 1 is multiplied to a number many times, that number is said to \"approach zero\". Enough applications and your number will get very close to, but never actually reach, zero."
-        },
-        "S4": {
-          "tooltip": "A stone that can activate when your energy is above 90%.",
-          "icon": "energyGreater90",
-          "name": "Stone: Energy more than 90%",
-          "flavorText": null
-        },
-        "K07": {
-          "tooltip": "A stone that can activate when Powersurge is active.",
-          "icon": "gemPowersurge",
-          "name": "Stone: Powersurge more than 0",
-          "flavorText": null
-        },
-        "Q66": {
-          "tooltip": "PowerSurge, upon activating, increases Crit Chance by 1% every second until it ends.",
-          "icon": "damagex3",
-          "name": "Critical Powersurge",
-          "flavorText": null
-        },
-        "Tp": {
-          "tooltip": "(GONE) Increases the number of talent points you start the world with by 1.",
-          "icon": "talentPoint",
-          "name": "Talent Point",
-          "flavorText": null
-        },
-        "Q81": {
-          "tooltip": "Removes the 1-second minimum limit on Global Cooldown, allowing Haste to reduce it below 1 second.",
-          "icon": "damagex3",
-          "name": "Limitless Haste",
-          "flavorText": null
-        },
-        "T8": {
-          "tooltip": "Restores energy and mana and reduces the remaining cooldown of all skills by 40%.",
-          "icon": "reload",
-          "name": "Skill: Reload",
-          "flavorText": null
-        },
-        "Pa": {
-          "tooltip": "Multiplies the damage bonus of Powersurge by 125%.",
-          "icon": "powersurgeDamage",
-          "name": "Improved Powersurge",
-          "flavorText": null
-        },
-        "K08": {
-          "tooltip": "A stone that can activate when Big Clicks is not active.",
-          "icon": "gemGameBigClicks",
-          "name": "Stone: Big Clicks is not active.",
-          "flavorText": null
-        },
-        "G": {
-          "tooltip": "Multiplies your gold received from all sources by 110%.",
-          "icon": "goldx3",
-          "name": "Gold",
-          "flavorText": "We can also say that it is multiplied by 1.1, but that sounds so much weaker."
-        },
-        "S5": {
-          "tooltip": "A stone that can activate when your energy is below 10%.",
-          "icon": "energyLower10",
-          "name": "Stone: Energy less than 10%",
-          "flavorText": null
-        },
-        "Q23": {
-          "tooltip": "Gold gained is increased by 100% while you have more than 40% of your total energy.",
-          "icon": "damagex3",
-          "name": "Restraint",
-          "flavorText": null
-        },
-        "I6": {
-          "tooltip": "Multiplies the damage you deal with gloves by 150%",
-          "icon": "damageHands",
-          "name": "Equipment: Gloves",
-          "flavorText": null
-        },
-        "qBg": {
-          "tooltip": "Adds 3% to your chance of finding bonus gold.",
-          "icon": "goldChance",
-          "name": "Fortuna's Luck",
-          "flavorText": "When killing monsters, bonus gold may appear. This is a linear bonus, like Crit Chance."
-        },
-        "Bd": {
-          "tooltip": "Multiplies the damage done by Big Clicks by 125%",
-          "icon": "bigClicks",
-          "name": "Bigger Big Clicks",
-          "flavorText": "They might not look any bigger when you get this upgrade. They're bigger on the inside. In fact, they weigh a lot more."
-        },
-        "qCc": {
-          "tooltip": "This Node does not actually exist in the game.",
-          "icon": "critChance",
-          "name": "+20% Crit Chance",
-          "flavorText": null
-        },
-        "K09": {
-          "tooltip": "A stone that can activate when Big Clicks is active.",
-          "icon": "gemGameBigClicks",
-          "name": "Stone: Big Clicks more than 0",
-          "flavorText": null
-        },
-        "Pt": {
-          "tooltip": "Multiplies the duration of Powersurge by 120%.",
-          "icon": "powersurgeDuration",
-          "name": "Sustained Powersurge",
-          "flavorText": null
-        },
-        "Bc": {
-          "tooltip": "Increases the number of clicks empowered by Big Clicks by 1.",
-          "icon": "bigClicks",
-          "name": "More Big Clicks",
-          "flavorText": "They march loyally behind you in unison, each one prepared to sacrifice itself for your cause."
-        },
-        "qG": {
-          "tooltip": "Multiplies your gold received from all sources by 133%.",
-          "icon": "goldx3",
-          "name": "Mammon's Greed",
-          "flavorText": null
-        },
-        "S6": {
-          "tooltip": "A stone that can activate when your mana is above 90%.",
-          "icon": "manaGreater90",
-          "name": "Stone: Mana more than 90%",
-          "flavorText": null
-        },
-        "Q24": {
-          "tooltip": "Spending energy deals damage equal to one click per energy.",
-          "icon": "damagex3",
-          "name": "Discharge",
-          "flavorText": null
-        },
-        "Q82": {
-          "tooltip": "Haste increases the number of clicks in a MultiClick by the percentage of haste you have.",
-          "icon": "damagex3",
-          "name": "Flurry",
-          "flavorText": "Rounded up or rounded down? Only the Ancients know."
-        },
-        "Ra": {
-          "tooltip": "Increases the effect of Reload by 20% of its base effect.",
-          "icon": "improvedReload",
-          "name": "Improved Reload",
-          "flavorText": null
-        },
-        "Nc": {
-          "tooltip": "Multiplies your damage from MultiClicks by 2",
-          "icon": "nineClicks",
-          "name": "MultiClick",
-          "flavorText": null
-        },
-        "K10": {
-          "tooltip": "A stone that can activate when Big Clicks has less than 10 stacks.",
-          "icon": "gemGameBigClicks",
-          "name": "Stone: Big Clicks less than 10",
-          "flavorText": null
-        },
-        "Q83": {
-          "tooltip": "Multiply your haste by 150% upon killing a monster. Lasts 5 seconds. Does not stack, but the timer will reset with each kill.",
-          "icon": "damagex3",
-          "name": "Killing Frenzy",
-          "flavorText": "Killing Frenzy's duration is not decreased by haste."
-        },
-        "Q25": {
-          "tooltip": "Spending mana increases haste for 5 seconds.",
-          "icon": "damagex3",
-          "name": "Gift of Chronos",
-          "flavorText": "To clarify, this multiplies your haste by 100% plus 1% per point of mana spent in the previous 5 seconds. Gift of Chronos's duration is not decreased by haste."
         },
         "I3": {
           "tooltip": "Multiplies the damage you deal with breastplates by 150%",
           "icon": "damageTop",
           "name": "Equipment: Breastplate",
-          "flavorText": null
-        },
-        "qCd": {
-          "tooltip": "Multiplies the damage of your critical hits by 172.8%.",
-          "icon": "critDamage",
-          "name": "Precision of Bhaal",
-          "flavorText": null
-        },
-        "H": {
-          "tooltip": "Multiplies your Haste by 105%.",
-          "icon": "haste",
-          "name": "Haste",
-          "flavorText": "Haste affects the rate that you auto-attack, and all cooldown speeds, including Automator cooldown speeds."
-        },
-        "Z01": {
-          "tooltip": "Automates Attempting a Boss.",
-          "icon": "gemAttemptBoss",
-          "name": "Gem: Attempt Boss",
-          "flavorText": null
-        },
-        "qTc": {
-          "tooltip": "Adds 6% to the chance that a monster happens to be a treasure chest.",
-          "icon": "treasureChance",
-          "name": "Mimzee's Favor",
-          "flavorText": null
-        },
-        "K11": {
-          "tooltip": "A stone that can activate when Big Clicks has more than 10 stacks.",
-          "icon": "gemGameBigClicks",
-          "name": "Stone: Big Clicks more than 10",
-          "flavorText": null
-        },
-        "S7": {
-          "tooltip": "A stone that can activate when your mana is below 10%.",
-          "icon": "manaLower10",
-          "name": "Stone: Mana less than 10%",
-          "flavorText": null
-        },
-        "A7": {
-          "tooltip": "Automates Mana Crit.",
-          "icon": "gemManaClick",
-          "name": "Gem: Mana Crit",
-          "flavorText": null
-        },
-        "qH": {
-          "tooltip": "Multiplies your Haste by 115.7%.",
-          "icon": "haste",
-          "name": "Vaagur's Impatience",
-          "flavorText": "Haste affects the rate that you auto-attack, and all cooldown speeds, including Automator cooldown speeds."
-        },
-        "A9": {
-          "tooltip": "Automates Dash.",
-          "icon": "gemDash",
-          "name": "Gem: Dash",
-          "flavorText": null
-        },
-        "Q26": {
-          "tooltip": "While Big Clicks is active, all skills cost 1 additional energy per skill that has been activated since Big Clicks began.",
-          "icon": "damagex3",
-          "name": "Curse of the Juggernaut",
-          "flavorText": null
-        },
-        "S8": {
-          "tooltip": "A stone that can activate during the first half of a zone.",
-          "icon": "zoneStart",
-          "name": "Stone: Zone Start",
-          "flavorText": null
-        },
-        "K12": {
-          "tooltip": "A stone that can activate when Big Clicks has less than 50 stacks.",
-          "icon": "gemGameBigClicks",
-          "name": "Stone: Big Clicks less than 50",
-          "flavorText": null
-        },
-        "I7": {
-          "tooltip": "Multiplies the damage you deal with boots by 150%",
-          "icon": "damageFeet",
-          "name": "Equipment: Boots",
-          "flavorText": null
-        },
-        "qTg": {
-          "tooltip": "Multiplies your gold received from treasure chests by 195%.",
-          "icon": "treasureGold",
-          "name": "Mimzee's Blessing",
-          "flavorText": null
-        },
-        "A5": {
-          "tooltip": "Automates Huge Click.",
-          "icon": "gemHugeClicks",
-          "name": "Gem: Huge Click",
-          "flavorText": null
-        },
-        "Q84": {
-          "tooltip": "Makes your Big Clicks smaller. Small Clicks are half as strong, but there are twice as many of them.",
-          "icon": "damagex3",
-          "name": "Small Clicks",
-          "flavorText": null
-        },
-        "Cd": {
-          "tooltip": "Multiplies the damage of your critical hits by 120%.",
-          "icon": "critDamage",
-          "name": "Crit Damage",
-          "flavorText": "When a number is multiplied by a fixed amount (greater than 1) many times, that number is said to grow \"exponentially\". This is because that process is usually represented by a formula that uses exponential notation."
-        },
-        "A6": {
-          "tooltip": "Automates Powersurge.",
-          "icon": "gemPowersurge",
-          "name": "Gem: Powersurge.",
-          "flavorText": null
-        },
-        "Rh": {
-          "tooltip": "Multiplies the cooldown of Reload by 0.8",
-          "icon": "hastenReload",
-          "name": "Hastened Reload",
-          "flavorText": null
-        },
-        "Z00": {
-          "tooltip": "Unlocks an additional slot for the Automator.",
-          "icon": "gemAddSlot",
-          "name": "Automator Slot",
-          "flavorText": null
-        },
-        "K13": {
-          "tooltip": "A stone that can activate when Big Clicks has more than 50 stacks.",
-          "icon": "gemGameBigClicks",
-          "name": "Stone: Big Clicks more than 50",
           "flavorText": null
         },
         "Cl": {
@@ -10895,88 +10437,52 @@
           "name": "Click Damage",
           "flavorText": "This affects damage from all skills that \"click\". But it does not affect auto-attacks, because those are not \"clicks\"."
         },
-        "Ir": {
-          "tooltip": "Multiplies the gold costs of buying and leveling equipment by 0.92.",
+        "qIr": {
+          "tooltip": "Reduces the cost of buying and leveling items by 22%.",
           "icon": "itemCostReduction",
-          "name": "Item Cost Reduction",
-          "flavorText": "Rufus sometimes wonders why he can't compete in the Gold market. He always felt like there was a mysterious seller undercutting him."
-        },
-        "Tg": {
-          "tooltip": "Multiplies the gold received from treasure chest monsters by 125%.",
-          "icon": "treasureGold",
-          "name": "Treasure Chest Gold",
+          "name": "The Thrift of Dogcog",
           "flavorText": null
         },
-        "S9": {
-          "tooltip": "A stone that can activate during the second half of a zone.",
-          "icon": "zoneMiddle",
-          "name": "Stone: Zone Middle",
+        "K04": {
+          "tooltip": "A stone that can activate when Clickstorm is not active.",
+          "icon": "gemClickstorm",
+          "name": "Stone: Clickstorm is not active.",
           "flavorText": null
         },
-        "Q85": {
-          "tooltip": "Haste increases the number of charges from Small Clicks, by the percentage of haste you have.",
-          "icon": "damagex3",
-          "name": "Expandable Small Clicks",
+        "S3": {
+          "tooltip": "A stone that can activate when the next monster's health is less than 50%.",
+          "icon": "mhLower50",
+          "name": "Stone: MH less than 50%",
           "flavorText": null
         },
-        "A8": {
-          "tooltip": "Automates Reload.",
-          "icon": "gemReload",
-          "name": "Gem: Reload",
-          "flavorText": null
-        },
-        "K14": {
-          "tooltip": "A stone that can activate when Big Clicks has less than 100 stacks.",
-          "icon": "gemGameBigClicks",
-          "name": "Stone: Big Clicks less than 100",
-          "flavorText": null
-        },
-        "Q86": {
-          "tooltip": "Small Clicks decreases the remaining cooldown of ClickTorrent by 1 second each.",
-          "icon": "damagex3",
-          "name": "Stormbringer",
-          "flavorText": null
-        },
-        "qGc": {
-          "tooltip": "Multiplies your gold received from clickables by 337.5%.",
-          "icon": "clickableGold",
-          "name": "Revolc's Blessing",
-          "flavorText": null
-        },
-        "Q28": {
-          "tooltip": "Critical Hits from Auto Attacks can restore 1 mana one time per second.",
-          "icon": "damagex3",
-          "name": "Jerator's Enchantment",
-          "flavorText": "This effect can not occur more than once every second."
-        },
-        "K15": {
-          "tooltip": "A stone that can activate when Big Clicks has more than 100 stacks.",
-          "icon": "gemGameBigClicks",
-          "name": "Stone: Big Clicks more than 100",
-          "flavorText": null
-        },
-        "qMu": {
-          "tooltip": "Adds 9 clicks to your multiclick, at the cost of 3 additional energy.",
+        "Nc": {
+          "tooltip": "Multiplies your damage from MultiClicks by 2",
           "icon": "nineClicks",
-          "name": "Mega Increased MultiClicks",
+          "name": "MultiClick",
           "flavorText": null
         },
-        "Q29": {
-          "tooltip": "Consumes 1.25 mana per second to auto attack 2.5 times per second, until you run out of mana. Speed increases every minute.",
-          "icon": "damagex3",
-          "name": "AutoAttackStorm",
-          "flavorText": "AutoAttackStorm is like Clickstorm, but does not replace it and can be used in conjunction with Clickstorm."
+        "G": {
+          "tooltip": "Multiplies your gold received from all sources by 110%.",
+          "icon": "goldx3",
+          "name": "Gold",
+          "flavorText": "We can also say that it is multiplied by 1.1, but that sounds so much weaker."
         },
-        "I8": {
-          "tooltip": "Multiplies the damage you deal with capes by 150%",
-          "icon": "damageBack",
-          "name": "Equipment: Cape",
-          "flavorText": "If you wear these in real life, people will think something is wrong with you."
+        "T3": {
+          "tooltip": "Clicks 5 times.",
+          "icon": "nineClicks",
+          "name": "Skill: MultiClick",
+          "flavorText": null
         },
-        "Sc": {
-          "tooltip": "A stone that can activate once every 4 seconds.",
-          "icon": "CD4S",
-          "name": "Stone: 4s CD",
+        "H": {
+          "tooltip": "Multiplies your Haste by 105%.",
+          "icon": "haste",
+          "name": "Haste",
+          "flavorText": "Haste affects the rate that you auto-attack, and all cooldown speeds, including Automator cooldown speeds."
+        },
+        "I2": {
+          "tooltip": "Multiplies the damage you deal with helmets by 150%",
+          "icon": "damageHead",
+          "name": "Equipment: Helmet",
           "flavorText": null
         },
         "Md": {
@@ -10985,46 +10491,100 @@
           "name": "Mana Crit Damage",
           "flavorText": null
         },
-        "T3": {
-          "tooltip": "Clicks 5 times.",
-          "icon": "nineClicks",
-          "name": "Skill: MultiClick",
+        "Kh": {
+          "tooltip": "Multiplies the cooldown of Clickstorm by 0.8",
+          "icon": "clickstorm",
+          "name": "Hastened Clickstorm",
+          "flavorText": "If a fixed positive amount less than 1 is multiplied to a number many times, that number is said to \"approach zero\". Enough applications and your number will get very close to, but never actually reach, zero."
+        },
+        "Sf": {
+          "tooltip": "A stone that can activate once every 90 seconds.",
+          "icon": "CD90S",
+          "name": "Stone: 90s CD",
           "flavorText": null
         },
-        "Aw": {
-          "tooltip": "Switch to the next Automator Set.",
-          "icon": "gemSwitchNext",
-          "name": "Gem: Next Set",
+        "Pc": {
+          "tooltip": "Adds 1% to your chance to hit an additional monster.",
+          "icon": "pierceChance",
+          "name": "Pierce Chance (NOT IN GAME)",
           "flavorText": null
         },
-        "K16": {
-          "tooltip": "A stone that can activate when Big Clicks has less than 200 stacks.",
+        "K19": {
+          "tooltip": "A stone that can activate when Big Clicks does not have more stacks than MultiClick can click.",
           "icon": "gemGameBigClicks",
-          "name": "Stone: Big Clicks less than 200",
+          "name": "Stone: Big Clicks is less than MultiClick",
           "flavorText": null
         },
-        "A4": {
-          "tooltip": "Automates Clickstorm.",
-          "icon": "gemClickstorm",
-          "name": "Gem: Clickstorm",
+        "Gb": {
+          "tooltip": "Multiplies your gold received from bosses by 200%.",
+          "icon": "bossGold",
+          "name": "Boss Gold",
+          "flavorText": "If you're tired of farming bosses, this will roughly cut it in half. Can you prove this?"
+        },
+        "Q24": {
+          "tooltip": "Spending energy deals damage equal to one click per energy.",
+          "icon": "damagex3",
+          "name": "Discharge",
           "flavorText": null
         },
-        "Mr": {
-          "tooltip": "Multiplies your mana regeneration rate by 110%.",
+        "A3": {
+          "tooltip": "Automates Big Clicks.",
+          "icon": "gemGameBigClicks",
+          "name": "Gem: Big Clicks",
+          "flavorText": null
+        },
+        "Q61": {
+          "tooltip": "Scoring a Critical Hit reduces the remaining cooldown of Mana Crit by 1 second.",
+          "icon": "damagex3",
+          "name": "Bhaal's Rise",
+          "flavorText": "Casting a cooldown-improved Mana Crit will reset the cooldown of your *next* Mana Crit to its original duration."
+        },
+        "K18": {
+          "tooltip": "A stone that can activate when Big Clicks has more stacks than MultiClick can click.",
+          "icon": "gemGameBigClicks",
+          "name": "Stone: Big Clicks more than MultiClick",
+          "flavorText": null
+        },
+        "qMr": {
+          "tooltip": "Multiplies your mana regeneration by 133%.",
           "icon": "manaRegen",
-          "name": "Mana Regeneration",
-          "flavorText": "You will get 10% more mana per minute than before you had this upgrade."
-        },
-        "Q30": {
-          "tooltip": "Energize becomes Managize, which restores 25% of your mana at the cost of 120 energy.",
-          "icon": "damagex3",
-          "name": "Managize",
+          "name": "Energon's Grace",
           "flavorText": null
         },
-        "Q87": {
-          "tooltip": "Huge Click, when activated, also triggers on every 20th click for the next 100 clicks.",
+        "Q23": {
+          "tooltip": "Gold gained is increased by 100% while you have more than 40% of your total energy.",
           "icon": "damagex3",
-          "name": "Hecaton's Echo",
+          "name": "Restraint",
+          "flavorText": null
+        },
+        "Se": {
+          "tooltip": "A stone that can activate once every 40 seconds.",
+          "icon": "CD40S",
+          "name": "Stone: 40s CD",
+          "flavorText": null
+        },
+        "qGb": {
+          "tooltip": "Multiplies your gold received from bosses by 800%.",
+          "icon": "bossGold",
+          "name": "Mimzee's Kindness",
+          "flavorText": null
+        },
+        "Bg": {
+          "tooltip": "Adds 1% to your chance of finding bonus gold.",
+          "icon": "goldChance",
+          "name": "Bonus Gold Chance",
+          "flavorText": "When killing monsters, bonus gold may appear. This is a linear bonus, like Crit Chance."
+        },
+        "Rh": {
+          "tooltip": "Multiplies the cooldown of Reload by 0.8",
+          "icon": "hastenReload",
+          "name": "Hastened Reload",
+          "flavorText": null
+        },
+        "S2": {
+          "tooltip": "A stone that can activate when the next monster's health is greater than 50%.",
+          "icon": "mhGreater50",
+          "name": "Stone: MH more than 50%",
           "flavorText": null
         },
         "K17": {
@@ -11033,15 +10593,458 @@
           "name": "Stone: Big Clicks more than 200",
           "flavorText": null
         },
+        "Ra": {
+          "tooltip": "Increases the effect of Reload by 20% of its base effect.",
+          "icon": "improvedReload",
+          "name": "Improved Reload",
+          "flavorText": null
+        },
+        "qGc": {
+          "tooltip": "Multiplies your gold received from clickables by 337.5%.",
+          "icon": "clickableGold",
+          "name": "Revolc's Blessing",
+          "flavorText": null
+        },
+        "qCl": {
+          "tooltip": "Multiplies your click damage by 133%.",
+          "icon": "clickDamage",
+          "name": "The Wrath of Fragsworth",
+          "flavorText": null
+        },
+        "Q45": {
+          "tooltip": "Reload's effects and cooldown are reduced by 80%.",
+          "icon": "damagex3",
+          "name": "Quick Reload",
+          "flavorText": null
+        },
+        "I5": {
+          "tooltip": "Multiplies the damage you deal with pants by 150%",
+          "icon": "damageLegs",
+          "name": "Equipment: Pants",
+          "flavorText": "Pants shouldn't do damage, that's ridiculous."
+        },
+        "Q22": {
+          "tooltip": "Damage is increased by 100% while you have less than 60% of your total energy.",
+          "icon": "damagex3",
+          "name": "Release",
+          "flavorText": null
+        },
+        "K38": {
+          "tooltip": "Automates upgrading All Items.",
+          "icon": "gemUpgradeCheapest",
+          "name": "Gem: Upgrading All Items ",
+          "flavorText": null
+        },
+        "Cc": {
+          "tooltip": "Adds 2% to your chance to score a critical hit.",
+          "icon": "critChance",
+          "name": "Crit Chance",
+          "flavorText": "Ever wonder what happens when you get over 100% Crit Chance? The Ancients once knew, but that is ancient history."
+        },
+        "Mt": {
+          "tooltip": "Increases your maximum mana by 25.",
+          "icon": "totalMana",
+          "name": "Total Mana",
+          "flavorText": "If a fixed amount is added to a number many times, that number is said to grow \"linearly\". This is because if you plot it out on an x/y graph, you'll see a line."
+        },
+        "S1": {
+          "tooltip": "A stone that can always activate.",
+          "icon": "always",
+          "name": "Stone: Always",
+          "flavorText": null
+        },
         "Sd": {
           "tooltip": "A stone that can activate once every 8 seconds.",
           "icon": "CD8S",
           "name": "Stone: 8s CD",
           "flavorText": null
+        },
+        "I1": {
+          "tooltip": "Multiplies the damage you deal with swords by 150%",
+          "icon": "damageWeapon",
+          "name": "Equipment: Sword",
+          "flavorText": null
+        },
+        "A5": {
+          "tooltip": "Automates Huge Click.",
+          "icon": "gemHugeClicks",
+          "name": "Gem: Huge Click",
+          "flavorText": null
+        },
+        "K03": {
+          "tooltip": "A stone that can activate when Huge Click is active.",
+          "icon": "gemHugeClicks",
+          "name": "Stone: Huge Click more than 0",
+          "flavorText": null
+        },
+        "K37": {
+          "tooltip": "Automates upgrading the Newest Item.",
+          "icon": "gemUpgradeCheapest",
+          "name": "Gem: Upgrading Newest Item",
+          "flavorText": null
+        },
+        "A6": {
+          "tooltip": "Automates Powersurge.",
+          "icon": "gemPowersurge",
+          "name": "Gem: Powersurge.",
+          "flavorText": null
+        },
+        "Pa": {
+          "tooltip": "Multiplies the damage bonus of Powersurge by 125%.",
+          "icon": "powersurgeDamage",
+          "name": "Improved Powersurge",
+          "flavorText": null
+        },
+        "K02": {
+          "tooltip": "A stone that can activate when Huge Click is not active.",
+          "icon": "gemHugeClicks",
+          "name": "Stone: Huge Click is not active.",
+          "flavorText": null
+        },
+        "qH": {
+          "tooltip": "Multiplies your Haste by 115.7%.",
+          "icon": "haste",
+          "name": "Vaagur's Impatience",
+          "flavorText": "Haste affects the rate that you auto-attack, and all cooldown speeds, including Automator cooldown speeds."
+        },
+        "A1": {
+          "tooltip": "Automates MultiClick.",
+          "icon": "gemNineClicks",
+          "name": "Gem: MultiClick",
+          "flavorText": null
+        },
+        "K01": {
+          "tooltip": "A stone that can activate when Energize is not active.",
+          "icon": "gemEnergize",
+          "name": "Stone: Energize is not active.",
+          "flavorText": null
+        },
+        "K16": {
+          "tooltip": "A stone that can activate when Big Clicks has less than 200 stacks.",
+          "icon": "gemGameBigClicks",
+          "name": "Stone: Big Clicks less than 200",
+          "flavorText": null
+        },
+        "Q44": {
+          "tooltip": "Reload reduces the cooldown of the next skill used by 50%.",
+          "icon": "damagex3",
+          "name": "Preload",
+          "flavorText": null
+        },
+        "A0": {
+          "tooltip": "Unlocks the Automator.",
+          "icon": "automator",
+          "name": "Automator",
+          "flavorText": null
+        },
+        "qMd": {
+          "tooltip": "Multiplies the damage done by Mana Crits by 195%",
+          "icon": "manaClick",
+          "name": "Mega Mana Crit Damage",
+          "flavorText": null
+        },
+        "Sc": {
+          "tooltip": "A stone that can activate once every 4 seconds.",
+          "icon": "CD4S",
+          "name": "Stone: 4s CD",
+          "flavorText": null
+        },
+        "A4": {
+          "tooltip": "Automates Clickstorm.",
+          "icon": "gemClickstorm",
+          "name": "Gem: Clickstorm",
+          "flavorText": null
+        },
+        "Q21": {
+          "tooltip": "Skills do not interrupt Auto Attacks.",
+          "icon": "damagex3",
+          "name": "Synchrony",
+          "flavorText": null
+        },
+        "S9": {
+          "tooltip": "A stone that can activate during the second half of a zone.",
+          "icon": "zoneMiddle",
+          "name": "Stone: Zone Middle",
+          "flavorText": null
+        },
+        "Sg": {
+          "tooltip": "A stone that can activate once every 10 minutes.",
+          "icon": "CD10M",
+          "name": "Stone: 10m CD",
+          "flavorText": null
+        },
+        "qCd": {
+          "tooltip": "Multiplies the damage of your critical hits by 172.8%.",
+          "icon": "critDamage",
+          "name": "Precision of Bhaal",
+          "flavorText": null
+        },
+        "Az": {
+          "tooltip": "Speeds up the Automator by 25%.",
+          "icon": "automatorSpeed",
+          "name": "Automator Speed",
+          "flavorText": null
+        },
+        "Q88": {
+          "tooltip": "Consumes 10 energy per second to click 30 times per second, until you run out of energy.",
+          "icon": "damagex3",
+          "name": "ClickTorrent",
+          "flavorText": "Replaces Clickstorm."
+        },
+        "qHd": {
+          "tooltip": "Multiplies the damage of Huge Click by 195%",
+          "icon": "hugeClicks",
+          "name": "Mega Huger Huge Click",
+          "flavorText": null
+        },
+        "I6": {
+          "tooltip": "Multiplies the damage you deal with gloves by 150%",
+          "icon": "damageHands",
+          "name": "Equipment: Gloves",
+          "flavorText": null
+        },
+        "Q43": {
+          "tooltip": "Reload also returns your current gold to the amount you had at the beginning of the zone, then increases it by Reload's bonus.",
+          "icon": "damagex3",
+          "name": "Reload Rampage",
+          "flavorText": null
+        },
+        "K36": {
+          "tooltip": "Automates upgrading the Cheapest Item to the next Multiplier.",
+          "icon": "gemUpgradeCheapest",
+          "name": "Gem: Upgrading Cheapest Item to next Multiplier",
+          "flavorText": null
+        },
+        "K15": {
+          "tooltip": "A stone that can activate when Big Clicks has more than 100 stacks.",
+          "icon": "gemGameBigClicks",
+          "name": "Stone: Big Clicks more than 100",
+          "flavorText": null
+        },
+        "qG": {
+          "tooltip": "Multiplies your gold received from all sources by 133%.",
+          "icon": "goldx3",
+          "name": "Mammon's Greed",
+          "flavorText": null
+        },
+        "Ay": {
+          "tooltip": "Unlocks an additional set for the Automator.",
+          "icon": "gemAddSet",
+          "name": "Automator Set",
+          "flavorText": null
+        },
+        "Cd": {
+          "tooltip": "Multiplies the damage of your critical hits by 120%.",
+          "icon": "critDamage",
+          "name": "Crit Damage",
+          "flavorText": "When a number is multiplied by a fixed amount (greater than 1) many times, that number is said to grow \"exponentially\". This is because that process is usually represented by a formula that uses exponential notation."
+        },
+        "I8": {
+          "tooltip": "Multiplies the damage you deal with capes by 150%",
+          "icon": "damageBack",
+          "name": "Equipment: Cape",
+          "flavorText": "If you wear these in real life, people will think something is wrong with you."
         }
       },
       "name": "Helpful Adventurer",
       "flavorName": "Cid"
     }
+  },
+  "skills": {
+    "Managize": {
+      "uid": "Managize",
+      "manaCost": 0,
+      "modName": "Helpful Adventurer",
+      "energyCost": 120,
+      "iconId": 35,
+      "cooldown": 60000,
+      "description": "",
+      "ignoresGCD": false,
+      "name": "Managize",
+      "char": "helpfulAdventurer"
+    },
+    "Energize: Extend": {
+      "uid": "Energize: Extend",
+      "manaCost": 25,
+      "modName": "Helpful Adventurer",
+      "energyCost": 0,
+      "iconId": 35,
+      "cooldown": 0,
+      "description": "",
+      "ignoresGCD": false,
+      "name": "Energize: Extend",
+      "char": "helpfulAdventurer"
+    },
+    "Mana Crit": {
+      "uid": "Mana Crit",
+      "manaCost": 5,
+      "modName": "Helpful Adventurer",
+      "energyCost": 0,
+      "iconId": 1,
+      "cooldown": 60000,
+      "description": "",
+      "ignoresGCD": false,
+      "name": "Mana Crit",
+      "char": "helpfulAdventurer"
+    },
+    "Energize: Rush": {
+      "uid": "Energize: Rush",
+      "manaCost": 25,
+      "modName": "Helpful Adventurer",
+      "energyCost": 0,
+      "iconId": 35,
+      "cooldown": 30000,
+      "description": "",
+      "ignoresGCD": false,
+      "name": "Energize: Rush",
+      "char": "helpfulAdventurer"
+    },
+    "Critstorm": {
+      "uid": "Critstorm",
+      "manaCost": 0,
+      "modName": "Helpful Adventurer",
+      "energyCost": 0,
+      "iconId": 201,
+      "cooldown": 600000,
+      "description": "",
+      "ignoresGCD": false,
+      "name": "Critstorm",
+      "char": "helpfulAdventurer"
+    },
+    "GoldenClicks": {
+      "uid": "GoldenClicks",
+      "manaCost": 0,
+      "modName": "Helpful Adventurer",
+      "energyCost": 0,
+      "iconId": 201,
+      "cooldown": 600000,
+      "description": "",
+      "ignoresGCD": false,
+      "name": "GoldenClicks",
+      "char": "helpfulAdventurer"
+    },
+    "Energize": {
+      "uid": "Energize",
+      "manaCost": 25,
+      "modName": "Helpful Adventurer",
+      "energyCost": 0,
+      "iconId": 35,
+      "cooldown": 60000,
+      "description": "",
+      "ignoresGCD": false,
+      "name": "Energize",
+      "char": "helpfulAdventurer"
+    },
+    "Clickdrizzle": {
+      "uid": "Clickdrizzle",
+      "manaCost": 0,
+      "modName": "Helpful Adventurer",
+      "energyCost": 0,
+      "iconId": 201,
+      "cooldown": 600000,
+      "description": "",
+      "ignoresGCD": false,
+      "name": "Clickdrizzle",
+      "char": "helpfulAdventurer"
+    },
+    "Big Clicks": {
+      "uid": "Big Clicks",
+      "manaCost": 0,
+      "modName": "Helpful Adventurer",
+      "energyCost": 4,
+      "iconId": 198,
+      "cooldown": 8000,
+      "description": "",
+      "ignoresGCD": false,
+      "name": "Big Clicks",
+      "char": "helpfulAdventurer"
+    },
+    "Clicktorrent": {
+      "uid": "Clicktorrent",
+      "manaCost": 0,
+      "modName": "Helpful Adventurer",
+      "energyCost": 0,
+      "iconId": 202,
+      "cooldown": 600000,
+      "description": "",
+      "ignoresGCD": false,
+      "name": "Clicktorrent",
+      "char": "helpfulAdventurer"
+    },
+    "Autoattackstorm": {
+      "uid": "Autoattackstorm",
+      "manaCost": 0,
+      "modName": "Helpful Adventurer",
+      "energyCost": 0,
+      "iconId": 201,
+      "cooldown": 600000,
+      "description": "",
+      "ignoresGCD": false,
+      "name": "Autoattackstorm",
+      "char": "helpfulAdventurer"
+    },
+    "Powersurge": {
+      "uid": "Powersurge",
+      "manaCost": 50,
+      "modName": "Helpful Adventurer",
+      "energyCost": 0,
+      "iconId": 150,
+      "cooldown": 900000,
+      "description": "",
+      "ignoresGCD": false,
+      "name": "Powersurge",
+      "char": "helpfulAdventurer"
+    },
+    "Huge Click": {
+      "uid": "Huge Click",
+      "manaCost": 0,
+      "modName": "Helpful Adventurer",
+      "energyCost": 3,
+      "iconId": 199,
+      "cooldown": 8000,
+      "description": "",
+      "ignoresGCD": false,
+      "name": "Huge Click",
+      "char": "helpfulAdventurer"
+    },
+    "MultiClick": {
+      "uid": "MultiClick",
+      "manaCost": 0,
+      "modName": "Helpful Adventurer",
+      "energyCost": 3,
+      "iconId": 197,
+      "cooldown": 0,
+      "description": "",
+      "ignoresGCD": false,
+      "name": "MultiClick",
+      "char": "helpfulAdventurer"
+    },
+    "Reload": {
+      "uid": "Reload",
+      "manaCost": 0,
+      "modName": "Helpful Adventurer",
+      "energyCost": 0,
+      "iconId": 168,
+      "cooldown": 1800000,
+      "description": "",
+      "ignoresGCD": false,
+      "name": "Reload",
+      "char": "helpfulAdventurer"
+    },
+    "Clickstorm": {
+      "uid": "Clickstorm",
+      "manaCost": 0,
+      "modName": "Helpful Adventurer",
+      "energyCost": 0,
+      "iconId": 200,
+      "cooldown": 600000,
+      "description": "",
+      "ignoresGCD": false,
+      "name": "Clickstorm",
+      "char": "helpfulAdventurer"
+    }
+  },
+  "ch2": {
+    "GAME_VERSION": "0.07 (8) beta PTR"
   }
 }
