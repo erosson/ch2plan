@@ -113,9 +113,7 @@ type alias StatsEntrySpec =
 
 statEntrySpecs : List StatsEntrySpec
 statEntrySpecs =
-    -- try to match the order of the in-game stats screen here. The order here is
-    -- irrelevant to what's displayed, but it makes it easier to keep things matching.
-    -- See scripts/ui/StatsSubtab.as
+    -- try to match the order of the in-game stats screen here. See scripts/ui/StatsSubtab.as
     --
     -- autoattack damage
     -- click damage
@@ -123,7 +121,7 @@ statEntrySpecs =
     , ( "Attack Delay", [ STAT_HASTE ], entrySec 600 )
 
     -- damage multiplier from level
-    , ( "Energy from Auto Attacks", [ STAT_MANA_REGEN ], stat1 >> \regen -> Just <| int <| 1 + regen.val ) -- currently a constant
+    -- energy from auto attacks - currently a constant, not useful here
     , ( "Global Cooldown Time", [ STAT_HASTE ], entrySec 2000 ) -- TODO that one keystone for <1 sec
     , ( "Automator Speed", [ STAT_AUTOMATOR_SPEED, STAT_HASTE ], stat2 >> \( auto, haste ) -> Just <| pct <| auto.val * haste.val )
     , ( "Critical Chance", [ STAT_CRIT_CHANCE ], entryPct )
@@ -134,9 +132,7 @@ statEntrySpecs =
     , ( "Mana Regeneration", [ GS.STAT_MANA_REGEN ], entryPct )
     , ( "Run Speed", [ GS.STAT_MOVEMENT_SPEED ], entryPct ) -- currently a constant
     , ( "Gold from All Sources", [ STAT_GOLD ], entryPct )
-
-    -- the x5 is datamined from heroclickerlib/managers/Formulas.as
-    , ( "Bonus Gold Chance (×5)", [ STAT_BONUS_GOLD_CHANCE ], entryPct )
+    , ( "Bonus Gold Chance (×10)", [ STAT_BONUS_GOLD_CHANCE ], entryPct ) -- the multiplier is datamined from heroclickerlib/managers/Formulas.as
     , ( "Boss Gold", [ STAT_BOSS_GOLD ], entryPct )
     , ( "Clickable Find Chance", [ STAT_CLICKABLE_CHANCE ], entryPct ) -- not in total stats; skill-tree-stats only
     , ( "Clickable Gold Multiplier", [ STAT_CLICKABLE_GOLD ], entryPct ) -- not in total stats; skill-tree-stats only

@@ -67,7 +67,7 @@ package
 		public static const CRITSTORM_TOOLTIP:String = "Consumes 1.25 energy per second to click 2.5 times per second, until you run out of energy. Clicks from this skill have +100% chance of being critical strikes. Speed increases every minute.";
 		public static const GOLDENCLICKS_TOOLTIP:String = "Consumes 1.25 energy per second to click 2.5 times per second, until you run out of energy. Doubles gold gained while active. Speed increases every minute.";
 		public static const CLICKTORRENT_TOOLTIP:String = "Consumes 10 energy per second to click 30 times per second, until you run out of energy.";
-		public static const AUTOATTACKSTORM_TOOLTIP:String = "Consumes 1.25 mana per second to auto attacks 2.5 times per second, until you run out of mana. Speed increases every minute.";
+		public static const AUTOATTACKSTORM_TOOLTIP:String = "Consumes 1.25 mana per second to auto attack 2.5 times per second, until you run out of mana. Speed increases every minute.";
 		
 		
 		public var bigClicksIndicators:Array = [];
@@ -1197,7 +1197,7 @@ package
 					"name": "Stone: Big Clicks more than 100",
 					"tooltip": "A stone that can activate when Big Clicks has more than 100 stacks." ,
 					"flavorText": null,
-					"setupFunction": function() {addBuffComparisonStone("BigClicksGT10", "Big Clicks > 100", "A stone that can activate when Big Clicks has more than 100 stacks.", "Big Clicks", CH2.COMPARISON_GT, 100); },
+					"setupFunction": function() {addBuffComparisonStone("BigClicksGT100", "Big Clicks > 100", "A stone that can activate when Big Clicks has more than 100 stacks.", "Big Clicks", CH2.COMPARISON_GT, 100); },
 					"purchaseFunction": function() { CH2.currentCharacter.automator.unlockStone("BigClicksGT100");  },
 					"icon": "gemGameBigClicks"
 				},
@@ -1636,9 +1636,9 @@ package
 			energize.useTutorialArrow = true;
 			energize.tooltipFunction = function():Object { 
 				var character:Character = CH2.currentCharacter;
-				var duration:Number = 60;
-				duration += 60 * (0.2 * character.getTrait("ImprovedEnergize"));
-				return this.skillTooltip("Restores 2 energy per second for " + duration.toFixed(0) + " seconds."); };
+				var duration:Number = 60 / character.hasteRating;
+				duration += (60 * (0.2 * character.getTrait("ImprovedEnergize"))) / character.hasteRating;
+				return this.skillTooltip("Restores " + (2 * character.hasteRating).toFixed(2) + " energy per second for " + (duration).toFixed(2) + " seconds."); };
 			
 			var managize:Skill = new Skill();
 			managize.modName = MOD_INFO["name"];
@@ -1734,7 +1734,7 @@ package
 			powerSurge.usesMaxEnergy = false;
 			powerSurge.tooltipFunction = function():Object{ 
 				var character:Character = CH2.currentCharacter;
-				var duration:Number = 60 * Math.pow(1.2, character.getTrait("SustainedPowersurge"));
+				var duration:Number = (60 * Math.pow(1.2, character.getTrait("SustainedPowersurge"))) / character.hasteRating;
 				var damage:Number = 2 * (Math.pow(1.25, character.getTrait("ImprovedPowersurge"))) * 100;
 				return this.skillTooltip("Causes your clicks within " + duration.toFixed(0) + " seconds to deal " + damage.toFixed(2) + "% damage."); 
 			};
@@ -2251,6 +2251,7 @@ package
 				buff.iconId = 23;
 				buff.isUntimedBuff = false;
 				buff.duration = 1000;
+				buff.unhastened = true;
 						buff.tooltipFunction = function() {
 							return {
 								"header": "AutoAttackCritMana",
@@ -2306,11 +2307,15 @@ package
 		
 		public function helpfulAdventurerAddGold(goldToAdd:BigNumber):void
 		{
+			var addedGold:BigNumber = new BigNumber(0);
+			addedGold.base = goldToAdd.base;
+			addedGold.power = goldToAdd.power;
 			if (CH2.currentCharacter.getTrait("HighEnergyGoldBonus") && (goldToAdd.gtN(0)) && CH2.currentCharacter.energy > 0.40 * CH2.currentCharacter.maxEnergy)
 			{
-				goldToAdd.timesEqualsN(2);
+				addedGold.timesEqualsN(2);
 			}
-			CH2.currentCharacter.addGoldDefault(goldToAdd);
+			
+			CH2.currentCharacter.addGoldDefault(addedGold);
 		}
 		
 		public function helpfulAdventurerAddEnergy(amount:Number, showFloatingText:Boolean = true):void
@@ -2548,12 +2553,13 @@ package
 			var buff:Buff = new Buff();
 			var buffClicks:int = multiClickCount() - 1;
 			buff.name = "MultiClick";
-			buff.duration = 800;
-			buff.tickRate = buff.duration / buffClicks;
+			buff.iconId = 202;
+			buff.tickRate = 50;
+			buff.duration = buff.tickRate * buffClicks;
 			buff.tickFunction = function() {
 				if (!CH2.currentCharacter.isNextMonsterInRange)
 				{
-					buff.tickRate *= 1.25;
+					buff.duration *= 0.8;
 				}
 				character.clickAttack(false);
 			}
@@ -2580,7 +2586,7 @@ package
 			buff.tooltipFunction = function() {
 				return {
 					"header": "Clicktorrent",
-					"body": "Clicking 30 times per second. Consuming 10 energy per second."
+					"body": "Clicking " + (30 * character.hasteRating).toFixed(2) + " times per second. Consuming " + (10 * character.hasteRating).toFixed(2) + " energy per second."
 				};
 			}
 			character.buffs.addBuff(buff);
@@ -2636,7 +2642,7 @@ package
 			buff.tooltipFunction = function() {
 				return {
 					"header": "Clickstorm",
-					"body": "Clicking " + 2.5 * tickSpeed + " times per second. Consuming " + 1.25 * tickSpeed + " energy per second. Speed increases every minute."
+					"body": "Clicking " + (2.5 * tickSpeed * character.hasteRating).toFixed(2) + " times per second. Consuming " + (1.25 * tickSpeed * character.hasteRating).toFixed(2) + " energy per second. Speed increases every minute."
 				};
 			}
 			character.buffs.addBuff(buff);
@@ -2669,7 +2675,7 @@ package
 			buff.tooltipFunction = function() {
 				return {
 					"header": "Critstorm",
-					"body": "Critting " + 2.5 * tickSpeed + " times per second. Consuming " + 1.25 * tickSpeed + " energy per second. Speed increases every minute."
+					"body": "Critting " + (2.5 * tickSpeed * character.hasteRating).toFixed(2) + " times per second. Consuming " + (1.25 * tickSpeed * character.hasteRating).toFixed(2) + " energy per second. Speed increases every minute."
 				};
 			}
 			character.buffs.addBuff(buff);
@@ -2701,7 +2707,7 @@ package
 			buff.tooltipFunction = function() {
 				return {
 					"header": "Golden Clicks",
-					"body": "Clicking " + 2.5 * tickSpeed + " times per second. Gold gained increased by 100%. Consuming " + 1.25 * tickSpeed + " energy per second. Speed increases every minute."
+					"body": "Clicking " + (2.5 * tickSpeed * character.hasteRating).toFixed(2) + " times per second. Gold gained increased by 100%. Consuming " + (1.25 * tickSpeed * character.hasteRating).toFixed(2) + " energy per second. Speed increases every minute."
 				};
 			}
 			character.buffs.addBuff(buff);
@@ -2738,7 +2744,7 @@ package
 			buff.tooltipFunction = function() {
 				return {
 					"header": "Autoattackstorm",
-					"body": "Autoattacking " + 2.5 * tickSpeed + " times per second. Consuming " + 1.25 * tickSpeed + " mana per second. Speed increases every minute."
+					"body": "Autoattacking " + (2.5 * tickSpeed * character.hasteRating).toFixed(2) + " times per second. Consuming " + (1.25 * tickSpeed * character.hasteRating).toFixed(2) + " mana per second. Speed increases every minute."
 				};
 			}
 			character.buffs.addBuff(buff);
@@ -2763,7 +2769,7 @@ package
 			buff.tooltipFunction = function() {
 				return {
 					"header": "Energize",
-					"body": "Restoring 2 energy per second."
+					"body": "Restoring 2 energy every " + (1 / character.hasteRating).toFixed(2) + " second."
 				};
 			}
 			character.buffs.addBuff(buff);
@@ -2995,7 +3001,7 @@ package
 					juggernautBuff.stacks = 1
 					juggernautBuff.maximumStacks = 0;
 					juggernautBuff.skillUseFunction = function(skill:Skill) {
-						CH2.currentCharacter.addEnergy(-juggernautBuff.stacks);
+						//CH2.currentCharacter.addEnergy(-juggernautBuff.stacks);
 						juggernautBuff.stacks++;
 					}
 					juggernautBuff.tooltipFunction = function() {
@@ -3113,12 +3119,11 @@ package
 							discountBuff.iconId = 99;
 							discountBuff.duration = 4000;
 							discountBuff.unhastened = true;
-//							discountBuff.buffStat(CH2.STAT_ITEM_COST_REDUCTION, 0.02 * 10.00 * (Math.pow(1.25, character.getTrait("HugeClickDamage"))));
-							discountBuff.buffStat(CH2.STAT_ITEM_COST_REDUCTION, 1 / (1 + (0.02 * 10.00 * Math.pow(1.25, character.getTrait("HugeClickDamage")))));
+							discountBuff.buffStat(CH2.STAT_ITEM_COST_REDUCTION, 1 / (1 + (0.005 * 10.00 * (1.25 * character.getTrait("HugeClickDamage")))));
 							discountBuff.tooltipFunction = function() {
 								return {
 									"header": "Huge Click Discount",
-									"body": "Item costs " + ((1 / (1 + (0.02 * 10.00 * Math.pow(1.25, character.getTrait("HugeClickDamage"))))) * 100).toFixed(2) + "%."
+									"body": "Item costs " + ((1 / (1 + (0.005 * 10.00 * (1.25 * character.getTrait("HugeClickDamage"))))) * 100).toFixed(2) + "%."
 								};
 							}
 							character.buffs.addBuff(discountBuff);
@@ -3293,12 +3298,31 @@ package
 				characterInstance.canUseSkill = helpfulAdventurerCanUseSkill;
 				characterInstance.addMana = helpfulAdventurerAddMana;
 				characterInstance.onZoneChanged = helpfulAdventurerZoneChanged;
+				characterInstance.getCalculatedEnergyCost = helpfulAdventurerGetCalculatedEnergyCost;
 				
 				//setup ascension functionality
 				for (var key:String in characterInstance.levelGraphNodeTypes)
 				{
 					helpfulAdventurer.levelGraphNodeTypes[key].setupFunction();
 				}
+			}
+		}
+		
+		public function helpfulAdventurerGetCalculatedEnergyCost(skill:Skill):Number
+		{
+			if (!skill.usesMaxEnergy)
+			{
+				var cost:Number = skill.energyCost * (1 - CH2.currentCharacter.energyCostReduction);
+				if (CH2.currentCharacter.buffs.hasBuffByName("Curse Of The Juggernaut"))
+				{
+					var juggernautBuff:Buff = CH2.currentCharacter.buffs.getBuff("Curse Of The Juggernaut");
+					cost += juggernautBuff.stacks;
+				}
+				return cost;
+			}
+			else
+			{
+				return this.maxEnergy;
 			}
 		}
 		
