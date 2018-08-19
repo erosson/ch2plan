@@ -29,6 +29,9 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 ---
 
+## 2018-08-19
+- Update to 0.07-(8)-beta-PTR
+
 ## 2018-08-18
 
 - Search now displays some help text when clicked.
