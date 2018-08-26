@@ -57,9 +57,10 @@ after_deploy:
   # clear cloudflare cache.
   # https://api.cloudflare.com/#zone-purge-all-files
   # zone identifier - 7c06b35c2392935ebb0653eaf94a3e70 - is on the cloudflare overview page for erosson.org
-  - curl -X POST "https://api.cloudflare.com/client/v4/zones/7c06b35c2392935ebb0653eaf94a3e70/purge_cache"
-         -H "X-Auth-Email: $CLOUDFLARE_EMAIL"
-         -H "X-Auth-Key: $CLOUDFLARE_TOKEN"
-         -H "Content-Type: application/json"
+  - |
+    curl -X POST "https://api.cloudflare.com/client/v4/zones/7c06b35c2392935ebb0653eaf94a3e70/purge_cache" \
+         -H "X-Auth-Email: $CLOUDFLARE_EMAIL" \
+         -H "X-Auth-Key: $CLOUDFLARE_TOKEN" \
+         -H "Content-Type: application/json" \
          --data '{"purge_everything":true}'
 
