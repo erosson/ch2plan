@@ -22,7 +22,6 @@
     "format": "bash -xc 'elm-format --yes src && prettier --write assets/ports.js assets/stats.json && true '",
     "lint": "bash -xc 'elm-format --validate src && prettier --list-different assets/ports.js assets/stats.json && true '",
     "test": "bash -xc 'yarn lint && elm-test && true '",
-    "deploy:purge-cloudflare-cache": "scripty",
     "start": "bash -xc 'yarn build && serve dist && true '"
   },
   "//optionalDependencies": "because travis fails to install me, but doesn't actually need me",
