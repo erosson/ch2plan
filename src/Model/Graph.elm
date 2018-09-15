@@ -1,24 +1,25 @@
-module Model.Graph
-    exposing
-        ( GraphModel
-          -- select
-        , nodesToBuild
-        , reachableSelectedNodes
-          -- create/update
-        , parse
-        , search
-        , updateOnChange
-        )
+module Model.Graph exposing
+    (  GraphModel
+       -- select
 
-import Set as Set exposing (Set)
+    , nodesToBuild
+    , parse
+    ,  reachableSelectedNodes
+       -- create/update
+
+    , search
+    , updateOnChange
+    )
+
 import Dict as Dict exposing (Dict)
-import Regex as Regex exposing (Regex)
+import GameData as G
 import Lazy as Lazy exposing (Lazy)
 import Maybe.Extra
-import Ports
-import GameData as G
-import Route as Route exposing (Route)
 import Model.Dijkstra as Dijkstra
+import Ports
+import Regex as Regex exposing (Regex)
+import Route as Route exposing (Route)
+import Set as Set exposing (Set)
 
 
 {-| All information needed to efficiently render the skill tree graph.
@@ -59,23 +60,24 @@ runDijkstra graph selected =
         _ =
             Debug.log "running dijkstra" ()
     in
-        Dijkstra.dijkstra graph selected Nothing
+    Dijkstra.dijkstra graph selected Nothing
 
 
 neighborNodes : G.Graph -> Set G.NodeId -> Set G.NodeId
 neighborNodes graph selected =
     Set.foldr (\id res -> G.neighbors id graph |> Set.union res) graph.startNodes selected
-        |> \res -> Set.diff res selected
+        |> (\res -> Set.diff res selected)
 
 
 nodesToBuild : G.Graph -> Set G.NodeId -> Maybe String
 nodesToBuild graph =
     Set.toList
-        >> List.map toString
+        >> List.map String.fromInt
         >> String.join "&"
         >> (\s ->
                 if s == "" then
                     Nothing
+
                 else
                     Just s
            )
@@ -86,19 +88,22 @@ buildToNodes graph =
     Maybe.withDefault ""
         >> String.split "&"
         -- non-ints are ignored. TODO: maybe we should error for these
-        >> List.map (String.toInt >> Result.toMaybe)
+        >> List.map String.toInt
         >> Maybe.Extra.values
-        >> \ids0 ->
-            let
-                ids =
-                    ids0 |> Set.fromList
-            in
+        >> (\ids0 ->
+                let
+                    ids =
+                        ids0 |> Set.fromList
+                in
                 if List.length ids0 /= Set.size ids then
                     Err "can't select a node twice"
+
                 else if not <| isValidSelection graph ids then
                     Err "some nodes in this build aren't connected to the start location"
+
                 else
                     Ok ids
+           )
 
 
 {-| Remove any selected nodes that can't be reached from the start location.
@@ -110,19 +115,20 @@ reachableSelectedNodes graph selected =
         loop id res =
             if Set.member id res.tried then
                 res
+
             else
                 let
                     -- loop with all selected immediate neighbors
                     nextIds =
                         G.neighbors id graph |> Set.intersect selected
                 in
-                    Set.foldr loop { tried = Set.insert id res.tried, reachable = Set.union res.reachable nextIds } nextIds
+                Set.foldr loop { tried = Set.insert id res.tried, reachable = Set.union res.reachable nextIds } nextIds
 
         startReachable =
             Set.intersect selected graph.startNodes
     in
-        Set.foldr loop { tried = Set.empty, reachable = startReachable } startReachable
-            |> .reachable
+    Set.foldr loop { tried = Set.empty, reachable = startReachable } startReachable
+        |> .reachable
 
 
 isValidSelection : G.Graph -> Set G.NodeId -> Bool
@@ -130,16 +136,14 @@ isValidSelection graph selected =
     reachableSelectedNodes graph selected == selected
 
 
-search : Ports.SearchRegex -> GraphModel -> GraphModel
-search { string, error } model =
-    case error of
-        Nothing ->
-            { model | search = string |> Debug.log "search" |> Maybe.map (Regex.regex >> Regex.caseInsensitive) }
-
-        Just error ->
-            -- parsing the regex here would cause an unrecoverable exception!
-            -- https://github.com/erosson/ch2plan/issues/44
-            model
+search : String -> GraphModel -> GraphModel
+search str model =
+    { model
+        | search =
+            str
+                |> Debug.log "search"
+                |> Regex.fromStringWith { caseInsensitive = True, multiline = True }
+    }
 
 
 {-| Parse graph state from a route.
@@ -147,14 +151,14 @@ search { string, error } model =
 Return type here is a bit weird. We can have two kinds of errors:
 
   - total failures: the skill tree cannot be rendered at all. Bad game-version, bad hero-name.
-  - partial failure: the skill tree *can* be rendered, but there's a problem. Bad search, bad node selections.
+  - partial failure: the skill tree _can_ be rendered, but there's a problem. Bad search, bad node selections.
 
 -}
 parse : G.GameData -> Route.HomeParams -> Result String ( GraphModel, Maybe String )
 parse gameData q =
     case Dict.get q.version gameData.byVersion of
         Nothing ->
-            Err <| "no such game-version: " ++ toString q.version
+            Err <| "no such game-version: " ++ q.version
 
         Just game ->
             case Dict.get q.hero game.heroes of
@@ -165,14 +169,14 @@ parse gameData q =
                     let
                         ( selected, error ) =
                             case buildToNodes char.graph q.build of
-                                Ok selected ->
-                                    ( selected, Nothing )
+                                Ok selected_ ->
+                                    ( selected_, Nothing )
 
                                 Err err ->
                                     -- this error is recoverable: show an empty tree with the error message
                                     ( Set.empty, Just err )
                     in
-                        Ok <| ( create game char selected, error )
+                    Ok <| ( create game char selected, error )
 
 
 updateOnChange : GraphModel -> GraphModel -> GraphModel
@@ -180,6 +184,7 @@ updateOnChange new old =
     if ( new.game, new.char, new.selected ) == ( old.game, old.char, old.selected ) then
         -- cache everything, when possible. search is updated elsewhere - no need for it to match.
         old
+
     else
         -- nothing's cacheable. always copy search, it's updated elsewhere.
         { new | search = old.search }

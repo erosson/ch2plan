@@ -17,12 +17,15 @@ Promise.all([
 ])
   .then(function([game, changelog]) {
     // console.log(chars)
-    var app = Elm.Main.fullscreen({
-      changelog: changelog,
-      gameData: game,
-      windowSize: {
-        width: document.documentElement.clientWidth,
-        height: document.documentElement.clientHeight
+    var app = Elm.Main.init({
+      node: document.documentElement,
+      flags: {
+        changelog: changelog,
+        gameData: game,
+        windowSize: {
+          width: document.documentElement.clientWidth,
+          height: document.documentElement.clientHeight
+        }
       }
     });
     app.ports.saveFileSelected.subscribe(function(elemId) {
@@ -50,40 +53,5 @@ Promise.all([
       };
       reader.readAsArrayBuffer(document.getElementById(elemId).files[0]);
     });
-    var q = null;
-    window.addEventListener("hashchange", function() {
-      q = parseSearchRegex(app, q);
-    });
-    // elm search url updates don't fire browser's hashchange event for some reason
-    app.ports.searchUpdated.subscribe(function() {
-      q = parseSearchRegex(app, q);
-    });
-    q = parseSearchRegex(app, q);
   })
   .catch(console.error);
-
-/**
- * parse search regexes in Javascript, since that's one of the few things that seriously breaks elm.
- * https://github.com/erosson/ch2plan/issues/44
- */
-function parseSearchRegex(app, q0) {
-  var q = parseQS(window.location.hash).q || null;
-  var error = null;
-  if (q !== q0) {
-    try {
-      var qr = new RegExp(q);
-    } catch (e) {
-      error = e.message;
-    }
-    app.ports.searchRegex.send({ string: q, error: error });
-  }
-  return q;
-}
-function parseQS(hash) {
-  var qs = {};
-  (hash.split("?")[1] || "").split("&").forEach(function(opt) {
-    var pair = opt.split("=");
-    qs[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
-  });
-  return qs;
-}

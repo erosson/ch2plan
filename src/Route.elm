@@ -1,28 +1,28 @@
-module Route
-    exposing
-        ( Route(..)
-        , Features
-        , HomeParams
-        , LegacyHomeParams
-        , parse
-        , parseFeatures
-        , flagParam
-        , fromLegacyParams
-        , defaultParams
-        , params
-        , stringify
-        , href
-        , ifFeature
-        )
+module Route exposing
+    ( Features
+    , HomeParams
+    , LegacyHomeParams
+    , Route(..)
+    , defaultParams
+    , flagParam
+    , fromLegacyParams
+    , href
+    , ifFeature
+    , params
+    , parse
+    , parseFeatures
+    , stringify
+    )
 
-import Set as Set exposing (Set)
-import Navigation
-import UrlParser as P exposing ((</>), (<?>))
-import Regex
 import Html as H
 import Html.Attributes as A
 import Http
 import Maybe.Extra
+import Regex
+import Set as Set exposing (Set)
+import Url as Url exposing (Url)
+import Url.Parser as P exposing ((</>), (<?>))
+import Url.Parser.Query as Q
 
 
 type alias HomeParams =
@@ -41,11 +41,11 @@ type alias LegacyHomeParams =
 
 
 fromLegacyParams : String -> LegacyHomeParams -> HomeParams
-fromLegacyParams version params =
+fromLegacyParams version args =
     { version = version
-    , hero = params.hero
-    , build = params.build
-    , search = params.search
+    , hero = args.hero
+    , build = args.build
+    , search = args.search
     }
 
 
@@ -57,14 +57,14 @@ defaultParams version =
 params : Route -> Maybe HomeParams
 params route =
     case route of
-        Home params ->
-            Just params
+        Home args ->
+            Just args
 
-        Stats params ->
-            Just params
+        Stats args ->
+            Just args
 
-        StatsTSV params ->
-            Just params
+        StatsTSV args ->
+            Just args
 
         _ ->
             Nothing
@@ -99,29 +99,32 @@ features0 =
     {}
 
 
-parse : Navigation.Location -> Route
+parse : Url -> Route
 parse =
-    hashQS
-        >> P.parseHash parser
+    hashUrl
+        >> P.parse parser
         >> Maybe.withDefault NotFound
         >> Debug.log "navigate to"
 
 
-hashQS : Navigation.Location -> Navigation.Location
-hashQS loc =
-    -- UrlParser doesn't do ?query=strings in the #hash, so fake it using the non-hash querystring
-    case Regex.split (Regex.AtMost 1) (Regex.regex "\\?") loc.hash of
-        [ hash ] ->
-            { loc | search = loc.search }
+hashUrl : Url -> Url
+hashUrl url =
+    -- elm 0.19 removed parseHash; booo. This function fakes it by transforming
+    -- `https://example.com/?flag=1#/some/path?some=query` to
+    -- `https://example.com/some/path?flag=1&some=query` for the parser.
+    case url.fragment |> Maybe.withDefault "" |> String.split "?" of
+        path :: queries ->
+            let
+                query =
+                    queries |> String.join "?"
 
-        [ hash, qs ] ->
-            { loc | hash = hash, search = loc.search ++ "&" ++ qs }
+                urlQuery =
+                    url.query |> Maybe.Extra.unwrap "" (\s -> s ++ "&")
+            in
+            { url | path = path, query = urlQuery ++ query |> Just }
 
         [] ->
-            Debug.crash "hashqs: empty"
-
-        other ->
-            Debug.crash "hashqs: 3+"
+            { url | path = "", query = url.query }
 
 
 maybeString =
@@ -130,6 +133,7 @@ maybeString =
             (\s ->
                 if s == "" then
                     Nothing
+
                 else
                     Just s
             )
@@ -138,7 +142,7 @@ maybeString =
 homeQS path =
     -- Query string for all skill tree urls
     path
-        <?> P.stringParam "q"
+        <?> Q.string "q"
 
 
 parser : P.Parser (Route -> a) a
@@ -174,7 +178,7 @@ parser =
 
 encodedString =
     -- if the string doesn't decode, skip decoding and use it as-is
-    P.custom "ENCODED_STRING" (\s -> Http.decodeUri s |> Maybe.withDefault s |> Ok)
+    P.custom "ENCODED_STRING" (\s -> Url.percentDecode s |> Maybe.withDefault s |> Just)
 
 
 falseBools =
@@ -183,18 +187,26 @@ falseBools =
 
 {-| bool param with a default value
 -}
-flagParam : String -> Bool -> P.QueryParser (Bool -> a) a
+flagParam : String -> Bool -> Q.Parser Bool
 flagParam name default =
-    Maybe.Extra.unwrap default (String.toLower >> (flip Set.member) falseBools >> not)
-        |> P.customParam name
+    let
+        parseFlag strs =
+            case strs of
+                [] ->
+                    default
+
+                str :: _ ->
+                    Set.member (str |> String.toLower) falseBools |> not
+    in
+    Q.custom name parseFlag
 
 
-parseFeatures : Navigation.Location -> Features
+parseFeatures : Url -> Features
 parseFeatures =
-    hashQS
+    hashUrl
         -- parser expects no segments
-        >> (\loc -> { loc | hash = "" })
-        >> P.parseHash featuresParser
+        >> (\url -> { url | path = "", fragment = Nothing })
+        >> P.parse featuresParser
         >> Maybe.withDefault features0
         >> Debug.log "feature-flags: "
 
@@ -210,18 +222,14 @@ ifFeature : Bool -> a -> a -> a
 ifFeature pred t f =
     if pred then
         t
+
     else
         f
 
 
-replace : String -> String -> String -> String
-replace search replace =
-    Regex.replace Regex.All (Regex.regex <| Regex.escape search) (always replace)
-
-
 encode : String -> String
 encode =
-    Http.encodeUri >> replace "(" "%28" >> replace ")" "%29"
+    Url.percentEncode >> String.replace "(" "%28" >> String.replace ")" "%29"
 
 
 stringifyHomePath : HomeParams -> String
@@ -231,9 +239,9 @@ stringifyHomePath { version, hero, build, search } =
             -- in addition to normal escaping, replace parens so urls and markdown don't break
             Maybe.Extra.unwrap "" (encode >> (++) "?q=") search
     in
-        "/"
-            ++ encode version
-            ++ case ( hero, build ) of
+    "/"
+        ++ encode version
+        ++ (case ( hero, build ) of
                 -- ( "helpfulAdventurer", Nothing ) ->
                 -- qs
                 ( _, Nothing ) ->
@@ -241,28 +249,29 @@ stringifyHomePath { version, hero, build, search } =
 
                 ( _, Just b ) ->
                     "/" ++ hero ++ "/" ++ b ++ qs
+           )
 
 
 stringify : Route -> String
 stringify route =
     case route of
-        Home params ->
-            "#/g" ++ stringifyHomePath params
+        Home args ->
+            "#/g" ++ stringifyHomePath args
 
-        Stats params ->
-            "#/s" ++ stringifyHomePath params
+        Stats args ->
+            "#/s" ++ stringifyHomePath args
 
-        StatsTSV params ->
-            "#/tsv" ++ stringifyHomePath params
+        StatsTSV args ->
+            "#/tsv" ++ stringifyHomePath args
 
         Changelog ->
             "#/changelog"
 
         NotFound ->
-            Debug.crash "why are you stringifying Route.NotFound?"
+            Debug.todo "why are you stringifying Route.NotFound?"
 
         _ ->
-            Debug.crash "I refuse to stringify legacy urls" route
+            Debug.todo "I refuse to stringify legacy urls" route
 
 
 href : Route -> H.Attribute msg

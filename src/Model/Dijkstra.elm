@@ -1,10 +1,10 @@
-module Model.Dijkstra exposing (Result, empty, dijkstra, selectPathToNode)
+module Model.Dijkstra exposing (Result, dijkstra, empty, selectPathToNode)
 
-import Set as Set exposing (Set)
 import Dict as Dict exposing (Dict)
-import Maybe.Extra
-import List.Extra
 import GameData as G
+import List.Extra
+import Maybe.Extra
+import Set as Set exposing (Set)
 
 
 {-| Shortest path of nodes that connect this to the current build - that is, to a start-location-connected selected node.
@@ -41,7 +41,7 @@ dijkstra graph selected0 target =
                 |> List.map (\id -> ( id, 0 ))
                 |> Dict.fromList
     in
-        visitNode 0 startOrSelected graph (allNodes |> Set.fromList) target { distances = distances0, prevs = Dict.empty }
+    visitNode 0 startOrSelected graph (allNodes |> Set.fromList) target { distances = distances0, prevs = Dict.empty }
 
 
 {-| List.Extra.minimumBy, but quit early if the value reaches a certain threshold.
@@ -50,7 +50,7 @@ Useful when we gotta go fast and know the minimum won't go below a certain value
 
 -}
 terminatingMinimumBy : comparable -> (a -> comparable) -> List a -> Maybe a
-terminatingMinimumBy terminateAt fn items =
+terminatingMinimumBy terminateAt fn items0 =
     let
         loop : List a -> a -> comparable -> a
         loop items minIn minOut =
@@ -63,27 +63,30 @@ terminatingMinimumBy terminateAt fn items =
                         headOut =
                             fn headIn
                     in
-                        if headOut <= terminateAt then
-                            headIn
-                        else if headOut <= minOut then
-                            loop tail headIn headOut
-                        else
-                            loop tail minIn minOut
-    in
-        case items of
-            [] ->
-                Nothing
+                    if headOut <= terminateAt then
+                        headIn
 
-            headIn :: tail ->
-                Just <|
-                    let
-                        headOut =
-                            fn headIn
-                    in
-                        if headOut <= terminateAt then
-                            headIn
-                        else
-                            loop tail headIn headOut
+                    else if headOut <= minOut then
+                        loop tail headIn headOut
+
+                    else
+                        loop tail minIn minOut
+    in
+    case items0 of
+        [] ->
+            Nothing
+
+        headIn :: tail ->
+            Just <|
+                let
+                    headOut =
+                        fn headIn
+                in
+                if headOut <= terminateAt then
+                    headIn
+
+                else
+                    loop tail headIn headOut
 
 
 visitNode : Int -> Set G.NodeId -> G.Graph -> Set G.NodeId -> Maybe G.NodeId -> Result -> Result
@@ -104,18 +107,19 @@ visitNode lastDistance startOrSelected graph unvisited target dp0 =
             if Just node == target then
                 -- if we're searching for this one specific node, quit early
                 dp0
+
             else
                 let
                     unvisitedNeighbors =
                         G.neighbors node graph |> Set.intersect unvisited |> Set.toList
 
                     d =
-                        Dict.get node dp0.distances |> Maybe.Extra.unpack (\_ -> Debug.crash "dijkstra: visitNeighbors: no prevNode distance?") identity
+                        Dict.get node dp0.distances |> Maybe.Extra.unpack (\_ -> Debug.todo "dijkstra: visitNeighbors: no prevNode distance?") identity
 
                     dp =
                         visitNeighbors startOrSelected { distances = dp0.distances, prevs = dp0.prevs } node d unvisitedNeighbors
                 in
-                    visitNode d startOrSelected graph (Set.remove node unvisited) target dp
+                visitNode d startOrSelected graph (Set.remove node unvisited) target dp
 
 
 visitNeighbors : Set G.NodeId -> Result -> G.NodeId -> Int -> List G.NodeId -> Result
@@ -133,6 +137,7 @@ visitNeighbors startOrSelected dp prevNode prevDist neighbors =
                     if prevDist == 0 && Set.member nextNode startOrSelected then
                         -- we still have a selected-connection to the start area; keep growing it
                         0
+
                     else
                         -- even if this node's selected, it's not start-connected
                         prevDist + 1
@@ -143,10 +148,11 @@ visitNeighbors startOrSelected dp prevNode prevDist neighbors =
                 dp1 =
                     if isShorter then
                         { distances = Dict.insert nextNode d distances, prevs = Dict.insert nextNode prevNode prevs }
+
                     else
                         dp
             in
-                visitNeighbors startOrSelected dp1 prevNode prevDist (List.drop 1 neighbors)
+            visitNeighbors startOrSelected dp1 prevNode prevDist (List.drop 1 neighbors)
 
 
 
@@ -164,4 +170,4 @@ selectPathToNode { prevs } =
                 Just next ->
                     loop (first :: path) next
     in
-        loop []
+    loop []

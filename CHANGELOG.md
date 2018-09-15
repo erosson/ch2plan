@@ -29,7 +29,12 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 ---
 
+## 2018-09-15
+
+- [Lots of internal code changes](https://github.com/erosson/ch2plan/issues/60). None of these changes should be visible to you, or make the site behave any differently - let me know if anything broke today!
+
 ## 2018-08-19
+
 - Update to 0.07-(8)-beta-PTR
 
 ## 2018-08-18

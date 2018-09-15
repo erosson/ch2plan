@@ -1,11 +1,11 @@
-module View.Spreadsheet exposing (view, format)
+module View.Spreadsheet exposing (format, view)
 
 import Dict as Dict exposing (Dict)
 import Html as H
 import Html.Attributes as A
 import Html.Events as E
-import Route
 import Model as M
+import Route
 
 
 view : M.Model -> Route.HomeParams -> H.Html msg
@@ -41,15 +41,15 @@ formatRows stats =
             ( nodeType.key, count )
 
         counts =
-            stats.nodes |> List.map (uncurry mapCounts) |> Dict.fromList
+            stats.nodes |> List.map (\( a, b ) -> mapCounts a b) |> Dict.fromList
     in
-        stats.char.nodeTypes
-            |> Dict.values
-            |> List.sortBy .key
-            |> List.map
-                (\node ->
-                    [ node.key
-                    , counts |> Dict.get node.key |> Maybe.withDefault 0 |> toString
-                    , "'" ++ node.name
-                    ]
-                )
+    stats.char.nodeTypes
+        |> Dict.values
+        |> List.sortBy .key
+        |> List.map
+            (\node ->
+                [ node.key
+                , counts |> Dict.get node.key |> Maybe.withDefault 0 |> String.fromInt
+                , "'" ++ node.name
+                ]
+            )

@@ -1,34 +1,35 @@
-module GameData
-    exposing
-        ( GameData
-        , GameVersionData
-        , Character
-        , Graph
-        , Node
-        , Edge
-        , NodeId
-        , NodeType
-        , NodeQuality(..)
-        , Skill
-        , decoder
-        , neighbors
-        , latestVersionId
-        , latestVersion
-        , graphMinX
-        , graphMinY
-        , graphMaxX
-        , graphMaxY
-        , graphWidth
-        , graphHeight
-        )
+module GameData exposing
+    ( Character
+    , Edge
+    , GameData
+    , GameVersionData
+    , Graph
+    , Node
+    , NodeId
+    , NodeQuality(..)
+    , NodeType
+    , Skill
+    , decoder
+    , graphHeight
+    , graphMaxX
+    , graphMaxY
+    , graphMinX
+    , graphMinY
+    , graphWidth
+    , latestVersion
+    , latestVersionId
+    , neighbors
+    , nodeTypeToString
+    , qualityToString
+    )
 
+import Dict as Dict exposing (Dict)
+import GameData.Stats as GS
 import Json.Decode as D
 import Json.Decode.Pipeline as P
-import Dict as Dict exposing (Dict)
-import Set as Set exposing (Set)
 import Maybe.Extra
-import GameData.Stats as GS
 import Regex as Regex exposing (Regex)
+import Set as Set exposing (Set)
 
 
 type alias GameData =
@@ -122,9 +123,9 @@ type alias Edge =
 
 latestVersionId : GameData -> String
 latestVersionId g =
-    case g.versionList |> List.filter (\v -> not <| Regex.contains (Regex.regex "PTR") v) |> List.reverse |> List.head of
+    case g.versionList |> List.filter (String.contains "PTR" >> not) |> List.reverse |> List.head of
         Nothing ->
-            Debug.crash "no game version data, no tree-planner"
+            Debug.todo "no game version data, no tree-planner"
 
         Just v ->
             v
@@ -134,7 +135,7 @@ latestVersion : GameData -> GameVersionData
 latestVersion g =
     case Dict.get (latestVersionId g) g.byVersion of
         Nothing ->
-            Debug.crash "game version in versionList not in byVersion"
+            Debug.todo "game version in versionList not in byVersion"
 
         Just s ->
             s
@@ -142,7 +143,7 @@ latestVersion g =
 
 decoder : D.Decoder GameData
 decoder =
-    P.decode GameData
+    D.succeed GameData
         |> P.required "versionList" (D.list D.string)
         |> P.required "byVersion" (D.dict gameVersionDecoder)
 
@@ -150,21 +151,21 @@ decoder =
 gameVersionDecoder : D.Decoder GameVersionData
 gameVersionDecoder =
     let
-        decoder : ( GS.Stats, Dict String Skill ) -> D.Decoder GameVersionData
-        decoder ( stats, skills ) =
-            P.decode GameVersionData
+        decoder_ : ( GS.Stats, Dict String Skill ) -> D.Decoder GameVersionData
+        decoder_ ( stats, skills ) =
+            D.succeed GameVersionData
                 |> P.required "versionSlug" D.string
                 |> P.custom (D.succeed stats)
                 |> P.required "heroes" (heroesDecoder stats skills)
     in
-        D.map2 (,)
-            (D.field "stats" GS.decoder)
-            (D.field "skills" (D.dict skillDecoder)
-                -- when 0.052 was exported, I hadn't yet implemented skills, so they're missing
-                |> D.maybe
-                |> D.map (Maybe.withDefault Dict.empty)
-            )
-            |> D.andThen decoder
+    D.map2 (\a b -> ( a, b ))
+        (D.field "stats" GS.decoder)
+        (D.field "skills" (D.dict skillDecoder)
+            -- when 0.052 was exported, I hadn't yet implemented skills, so they're missing
+            |> D.maybe
+            |> D.map (Maybe.withDefault Dict.empty)
+        )
+        |> D.andThen decoder_
 
 
 nonzeroIntDecoder : D.Decoder (Maybe Int)
@@ -174,6 +175,7 @@ nonzeroIntDecoder =
             (\i ->
                 if i == 0 then
                     Nothing
+
                 else
                     Just i
             )
@@ -181,12 +183,12 @@ nonzeroIntDecoder =
 
 skillNameToId : String -> String
 skillNameToId =
-    Regex.replace Regex.All (Regex.regex "\\W+") (always "")
+    Regex.replace (Regex.fromString "\\W+" |> Maybe.withDefault Regex.never) (always "")
 
 
 skillDecoder : D.Decoder Skill
 skillDecoder =
-    P.decode Skill
+    D.succeed Skill
         |> P.required "name" (D.string |> D.map skillNameToId)
         |> P.required "name" D.string
         |> P.required "iconId" D.int
@@ -203,26 +205,27 @@ heroesDecoder stats skills =
 
 
 dictKeyDecoder : (String -> D.Decoder a) -> D.Decoder (Dict String a)
-dictKeyDecoder decoder =
+dictKeyDecoder decoder_ =
     let
         decode : String -> D.Value -> D.Decoder ( String, a )
         decode key val =
-            case D.decodeValue (decoder key) val of
+            case D.decodeValue (decoder_ key) val of
                 Ok ok ->
                     D.succeed ( key, ok )
 
                 Err err ->
-                    D.fail err
+                    -- TODO elm 0.19 upgrade mangled the typing here a bit; fix it
+                    D.fail (Debug.toString err)
     in
-        D.keyValuePairs D.value
-            |> D.map (List.map (uncurry decode))
-            |> D.andThen (List.foldr (D.map2 (::)) (D.succeed []))
-            |> D.map Dict.fromList
+    D.keyValuePairs D.value
+        |> D.map (List.map (\( a, b ) -> decode a b))
+        |> D.andThen (List.foldr (D.map2 (::)) (D.succeed []))
+        |> D.map Dict.fromList
 
 
 characterDecoder : Dict String Skill -> Maybe GS.Character -> D.Decoder Character
 characterDecoder skills stats =
-    P.decode Character
+    D.succeed Character
         |> P.required "name" D.string
         |> P.required "flavorName" D.string
         |> P.required "flavorClass" D.string
@@ -230,7 +233,7 @@ characterDecoder skills stats =
         |> P.required "levelGraphNodeTypes" (nodeTypesDecoder stats)
         -- graph looks at two fields to construct one, so this looks a little weird
         |> P.custom
-            (P.decode graph
+            (D.succeed graph
                 |> P.required "levelGraphNodeTypes" (nodeTypesDecoder stats)
                 |> P.required "levelGraphObject" levelGraphObjectDecoder
             )
@@ -242,8 +245,10 @@ parseNodeQuality id =
     -- This is a terribly hacky way to determine a node's color, but it works for now.
     if String.startsWith "q" id then
         Notable
+
     else if String.startsWith "Q" id then
         Keystone
+
     else
         Plain
 
@@ -255,16 +260,16 @@ nodeTypesDecoder stats =
 
 decodeDictKeyInt name ( key0, val ) =
     case String.toInt key0 of
-        Ok key ->
+        Just key ->
             D.succeed ( key, val )
 
-        Err err ->
-            D.fail <| "couldn't decode " ++ name ++ " dict key: " ++ err
+        Nothing ->
+            D.fail <| "couldn't decode " ++ name ++ " dict key"
 
 
 levelGraphObjectDecoder : D.Decoder GraphSpec
 levelGraphObjectDecoder =
-    P.decode GraphSpec
+    D.succeed GraphSpec
         |> P.required "edges"
             (edgeDecoder
                 |> D.dict
@@ -299,7 +304,7 @@ edgeDecoder =
 
 nodeDecoder : D.Decoder NodeSpec
 nodeDecoder =
-    P.decode NodeSpec
+    D.succeed NodeSpec
         |> P.required "val" D.string
         |> P.required "x" D.int
         |> P.required "y" D.int
@@ -307,7 +312,7 @@ nodeDecoder =
 
 nodeTypeDecoder : Maybe GS.Character -> String -> D.Decoder (NodeQuality -> NodeType)
 nodeTypeDecoder stats key =
-    P.decode NodeType
+    D.succeed NodeType
         |> P.custom (D.succeed key)
         |> P.required "name" D.string
         |> P.required "icon" D.string
@@ -330,7 +335,7 @@ graph nodeTypes graphSpec =
                     { id = id, typeId = n.val, x = n.x, y = n.y, val = val }
 
                 Nothing ->
-                    Debug.crash <| "no such nodetype: " ++ n.val
+                    Debug.todo <| "no such nodetype: " ++ n.val
 
         nodes =
             Dict.map getNode graphSpec.nodes
@@ -338,21 +343,21 @@ graph nodeTypes graphSpec =
         getEdge ( a, b ) =
             -- TODO this should be a decoder or result
             case ( Dict.get a nodes, Dict.get b nodes ) of
-                ( Just a, Just b ) ->
-                    ( a, b )
+                ( Just aa, Just bb ) ->
+                    ( aa, bb )
 
                 _ ->
-                    Debug.crash <| "no such edge: " ++ toString ( a, b )
+                    Debug.todo <| "no such edge: " ++ Debug.toString ( a, b )
 
         edges =
             Dict.map (always getEdge) graphSpec.edges
     in
-        { nodes = nodes
-        , edges = edges
-        , startNodes = Set.singleton 1 -- TODO happens to work for helpfulAdventurer, but where does this come from?
-        , neighbors = calcNeighbors <| Dict.values edges
-        , bounds = calcBounds <| Dict.values nodes
-        }
+    { nodes = nodes
+    , edges = edges
+    , startNodes = Set.singleton 1 -- TODO happens to work for helpfulAdventurer, but where does this come from?
+    , neighbors = calcNeighbors <| Dict.values edges
+    , bounds = calcBounds <| Dict.values nodes
+    }
 
 
 type alias NodeId =
@@ -371,17 +376,17 @@ calcNeighbors =
         fold ( n1, n2 ) =
             Dict.update n1.id (update n2.id) >> Dict.update n2.id (update n1.id)
     in
-        List.foldr fold Dict.empty
+    List.foldr fold Dict.empty
 
 
 neighbors : NodeId -> Graph -> Set NodeId
-neighbors id { neighbors } =
-    case Dict.get id neighbors of
+neighbors id g =
+    case Dict.get id g.neighbors of
         Just ids ->
             ids
 
         Nothing ->
-            Debug.crash <| "neighbors for a nonexistant node: " ++ toString id
+            Debug.todo <| "neighbors for a nonexistant node: " ++ String.fromInt id
 
 
 type alias GraphBounds =
@@ -424,3 +429,13 @@ graphHeight g =
 graphWidth : Graph -> Int
 graphWidth g =
     graphMaxX g - graphMinX g
+
+
+qualityToString : NodeQuality -> String
+qualityToString =
+    Debug.toString
+
+
+nodeTypeToString : NodeType -> String
+nodeTypeToString =
+    Debug.toString

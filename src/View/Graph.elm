@@ -1,31 +1,29 @@
-module View.Graph
-    exposing
-        ( view
-        , nodeBackgroundImage
-        , nodeQualityClass
-        , iconUrl
-        )
+module View.Graph exposing
+    ( iconUrl
+    , nodeBackgroundImage
+    , nodeQualityClass
+    , view
+    )
 
 import Dict as Dict exposing (Dict)
-import Set as Set exposing (Set)
-import Regex as Regex exposing (Regex)
+import Draggable
+import GameData as G
 import Html as H
 import Html.Attributes as HA
+import Json.Decode as Decode
+import List.Extra
+import Math.Vector2 as V2
+import Maybe.Extra
+import Model as M
+import Model.Graph as MG
+import Regex as Regex exposing (Regex)
+import Route
+import Set as Set exposing (Set)
 import Svg as S
 import Svg.Attributes as A
 import Svg.Events as E
 import Svg.Lazy as L
-import Maybe.Extra
-import List.Extra
-import Math.Vector2 as V2
-import Draggable
 import VirtualDom
-import Json.Decode as Decode
-import Window
-import Model as M
-import Model.Graph as MG
-import GameData as G
-import Route
 
 
 view : M.Model -> MG.GraphModel -> H.Html M.Msg
@@ -49,18 +47,17 @@ view model graph =
                 , S.filter [ A.id "highlight5" ] [ S.feColorMatrix [ A.type_ "hueRotate", A.values "315" ] [] ]
                 ]
             , S.g [ zoomAndPan model graph ]
-                ([ graph |> L.lazy2 viewEdges False
-                 , graph |> L.lazy2 viewEdges True
-                 , graph |> L.lazy viewNodeBackgrounds
-                 , graph |> L.lazy2 viewNodes model.features
-                 ]
-                )
+                [ graph |> L.lazy2 viewEdges False
+                , graph |> L.lazy2 viewEdges True
+                , graph |> L.lazy viewNodeBackgrounds
+                , graph |> L.lazy2 viewNodes model.features
+                ]
             , viewZoomButtons model.windowSize
             ]
          ]
             ++ Maybe.Extra.unwrap []
                 (List.singleton << viewTooltip model graph)
-                (M.visibleTooltip model |> Maybe.andThen ((flip Dict.get) graph.char.graph.nodes))
+                (M.visibleTooltip model |> Maybe.andThen ((\b a -> Dict.get a b) graph.char.graph.nodes))
         )
 
 
@@ -70,7 +67,7 @@ viewNodeBackgrounds home =
         _ =
             Debug.log "redraw backgrounds" ()
     in
-        home.char.graph.nodes |> Dict.toList |> List.map (viewNodeBackground home << Tuple.second) |> S.g []
+    home.char.graph.nodes |> Dict.toList |> List.map (viewNodeBackground home << Tuple.second) |> S.g []
 
 
 viewNodes : Route.Features -> MG.GraphModel -> S.Svg M.Msg
@@ -79,7 +76,7 @@ viewNodes features home =
         _ =
             Debug.log "redraw nodes" ()
     in
-        home.char.graph.nodes |> Dict.toList |> List.map (viewNode features home << Tuple.second) |> S.g []
+    home.char.graph.nodes |> Dict.toList |> List.map (viewNode features home << Tuple.second) |> S.g []
 
 
 viewEdges : Bool -> MG.GraphModel -> S.Svg msg
@@ -91,6 +88,7 @@ viewEdges selected home =
         ( edges, classes ) =
             if selected then
                 ( List.filter (\e -> isEdgeSelected home e) <| Dict.values home.char.graph.edges, "edge edge-selected" )
+
             else
                 ( List.Extra.filterNot (\e -> isEdgeSelected home e) <| Dict.values home.char.graph.edges, "edge" )
 
@@ -99,7 +97,7 @@ viewEdges selected home =
                 |> List.map viewEdge
                 |> String.join " "
     in
-        S.path [ A.class classes, A.d path ] []
+    S.path [ A.class classes, A.d path ] []
 
 
 viewTooltip : M.Model -> MG.GraphModel -> G.Node -> H.Html msg
@@ -125,26 +123,30 @@ viewTooltip model graph node =
         sidebarOffset =
             if model.sidebarOpen then
                 sidebarWidth
+
             else
                 0
 
         style =
             [ if x > sidebarOffset + w / 2 then
                 ( "right", sidebarOffset + w - x )
+
               else
                 ( "left", x )
             , if y > h / 2 then
                 ( "bottom", h - y )
+
               else
                 ( "top", y )
             ]
-                |> List.map (Tuple.mapSecond <| \n -> toString n ++ "px")
+                |> List.map (Tuple.mapSecond <| \n -> String.fromFloat n ++ "px")
+                |> List.map (\( k, v ) -> HA.style k v)
     in
-        H.div [ HA.class "tooltip", HA.style style ]
-            [ H.b [] [ H.text node.val.name ]
-            , H.p [] [ H.text <| Maybe.withDefault "" node.val.tooltip ]
-            , H.p [ A.class "flavor" ] [ H.text <| Maybe.withDefault "" node.val.flavorText ]
-            ]
+    H.div ([ HA.class "tooltip" ] ++ style)
+        [ H.b [] [ H.text node.val.name ]
+        , H.p [] [ H.text <| Maybe.withDefault "" node.val.tooltip ]
+        , H.p [ A.class "flavor" ] [ H.text <| Maybe.withDefault "" node.val.flavorText ]
+        ]
 
 
 {-| Also old title-tooltip text.
@@ -158,7 +160,7 @@ appendSearch =
     Maybe.Extra.unwrap "" ((++) "\n\n")
 
 
-viewZoomButtons : Window.Size -> S.Svg M.Msg
+viewZoomButtons : { width : Int, height : Int } -> S.Svg M.Msg
 viewZoomButtons w =
     S.g [ A.class "zoom-buttons" ]
         [ viewZoomButton ( w.width - 35, 5 ) "+" (M.Zoom -25)
@@ -169,8 +171,8 @@ viewZoomButtons w =
 viewZoomButton : ( Int, Int ) -> String -> msg -> S.Svg msg
 viewZoomButton ( x, y ) text msg =
     S.g [ E.onClick msg ]
-        [ S.rect [ A.x (toString x), A.y (toString y), A.width "30", A.height "30", A.rx "5", A.ry "5" ] []
-        , S.text_ [ A.x (toString <| x + 15), A.y (toString <| y + 15) ] [ S.text text ]
+        [ S.rect [ A.x (String.fromInt x), A.y (String.fromInt y), A.width "30", A.height "30", A.rx "5", A.ry "5" ] []
+        , S.text_ [ A.x (String.fromInt <| x + 15), A.y (String.fromInt <| y + 15) ] [ S.text text ]
         ]
 
 
@@ -181,7 +183,7 @@ inputZoomAndPan =
     ]
 
 
-panOffsets : M.Model -> MG.GraphModel -> ( Window.Size, Float, Float )
+panOffsets : M.Model -> MG.GraphModel -> ( { width : Int, height : Int }, Float, Float )
 panOffsets model graph =
     let
         ( w, sidebarXOffset ) =
@@ -191,21 +193,22 @@ panOffsets model graph =
                   }
                 , sidebarWidth
                 )
+
             else
                 ( model.windowSize, 0 )
 
-        ( cx, cy ) =
-            M.center { model | windowSize = w } graph |> V2.toTuple
+        c =
+            M.center { model | windowSize = w } graph |> V2.toRecord
 
         zoom =
             M.zoom { model | windowSize = w } graph
 
         ( left, top ) =
-            ( cx - (toFloat w.width / 2 + sidebarXOffset) / zoom
-            , cy - toFloat w.height / 2 / zoom
+            ( c.x - (toFloat w.width / 2 + sidebarXOffset) / zoom
+            , c.y - toFloat w.height / 2 / zoom
             )
     in
-        ( w, -left, -top )
+    ( w, -left, -top )
 
 
 sidebarWidth =
@@ -222,24 +225,26 @@ zoomAndPan model graph =
             M.zoom { model | windowSize = w } graph
 
         panning =
-            "translate(" ++ toString panX ++ ", " ++ toString panY ++ ")"
+            "translate(" ++ String.fromFloat panX ++ ", " ++ String.fromFloat panY ++ ")"
 
         zooming =
-            "scale(" ++ toString zoom ++ ")"
+            "scale(" ++ String.fromFloat zoom ++ ")"
     in
-        A.transform (zooming ++ " " ++ panning)
+    A.transform (zooming ++ " " ++ panning)
 
 
 handleZoom : S.Attribute M.Msg
 handleZoom =
     let
-        ignoreDefaults =
-            VirtualDom.Options True True
+        event dy =
+            { stopPropagation = True
+            , preventDefault = True
+            , message = normalizeMouseZoom dy
+            }
     in
-        VirtualDom.onWithOptions
-            "wheel"
-            ignoreDefaults
-            (Decode.map normalizeMouseZoom <| Decode.field "deltaY" Decode.float)
+    VirtualDom.on
+        "wheel"
+        (Decode.field "deltaY" Decode.float |> Decode.map event |> VirtualDom.Custom)
 
 
 normalizeMouseZoom : Float -> M.Msg
@@ -248,21 +253,23 @@ normalizeMouseZoom deltaY =
         normalized =
             if deltaY < 0 then
                 -1
+
             else if deltaY > 0 then
                 1
+
             else
                 0
 
         speed =
             10
     in
-        M.Zoom <| normalized * speed
+    M.Zoom <| normalized * speed
 
 
 formatViewBox : Int -> G.Graph -> String
 formatViewBox margin g =
     [ G.graphMinX g - margin, G.graphMinY g - margin, G.graphWidth g + 2 * margin, G.graphHeight g + 2 * margin ]
-        |> List.map toString
+        |> List.map String.fromInt
         |> String.join " "
 
 
@@ -275,24 +282,24 @@ isEdgeSelected home ( a, b ) =
         bSelected =
             Set.member b.id home.selected
     in
-        aSelected && bSelected
+    aSelected && bSelected
 
 
 viewEdge : G.Edge -> String
 viewEdge ( a, b ) =
     let
         startPoint =
-            "M" ++ toString a.x ++ " " ++ toString a.y
+            "M" ++ String.fromInt a.x ++ " " ++ String.fromInt a.y
 
         endPoint =
-            "L" ++ toString b.x ++ " " ++ toString b.y
+            "L" ++ String.fromInt b.x ++ " " ++ String.fromInt b.y
     in
-        startPoint ++ " " ++ endPoint
+    startPoint ++ " " ++ endPoint
 
 
 nodeQualityClass : G.NodeQuality -> String
 nodeQualityClass =
-    toString >> (++) "node-"
+    G.qualityToString >> (++) "node-"
 
 
 iconSize =
@@ -314,10 +321,10 @@ viewNodeBackground { selected, search, neighbors } { id, x, y, val } =
     S.image
         [ A.class <| String.join " " [ "node-background", nodeHighlightClass search val, nodeSelectedClass selected id, nodeNeighborClass neighbors id, nodeQualityClass val.quality ]
         , A.xlinkHref <| nodeBackgroundImage val (isNodeHighlighted search val) (Set.member id selected) (Set.member id neighbors)
-        , A.x <| toString <| x - nodeBGSize // 2
-        , A.y <| toString <| y - nodeBGSize // 2
-        , A.width <| toString nodeBGSize
-        , A.height <| toString nodeBGSize
+        , A.x <| String.fromInt <| x - nodeBGSize // 2
+        , A.y <| String.fromInt <| y - nodeBGSize // 2
+        , A.width <| String.fromInt nodeBGSize
+        , A.height <| String.fromInt nodeBGSize
         ]
         []
 
@@ -335,10 +342,10 @@ viewNode features home { id, x, y, val } =
         ]
         [ S.image
             [ A.xlinkHref <| iconUrl val
-            , A.x <| toString <| x - iconSize // 2
-            , A.y <| toString <| y - iconSize // 2
-            , A.width <| toString iconSize
-            , A.height <| toString iconSize
+            , A.x <| String.fromInt <| x - iconSize // 2
+            , A.y <| String.fromInt <| y - iconSize // 2
+            , A.width <| String.fromInt iconSize
+            , A.height <| String.fromInt iconSize
             ]
             []
         ]
@@ -361,6 +368,7 @@ nodeBackgroundImage node isHighlighted isSelected isNeighbor =
         suffix =
             if isHighlighted then
                 "Highlight"
+
             else if isSelected then
                 -- SelectedVis has a green border, while Selected is just like in-game.
                 -- Small nodes aren't visible enough when selected - too small,
@@ -369,14 +377,17 @@ nodeBackgroundImage node isHighlighted isSelected isNeighbor =
                 -- the extra border - much larger, with more color - so leave them alone.
                 if node.quality == G.Plain then
                     "SelectedVis"
+
                 else
                     "Selected"
+
             else if isNeighbor then
                 "Next"
+
             else
                 ""
     in
-        "./ch2data/node-img/" ++ quality ++ suffix ++ ".png?3"
+    "./ch2data/node-img/" ++ quality ++ suffix ++ ".png?3"
 
 
 isNodeHighlighted : Maybe Regex -> G.NodeType -> Bool
@@ -390,22 +401,22 @@ nodeHighlightGroup : Maybe Regex -> G.NodeType -> Maybe Int
 nodeHighlightGroup regex0 t =
     let
         find regex =
-            case nodeSearchText t |> Regex.find (Regex.AtMost 1) regex of
+            case nodeSearchText t |> Regex.findAtMost 1 regex of
                 [] ->
                     Nothing
 
                 { submatches } :: _ ->
                     submatches
-                        |> List.indexedMap (,)
+                        |> List.indexedMap (\a b -> ( a, b ))
                         -- |> Debug.log ("nodeHighlightGroup match: " ++ t.name)
                         -- maximum 6 groups. ~~640k~~ 6 ought to be enough for anybody
-                        |> List.filterMap (\( i, match ) -> match |> Maybe.map (always <| i % 6))
+                        |> List.filterMap (\( i, match ) -> match |> Maybe.map (always <| modBy 6 i))
                         |> List.head
                         -- it matched, but has no subgroups
                         |> Maybe.withDefault 0
                         |> Just
     in
-        Maybe.Extra.unwrap Nothing find regex0
+    Maybe.Extra.unwrap Nothing find regex0
 
 
 nodeHighlightClass : Maybe Regex -> G.NodeType -> String
@@ -415,13 +426,14 @@ nodeHighlightClass q t =
             "node-nohighlight"
 
         Just i ->
-            "node-highlight node-highlight" ++ toString i
+            "node-highlight node-highlight" ++ String.fromInt i
 
 
 nodeSelectedClass : Set Int -> Int -> String
 nodeSelectedClass selected id =
     if Set.member id selected then
         "node-selected"
+
     else
         "node-noselected"
 
@@ -430,5 +442,6 @@ nodeNeighborClass : Set Int -> Int -> String
 nodeNeighborClass selected id =
     if Set.member id selected then
         "node-neighbor"
+
     else
         "node-nonneighbor"
