@@ -44,11 +44,11 @@ Here's the procedure. An Ubuntu Linux machine and ffdec are required. (TODO add 
     - Add ./exporter/bin/ch2plan-exporter.swf to your [Clicker Heroes 2 mods](https://www.clickerheroes2.com/installing_mods.php).
     - Open Clicker Heroes 2.
     - (TODO: automate this) Move `latest.json` from your desktop to (TODO: where it belongs).
-    - (TODO: automate this) Run `yarn export:post-chars`
+    - (TODO: automate this) Run `yarn export:postchars`
   - Run the old reliable `yarn export:chars`. It opens a text file and - much less visibly - starts a web server and adds the url to your clipboard.
     - Open a browser. New tab. Ctrl-v, enter. You'll see a page that says "open the javascript console".
     - Do so (ctrl-shift-j). Copy all the json. Paste it in to the text file.
     - Close the text file. Kill the web server (ctrl-c).
--   Add links to the new version in ViewSkillTree.elm, if necessary.
+- Add links to the new version in ViewSkillTree.elm, if necessary.
 - You're done, hopefully! Run `yarn dev` to test things.
-  - If you change stats.json after this point, run `yarn export:post-chars` to update it.
+  - If you change stats.json after this point, run `yarn export:postchars` to update it.

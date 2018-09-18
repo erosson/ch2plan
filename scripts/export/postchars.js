@@ -1,5 +1,6 @@
 const { promisify } = require("util");
 const fs = require("fs");
+const sortJson = require("sort-json");
 
 async function readStats(path) {
   try {
@@ -18,7 +19,8 @@ async function main(path) {
     // the dir already exists, that's fine
   }
 
-  const json = JSON.parse(await promisify(fs.readFile)(path));
+  const json = sortJson(JSON.parse(await promisify(fs.readFile)(path)));
+  const rawSortedJson = Object.assign({}, json);
   json.versionSlug = json.ch2.GAME_VERSION.replace(/\s/g, "-");
   const statsSnapshotPath =
     "./assets/ch2data/chars/v/full/" + json.versionSlug + ".stats.json";
@@ -44,6 +46,7 @@ async function main(path) {
   }
   allJson.byVersion[json.versionSlug] = json;
   await Promise.all([
+    promisify(fs.writeFile)(path, JSON.stringify(rawSortedJson, null, 2)),
     promisify(fs.writeFile)(statsSnapshotPath, statsText),
     promisify(fs.writeFile)(
       "./assets/ch2data/chars/latest.min.json",
