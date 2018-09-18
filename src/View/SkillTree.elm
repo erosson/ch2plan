@@ -51,8 +51,8 @@ view header model graph =
 
 
 ver =
-    { live = "0.06-beta"
-    , ptr = "0.07-(8)-beta-PTR"
+    { live = "0.07-beta"
+    , ptr = "0.08-beta-(e)"
     }
 
 

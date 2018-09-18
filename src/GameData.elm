@@ -122,7 +122,7 @@ type alias Edge =
 
 latestVersionId : GameData -> String
 latestVersionId g =
-    case g.versionList |> List.filter (\v -> not <| Regex.contains (Regex.regex "PTR") v) |> List.reverse |> List.head of
+    case g.versionList |> List.filter (\v -> not <| Regex.contains (Regex.regex "PTR|\\(e\\)") v) |> List.reverse |> List.head of
         Nothing ->
             Debug.crash "no game version data, no tree-planner"
 

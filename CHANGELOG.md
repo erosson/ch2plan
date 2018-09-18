@@ -29,6 +29,10 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 ---
 
+## 2018-09-17
+- Update to live version 0.07-beta, and PTR version 0.08-beta-(e).
+  - Planning your PTR automator tree is not yet supported, but you can see the automator tree by scrolling far to the right.
+
 ## 2018-08-19
 - Update to 0.07-(8)-beta-PTR
 
