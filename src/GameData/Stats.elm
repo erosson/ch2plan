@@ -1,25 +1,24 @@
-module GameData.Stats
-    exposing
-        ( Stats
-        , StatValue
-        , Growth(..)
-        , Character
-        , Stat(..)
-        , StatTotal
-        , Rules
-        , decoder
-        , calcStat
-        , calcStats
-        , statTable
-        , getStat
-        )
+module GameData.Stats exposing
+    ( Character
+    , Growth(..)
+    , Rules
+    , Stat(..)
+    , StatTotal
+    , StatValue
+    , Stats
+    , calcStat
+    , calcStats
+    , decoder
+    , getStat
+    , statTable
+    )
 
+import Dict as Dict exposing (Dict)
+import Dict.Extra
 import Json.Decode as D
 import Json.Decode.Pipeline as P
-import Dict as Dict exposing (Dict)
-import Maybe.Extra
 import List.Extra
-import Dict.Extra
+import Maybe.Extra
 
 
 type Growth
@@ -53,7 +52,7 @@ rules0 =
 
 decoder : D.Decoder Stats
 decoder =
-    P.decode Stats
+    D.succeed Stats
         |> P.optional "rules" rulesDecoder rules0
         |> P.required "statValueFunctions" (D.dict statValueDecoder)
         |> P.required "characters" (D.dict charDecoder)
@@ -61,14 +60,14 @@ decoder =
 
 charDecoder : D.Decoder Character
 charDecoder =
-    P.decode Character
+    D.succeed Character
         -- TODO traits
         |> P.required "stats" (charStatsDecoder |> D.map charStatsByNodeType)
 
 
 rulesDecoder : D.Decoder Rules
 rulesDecoder =
-    P.decode Rules
+    D.succeed Rules
         |> P.optional "hasteAffectsDuration" D.bool rules0.hasteAffectsDuration
 
 
@@ -84,7 +83,7 @@ charStatsDecoder : D.Decoder (Dict StatName (List ( NodeType, Int )))
 charStatsDecoder =
     D.dict <|
         D.list <|
-            D.map2 (,)
+            D.map2 (\a b -> ( a, b ))
                 (D.index 0 D.string)
                 (D.index 1 D.int)
 
@@ -105,7 +104,7 @@ charStatsByNodeType =
 
 statValueDecoder : D.Decoder StatValue
 statValueDecoder =
-    P.decode StatValue
+    D.succeed StatValue
         |> P.custom (D.index 0 D.float)
         |> P.custom (D.index 1 growthDecoder)
         |> P.custom (D.index 2 D.float)
@@ -130,9 +129,9 @@ growthDecoder =
 
 calcStat : Stats -> Stat -> Int -> Float
 calcStat stats stat level =
-    case Dict.get (toString stat) stats.statValueFunctions of
+    case Dict.get (statToString stat) stats.statValueFunctions of
         Nothing ->
-            Debug.crash <| "Impossible. Perhaps the stats.json is incomplete. " ++ toString stat
+            Debug.todo <| "Impossible. Perhaps the stats.json is incomplete. " ++ Debug.toString stat
 
         Just statValue ->
             case statValue.growth of
@@ -149,17 +148,17 @@ sumStatLevels stats =
         sums : Dict String Int
         sums =
             stats
-                |> Dict.Extra.groupBy (Tuple.first >> toString)
+                |> Dict.Extra.groupBy (Tuple.first >> statToString)
                 |> Dict.map (List.map Tuple.second >> List.sum |> always)
     in
-        statList
-            |> List.map
-                (\stat ->
-                    ( stat
-                    , Dict.get (toString stat) sums
-                        |> Maybe.withDefault 0
-                    )
+    statList
+        |> List.map
+            (\stat ->
+                ( stat
+                , Dict.get (statToString stat) sums
+                    |> Maybe.withDefault 0
                 )
+            )
 
 
 type alias StatTotal =
@@ -279,12 +278,18 @@ statList =
     ]
 
 
+statToString : Stat -> String
+statToString =
+    -- TODO
+    Debug.toString
+
+
 statsBySkill : Dict String (Dict String Stat)
 statsBySkill =
     statList
         |> List.map
             (\s ->
-                case toString s |> String.split "_" of
+                case statToString s |> String.split "_" of
                     [ skill, stat ] ->
                         Just ( skill, stat, s )
 
@@ -298,7 +303,7 @@ statsBySkill =
 
 statDict : Dict String Stat
 statDict =
-    statList |> List.map (\s -> ( toString s, s )) |> Dict.fromList
+    statList |> List.map (\s -> ( statToString s, s )) |> Dict.fromList
 
 
 statTable : List StatTotal -> Stat -> StatTotal
@@ -306,19 +311,20 @@ statTable stats =
     let
         dict : Dict String StatTotal
         dict =
-            stats |> List.map (\s -> ( toString s.stat, s )) |> Dict.fromList
+            stats |> List.map (\s -> ( statToString s.stat, s )) |> Dict.fromList
     in
-        -- it's a dict-measuring contest lolol
-        if Dict.size dict /= List.length statList then
-            Debug.crash ("statTable expects a complete list of stats. Expected " ++ toString (List.length statList) ++ ", got " ++ toString (Dict.size dict)) dict
-        else
-            \stat ->
-                case Dict.get (toString stat) dict of
-                    Nothing ->
-                        Debug.crash "statTable had a complete list of stats, but somehow dict.get missed one" stat
+    -- it's a dict-measuring contest lolol
+    if Dict.size dict /= List.length statList then
+        Debug.todo ("statTable expects a complete list of stats. Expected " ++ String.fromInt (List.length statList) ++ ", got " ++ String.fromInt (Dict.size dict)) dict
 
-                    Just stat ->
-                        stat
+    else
+        \stat ->
+            case Dict.get (statToString stat) dict of
+                Nothing ->
+                    Debug.todo "statTable had a complete list of stats, but somehow dict.get missed one" stat
+
+                Just juststat ->
+                    juststat
 
 
 getStat : String -> Maybe Stat

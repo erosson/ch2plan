@@ -1,14 +1,13 @@
-module Model.Skill
-    exposing
-        ( energyCost
-        , manaCost
-        , cooldown
-        , duration
-        , uptime
-        , damage
-        , stacks
-        , effect
-        )
+module Model.Skill exposing
+    ( cooldown
+    , damage
+    , duration
+    , effect
+    , energyCost
+    , manaCost
+    , stacks
+    , uptime
+    )
 
 import GameData as G
 import GameData.Stats as GS exposing (Stat(..))
@@ -49,10 +48,11 @@ duration rules g s =
             -- https://www.reddit.com/r/ClickerHeroes/comments/9587av/clicker_heroes_2_007_can_now_be_tested/
             if rules.hasteAffectsDuration then
                 (g STAT_HASTE).val
+
             else
                 1
     in
-        skillVal g s "duration" |> Maybe.map ((*) (1 / 1000 / haste))
+    skillVal g s "duration" |> Maybe.map ((*) (1 / 1000 / haste))
 
 
 uptime : GS.Rules -> (GS.Stat -> GS.StatTotal) -> G.Skill -> Maybe Float

@@ -1,17 +1,17 @@
-module View.Stats exposing (view, viewStatsSummary, viewNodeSummary)
+module View.Stats exposing (view, viewNodeSummary, viewStatsSummary)
 
 import Dict as Dict exposing (Dict)
-import Set as Set exposing (Set)
-import Time as Time exposing (Time)
+import GameData as G
+import GameData.Stats as GS exposing (Stat(..))
 import Html as H
 import Html.Attributes as A
 import Html.Events as E
 import Maybe.Extra
-import Route
 import Model as M
 import Model.Skill as Skill
-import GameData as G
-import GameData.Stats as GS exposing (Stat(..))
+import Route
+import Set as Set exposing (Set)
+import Time
 import View.Graph
 import View.Spreadsheet
 
@@ -27,36 +27,36 @@ view model params =
                 getStat =
                     GS.statTable stats
             in
-                H.div []
-                    [ H.p []
-                        [ H.a [ Route.href <| Route.Home params ] [ H.text "View Skill Tree" ] ]
-                    , H.p [ A.title "I haven't seen an official name for those blue nodes in CH2, so I stole Path of Exile's name for nodes like that." ]
-                        [ H.text "⚠ Warning: most of the blue "
-                        , H.span [ A.class "node-Keystone" ] [ H.text "Keystone Nodes" ]
-                        , H.text " have no effect on these stat calculations yet. Work is in progress. Please be patient. (All other nodes should work.)"
+            H.div []
+                [ H.p []
+                    [ H.a [ Route.href <| Route.Home params ] [ H.text "View Skill Tree" ] ]
+                , H.p [ A.title "I haven't seen an official name for those blue nodes in CH2, so I stole Path of Exile's name for nodes like that." ]
+                    [ H.text "⚠ Warning: most of the blue "
+                    , H.span [ A.class "node-Keystone" ] [ H.text "Keystone Nodes" ]
+                    , H.text " have no effect on these stat calculations yet. Work is in progress. Please be patient. (All other nodes should work.)"
+                    ]
+                , H.div [ A.class "stats-flex" ]
+                    [ H.div [ A.class "stats-box skills-summary" ]
+                        [ H.p [] [ H.text "Skills:" ]
+                        , H.ul [] (List.map (viewSkillSummary game.stats.rules getStat) <| List.filter (\s -> not <| Set.member s.id skillBlacklist) <| Dict.values char.skills)
                         ]
-                    , H.div [ A.class "stats-flex" ]
-                        [ H.div [ A.class "stats-box skills-summary" ]
-                            [ H.p [] [ H.text "Skills:" ]
-                            , H.ul [] (List.map (viewSkillSummary game.stats.rules getStat) <| List.filter (\s -> not <| Set.member s.id skillBlacklist) <| Dict.values char.skills)
-                            ]
-                        , H.div [ A.class "stats-box" ]
-                            [ H.p [] [ H.text "Statistics:" ]
-                            , viewStatsSummary getStat
-                            ]
-                        , H.div [ A.class "stats-box" ]
-                            [ H.p []
-                                [ H.a [ Route.href <| Route.Home params ] [ H.text <| toString (Set.size selected) ++ " skill points:" ]
-                                , H.text " ("
-                                , H.a [ Route.href <| Route.StatsTSV params ] [ H.text "spreadsheet format" ]
+                    , H.div [ A.class "stats-box" ]
+                        [ H.p [] [ H.text "Statistics:" ]
+                        , viewStatsSummary getStat
+                        ]
+                    , H.div [ A.class "stats-box" ]
+                        [ H.p []
+                            [ H.a [ Route.href <| Route.Home params ] [ H.text <| String.fromInt (Set.size selected) ++ " skill points:" ]
+                            , H.text " ("
+                            , H.a [ Route.href <| Route.StatsTSV params ] [ H.text "spreadsheet format" ]
 
-                                -- , H.textarea [ A.rows 1, A.cols 5, A.readonly True ] [ H.text <| View.Spreadsheet.format model summary ]
-                                , H.text ")"
-                                ]
-                            , viewNodeSummary True nodes
+                            -- , H.textarea [ A.rows 1, A.cols 5, A.readonly True ] [ H.text <| View.Spreadsheet.format model summary ]
+                            , H.text ")"
                             ]
+                        , viewNodeSummary True nodes
                         ]
                     ]
+                ]
 
 
 skillBlacklist =
@@ -69,14 +69,14 @@ viewSkillSummary rules getStat skill =
     let
         lines =
             -- all of these lines are conditional: displayed if and only if the far-left skill-field or stat exists (ie. is not Nothing).
-            [ Skill.energyCost getStat skill |> Maybe.map (int >> (,,) "Energy Cost" "")
-            , Skill.manaCost getStat skill |> Maybe.map (int >> (,,) "Mana Cost" "")
-            , Skill.cooldown getStat skill |> Maybe.map (sec 1 >> (,,) "Cooldown" "")
-            , Skill.duration rules getStat skill |> Maybe.map (sec 1 >> (,,) "Duration" "")
-            , Skill.uptime rules getStat skill |> Maybe.map (pct >> (,,) "Uptime" "Duration / cooldown. The amount of time this buff can be active. 100% means it's always active, if you can pay its mana cost.")
-            , Skill.damage getStat skill |> Maybe.map (pct >> (,,) "Damage" "")
-            , Skill.stacks getStat skill |> Maybe.map (int >> (,,) "Stacks" "")
-            , Skill.effect getStat skill |> Maybe.map (pct >> (,,) "Effect" "")
+            [ Skill.energyCost getStat skill |> Maybe.map (int >> (\c -> ( "Energy Cost", "", c )))
+            , Skill.manaCost getStat skill |> Maybe.map (int >> (\c -> ( "Mana Cost", "", c )))
+            , Skill.cooldown getStat skill |> Maybe.map (sec 1 >> (\c -> ( "Cooldown", "", c )))
+            , Skill.duration rules getStat skill |> Maybe.map (sec 1 >> (\c -> ( "Duration", "", c )))
+            , Skill.uptime rules getStat skill |> Maybe.map (pct >> (\c -> ( "Uptime", "Duration / cooldown. The amount of time this buff can be active. 100% means it's always active, if you can pay its mana cost.", c )))
+            , Skill.damage getStat skill |> Maybe.map (pct >> (\c -> ( "Damage", "", c )))
+            , Skill.stacks getStat skill |> Maybe.map (int >> (\c -> ( "Stacks", "", c )))
+            , Skill.effect getStat skill |> Maybe.map (pct >> (\c -> ( "Effect", "", c )))
             ]
                 |> Maybe.Extra.values
                 |> List.map
@@ -87,8 +87,8 @@ viewSkillSummary rules getStat skill =
                             ]
                     )
     in
-        H.li []
-            [ H.img [ A.class "skill-icon", A.src <| "./ch2data/img/skills/" ++ toString skill.iconId ++ ".png" ] [], H.b [] [ H.text skill.name ], H.ul [] lines ]
+    H.li []
+        [ H.img [ A.class "skill-icon", A.src <| "./ch2data/img/skills/" ++ String.fromInt skill.iconId ++ ".png" ] [], H.b [] [ H.text skill.name ], H.ul [] lines ]
 
 
 viewStatsSummary : (GS.Stat -> GS.StatTotal) -> H.Html msg
@@ -102,9 +102,9 @@ viewStatsSummary getStat =
                 level =
                     (stats |> List.map .level |> List.sum) // max 1 (List.length stats)
             in
-                { label = label, level = level, value = format stats }
+            { label = label, level = level, value = format stats }
     in
-        H.table [ A.class "stats-summary" ] (statEntrySpecs |> List.map (toEntry >> viewStatEntry) |> Maybe.Extra.values)
+    H.table [ A.class "stats-summary" ] (statEntrySpecs |> List.map (toEntry >> viewStatEntry) |> Maybe.Extra.values)
 
 
 type alias StatsEntrySpec =
@@ -123,7 +123,7 @@ statEntrySpecs =
     -- damage multiplier from level
     -- energy from auto attacks - currently a constant, not useful here
     , ( "Global Cooldown Time", [ STAT_HASTE ], entrySec 2000 ) -- TODO that one keystone for <1 sec
-    , ( "Automator Speed", [ STAT_AUTOMATOR_SPEED, STAT_HASTE ], stat2 >> \( auto, haste ) -> Just <| pct <| auto.val * haste.val )
+    , ( "Automator Speed", [ STAT_AUTOMATOR_SPEED, STAT_HASTE ], stat2 >> (\( auto, haste ) -> Just <| pct <| auto.val * haste.val) )
     , ( "Critical Chance", [ STAT_CRIT_CHANCE ], entryPct )
     , ( "Critical Damage Multiplier", [ STAT_CRIT_DAMAGE ], entryPct )
     , ( "Haste", [ STAT_HASTE ], entryPct )
@@ -159,7 +159,7 @@ stat1 stats =
             a
 
         _ ->
-            Debug.crash "expected 1 stat" stats
+            Debug.todo "expected 1 stat" stats
 
 
 stat2 : List GS.StatTotal -> ( GS.StatTotal, GS.StatTotal )
@@ -169,35 +169,35 @@ stat2 stats =
             ( a, b )
 
         _ ->
-            Debug.crash "expected 2 stats" stats
+            Debug.todo "expected 2 stats" stats
 
 
 entryPct =
-    stat1 >> \stat -> Just <| pct stat.val
+    stat1 >> (\stat -> Just <| pct stat.val)
 
 
 entryFloat =
-    stat1 >> \stat -> Just <| float 3 stat.val
+    stat1 >> (\stat -> Just <| float 3 stat.val)
 
 
 entrySec base =
-    stat1 >> \stat -> Just <| sec 1 <| base / Time.second / stat.val
+    stat1 >> (\stat -> Just <| sec 1 <| base / 1000 / stat.val)
 
 
 entryInt =
-    stat1 >> \stat -> Just <| int stat.val
+    stat1 >> (\stat -> Just <| int stat.val)
 
 
 viewStatEntry : { label : String, level : Int, value : Maybe String } -> Maybe (H.Html msg)
 viewStatEntry { label, level, value } =
     Maybe.map
-        (\value ->
+        (\val ->
             H.tr
                 [ A.class <| "level-" ++ statLevelTier level
-                , A.title <| "Level " ++ toString level
+                , A.title <| "Level " ++ String.fromInt level
                 ]
                 [ H.td [] [ H.text <| label ++ ": " ]
-                , H.td [ A.class "stat-value" ] [ H.text value ]
+                , H.td [ A.class "stat-value" ] [ H.text val ]
 
                 -- , H.td [ A.class "stat-level" ] [ H.text <| "Level " ++ toString level ]
                 ]
@@ -207,7 +207,7 @@ viewStatEntry { label, level, value } =
 
 pct : Float -> String
 pct f =
-    (f * 100 |> floor |> toString) ++ "%"
+    (f * 100 |> floor |> String.fromInt) ++ "%"
 
 
 float : Int -> Float -> String
@@ -216,7 +216,7 @@ float sigfigs f =
         exp =
             10 ^ toFloat sigfigs
     in
-        (f * exp |> floor |> toFloat) / exp |> toString
+    (f * exp |> floor |> toFloat) / exp |> String.fromFloat
 
 
 sec : Int -> Float -> String
@@ -231,20 +231,23 @@ pct0 f =
 negPct f =
     if f == 1 then
         "-0%"
+
     else
         pct0 f
 
 
 int =
-    toString << floor
+    String.fromInt << floor
 
 
 statLevelTier : Int -> String
 statLevelTier level =
     if level > 7 then
         "high"
+
     else if level > 3 then
         "mid"
+
     else
         "low"
 
@@ -254,8 +257,9 @@ viewNodeSummary showTooltips ns =
     H.ul [ A.class "node-summary" ] <|
         if List.length ns == 0 then
             []
+
         else
-            List.map (uncurry <| viewNodeSummaryLine showTooltips) ns
+            List.map ((\f ( a, b ) -> f a b) <| viewNodeSummaryLine showTooltips) ns
 
 
 viewNodeSummaryLine : Bool -> Int -> G.NodeType -> H.Html msg
@@ -264,27 +268,30 @@ viewNodeSummaryLine showTooltips count nodeType =
         tooltip =
             if showTooltips then
                 nodeType.tooltip
+
             else
                 Nothing
     in
-        H.li [ A.class <| View.Graph.nodeQualityClass nodeType.quality ]
-            [ H.div [ A.class "icon" ]
-                [ H.img [ A.class "icon-background", A.src <| View.Graph.nodeBackgroundImage nodeType False False False ] []
-                , H.img [ A.class "icon-main", A.src <| View.Graph.iconUrl nodeType ] []
-                ]
-            , H.div []
-                [ H.text <|
-                    " "
-                        ++ if count /= 1 then
-                            toString count ++ "× "
-                           else
-                            ""
-                , H.b [] [ H.text nodeType.name ]
-                , H.span [] [ H.text <| Maybe.Extra.unwrap "" ((++) ": ") tooltip ]
-                ]
-
-            -- , H.div [] [ H.text <| Maybe.withDefault "" nodeType.tooltip ]
-            , H.div [ A.class "clear" ] []
-
-            -- , H.text <| toString nodeType
+    H.li [ A.class <| View.Graph.nodeQualityClass nodeType.quality ]
+        [ H.div [ A.class "icon" ]
+            [ H.img [ A.class "icon-background", A.src <| View.Graph.nodeBackgroundImage nodeType False False False ] []
+            , H.img [ A.class "icon-main", A.src <| View.Graph.iconUrl nodeType ] []
             ]
+        , H.div []
+            [ H.text <|
+                " "
+                    ++ (if count /= 1 then
+                            String.fromInt count ++ "× "
+
+                        else
+                            ""
+                       )
+            , H.b [] [ H.text nodeType.name ]
+            , H.span [] [ H.text <| Maybe.Extra.unwrap "" ((++) ": ") tooltip ]
+            ]
+
+        -- , H.div [] [ H.text <| Maybe.withDefault "" nodeType.tooltip ]
+        , H.div [ A.class "clear" ] []
+
+        -- , H.text <| toString nodeType
+        ]

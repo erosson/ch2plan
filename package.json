@@ -6,7 +6,6 @@
   "license": "GPL-3.0",
   "private": true,
   "scripts": {
-    "prepare": "elm-package install --yes",
     "tf:init": "terraform init",
     "tf:plan": "terraform plan",
     "tf:apply": "terraform apply -auto-approve",
@@ -17,12 +16,11 @@
     "//dev": "All this `bash -xc '... && true '` boilerplate makes things work on windows, with git-for-windows bash installed. I'm not a real windows dev, sorry - happy to take nicer pull requests here",
     "copyDeps": "bash -xc 'mkdir -p assets/lib && cp node_modules/amf-js/src/amf.js assets/lib && cp node_modules/zlibjs/bin/rawinflate.min.js assets/lib && true '",
     "dev": "bash -xc 'yarn copyDeps && cp CHANGELOG.md ./assets && elm-live src/Main.elm --open --dir=assets -- --output assets/elm.js && true'",
-    "build": "bash -xc 'rm -rf dist && mkdir dist && yarn copyDeps && cp CHANGELOG.md dist/ && cp -rp assets/* dist/ && elm-make src/Main.elm --output dist/elm.js && true'",
+    "build": "bash -xc 'rm -rf dist && mkdir dist && yarn copyDeps && cp CHANGELOG.md dist/ && cp -rp assets/* dist/ && elm make src/Main.elm --output dist/elm.js && true'",
     "//test": "you probably want to run this with --watch, like 'yarn test --watch'",
     "format": "bash -xc 'elm-format --yes src && prettier --write assets/ports.js assets/stats.json && true '",
     "lint": "bash -xc 'elm-format --validate src && prettier --list-different assets/ports.js assets/stats.json && true '",
     "test": "bash -xc 'yarn lint && elm-test && true '",
-    "deploy:purge-cloudflare-cache": "scripty",
     "start": "bash -xc 'yarn build && serve dist && true '"
   },
   "//optionalDependencies": "because travis fails to install me, but doesn't actually need me",
@@ -34,10 +32,10 @@
     "zlibjs": "^0.3.1"
   },
   "devDependencies": {
-    "elm": "^0.18.0",
-    "elm-format": "^0.6.1-alpha",
-    "elm-live": "^2.7.5",
-    "elm-test": "^0.18.12",
+    "elm": "^0.19.0-bugfix2",
+    "elm-format": "^0.8.0",
+    "elm-live": "^3.0.5",
+    "elm-test": "^0.19.0-beta9",
     "prettier": "^1.14.0",
     "scripty": "^1.7.2",
     "serve": "^9.6.0",

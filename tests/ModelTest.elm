@@ -1,12 +1,14 @@
-module ModelTest exposing (..)
+module ModelTest exposing (flags, loc, suite)
 
 import Dict as Dict exposing (Dict)
-import Json.Encode as E
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
-import Test exposing (..)
-import Navigation
+import Json.Encode as E
+import Maybe.Extra
 import Model
+import Route
+import Test exposing (..)
+import Url as Url exposing (Url)
 
 
 suite : Test
@@ -15,26 +17,26 @@ suite =
         [ test "sets search" <|
             \_ ->
                 Expect.equal (Just "foo")
-                    ({ loc | hash = "/g/vTest/helpfulAdventurer?q=foo" }
-                        |> Model.init flags
-                        |> Tuple.first
-                        |> .searchString
+                    ({ loc | fragment = Just "/g/vTest/helpfulAdventurer?q=foo" }
+                        |> Route.parse
+                        |> Route.params
+                        |> Maybe.Extra.unwrap Nothing .search
                     )
         , test "no search" <|
             \_ ->
                 Expect.equal Nothing
-                    ({ loc | hash = "/g/vTest/helpfulAdventurer" }
-                        |> Model.init flags
-                        |> Tuple.first
-                        |> .searchString
+                    ({ loc | fragment = Just "/g/vTest/helpfulAdventurer" }
+                        |> Route.parse
+                        |> Route.params
+                        |> Maybe.Extra.unwrap Nothing .search
                     )
         , test "invalid search" <|
             \_ ->
                 Expect.equal (Just "(")
-                    ({ loc | hash = "/g/vTest/helpfulAdventurer?q=(" }
-                        |> Model.init flags
-                        |> Tuple.first
-                        |> .searchString
+                    ({ loc | fragment = Just "/g/vTest/helpfulAdventurer?q=(" }
+                        |> Route.parse
+                        |> Route.params
+                        |> Maybe.Extra.unwrap Nothing .search
                     )
         ]
 
@@ -45,7 +47,7 @@ flags =
     { changelog = ""
     , gameData =
         E.object
-            [ ( "versionList", [ "vTest" ] |> List.map E.string |> E.list )
+            [ ( "versionList", [ "vTest" ] |> E.list E.string )
             , ( "byVersion"
               , E.object
                     [ ( "vTest"
@@ -67,17 +69,12 @@ flags =
     }
 
 
-loc : Navigation.Location
+loc : Url
 loc =
-    { href = ""
+    { protocol = Url.Https
     , host = ""
-    , hostname = ""
-    , protocol = ""
-    , origin = ""
-    , port_ = ""
-    , pathname = ""
-    , search = ""
-    , hash = ""
-    , username = ""
-    , password = ""
+    , port_ = Nothing
+    , path = ""
+    , query = Nothing
+    , fragment = Nothing
     }
