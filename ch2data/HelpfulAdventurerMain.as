@@ -3299,12 +3299,6 @@ package
 				characterInstance.addMana = helpfulAdventurerAddMana;
 				characterInstance.onZoneChanged = helpfulAdventurerZoneChanged;
 				characterInstance.getCalculatedEnergyCost = helpfulAdventurerGetCalculatedEnergyCost;
-				
-				//setup ascension functionality
-				for (var key:String in characterInstance.levelGraphNodeTypes)
-				{
-					helpfulAdventurer.levelGraphNodeTypes[key].setupFunction();
-				}
 			}
 		}
 		

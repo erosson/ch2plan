@@ -113,6 +113,8 @@ package models
       public static var staticFields:Array = ["flavorName","flavorClass","flavor","gender","flair","characterSelectOrder","availableForCreation","visibleOnCharacterSelect","defaultSaveName","startingSkills","levelCostScaling","talentChoices","talentZones","upgradeableStats","assetGroupName","damageMultiplierBase","maxManaMultiplierBase","maxEnergyMultiplierBase","attackMsDelay","gcdBase","autoAttackDamageMultiplierBase","damageMultiplierValueFunction","maxManaMultiplierValueFunction","maxEnergyMultiplierValueFunction","damageMultiplierCostFunction","maxManaMultiplierCostFunction","maxEnergyMultiplierCostFunction","statValueFunctions","statBaseValues","statCostFunctions","monstersPerZone","monsterHealthMultiplier","attackRange","levelGraph","levelGraphNodeTypes","recommendedLevelsForWorlds"];
        
       
+      public var version:Number = 0;
+      
       public var state:int = 5;
       
       public var monstersPerZone:Number = 50;
@@ -652,6 +654,7 @@ package models
          x = 20;
          y = CHARACTER_ZONE_START_Y;
          removeOnZoneChanges = false;
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"version");
          this.persist(GILD_PERSISTING_FALSE,registerDynamicBigNumber,"unarmedDamage");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicString,"name");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"roller",Roller);
@@ -1868,13 +1871,6 @@ package models
       
       public function onWorldFinishedDefault() : void
       {
-         var extraRuns:int = 0;
-         var bonusExperience:BigNumber = null;
-         var i:int = 0;
-         var extraRunsFromWorld:int = 0;
-         var j:int = 0;
-         var worldExperience:BigNumber = null;
-         var totalMonstersForBonus:Number = NaN;
          this.didFinishWorld = true;
          this.highestMonstersKilled[this.currentWorldId] = 0;
          if(this.runsCompletedPerWorld.hasOwnProperty(this.currentWorldId))
@@ -1889,33 +1885,6 @@ package models
          {
             this.drainWorldsUpTo(this.currentWorldId);
             this.addGild(this.currentWorldId);
-         }
-         else if(this.runsCompletedPerWorld[this.currentWorldId] < 6)
-         {
-            if(this.currentWorldId > 1)
-            {
-               extraRuns = 0;
-               bonusExperience = new BigNumber(0);
-               for(i = this.currentWorldId - 1; i > 0; i--)
-               {
-                  extraRunsFromWorld = 0;
-                  for(j = 0; j <= extraRuns; j++)
-                  {
-                     worldExperience = Formulas.instance.getMonsterExperienceForWorld(i);
-                     totalMonstersForBonus = this.monstersPerZone * 100 - this.highestMonstersKilled[i];
-                     worldExperience.timesEqualsN(totalMonstersForBonus);
-                     if(this.runsCompletedPerWorld[i] < 5)
-                     {
-                        extraRunsFromWorld++;
-                     }
-                     this.runsCompletedPerWorld[i]++;
-                     this.highestMonstersKilled[i] = 0;
-                     bonusExperience.plusEquals(worldExperience);
-                  }
-                  extraRuns = extraRuns + extraRunsFromWorld;
-               }
-               this.addExperience(bonusExperience);
-            }
          }
          if(this.currentWorldId > this.highestWorldCompleted)
          {
@@ -2248,6 +2217,15 @@ package models
          statRating = statRating + this.inventory.getEquippedStatRating(id);
          statRating = statRating + this.buffs.getBuffedStatRating(id);
          return statRating;
+      }
+      
+      public function setupSkillTree() : void
+      {
+         var key:* = null;
+         for(key in this.levelGraphNodeTypes)
+         {
+            this.levelGraphNodeTypes[key].setupFunction();
+         }
       }
       
       public function setupSkills() : void
@@ -2812,7 +2790,6 @@ package models
          this.hasNewSkillTreePointsAvailable = true;
          this.levelUpStat(CH2.STAT_DAMAGE);
          this.eventLogger.logEvent(EventLog.LEVELED_UP);
-         this.characterDisplay.playLevelUp();
          this.addEnergy(this.maxEnergy - this.energy,false);
          IdleHeroUIManager.instance.refreshLevelDisplays();
          CH2.user.remoteStatsTracking.addEvent({
@@ -2840,10 +2817,17 @@ package models
          }
          if(didLevel)
          {
-            IdleHeroUIManager.instance.mainUI.mainPanel.graphPanel.redrawGraph();
-            if(IdleHeroUIManager.instance.mainUI.mainPanel.isOnGraphPanel)
+            if(IdleHeroUIManager.instance.mainUI)
             {
-               IdleHeroUIManager.instance.mainUI.mainPanel.graphPanel.updateInteractiveLayer();
+               IdleHeroUIManager.instance.mainUI.mainPanel.graphPanel.redrawGraph();
+               if(IdleHeroUIManager.instance.mainUI.mainPanel.isOnGraphPanel)
+               {
+                  IdleHeroUIManager.instance.mainUI.mainPanel.graphPanel.updateInteractiveLayer();
+               }
+            }
+            if(this.characterDisplay)
+            {
+               this.characterDisplay.playLevelUp();
             }
             this.timeSinceLastLevelUp = 0;
          }
@@ -2855,13 +2839,13 @@ package models
       {
          if(level <= 10)
          {
-            return new BigNumber(60 + (level - 1) * 50);
+            return new BigNumber(180 + (level - 1) * 150);
          }
          if(level <= 20)
          {
-            return new BigNumber(460 + (level - 10) * 100);
+            return new BigNumber(1380 + (level - 10) * 300);
          }
-         return new BigNumber(1460 + (level - 20) * 500);
+         return new BigNumber(4380 + (level - 20) * 500);
       }
       
       public function getLevelUpCostToNextLevelOld(level:Number) : BigNumber
@@ -2900,7 +2884,7 @@ package models
             if(_loc6_ && _loc6_.isActive)
             {
                _loc7_ = _loc6_.slot;
-               if(_loc7_ >= 0)
+               if(_loc7_ >= 0 && IdleHeroUIManager.instance.mainUI)
                {
                   IdleHeroUIManager.instance.mainUI.hud.skillBar.skillSlots[_loc7_].removeChild(IdleHeroUIManager.instance.mainUI.hud.skillBar.skillSlots[_loc7_].skillSlotUI);
                   IdleHeroUIManager.instance.mainUI.hud.skillBar.skillSlots[_loc7_].onDropRemoved(IdleHeroUIManager.instance.mainUI.hud.skillBar.skillSlots[_loc7_].skillSlotUI);
@@ -2918,13 +2902,16 @@ package models
          var _loc5_:Number = GILD_DAMAGE_INCREASE;
          if(this.gilds == 1)
          {
-            this.gildedDamageMultiplier = new BigNumber("9.5315691222e36").multiplyN(_loc5_);
+            this.gildedDamageMultiplier = new BigNumber("2.1446e37").multiplyN(_loc5_);
          }
          else
          {
-            this.gildedDamageMultiplier = new BigNumber("9.5315691222e36").multiplyN(_loc5_).multiply(new BigNumber("2.2092461758398e31").multiplyN(_loc5_).pow(this.gilds - 1));
+            this.gildedDamageMultiplier = new BigNumber("2.1446e37").multiplyN(_loc5_).multiply(new BigNumber("4.9708e31").multiplyN(_loc5_).pow(this.gilds - 1));
          }
-         this.characterDisplay.characterUI.removeAll();
+         if(this.characterDisplay)
+         {
+            this.characterDisplay.characterUI.removeAll();
+         }
          if(this.gilds == 1)
          {
             IdleHeroUIManager.instance.showSimpleGamePopup("Congratulations!",_("Congratulations! You\'ve completed a gilded world. Your base damage has been multiplied by %s%, and your skill tree has been reset, but your Automator upgrades remain.",_loc5_ * 100),null,"Continue");
@@ -2951,6 +2938,7 @@ package models
                this.totalExperience.fromFloat(208928569.574619);
                this.level = 931;
          }
+         this.totalStatPointsV2 = 6;
       }
       
       public function playCastAnimation() : void
@@ -3409,6 +3397,31 @@ package models
          {
             this.lostOnGilding.push(registerDynamicArgs[0]);
          }
+      }
+      
+      public function migrate() : void
+      {
+         var i:int = 0;
+         trace("migrating version " + this.version + " to " + IdleHeroMain.SAVE_VERSION);
+         if(this.version == 0)
+         {
+            if(this.highestWorldCompleted >= 15 && this.gilds == 0)
+            {
+               this.runsCompletedPerWorld = {};
+               this.highestMonstersKilled = {};
+               for(i = 0; i <= 15; i++)
+               {
+                  this.runsCompletedPerWorld[i] = 0;
+                  this.highestMonstersKilled[i] = 0;
+               }
+               this.highestWorldCompleted = 1;
+               this.currentWorldId = 15;
+               CH2.user.finishWorld();
+               CH2.user.ascensionWorlds.ascensionWorlds = [];
+               this.totalStatPointsV2 = this.totalStatPointsV2 + 3;
+            }
+         }
+         this.version = IdleHeroMain.SAVE_VERSION;
       }
    }
 }

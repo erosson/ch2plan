@@ -23,7 +23,7 @@ package heroclickerlib.managers
       
       public static const SLOW:Array = [0.9];
       
-      public static const FAST:Array = [1.075];
+      public static const FAST:Array = [1.05];
       
       public static const WORLD_CURVES:Object = {
          "Standard":STANDARD,
@@ -247,7 +247,14 @@ package heroclickerlib.managers
             return new BigNumber(0);
          }
          var result:BigNumber = item.baseCost.divideN(30);
-         result.timesEqualsN(Math.pow(0.86,item.rank - 1));
+         if(CH2.currentAscensionWorld && CH2.currentAscensionWorld.worldNumber <= 2)
+         {
+            result.timesEqualsN(Math.pow(0.86,item.rank - 1));
+         }
+         else
+         {
+            result.timesEqualsN(Math.pow(0.9,item.rank - 1));
+         }
          result.timesEqualsN(1 + item.bonusDamage);
          if(item.rank < 4)
          {
@@ -379,7 +386,12 @@ package heroclickerlib.managers
       
       public function getMonsterExperienceForWorld(worldId:int) : BigNumber
       {
-         return CH2.user.ascensionWorlds.getWorld(worldId).experienceMultiplier.multiplyN(50).divideN(CH2.currentCharacter.monstersPerZone).multiplyN(Math.pow(0.965,CH2.currentCharacter.runsCompletedPerWorld[worldId]));
+         var result:BigNumber = CH2.user.ascensionWorlds.getWorld(worldId).experienceMultiplier.multiplyN(150).divideN(CH2.currentCharacter.monstersPerZone).multiplyN(Math.pow(0.984274,CH2.currentCharacter.runsCompletedPerWorld[worldId]));
+         if(CH2.currentCharacter.runsCompletedPerWorld[worldId] >= 7)
+         {
+            result.timesEqualsN(0.05);
+         }
+         return result;
       }
       
       public function getMonsterExperience(zone:int, isBoss:Boolean) : BigNumber
@@ -388,7 +400,11 @@ package heroclickerlib.managers
          {
             return new BigNumber(0);
          }
-         var zoneExperience:BigNumber = this.getZoneExperience(zone).multiplyN(Math.pow(0.965,CH2.currentCharacter.runsCompletedPerWorld[CH2.currentAscensionWorld.worldNumber]));
+         var zoneExperience:BigNumber = this.getZoneExperience(zone).multiplyN(Math.pow(0.984274,CH2.currentCharacter.runsCompletedPerWorld[CH2.currentAscensionWorld.worldNumber]));
+         if(CH2.currentCharacter.runsCompletedPerWorld[CH2.currentAscensionWorld.worldNumber] >= 7)
+         {
+            zoneExperience.timesEqualsN(0.05);
+         }
          if(isBoss)
          {
             return zoneExperience;
@@ -398,7 +414,7 @@ package heroclickerlib.managers
       
       public function getZoneExperience(zone:int) : BigNumber
       {
-         return CH2.currentAscensionWorld.experienceMultiplier.multiplyN(50);
+         return CH2.currentAscensionWorld.experienceMultiplier.multiplyN(150);
       }
       
       public function getZoneExperienceOld(zone:int) : BigNumber
