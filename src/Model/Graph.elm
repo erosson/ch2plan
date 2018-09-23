@@ -84,26 +84,30 @@ nodesToBuild graph =
 
 
 buildToNodes : G.Graph -> Maybe String -> Result String (Set G.NodeId)
-buildToNodes graph =
-    Maybe.withDefault ""
-        >> String.split "&"
-        -- non-ints are ignored. TODO: maybe we should error for these
-        >> List.map String.toInt
-        >> Maybe.Extra.values
-        >> (\ids0 ->
-                let
-                    ids =
-                        ids0 |> Set.fromList
-                in
-                if List.length ids0 /= Set.size ids then
-                    Err "can't select a node twice"
+buildToNodes graph build =
+    let
+        strList =
+            build |> Maybe.withDefault "" |> String.split "&"
 
-                else if not <| isValidSelection graph ids then
-                    Err "some nodes in this build aren't connected to the start location"
+        idList =
+            -- non-ints are ignored. TODO: maybe we should error for these
+            strList |> List.map String.toInt |> Maybe.Extra.values
 
-                else
-                    Ok ids
-           )
+        ids =
+            idList |> Set.fromList
+    in
+    if strList == [ "all" ] then
+        -- special-case a build with all nodes selected, "all"
+        Ok <| allSelectableNodes graph
+
+    else if List.length idList /= Set.size ids then
+        Err "can't select a node twice"
+
+    else if not <| isValidSelection graph ids then
+        Err "some nodes in this build aren't connected to the start location"
+
+    else
+        Ok ids
 
 
 {-| Remove any selected nodes that can't be reached from the start location.
@@ -129,6 +133,14 @@ reachableSelectedNodes graph selected =
     in
     Set.foldr loop { tried = Set.empty, reachable = startReachable } startReachable
         |> .reachable
+
+
+allSelectableNodes : G.Graph -> Set G.NodeId
+allSelectableNodes graph =
+    graph.nodes
+        |> Dict.keys
+        |> Set.fromList
+        |> reachableSelectedNodes graph
 
 
 isValidSelection : G.Graph -> Set G.NodeId -> Bool

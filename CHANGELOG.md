@@ -29,11 +29,17 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 ---
 
+## 2018-09-23
+
+- [The build URL "all"](https://ch2.erosson.org/#/g/0.07-beta/helpfulAdventurer/all) now selects all possible nodes.
+
 ## 2018-09-17
+
 - Update to live version 0.07-beta, and PTR version 0.08-beta-(e).
   - Planning your PTR automator tree is not yet supported, but you can see the automator tree by scrolling far to the right.
 
 ## 2018-09-15
+
 - [Lots of internal code changes](https://github.com/erosson/ch2plan/issues/60). None of these changes should be visible to you, or make the site behave any differently - let me know if anything broke today!
 
 ## 2018-08-19
