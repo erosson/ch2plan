@@ -12429,6 +12429,10 @@
     },
     "characters": {
       "helpfulAdventurer": {
+        "startNodes": [
+          1,
+          35
+        ],
         "stats": {
           "STAT_GOLD": [
             [

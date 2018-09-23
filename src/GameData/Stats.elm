@@ -19,6 +19,7 @@ import Json.Decode as D
 import Json.Decode.Pipeline as P
 import List.Extra
 import Maybe.Extra
+import Set as Set exposing (Set)
 
 
 type Growth
@@ -38,7 +39,9 @@ type alias Stats =
 
 
 type alias Character =
-    { stats : Dict NodeType (List ( Stat, Int )) }
+    { stats : Dict NodeType (List ( Stat, Int ))
+    , startNodes : Set Int
+    }
 
 
 type alias Rules =
@@ -63,6 +66,7 @@ charDecoder =
     D.succeed Character
         -- TODO traits
         |> P.required "stats" (charStatsDecoder |> D.map charStatsByNodeType)
+        |> P.optional "startNodes" (D.list D.int |> D.map Set.fromList) (Set.singleton 1)
 
 
 rulesDecoder : D.Decoder Rules

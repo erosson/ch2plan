@@ -233,7 +233,7 @@ characterDecoder skills stats =
         |> P.required "levelGraphNodeTypes" (nodeTypesDecoder stats)
         -- graph looks at two fields to construct one, so this looks a little weird
         |> P.custom
-            (D.succeed graph
+            (D.succeed (graph <| statsStartNodes stats)
                 |> P.required "levelGraphNodeTypes" (nodeTypesDecoder stats)
                 |> P.required "levelGraphObject" levelGraphObjectDecoder
             )
@@ -325,8 +325,15 @@ nodeTypeDecoder stats key =
 -- |> P.optional "icon" (D.nullable D.string) Nothing
 
 
-graph : NodeTypes -> GraphSpec -> Graph
-graph nodeTypes graphSpec =
+statsStartNodes : Maybe GS.Character -> Set NodeId
+statsStartNodes =
+    -- the default is necessary for old versions where I hadn't defined stats-characters yet.
+    -- Probably reasonable to drop support for them at some point.
+    Maybe.Extra.unwrap (Set.singleton 1) .startNodes
+
+
+graph : Set NodeId -> NodeTypes -> GraphSpec -> Graph
+graph startNodes nodeTypes graphSpec =
     let
         getNode id n =
             -- TODO this should be a decoder or result
@@ -354,7 +361,7 @@ graph nodeTypes graphSpec =
     in
     { nodes = nodes
     , edges = edges
-    , startNodes = Set.singleton 1 -- TODO happens to work for helpfulAdventurer, but where does this come from?
+    , startNodes = startNodes
     , neighbors = calcNeighbors <| Dict.values edges
     , bounds = calcBounds <| Dict.values nodes
     }

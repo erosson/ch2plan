@@ -32,6 +32,7 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 ## 2018-09-23
 
 - [The build URL "all"](https://ch2.erosson.org/#/g/0.07-beta/helpfulAdventurer/all) now selects all possible nodes.
+- PTR 0.08-beta-(e): you can now plan your automator tree and select automator nodes. Scroll far to the right.
 
 ## 2018-09-17
 
