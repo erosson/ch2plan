@@ -1,1 +1,1 @@
-node scripts/export/postchars.js %1
+node scripts/export/__postchars.js %1
