@@ -29,6 +29,10 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 ---
 
+## 2018-12-24
+- Update to live version 0.8.1-(early access), and PTR version 0.9.0-(experimental).
+  - Wizard icons are missing - should be fixed shortly
+
 ## 2018-09-23
 
 - [The build URL "all"](https://ch2.erosson.org/#/g/0.07-beta/helpfulAdventurer/all) now selects all possible nodes.

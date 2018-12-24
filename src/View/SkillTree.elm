@@ -52,8 +52,8 @@ view header model graph =
 
 
 ver =
-    { live = "0.07-beta"
-    , ptr = "0.08-beta-(e)"
+    { live = "0.8.1-(early-access)"
+    , ptr = "0.9.0-(e)"
     }
 
 
