@@ -30,8 +30,9 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 ---
 
 ## 2018-12-24
+
 - Update to live version 0.8.1-(early access), and PTR version 0.9.0-(experimental).
-  - Wizard icons are missing - should be fixed shortly
+- [The wizard skill tree](https://ch2.erosson.org/#/g/0.09-%28e%29/wizard/) mostly works. Known issues, to be fixed soon: the start node is wrong, node icons don't look quite right (transparency, stars), and the stats screen doesn't help with wizard stats.
 
 ## 2018-09-23
 
