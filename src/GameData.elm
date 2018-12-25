@@ -21,6 +21,7 @@ module GameData exposing
     , neighbors
     , nodeTypeToString
     , qualityToString
+    , startNodes
     )
 
 import Dict as Dict exposing (Dict)
@@ -87,6 +88,7 @@ type alias NodeType =
     , icon : String
     , tooltip : Maybe String
     , flavorText : Maybe String
+    , alwaysAvailable : Bool
     , stats : List ( GS.Stat, Int )
     , quality : NodeQuality
     }
@@ -105,7 +107,6 @@ type alias NodeTypes =
 type alias Graph =
     { edges : Dict NodeId Edge
     , nodes : Dict NodeId Node
-    , startNodes : Set NodeId
 
     -- precalculated/derived from edges/nodes
     , bounds : GraphBounds
@@ -233,7 +234,7 @@ characterDecoder skills stats =
         |> P.required "levelGraphNodeTypes" (nodeTypesDecoder stats)
         -- graph looks at two fields to construct one, so this looks a little weird
         |> P.custom
-            (D.succeed (graph <| statsStartNodes stats)
+            (D.succeed graph
                 |> P.required "levelGraphNodeTypes" (nodeTypesDecoder stats)
                 |> P.required "levelGraphObject" levelGraphObjectDecoder
             )
@@ -318,6 +319,7 @@ nodeTypeDecoder stats key =
         |> P.required "icon" D.string
         |> P.optional "tooltip" (D.nullable D.string) Nothing
         |> P.optional "flavorText" (D.nullable D.string) Nothing
+        |> P.optional "alwaysAvailable" D.bool False
         |> P.custom (Maybe.andThen (.stats >> Dict.get key) stats |> Maybe.withDefault [] |> D.succeed)
 
 
@@ -325,15 +327,8 @@ nodeTypeDecoder stats key =
 -- |> P.optional "icon" (D.nullable D.string) Nothing
 
 
-statsStartNodes : Maybe GS.Character -> Set NodeId
-statsStartNodes =
-    -- the default is necessary for old versions where I hadn't defined stats-characters yet.
-    -- Probably reasonable to drop support for them at some point.
-    Maybe.Extra.unwrap (Set.singleton 1) .startNodes
-
-
-graph : Set NodeId -> NodeTypes -> GraphSpec -> Graph
-graph startNodes nodeTypes graphSpec =
+graph : NodeTypes -> GraphSpec -> Graph
+graph nodeTypes graphSpec =
     let
         getNode id n =
             -- TODO this should be a decoder or result
@@ -361,10 +356,14 @@ graph startNodes nodeTypes graphSpec =
     in
     { nodes = nodes
     , edges = edges
-    , startNodes = startNodes
     , neighbors = calcNeighbors <| Dict.values edges
     , bounds = calcBounds <| Dict.values nodes
     }
+
+
+startNodes : Graph -> Set NodeId
+startNodes =
+    .nodes >> Dict.values >> List.filter (.val >> .alwaysAvailable) >> List.map .id >> Set.fromList
 
 
 type alias NodeId =

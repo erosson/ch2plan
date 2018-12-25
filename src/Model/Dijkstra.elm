@@ -31,12 +31,13 @@ dijkstra graph selected0 target =
             Dict.keys graph.nodes
 
         startOrSelected =
-            Set.union graph.startNodes selected0
+            Set.union (G.startNodes graph) selected0
 
         distances0 : Dict G.NodeId Int
         distances0 =
             -- missing = infinity distance
-            graph.startNodes
+            graph
+                |> G.startNodes
                 |> Set.toList
                 |> List.map (\id -> ( id, 0 ))
                 |> Dict.fromList

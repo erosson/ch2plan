@@ -65,7 +65,7 @@ runDijkstra graph selected =
 
 neighborNodes : G.Graph -> Set G.NodeId -> Set G.NodeId
 neighborNodes graph selected =
-    Set.foldr (\id res -> G.neighbors id graph |> Set.union res) graph.startNodes selected
+    Set.foldr (\id res -> G.neighbors id graph |> Set.union res) (G.startNodes graph) selected
         |> (\res -> Set.diff res selected)
 
 
@@ -129,7 +129,7 @@ reachableSelectedNodes graph selected =
                 Set.foldr loop { tried = Set.insert id res.tried, reachable = Set.union res.reachable nextIds } nextIds
 
         startReachable =
-            Set.intersect selected graph.startNodes
+            graph |> G.startNodes |> Set.intersect selected
     in
     Set.foldr loop { tried = Set.empty, reachable = startReachable } startReachable
         |> .reachable

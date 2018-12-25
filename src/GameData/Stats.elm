@@ -40,7 +40,8 @@ type alias Stats =
 
 type alias Character =
     { stats : Dict NodeType (List ( Stat, Int ))
-    , startNodes : Set Int
+
+    -- there used to be more here, but the extra layer's now a bit redundant
     }
 
 
@@ -66,7 +67,6 @@ charDecoder =
     D.succeed Character
         -- TODO traits
         |> P.required "stats" (charStatsDecoder |> D.map charStatsByNodeType)
-        |> P.optional "startNodes" (D.list D.int |> D.map Set.fromList) (Set.singleton 1)
 
 
 rulesDecoder : D.Decoder Rules

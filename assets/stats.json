@@ -57,7 +57,6 @@
   "//characters": "based on ./ch2data/HelpfulAdventurerMain.as purchaseFunction()s",
   "characters": {
     "helpfulAdventurer": {
-      "startNodes": [1, 35],
       "stats": {
         "STAT_GOLD": [["G", 1], ["qG", 3]],
         "STAT_CRIT_CHANCE": [["Cc", 1]],
