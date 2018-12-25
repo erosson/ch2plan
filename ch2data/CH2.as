@@ -1,6 +1,7 @@
 package heroclickerlib
 {
-   import com.playsaurus.utils.CurrentUser;
+   import heroclickerlib.managers.CH2AssetManager;
+   import heroclickerlib.managers.SaveManager;
    import heroclickerlib.world.Rooms;
    import heroclickerlib.world.World;
    import models.AscensionWorld;
@@ -12,6 +13,10 @@ package heroclickerlib
    
    public class CH2
    {
+      
+      public static const DEFAULT_CHARACTER_NAME:String = "Helpful Adventurer";
+      
+      public static const DEFAULT_WORLD_ID:int = 1;
       
       public static const MULTIPLICATIVE:int = 1;
       
@@ -39,7 +44,7 @@ package heroclickerlib
       
       public static const STAT_TREASURE_CHEST_CHANCE:int = 10;
       
-      public static const STAT_BOSS_GOLD:int = 11;
+      public static const STAT_MONSTER_GOLD:int = 11;
       
       public static const STAT_ITEM_COST_REDUCTION:int = 12;
       
@@ -93,11 +98,11 @@ package heroclickerlib
       
       public static const COMPARISON_NEQ:int = 5;
       
-      public static var shaker:Shaker = new Shaker();
-      
       public static var game:IdleHeroMain;
       
-      public static var cachedCharacter:Character = null;
+      public static var user:UserData = null;
+      
+      public static var currentCharacter:Character = null;
        
       
       public function CH2()
@@ -197,11 +202,11 @@ package heroclickerlib
             "calculationType":MULTIPLICATIVE,
             "formattingFunction":percentFormat
          };
-         STATS[STAT_BOSS_GOLD] = {
-            "displayName":"Boss Gold",
-            "description":"Multiplies your gold received from bosses by x%s.",
-            "amountOnItems":2,
-            "itemDamageBoost":0.2,
+         STATS[STAT_MONSTER_GOLD] = {
+            "displayName":"Monster Gold",
+            "description":"Multiplies your gold received from monsters by x%s.",
+            "amountOnItems":0.12,
+            "itemDamageBoost":0,
             "appearsInAllItemSlots":true,
             "iconId":1,
             "calculationType":MULTIPLICATIVE,
@@ -438,23 +443,9 @@ package heroclickerlib
          return String(statValue);
       }
       
-      public static function get user() : UserData
-      {
-         return CurrentUser.instance as UserData;
-      }
-      
       public static function get userIsInitialized() : Boolean
       {
-         return CurrentUser.isInitialized;
-      }
-      
-      public static function get currentCharacter() : Character
-      {
-         if(!cachedCharacter)
-         {
-            cachedCharacter = user.currentCharacter;
-         }
-         return cachedCharacter;
+         return user != null;
       }
       
       public static function get world() : World
@@ -485,6 +476,48 @@ package heroclickerlib
       public static function get roller() : Roller
       {
          return currentCharacter.roller;
+      }
+      
+      public static function changeCharacter(saveName:String) : void
+      {
+         if(currentCharacter)
+         {
+            SaveManager.instance.save();
+            if(currentCharacter.characterDisplay)
+            {
+               currentCharacter.characterDisplay.characterUI.removeAll();
+            }
+            currentCharacter.onCharacterUnloaded();
+            CH2AssetManager.instance.disposeCharacter();
+         }
+         if(world)
+         {
+            world.disposeFloatingClickables();
+         }
+         user.currentCharacterName = saveName;
+         currentCharacter = user.saves[user.currentCharacterName];
+         currentCharacter.onCharacterLoaded();
+         currentCharacter.setUpgradeToNextMultiplier(currentCharacter.shouldLevelToNextMultiplier);
+         currentCharacter.setupRoller();
+         currentCharacter.setupSkills();
+         currentCharacter.setupSkillTree();
+         currentCharacter.setupTrackedStats();
+         currentCharacter.populateRubyPurchaseOptions();
+         currentCharacter.populateWorldEndAutomationOptions();
+         currentCharacter.populateTutorials();
+         currentCharacter.automator.setupInventories();
+         for(var i:int = 0; i < currentCharacter.startingSkills.length; i++)
+         {
+            currentCharacter.activateSkill(currentCharacter.startingSkills[i]);
+         }
+         if(currentCharacter.hasNeverStartedWorld)
+         {
+            currentCharacter.startWorld(DEFAULT_WORLD_ID);
+            currentCharacter.energy = currentCharacter.maxEnergy;
+            currentCharacter.mana = currentCharacter.maxMana;
+         }
+         game.doGameStateAction(IdleHeroMain.ACTION_PLAYER_SWITCHED_CHARACTERS);
+         currentCharacter.applyPurchasedNodes();
       }
    }
 }

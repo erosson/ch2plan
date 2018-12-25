@@ -1,12 +1,10 @@
 package heroclickerlib.managers
 {
    import com.playsaurus.numbers.BigNumber;
-   import com.playsaurus.utils.CurrentUser;
    import heroclickerlib.CH2;
    import models.Character;
    import models.Item;
    import models.Monster;
-   import models.UserData;
    
    public class Formulas
    {
@@ -74,16 +72,6 @@ package heroclickerlib.managers
       public static function getRandomCurve() : String
       {
          return curveList[CH2.roller.curveRoller.integer(0,_cachedCurveList.length - 1)];
-      }
-      
-      private function get _user() : UserData
-      {
-         return CurrentUser.instance as UserData;
-      }
-      
-      private function get _character() : Character
-      {
-         return this._user.currentCharacter;
       }
       
       public function multiplierFromCurve(n:Number, curve:Array) : *
@@ -156,7 +144,7 @@ package heroclickerlib.managers
          }
          else if(monster.isMiniBoss)
          {
-            monsterHealth.timesEqualsN(15);
+            monsterHealth.timesEqualsN(CH2.currentCharacter.monstersPerZone / 3);
          }
          return monsterHealth;
       }
@@ -169,10 +157,10 @@ package heroclickerlib.managers
       public function monsterGoldFormula(monster:Monster) : BigNumber
       {
          var totalGold:BigNumber = this.getWorld1MonsterHealth(monster);
-         totalGold = totalGold.multiplyN(this._character.monsterGoldMultiplier);
-         if(this._character.isIdle)
+         totalGold = totalGold.multiplyN(CH2.currentCharacter.monsterGoldMultiplier);
+         if(CH2.currentCharacter.isIdle)
          {
-            totalGold = totalGold.multiplyN(this._character.idleMonsterGoldMultiplier);
+            totalGold = totalGold.multiplyN(CH2.currentCharacter.idleMonsterGoldMultiplier);
          }
          if(monster.zoneSpawned < 5)
          {
@@ -180,15 +168,18 @@ package heroclickerlib.managers
          }
          totalGold.timesEqualsN(0.1);
          totalGold = totalGold.ceil();
-         if(monster.name == Monster.TREASURE_CHEST_NAME)
+         if(monster.isTreasureChest)
          {
             totalGold.timesEqualsN(5);
             totalGold.timesEqualsN(CH2.currentCharacter.treasureChestGold);
          }
+         else
+         {
+            totalGold.timesEqualsN(CH2.currentCharacter.monsterGold);
+         }
          if(monster.isBoss)
          {
             totalGold.timesEqualsN(0.1);
-            totalGold.timesEqualsN(CH2.currentCharacter.bossGold);
          }
          if(CH2.currentCharacter.zoneMetalDetectorActive)
          {
@@ -198,7 +189,7 @@ package heroclickerlib.managers
          {
             totalGold.timesEqualsN(Character.METAL_DETECTOR_GOLD_BONUS);
          }
-         if(CH2.roller.miscRoller.boolean(this._character.bonusGoldChance))
+         if(CH2.roller.miscRoller.boolean(CH2.currentCharacter.bonusGoldChance))
          {
             totalGold = totalGold.multiplyN(BONUS_GOLD_MULTIPLIER);
          }
@@ -207,7 +198,7 @@ package heroclickerlib.managers
       
       public function getBaseGoldDroppedFromHighestZoneReachedMonster() : BigNumber
       {
-         return this.getCurvedMonsterHealth(this._character.highestZone);
+         return this.getCurvedMonsterHealth(CH2.currentCharacter.highestZone);
       }
       
       public function getNumVisualCoinsForGoldDropAmount(goldAmount:BigNumber) : int
@@ -242,38 +233,7 @@ package heroclickerlib.managers
       
       public function getItemDamage(item:Item) : BigNumber
       {
-         if(item.skills.length > 0)
-         {
-            return new BigNumber(0);
-         }
-         var result:BigNumber = item.baseCost.divideN(30);
-         if(CH2.currentAscensionWorld && CH2.currentAscensionWorld.worldNumber <= 2)
-         {
-            result.timesEqualsN(Math.pow(0.86,item.rank - 1));
-         }
-         else
-         {
-            result.timesEqualsN(Math.pow(0.9,item.rank - 1));
-         }
-         result.timesEqualsN(1 + item.bonusDamage);
-         if(item.rank < 4)
-         {
-            result.timesEqualsN(5 - item.rank);
-         }
-         result = result.floor();
-         result.timesEqualsN(item.level);
-         result.timesEqualsN(Math.pow(CH2.currentCharacter.item10LvlDmgMultiplier,Math.floor(item.level / 10)));
-         result.timesEqualsN(Math.pow(CH2.currentCharacter.item20LvlDmgMultiplier,Math.floor(item.level / 20)));
-         if(item.level >= 50)
-         {
-            result.timesEqualsN(CH2.currentCharacter.item50LvlDmgMultiplier);
-            if(item.level >= 100)
-            {
-               result.timesEqualsN(CH2.currentCharacter.item100LvlDmgMultiplier);
-            }
-         }
-         result.timesEqualsN(CH2.currentCharacter.getMultiplierForItemType(item.type));
-         return result;
+         return CH2.currentCharacter.getItemDamage(item);
       }
       
       public function nextItemMultiplier(item:Item) : int
@@ -313,14 +273,13 @@ package heroclickerlib.managers
       {
          var cost:BigNumber = new BigNumber(worldCost);
          cost.timesEqualsN(Math.pow(1.16,level - 1));
-         cost = cost.floor();
-         cost.timesEqualsN(this._character.itemCostReduction);
+         cost.floorInPlace();
+         cost.timesEqualsN(CH2.currentCharacter.itemCostReduction);
          return cost;
       }
       
-      public function getItemWorldCost(rank:Number) : BigNumber
+      public function getItemWorldCost(rank:Number, curve:Array, worldCostMultiplier:BigNumber) : BigNumber
       {
-         var curve:Array = CH2.currentAscensionWorld.itemCostCurve;
          var curveLength:uint = curve.length;
          var rankFactorial:BigNumber = new BigNumber(1);
          var i:int = 2;
@@ -330,7 +289,7 @@ package heroclickerlib.managers
             i++;
          }
          rankFactorial.timesEqualsN(10);
-         rankFactorial.timesEquals(CH2.currentAscensionWorld.costMultiplier);
+         rankFactorial.timesEquals(worldCostMultiplier);
          rankFactorial.timesEqualsN(Math.pow(10000,Math.floor((rank - 1) / 8)));
          return rankFactorial;
       }
@@ -357,7 +316,7 @@ package heroclickerlib.managers
       
       public function itemPawnSalePrice() : BigNumber
       {
-         return this.getGoldForZone(this._character.highestZone);
+         return this.getGoldForZone(CH2.currentCharacter.highestZone);
       }
       
       public function getPotionPrice() : BigNumber
@@ -377,16 +336,9 @@ package heroclickerlib.managers
          return new BigNumber((worldNumber + 1) / 2);
       }
       
-      public function getAscensionExperience() : BigNumber
-      {
-         var points:BigNumber = new BigNumber(50000);
-         points.timesEquals(CH2.currentAscensionWorld.experienceMultiplier);
-         return points;
-      }
-      
       public function getMonsterExperienceForWorld(worldId:int) : BigNumber
       {
-         var result:BigNumber = CH2.user.ascensionWorlds.getWorld(worldId).experienceMultiplier.multiplyN(150).divideN(CH2.currentCharacter.monstersPerZone).multiplyN(Math.pow(0.984274,CH2.currentCharacter.runsCompletedPerWorld[worldId]));
+         var result:BigNumber = CH2.currentCharacter.worlds.getWorld(worldId).experienceMultiplier.multiplyN(150).divideN(CH2.currentCharacter.monstersPerZone).multiplyN(Math.pow(0.984274,CH2.currentCharacter.runsCompletedPerWorld[worldId]));
          if(CH2.currentCharacter.runsCompletedPerWorld[worldId] >= 7)
          {
             result.timesEqualsN(0.05);
@@ -394,39 +346,31 @@ package heroclickerlib.managers
          return result;
       }
       
-      public function getMonsterExperience(zone:int, isBoss:Boolean) : BigNumber
+      public function getMonsterExperience(monster:Monster) : BigNumber
       {
-         if(!CH2.currentCharacter.isOnHighestZone)
+         var character:Character = CH2.currentCharacter;
+         var characterLevel:Number = character.level;
+         var world:Number = CH2.currentAscensionWorld.worldNumber;
+         if(characterLevel > monster.level && characterLevel >= 50)
          {
             return new BigNumber(0);
          }
-         var zoneExperience:BigNumber = this.getZoneExperience(zone).multiplyN(Math.pow(0.984274,CH2.currentCharacter.runsCompletedPerWorld[CH2.currentAscensionWorld.worldNumber]));
-         if(CH2.currentCharacter.runsCompletedPerWorld[CH2.currentAscensionWorld.worldNumber] >= 7)
+         var reward:BigNumber = new BigNumber(Math.floor(10 + monster.level / 5));
+         reward.timesEqualsN(Math.pow(1.2,monster.level - characterLevel));
+         if(monster.isBoss)
          {
-            zoneExperience.timesEqualsN(0.05);
+            reward.timesEqualsN(50);
          }
-         if(isBoss)
+         else
          {
-            return zoneExperience;
+            reward.timesEqualsN(50 / character.monstersPerZone);
          }
-         return zoneExperience.divideN(CH2.currentCharacter.monstersPerZone);
+         return reward;
       }
       
       public function getZoneExperience(zone:int) : BigNumber
       {
          return CH2.currentAscensionWorld.experienceMultiplier.multiplyN(150);
-      }
-      
-      public function getZoneExperienceOld(zone:int) : BigNumber
-      {
-         var points:BigNumber = this.getAscensionExperience();
-         if(zone == 1)
-         {
-            points.timesEqualsN(0.0001);
-            return points;
-         }
-         points.timesEqualsN((zone - 1) * 0.0002 + 0.0001);
-         return points;
       }
       
       public function getWorldExperience() : BigNumber
@@ -437,6 +381,31 @@ package heroclickerlib.managers
             points.plusEquals(this.getZoneExperience(i));
          }
          return points;
+      }
+      
+      public function getWorldDifficulty(worldNumber:Number) : BigNumber
+      {
+         var currentGrowthRate:Number = NaN;
+         var i:int = 0;
+         if(worldNumber == 1)
+         {
+            return new BigNumber(1);
+         }
+         var gildNumber:Number = Math.floor(worldNumber / CH2.currentCharacter.worldsPerGild);
+         var difficultyScale:BigNumber = new BigNumber(30);
+         if(worldNumber > 2)
+         {
+            currentGrowthRate = 10;
+            for(i = 3; i <= worldNumber; i++)
+            {
+               if(i % CH2.currentCharacter.worldsPerGild == 1)
+               {
+                  currentGrowthRate = currentGrowthRate + 0.5;
+               }
+               difficultyScale.timesEqualsN(currentGrowthRate);
+            }
+         }
+         return difficultyScale;
       }
       
       public function getStatPointsEarnedAtLevel(level:Number) : BigNumber

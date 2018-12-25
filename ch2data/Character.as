@@ -2,6 +2,7 @@ package models
 {
    import com.doogog.utils.MiscUtils;
    import com.gskinner.utils.Rnd;
+   import com.playsaurus.model.Model;
    import com.playsaurus.numbers.BigNumber;
    import com.playsaurus.utils.ServerTimeKeeper;
    import com.playsaurus.utils.TimeFormatter;
@@ -17,9 +18,9 @@ package models
    import heroclickerlib.world.CharacterDisplay;
    import it.sephiroth.gettext._;
    import lib.managers.TextManager;
-   import ui.IdleHeroUIManager;
+   import ui.CH2UI;
    
-   public dynamic class Character extends WorldEntity
+   public class Character extends Model
    {
       
       public static const GILD_PERSISTING_TRUE:Boolean = true;
@@ -28,7 +29,7 @@ package models
       
       public static const GILD_DAMAGE_INCREASE:Number = 218750000;
       
-      public static const TIME_UNTIL_PLAYER_NEEDS_HINT_MS:Number = 300000;
+      public static const TIME_UNTIL_PLAYER_NEEDS_HINT_MS:Number = 60000;
       
       public static const TIME_UNTIL_PLAYER_NEEDS_RUBY_SHOP_HINT_MS:Number = 150000;
       
@@ -60,8 +61,6 @@ package models
       
       public static const MAX_CATALOG_SIZE:Number = 4;
       
-      public static const ZONES_BETWEEN_TALENTS:Number = 10;
-      
       public static const WORLD_END_AUTOMATION_OPTIONS_UNLOCK_WORLD:Number = 3;
       
       public static const WALK_SPEED_METERS_PER_SECOND:Number = 4.5;
@@ -90,6 +89,8 @@ package models
       
       public static const ANCIENT_SHARD_PURCHASE_COOLDOWN:int = 84600000;
       
+      public static const AUTOMATOR_POINT_PURCHASE_COOLDOWN:int = 14400000;
+      
       public static const POWER_RUNE_DAMAGE_BONUS:Number = 1;
       
       public static const SPEED_RUNE_HASTE_BONUS:Number = 0.1;
@@ -104,20 +105,32 @@ package models
       
       public static const MAGICAL_BREW_MANA_AMOUNT:Number = 10;
       
-      public static const DEFAULT_UPGRADEABLE_STATS:Array = [CH2.STAT_GOLD,CH2.STAT_MOVEMENT_SPEED,CH2.STAT_CRIT_CHANCE,CH2.STAT_CRIT_DAMAGE,CH2.STAT_HASTE,CH2.STAT_MANA_REGEN,CH2.STAT_IDLE_DAMAGE,CH2.STAT_CLICKABLE_GOLD,CH2.STAT_CLICK_DAMAGE,CH2.STAT_TREASURE_CHEST_CHANCE,CH2.STAT_BOSS_GOLD,CH2.STAT_ITEM_COST_REDUCTION,CH2.STAT_TOTAL_MANA,CH2.STAT_TOTAL_ENERGY,CH2.STAT_CLICKABLE_CHANCE,CH2.STAT_BONUS_GOLD_CHANCE,CH2.STAT_TREASURE_CHEST_GOLD,CH2.STAT_PIERCE_CHANCE,CH2.STAT_ITEM_WEAPON_DAMAGE,CH2.STAT_ITEM_HEAD_DAMAGE,CH2.STAT_ITEM_CHEST_DAMAGE,CH2.STAT_ITEM_RING_DAMAGE,CH2.STAT_ITEM_LEGS_DAMAGE,CH2.STAT_ITEM_HANDS_DAMAGE,CH2.STAT_ITEM_FEET_DAMAGE,CH2.STAT_ITEM_BACK_DAMAGE];
+      public static const DEFAULT_UPGRADEABLE_STATS:Array = [CH2.STAT_GOLD,CH2.STAT_MOVEMENT_SPEED,CH2.STAT_CRIT_CHANCE,CH2.STAT_CRIT_DAMAGE,CH2.STAT_HASTE,CH2.STAT_MANA_REGEN,CH2.STAT_IDLE_DAMAGE,CH2.STAT_CLICKABLE_GOLD,CH2.STAT_CLICK_DAMAGE,CH2.STAT_TREASURE_CHEST_CHANCE,CH2.STAT_MONSTER_GOLD,CH2.STAT_ITEM_COST_REDUCTION,CH2.STAT_TOTAL_MANA,CH2.STAT_TOTAL_ENERGY,CH2.STAT_CLICKABLE_CHANCE,CH2.STAT_BONUS_GOLD_CHANCE,CH2.STAT_TREASURE_CHEST_GOLD,CH2.STAT_PIERCE_CHANCE,CH2.STAT_ITEM_WEAPON_DAMAGE,CH2.STAT_ITEM_HEAD_DAMAGE,CH2.STAT_ITEM_CHEST_DAMAGE,CH2.STAT_ITEM_RING_DAMAGE,CH2.STAT_ITEM_LEGS_DAMAGE,CH2.STAT_ITEM_HANDS_DAMAGE,CH2.STAT_ITEM_FEET_DAMAGE,CH2.STAT_ITEM_BACK_DAMAGE];
       
-      public static const VALUES_RESET_AT_ASCENSION:Array = ["State","timeSinceLastClickAttack","timeSinceLastSkill","timeSinceLastAutoAttack","consecutiveOneShottedMonsters","gold","mana","energy","gcdRemaining","castTimeRemaining","castTime","skillBeingCast","buffs","inventory","currentCatalogRank","catalogItemsForSale","isPurchasingLocked","currentZone","highestZone","totalRunDistance","totalGold","monstersKilled","monstersKilledPerZone","powerRuneActivated","speedRuneActivated","luckRuneActivated","timeMetalDetectorActive","zoneMetalDetectorActive","zoneStartGold"];
+      public static const VALUES_RESET_AT_ASCENSION:Array = ["state","timeSinceLastClickAttack","timeSinceLastSkill","timeSinceLastAutoAttack","consecutiveOneShottedMonsters","gold","mana","energy","gcdRemaining","castTimeRemaining","castTime","skillBeingCast","buffs","inventory","currentCatalogRank","catalogItemsForSale","isPurchasingLocked","currentZone","highestZone","totalRunDistance","totalGold","monstersKilled","monstersKilledPerZone","powerRuneActivated","speedRuneActivated","luckRuneActivated","timeMetalDetectorActive","zoneMetalDetectorActive","zoneStartGold"];
+      
+      public static var staticTutorialInstances:Object = {};
       
       public static var staticSkillInstances:Object = {};
       
-      public static var staticFields:Array = ["flavorName","flavorClass","flavor","gender","flair","characterSelectOrder","availableForCreation","visibleOnCharacterSelect","defaultSaveName","startingSkills","levelCostScaling","talentChoices","talentZones","upgradeableStats","assetGroupName","damageMultiplierBase","maxManaMultiplierBase","maxEnergyMultiplierBase","attackMsDelay","gcdBase","autoAttackDamageMultiplierBase","damageMultiplierValueFunction","maxManaMultiplierValueFunction","maxEnergyMultiplierValueFunction","damageMultiplierCostFunction","maxManaMultiplierCostFunction","maxEnergyMultiplierCostFunction","statValueFunctions","statBaseValues","statCostFunctions","monstersPerZone","monsterHealthMultiplier","attackRange","levelGraph","levelGraphNodeTypes","recommendedLevelsForWorlds"];
+      public static var staticFields:Array = ["flavorName","flavorClass","flavor","gender","flair","characterSelectOrder","availableForCreation","visibleOnCharacterSelect","defaultSaveName","startingSkills","levelCostScaling","upgradeableStats","assetGroupName","damageMultiplierBase","maxManaMultiplierBase","maxEnergyMultiplierBase","attackMsDelay","gcdBase","autoAttackDamageMultiplierBase","damageMultiplierValueFunction","maxManaMultiplierValueFunction","maxEnergyMultiplierValueFunction","damageMultiplierCostFunction","maxManaMultiplierCostFunction","maxEnergyMultiplierCostFunction","statValueFunctions","statBaseValues","statCostFunctions","monstersPerZone","monsterHealthMultiplier","attackRange","levelGraph","levelGraphNodeTypes"];
        
+      
+      public var isMouseOverClickableActivationUnlocked:Boolean = false;
+      
+      public var numUserInputActions:Number;
+      
+      public var sidePanelIsVisible:Boolean;
+      
+      public var modDependencies:Object;
       
       public var version:Number = 0;
       
       public var state:int = 5;
       
       public var monstersPerZone:Number = 50;
+      
+      public var worldsPerGild:Number = 30;
       
       public var monsterHealthMultiplier:Number = 1;
       
@@ -147,6 +160,10 @@ package models
       
       public var creationTime:Number;
       
+      public var gender:String;
+      
+      public var flair:String;
+      
       public var roller:Roller;
       
       public var startingRollerValue:int;
@@ -173,6 +190,8 @@ package models
       
       public var timeSinceLastAncientShardPurchase:int = 84600000;
       
+      public var timeSinceLastAutomatorPointPurchase:int = 14400000;
+      
       public var powerRuneActivated:Boolean = false;
       
       public var speedRuneActivated:Boolean = false;
@@ -186,6 +205,10 @@ package models
       public var zoneMetalDetectorActive:Boolean = false;
       
       public var zoneOfZoneMetalDetectorActivation:Number;
+      
+      public var zoneToShowPerWorld:Object;
+      
+      public var hasActivatedMassiveOrangeFish:Object;
       
       public var inputLogger:InputLog;
       
@@ -207,6 +230,8 @@ package models
       
       public var trackedXPEarned:TrackedStat;
       
+      public var drawCounts:TrackedStat;
+      
       public var gcdRemaining:Number = 0;
       
       public var castTimeRemaining:Number = 0;
@@ -215,9 +240,13 @@ package models
       
       public var skillBeingCast:Skill;
       
+      public var worlds:AscensionWorlds;
+      
       public var buffs:Buffs;
       
       public var inventory:Items;
+      
+      public var shouldLevelToNextMultiplier:Boolean = false;
       
       public var currentCatalogRank:Number = 0;
       
@@ -231,6 +260,12 @@ package models
       
       public var worldEndAutomationOptions:Array;
       
+      public var automatorStones:Number = 0;
+      
+      public var currentTutorial:Tutorial = null;
+      
+      public var tutorials:Array;
+      
       public var timeOfLastRun:Number = 0;
       
       public var timeOfLastAscension:Number = 0;
@@ -241,9 +276,15 @@ package models
       
       public var timeOfflineMilliseconds:Number = 0;
       
-      public var timeSinceLastItemInteraction:Number = 0;
-      
       public var serverTimeOfLastUpdate:Number = 0;
+      
+      public var timeOfLastCatalogPurchase:Number = 0;
+      
+      public var timeOfLastItemUpgrade:Number = 0;
+      
+      public var timeOfLastOutOfEnergy:Number = 0;
+      
+      public var timeOfLastLevelUp:Number = 0;
       
       public var didFinishWorld:Boolean = true;
       
@@ -254,6 +295,8 @@ package models
       public var totalRunDistance:Number = 0;
       
       public var totalGold:BigNumber;
+      
+      public var highestItemTierSeen:Number = 0;
       
       public var monstersKilled:Number = 0;
       
@@ -283,6 +326,10 @@ package models
       
       public var hasSeenItemsPanel:Boolean = false;
       
+      public var hasSeenGraphPanel:Boolean = false;
+      
+      public var hasSeenSkillsPanel:Boolean = false;
+      
       public var hasSeenAutomatorPanel:Boolean = false;
       
       public var hasSeenWorldsPanel:Boolean = false;
@@ -293,39 +340,27 @@ package models
       
       public var hasSeenRubyShopPanel:Boolean = false;
       
+      public var onlineTimeAsOfLastRubyShopMilliseconds:Number;
+      
       public var hasNewSkillTreePointsAvailable:Boolean = false;
       
       public var hasNewSkillAvailable:Boolean = false;
       
-      public var itemAlertArrowsShowing:int = 0;
-      
       public var totalRubies:Number = 0;
       
-      public var isItemPanelUnlocked:Function;
+      public var isItemPanelUnlockedHandler:Object = null;
       
-      public var isGraphPanelUnlocked:Function;
+      public var isGraphPanelUnlockedHandler:Object = null;
       
-      public var isSkillPanelUnlocked:Function;
+      public var isSkillPanelUnlockedHandler:Object = null;
       
-      public var isAutomatorPanelUnlocked:Function;
+      public var isAutomatorPanelUnlockedHandler:Object = null;
       
-      public var isWorldsPanelUnlocked:Function;
+      public var isWorldsPanelUnlockedHandler:Object = null;
       
-      public var isMiscPanelUnlocked:Function;
+      public var isMiscPanelUnlockedHandler:Object = null;
       
-      public var shouldSlideInMainPanelForFirstTime:Function;
-      
-      public var shouldShowGraphPanelAlertArrow:Function;
-      
-      public var shouldShowAutomatorPanelAlertArrow:Function;
-      
-      public var shouldShowCatalogItemAlertArrow:Function;
-      
-      public var shouldShowItemUpgradeAlertArrow:Function;
-      
-      public var shouldShowMainPanelAlertArrow:Function;
-      
-      public var shouldShowRightPanelAlertArrow:Function;
+      public var shouldSlideInMainPanelForFirstTimeHandler:Object = null;
       
       public var assetGroupName:String;
       
@@ -333,13 +368,13 @@ package models
       
       public var activeSkills:Array;
       
-      public var talents:Array;
-      
       public var level:Number = 1;
       
       public var totalStatPointsV2:Number = 0;
       
       public var didConvertTotalStatPointsToV2ThisIsStupid:Boolean = false;
+      
+      public var automatorPoints:int = 0;
       
       public var totalExperience:BigNumber;
       
@@ -369,21 +404,23 @@ package models
       
       public var hasNeverStartedWorld:Boolean = true;
       
-      public var timeSinceLastLevelUp:Number = 0;
-      
-      public var timeSinceAutomatorWasUnlocked:Number = 0;
-      
       public var lostOnGilding:Array;
+      
+      public var isViewingAutomatorTree:Boolean = false;
+      
+      public var skillTreeViewX:Number = 0;
+      
+      public var skillTreeViewY:Number = 0;
+      
+      public var automatorTreeViewX:Number = 15741;
+      
+      public var automatorTreeViewY:Number = -125;
       
       public var flavorName:String;
       
       public var flavorClass:String;
       
       public var flavor:String;
-      
-      public var gender:String;
-      
-      public var flair:String;
       
       public var characterSelectOrder:Number;
       
@@ -393,15 +430,9 @@ package models
       
       public var defaultSaveName:String;
       
-      public var baseOutfitId:Number;
-      
       public var startingSkills:Array;
       
       public var levelCostScaling:String;
-      
-      public var talentZones:Array;
-      
-      public var talentChoices:Array;
       
       public var upgradeableStats:Array;
       
@@ -463,29 +494,33 @@ package models
       
       public var nodesPurchased:Object;
       
-      public var traits:Object;
+      public var undoNodes:Object;
       
-      public var recommendedLevelsForWorlds:Object;
+      public var traits:Object;
       
       public var characterDisplay:CharacterDisplay;
       
-      public var applyTalents:Function;
+      public var worldEntity:WorldEntity;
       
-      public var onWorldStarted:Function;
+      public var x:Number;
       
-      public var onCharacterLoaded:Function;
+      public var y:Number;
       
-      public var onCharacterUnloaded:Function;
+      public var onWorldStartedHandler:Object = null;
       
-      public var onCharacterDisplayCreated:Function;
+      public var onCharacterLoadedHandler:Object = null;
       
-      public var triggerGlobalCooldown:Function;
+      public var onCharacterUnloadedHandler:Object = null;
       
-      public var unlockCharacter:Function;
+      public var onCharacterDisplayCreatedHandler:Object = null;
       
-      public var onAutomatorUnlocked:Function;
+      public var triggerGlobalCooldownHandler:Object = null;
       
-      public var populateWorldEndAutomationOptions:Function;
+      public var unlockCharacterHandler:Object = null;
+      
+      public var onAutomatorUnlockedHandler:Object = null;
+      
+      public var populateWorldEndAutomationOptionsHandler:Object = null;
       
       private var timeUntilDamageCache:int = 100;
       
@@ -497,99 +532,104 @@ package models
       
       private var musicExcitementTimer:int = 0;
       
-      public var update:Function;
+      private var timeSinceRegen:int = 0;
       
-      public var changeState:Function;
+      public var updateHandler:Object = null;
       
-      public var attack:Function;
+      public var changeStateHandler:Object = null;
       
-      public var clickAttack:Function;
+      public var attackHandler:Object = null;
       
-      public var autoAttack:Function;
+      public var clickAttackHandler:Object = null;
       
-      public var onClickAttack:Function;
+      public var autoAttackHandler:Object = null;
       
-      public var onTeleportAttack:Function;
+      public var onClickAttackHandler:Object = null;
       
-      public var onKilledMonster:Function;
+      public var onTeleportAttackHandler:Object = null;
       
-      public var onZoneChanged:Function;
+      public var onKilledMonsterHandler:Object = null;
       
-      public var onWorldFinished:Function;
+      public var onZoneChangedHandler:Object = null;
       
-      public var getCalculatedEnergyCost:Function;
+      public var onWorldFinishedHandler:Object = null;
       
-      public var onAscension:Function;
+      public var getCalculatedEnergyCostHandler:Object = null;
       
-      public var addGold:Function;
+      public var onAscensionHandler:Object = null;
       
-      public var addRubies:Function;
+      public var addGoldHandler:Object = null;
       
-      public var regenerateManaAndEnergy:Function;
+      public var addRubiesHandler:Object = null;
       
-      public var addEnergy:Function;
+      public var regenerateManaAndEnergyHandler:Object = null;
       
-      public var addMana:Function;
+      public var addEnergyHandler:Object = null;
       
-      public var canUseSkill:Function;
+      public var addManaHandler:Object = null;
       
-      public var onUsedSkill:Function;
+      public var canUseSkillHandler:Object = null;
       
-      public var levelUpItem:Function;
+      public var onUsedSkillHandler:Object = null;
       
-      public var buyNextItemBonus:Function;
+      public var levelUpItemHandler:Object = null;
       
-      public var purchaseCatalogItem:Function;
+      public var buyNextItemBonusHandler:Object = null;
       
-      public var generateCatalog:Function;
+      public var purchaseCatalogItemHandler:Object = null;
       
-      public var learnTalent:Function;
+      public var generateCatalogHandler:Object = null;
       
-      public var walk:Function;
+      public var walkHandler:Object = null;
       
-      public var shouldRubyShopActivate:Function;
+      private var cachedClassStats:Array;
       
-      public var shouldRubyShopDeactivate:Function;
+      private var classStatsCached:Boolean = false;
       
-      public var populateRubyPurchaseOptions:Function;
+      public var getLevelUpCostToNextLevelHandler:Object = null;
       
-      public var generateRubyShop:Function;
+      public var addGildHandler:Object = null;
       
-      public var updateRubyShopFields:Function;
+      public var highestDamageExponent:Number = 0;
+      
+      public var shouldRubyShopActivateHandler:Object = null;
+      
+      public var shouldRubyShopDeactivateHandler:Object = null;
+      
+      public var populateRubyPurchaseOptionsHandler:Object = null;
+      
+      public var generateRubyShopHandler:Object = null;
+      
+      public var updateRubyShopFieldsHandler:Object = null;
+      
+      public var onMigrationHandler:Object = null;
+      
+      public var getItemDamageHandler:Object = null;
       
       public function Character()
       {
+         this.modDependencies = {};
          this.unarmedDamage = new BigNumber(1);
          this.roller = new Roller();
          this.gold = new BigNumber(0);
          this.zoneStartGold = new BigNumber(0);
          this.rubyPurchaseOptions = [];
          this.currentRubyShop = [];
+         this.zoneToShowPerWorld = {};
+         this.hasActivatedMassiveOrangeFish = {};
          this.inputLogger = new InputLog();
          this.eventLogger = new EventLog();
+         this.worlds = new AscensionWorlds();
          this.buffs = new Buffs();
          this.inventory = new Items();
          this.catalogItemsForSale = [];
          this.automator = new Automator();
          this.worldEndAutomationOptions = [];
+         this.tutorials = [];
          this.totalGold = new BigNumber(0);
          this.monstersKilledPerZone = {};
-         this.isItemPanelUnlocked = this.isItemPanelUnlockedDefault;
-         this.isGraphPanelUnlocked = this.isGraphPanelUnlockedDefault;
-         this.isSkillPanelUnlocked = this.isSkillPanelUnlockedDefault;
-         this.isAutomatorPanelUnlocked = this.isAutomatorPanelUnlockedDefault;
-         this.isWorldsPanelUnlocked = this.isWorldsPanelUnlockedDefault;
-         this.isMiscPanelUnlocked = this.isMiscPanelUnlockedDefault;
-         this.shouldSlideInMainPanelForFirstTime = this.shouldSlideInMainPanelForFirstTimeDefault;
-         this.shouldShowGraphPanelAlertArrow = this.shouldShowGraphPanelAlertArrowDefault;
-         this.shouldShowAutomatorPanelAlertArrow = this.shouldShowAutomatorPanelAlertArrowDefault;
-         this.shouldShowCatalogItemAlertArrow = this.shouldShowCatalogItemAlertArrowDefault;
-         this.shouldShowItemUpgradeAlertArrow = this.shouldShowItemUpgradeAlertArrowDefault;
-         this.shouldShowMainPanelAlertArrow = this.shouldShowMainPanelAlertArrowDefault;
-         this.shouldShowRightPanelAlertArrow = this.shouldShowRightPanelAlertArrowDefault;
          this.skills = {};
          this.activeSkills = [];
-         this.talents = [];
          this.totalExperience = new BigNumber(0);
          this.experienceAtRunStart = new BigNumber(0);
          this.experienceForCurrentWorld = new BigNumber(0);
@@ -605,57 +645,23 @@ package models
          this.statCostFunctions = new Array();
          this.statBaseValues = new Array();
          this.nodesPurchased = {};
+         this.undoNodes = {};
          this.traits = {};
-         this.applyTalents = this.applyTalentsDefault;
-         this.onWorldStarted = this.onWorldStartedDefault;
-         this.onCharacterLoaded = this.onCharacterLoadedDefault;
-         this.onCharacterUnloaded = this.onCharacterUnloadedDefault;
-         this.onCharacterDisplayCreated = this.onCharacterDisplayCreatedDefault;
-         this.triggerGlobalCooldown = this.triggerGlobalCooldownDefault;
-         this.unlockCharacter = this.unlockCharacterDefault;
-         this.onAutomatorUnlocked = this.onAutomatorUnlockedDefault;
-         this.populateWorldEndAutomationOptions = this.populateWorldEndAutomationOptionsDefault;
+         this.worldEntity = new WorldEntity();
          this.cachedDamage = [];
-         this.update = this.updateDefault;
-         this.changeState = this.changeStateDefault;
-         this.attack = this.attackDefault;
-         this.clickAttack = this.clickAttackDefault;
-         this.autoAttack = this.autoAttackDefault;
-         this.onClickAttack = this.onClickAttackDefault;
-         this.onTeleportAttack = this.onTeleportAttackDefault;
-         this.onKilledMonster = this.onKilledMonsterDefault;
-         this.onZoneChanged = this.onZoneChangedDefault;
-         this.onWorldFinished = this.onWorldFinishedDefault;
-         this.getCalculatedEnergyCost = this.getCalculatedEnergyCostDefault;
-         this.onAscension = this.onAscensionDefault;
-         this.addGold = this.addGoldDefault;
-         this.addRubies = this.addRubiesDefault;
-         this.regenerateManaAndEnergy = this.regenerateManaAndEnergyDefault;
-         this.addEnergy = this.addEnergyDefault;
-         this.addMana = this.addManaDefault;
-         this.canUseSkill = this.canUseSkillDefault;
-         this.onUsedSkill = this.onUsedSkillDefault;
-         this.levelUpItem = this.levelUpItemDefault;
-         this.buyNextItemBonus = this.buyNextItemBonusDefault;
-         this.purchaseCatalogItem = this.purchaseCatalogItemDefault;
-         this.generateCatalog = this.generateCatalogDefault;
-         this.learnTalent = this.learnTalentDefault;
-         this.walk = this.walkDefault;
-         this.shouldRubyShopActivate = this.shouldRubyShopActivateDefault;
-         this.shouldRubyShopDeactivate = this.shouldRubyShopDeactivateDefault;
-         this.populateRubyPurchaseOptions = this.populateRubyPurchaseOptionsDefault;
-         this.generateRubyShop = this.generateRubyShopDefault;
-         this.updateRubyShopFields = this.updateRubyShopFieldsDefault;
+         this.cachedClassStats = [];
          super();
          if(CH2.STATS.length == 0)
          {
             CH2.initStats();
          }
-         x = 20;
-         y = CHARACTER_ZONE_START_Y;
-         removeOnZoneChanges = false;
+         this.x = 20;
+         this.y = CHARACTER_ZONE_START_Y;
+         this.worldEntity.removeOnZoneChanges = false;
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicObject,"modDependencies");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"version");
          this.persist(GILD_PERSISTING_FALSE,registerDynamicBigNumber,"unarmedDamage");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"worlds",AscensionWorlds);
          this.persist(GILD_PERSISTING_TRUE,registerDynamicString,"name");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"roller",Roller);
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"startingRollerValue");
@@ -676,7 +682,6 @@ package models
          this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"inventory",Items);
          this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"automator",Automator);
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"currentWorldEndAutomationOption");
-         this.persist(GILD_PERSISTING_TRUE,registerDynamicCollection,"talents",Talent);
          this.persist(GILD_PERSISTING_FALSE,registerDynamicCollection,"skills",Skill);
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"currentCatalogRank");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicCollection,"catalogItemsForSale",Item);
@@ -689,9 +694,14 @@ package models
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeOfflineMilliseconds");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"serverTimeOfLastUpdate");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"creationTime");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeOfLastOutOfEnergy");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeOfLastLevelUp");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeOfLastItemUpgrade");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeOfLastCatalogPurchase");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeSinceLastRubyShopAppearance");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeSinceLastAncientShardPurchase");
-         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"ancientShards");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeSinceLastAutomatorPointPurchase");
+         this.persist(GILD_PERSISTING_FALSE,registerDynamicNumber,"ancientShards");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"powerRuneActivated");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"speedRuneActivated");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"luckRuneActivated");
@@ -699,11 +709,14 @@ package models
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeSinceTimeMetalDetectorActivated");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"zoneMetalDetectorActive");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"zoneOfZoneMetalDetectorActivation");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicObject,"zoneToShowPerWorld");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicObject,"hasActivatedMassiveOrangeFish");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"didFinishWorld");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"currentZone");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"highestZone");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"totalRunDistance");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBigNumber,"totalGold");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"highestItemTierSeen");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"monstersKilled");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"totalUpgradesToItems");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"totalCatalogItemsPurchased");
@@ -725,9 +738,11 @@ package models
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasSeenMiscPanel");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasReceivedFirstTimeEnergy");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasSeenRubyShopPanel");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasNewSkillTreePointsAvailable");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicString,"name");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"level");
          this.persist(GILD_PERSISTING_FALSE,registerDynamicNumber,"totalStatPointsV2");
+         this.persist(GILD_PERSISTING_FALSE,registerDynamicNumber,"automatorPoints");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"didConvertTotalStatPointsToV2ThisIsStupid");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBigNumber,"experience");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBigNumber,"totalExperience");
@@ -744,6 +759,7 @@ package models
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"gilds");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBigNumber,"gildedDamageMultiplier");
          this.persist(GILD_PERSISTING_FALSE,registerDynamicObject,"nodesPurchased");
+         this.persist(GILD_PERSISTING_FALSE,registerDynamicObject,"undoNodes");
          this.persist(GILD_PERSISTING_FALSE,registerDynamicObject,"traits");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicObject,"monstersKilledPerZone");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasNeverStartedWorld");
@@ -775,7 +791,7 @@ package models
          this.statBaseValues[CH2.STAT_CLICKABLE_GOLD] = 1;
          this.statBaseValues[CH2.STAT_TREASURE_CHEST_CHANCE] = 0.02;
          this.statBaseValues[CH2.STAT_TREASURE_CHEST_GOLD] = 1;
-         this.statBaseValues[CH2.STAT_BOSS_GOLD] = 1;
+         this.statBaseValues[CH2.STAT_MONSTER_GOLD] = 1;
          this.statBaseValues[CH2.STAT_CLICKABLE_CHANCE] = 0;
          this.statBaseValues[CH2.STAT_ENERGY_REGEN] = 0;
          this.statBaseValues[CH2.STAT_DAMAGE] = 1;
@@ -819,7 +835,7 @@ package models
          this.statValueFunctions[CH2.STAT_CLICKABLE_GOLD] = exponentialMultiplier(1.5);
          this.statValueFunctions[CH2.STAT_TREASURE_CHEST_CHANCE] = linear(0.02);
          this.statValueFunctions[CH2.STAT_TREASURE_CHEST_GOLD] = exponentialMultiplier(1.25);
-         this.statValueFunctions[CH2.STAT_BOSS_GOLD] = exponentialMultiplier(2);
+         this.statValueFunctions[CH2.STAT_MONSTER_GOLD] = exponentialMultiplier(1.12);
          this.statValueFunctions[CH2.STAT_CLICKABLE_CHANCE] = linear(0.1);
          this.statValueFunctions[CH2.STAT_ENERGY_REGEN] = linear(0);
          this.statValueFunctions[CH2.STAT_DAMAGE] = exponentialMultiplier(1.5);
@@ -850,7 +866,7 @@ package models
          this.statCostFunctions[CH2.STAT_CLICKABLE_GOLD] = exponential(1.25);
          this.statCostFunctions[CH2.STAT_TREASURE_CHEST_CHANCE] = exponential(1.25);
          this.statCostFunctions[CH2.STAT_TREASURE_CHEST_GOLD] = exponential(1.25);
-         this.statCostFunctions[CH2.STAT_BOSS_GOLD] = exponential(1.25);
+         this.statCostFunctions[CH2.STAT_MONSTER_GOLD] = exponential(1.25);
          this.statCostFunctions[CH2.STAT_CLICKABLE_CHANCE] = exponential(1.25);
          this.statCostFunctions[CH2.STAT_ENERGY_REGEN] = exponential(1.25);
          this.statCostFunctions[CH2.STAT_DAMAGE] = linear(1);
@@ -942,7 +958,7 @@ package models
       
       public function get shouldAutoAttack() : Boolean
       {
-         return this.millisecondsBeforeNextAutoAttack <= 0;
+         return this.millisecondsBeforeNextAutoAttack <= 0 && !this.isCasting;
       }
       
       public function get isPaused() : Boolean
@@ -965,7 +981,7 @@ package models
          var closestMonster:Monster = CH2.world.getNextMonster();
          if(closestMonster)
          {
-            distance = (closestMonster.y - y - this.attackRange) / Character.ONE_METER_Y_DISTANCE;
+            distance = (closestMonster.y - this.worldEntity.y - this.attackRange) / Character.ONE_METER_Y_DISTANCE;
             return distance / this.walkSpeed * 1000;
          }
          return Number.MAX_VALUE;
@@ -981,7 +997,7 @@ package models
          var closestMonster:Monster = CH2.world.getNextMonster();
          if(closestMonster)
          {
-            return closestMonster.y - y <= this.attackRange;
+            return closestMonster.y - this.y <= this.attackRange;
          }
          return false;
       }
@@ -1006,9 +1022,27 @@ package models
          return this.energy >= this.clickAttackEnergyCost;
       }
       
+      public function isItemPanelUnlocked() : Boolean
+      {
+         if(this.isItemPanelUnlockedHandler)
+         {
+            return this.isItemPanelUnlockedHandler.isItemPanelUnlockedOverride();
+         }
+         return this.isItemPanelUnlockedDefault();
+      }
+      
       public function isItemPanelUnlockedDefault() : Boolean
       {
          return true;
+      }
+      
+      public function isGraphPanelUnlocked() : Boolean
+      {
+         if(this.isGraphPanelUnlockedHandler)
+         {
+            return this.isGraphPanelUnlockedHandler.isGraphPanelUnlockedOverride();
+         }
+         return this.isGraphPanelUnlockedDefault();
       }
       
       public function isGraphPanelUnlockedDefault() : Boolean
@@ -1016,9 +1050,27 @@ package models
          return this.level >= 2;
       }
       
+      public function isSkillPanelUnlocked() : Boolean
+      {
+         if(this.isSkillPanelUnlockedHandler)
+         {
+            return this.isSkillPanelUnlockedHandler.isSkillPanelUnlockedOverride();
+         }
+         return this.isSkillPanelUnlockedDefault();
+      }
+      
       public function isSkillPanelUnlockedDefault() : Boolean
       {
          return this.hasPurchasedFirstSkill;
+      }
+      
+      public function isAutomatorPanelUnlocked() : Boolean
+      {
+         if(this.isAutomatorPanelUnlockedHandler)
+         {
+            return this.isAutomatorPanelUnlockedHandler.isAutomatorPanelUnlockedOverride();
+         }
+         return this.isAutomatorPanelUnlockedDefault();
       }
       
       public function isAutomatorPanelUnlockedDefault() : Boolean
@@ -1026,9 +1078,27 @@ package models
          return this.hasUnlockedAutomator;
       }
       
+      public function isWorldsPanelUnlocked() : Boolean
+      {
+         if(this.isWorldsPanelUnlockedHandler)
+         {
+            return this.isWorldsPanelUnlockedHandler.isWorldsPanelUnlockedOverride();
+         }
+         return this.isWorldsPanelUnlockedDefault();
+      }
+      
       public function isWorldsPanelUnlockedDefault() : Boolean
       {
          return this.highestWorldCompleted >= 1;
+      }
+      
+      public function isMiscPanelUnlocked() : Boolean
+      {
+         if(this.isMiscPanelUnlockedHandler)
+         {
+            return this.isMiscPanelUnlockedHandler.isMiscPanelUnlockedOverride();
+         }
+         return this.isMiscPanelUnlockedDefault();
       }
       
       public function isMiscPanelUnlockedDefault() : Boolean
@@ -1046,52 +1116,18 @@ package models
          return false;
       }
       
+      public function shouldSlideInMainPanelForFirstTime() : Boolean
+      {
+         if(this.shouldSlideInMainPanelForFirstTimeHandler)
+         {
+            return this.shouldSlideInMainPanelForFirstTimeHandler.shouldSlideInMainPanelForFirstTimeOverride();
+         }
+         return this.shouldSlideInMainPanelForFirstTimeDefault();
+      }
+      
       public function shouldSlideInMainPanelForFirstTimeDefault() : Boolean
       {
          return !this.hasSeenMainPanel && this.canAffordFirstCatalogItem();
-      }
-      
-      public function shouldShowGraphPanelAlertArrowDefault() : Boolean
-      {
-         return this.hasAvailableStatPoints && this.spentStatPoints.ltN(3) && this.timeSinceLastLevelUp > TIME_UNTIL_PLAYER_NEEDS_HINT_MS;
-      }
-      
-      public function shouldShowAutomatorPanelAlertArrowDefault() : Boolean
-      {
-         return !this.hasSeenAutomatorPanel && this.isAutomatorPanelUnlocked() && this.timeSinceAutomatorWasUnlocked > TIME_UNTIL_PLAYER_NEEDS_HINT_MS;
-      }
-      
-      public function shouldShowCatalogItemAlertArrowDefault() : Boolean
-      {
-         if(this.currentCatalogRank == 0 && this.totalCatalogItemsPurchased == 0)
-         {
-            return this.canAffordFirstCatalogItem() && this.timeSinceLastItemInteraction > TIME_UNTIL_PLAYER_NEEDS_HINT_MS;
-         }
-         return false;
-      }
-      
-      public function shouldShowItemUpgradeAlertArrowDefault() : Boolean
-      {
-         var item:Item = null;
-         if(this.totalUpgradesToItems < 3)
-         {
-            item = this.inventory.getItemInSlot(0);
-            if(item)
-            {
-               return this.gold.gte(item.cost()) && this.timeSinceLastItemInteraction > TIME_UNTIL_PLAYER_NEEDS_HINT_MS;
-            }
-         }
-         return false;
-      }
-      
-      public function shouldShowMainPanelAlertArrowDefault() : Boolean
-      {
-         return this.shouldShowGraphPanelAlertArrow() || this.shouldShowAutomatorPanelAlertArrow() || this.shouldShowItemUpgradeAlertArrow() || this.shouldShowCatalogItemAlertArrow();
-      }
-      
-      public function shouldShowRightPanelAlertArrowDefault() : Boolean
-      {
-         return !this.hasSeenRubyShopPanel && this.timeSinceLastRubyShopAppearance > TIME_UNTIL_PLAYER_NEEDS_RUBY_SHOP_HINT_MS && this.timeSinceLastRubyShopAppearance < RUBY_SHOP_APPEARANCE_DURATION;
       }
       
       public function get isOnHighestZone() : Boolean
@@ -1146,33 +1182,7 @@ package models
       
       public function get currentWorld() : AscensionWorld
       {
-         return CH2.user.ascensionWorlds.getWorld(this.currentWorldId);
-      }
-      
-      public function get currentTalentTier() : Number
-      {
-         return this.talents.length;
-      }
-      
-      public function get currentTalentTierChoices() : Array
-      {
-         return this.talentChoices[this.currentTalentTier];
-      }
-      
-      public function get hasAllAvailableTalents() : Boolean
-      {
-         return this.talents.length == this.talentChoices.length;
-      }
-      
-      public function get zoneOfNextTalentUnlock() : Number
-      {
-         return this.talentZones[this.talents.length];
-      }
-      
-      public function get isReadyForNextTalent() : Boolean
-      {
-         var isNewTierAchieved:* = this.highestZone > this.zoneOfNextTalentUnlock;
-         return !this.hasAllAvailableTalents && isNewTierAchieved;
+         return this.worlds.getWorld(this.currentWorldId);
       }
       
       public function get timeSinceMostRecentRunBegan() : Number
@@ -1268,6 +1278,9 @@ package models
       
       public function startWorld(worldNumber:Number) : void
       {
+         var worldIsInLastFiveOfGild:* = false;
+         var chanceToShowInWorld:Number = NaN;
+         var willShowInCurrentWorld:* = undefined;
          this.hasNeverStartedWorld = false;
          this.onWorldStarted(worldNumber);
          this.generateCatalog();
@@ -1276,28 +1289,74 @@ package models
          {
             this.highestMonstersKilled[worldNumber] = 0;
          }
+         if(!this.zoneToShowPerWorld.hasOwnProperty(worldNumber))
+         {
+            worldIsInLastFiveOfGild = (this.currentWorldId - 1) % this.worldsPerGild >= this.worldsPerGild - 4;
+            chanceToShowInWorld = !!worldIsInLastFiveOfGild?Number(0.25):Number(0.1);
+            willShowInCurrentWorld = CH2.roller.worldRoller.boolean(chanceToShowInWorld);
+            if(willShowInCurrentWorld)
+            {
+               this.zoneToShowPerWorld[worldNumber] = CH2.roller.worldRoller.integer(35,90);
+            }
+            else
+            {
+               this.zoneToShowPerWorld[worldNumber] = 101;
+            }
+            this.hasActivatedMassiveOrangeFish[worldNumber] = false;
+         }
          MusicManager.instance.shufflePlaylists();
       }
       
-      public function applyTalentsDefault() : void
+      public function onWorldStarted(worldNumber:Number) : void
       {
-         var talent:Talent = null;
-         for each(talent in this.talents)
+         if(this.onWorldStartedHandler)
          {
-            Trace(talent.name);
-            talent.apply();
+            this.onWorldStartedHandler.onWorldStartedOverride(worldNumber);
+         }
+         else
+         {
+            this.onWorldStartedDefault(worldNumber);
          }
       }
       
       public function onWorldStartedDefault(worldNumber:Number) : void
       {
          this.currentWorldId = worldNumber;
+         var expectedNumGilds:int = Math.floor((this.currentWorldId - 1) / this.worldsPerGild);
+         if(this.gilds < expectedNumGilds)
+         {
+            this.drainWorldsUpTo(this.currentWorldId - 1);
+            this.addGild(this.currentWorldId);
+         }
          this.timeOfLastRun = CH2.user.totalMsecsPlayed;
-         this.applyTalents();
+      }
+      
+      public function onCharacterLoaded() : void
+      {
+         if(this.onCharacterLoadedHandler)
+         {
+            this.onCharacterLoadedHandler.onCharacterLoadedOverride();
+         }
+         else
+         {
+            this.onCharacterLoadedDefault();
+         }
       }
       
       public function onCharacterLoadedDefault() : void
       {
+      }
+      
+      public function onCharacterUnloaded() : void
+      {
+         if(this.onCharacterUnloadedHandler)
+         {
+            this.onCharacterUnloadedHandler.onCharacterUnloadedOverride();
+         }
+         else
+         {
+            this.onCharacterUnloadedDefault();
+         }
       }
       
       public function onCharacterUnloadedDefault() : void
@@ -1305,13 +1364,49 @@ package models
          this.activeSkills = [];
       }
       
+      public function onCharacterDisplayCreated(display:CharacterDisplay) : void
+      {
+         if(this.onCharacterDisplayCreatedHandler)
+         {
+            this.onCharacterDisplayCreatedHandler.onCharacterDisplayCreatedOverride(display);
+         }
+         else
+         {
+            this.onCharacterDisplayCreatedDefault(display);
+         }
+      }
+      
       public function onCharacterDisplayCreatedDefault(display:CharacterDisplay) : void
       {
+      }
+      
+      public function triggerGlobalCooldown() : void
+      {
+         if(this.triggerGlobalCooldownHandler)
+         {
+            this.triggerGlobalCooldownHandler.triggerGlobalCooldownOverride();
+         }
+         else
+         {
+            this.triggerGlobalCooldownDefault();
+         }
       }
       
       public function triggerGlobalCooldownDefault() : void
       {
          this.gcdRemaining = this.gcd;
+      }
+      
+      public function unlockCharacter() : void
+      {
+         if(this.unlockCharacterHandler)
+         {
+            this.unlockCharacterHandler.unlockCharacterOverride();
+         }
+         else
+         {
+            this.unlockCharacterDefault();
+         }
       }
       
       public function unlockCharacterDefault() : void
@@ -1323,10 +1418,33 @@ package models
          }
       }
       
+      public function onAutomatorUnlocked() : void
+      {
+         if(this.onAutomatorUnlockedHandler)
+         {
+            this.onAutomatorUnlockedHandler.onAutomatorUnlockedOverride();
+         }
+         else
+         {
+            this.onAutomatorUnlockedDefault();
+         }
+      }
+      
       public function onAutomatorUnlockedDefault() : void
       {
          this.hasUnlockedAutomator = true;
-         this.timeSinceAutomatorWasUnlocked = 0;
+      }
+      
+      public function populateWorldEndAutomationOptions() : void
+      {
+         if(this.populateWorldEndAutomationOptionsHandler)
+         {
+            this.populateWorldEndAutomationOptionsHandler.populateWorldEndAutomationOptionsOverride();
+         }
+         else
+         {
+            this.populateWorldEndAutomationOptionsDefault();
+         }
       }
       
       public function populateWorldEndAutomationOptionsDefault() : void
@@ -1388,7 +1506,7 @@ package models
       
       public function excitingUpgradeCheck() : void
       {
-         var currentDamage:BigNumber = this.inventory.getEquippedDamage().add(this.unarmedDamage);
+         var currentDamage:BigNumber = this.inventory.getEquippedDamage();
          if(this.cachedDamage.length < 50)
          {
             this.fillDamageCache(currentDamage);
@@ -1401,13 +1519,21 @@ package models
          }
       }
       
+      public function update(dt:int) : void
+      {
+         if(this.updateHandler)
+         {
+            this.updateHandler.updateOverride(dt);
+         }
+         else
+         {
+            this.updateDefault(dt);
+         }
+      }
+      
       public function updateDefault(dt:int) : void
       {
          var target:Monster = null;
-         var idleBuff:Buff = null;
-         this.timeSinceLastLevelUp = this.timeSinceLastLevelUp + dt;
-         this.timeSinceAutomatorWasUnlocked = this.timeSinceAutomatorWasUnlocked + dt;
-         this.timeSinceLastItemInteraction = this.timeSinceLastItemInteraction + dt;
          this.timeOnlineMilliseconds = this.timeOnlineMilliseconds + dt;
          this.timeUntilDamageCache = this.timeUntilDamageCache - dt;
          this.musicExcitementTimer = this.musicExcitementTimer - dt;
@@ -1426,17 +1552,25 @@ package models
                this.musicExcitementLevel = 0;
             }
             this.timeUntilDamageCache = 100;
-            this.cachedDamage[this.nextDamageCacheEntry] = this.inventory.getEquippedDamage().add(this.unarmedDamage);
+            this.cachedDamage[this.nextDamageCacheEntry] = this.inventory.getEquippedDamage();
             this.nextDamageCacheEntry = (this.nextDamageCacheEntry + 1) % 49;
             if(this.nextDamageCacheEntry > 50)
             {
                this.nextDamageCacheEntry = 0;
             }
          }
-         this.regenerateManaAndEnergy(dt);
+         this.timeSinceRegen = this.timeSinceRegen + dt;
+         if(this.timeSinceRegen > 1000)
+         {
+            this.regenerateManaAndEnergy(this.timeSinceRegen);
+            this.timeSinceRegen = 0;
+         }
          this.cooldownSkills(dt);
          this.gcdRemaining = this.gcdRemaining - dt;
-         this.characterDisplay.update(dt);
+         if(IdleHeroMain.IS_RENDERING)
+         {
+            this.characterDisplay.update(dt);
+         }
          this.automator.executeAutomatorQueue(dt);
          var lockedState:int = this.state;
          switch(lockedState)
@@ -1496,35 +1630,14 @@ package models
                   this.changeState(STATE_WALKING);
                }
          }
-         if(this.isIdle && !this.buffs.hasBuffByName("Idle") && this.hasIdleBonuses)
-         {
-            idleBuff = new Buff();
-            idleBuff.iconId = 168;
-            idleBuff.isUntimedBuff = true;
-            idleBuff.name = "Idle";
-            idleBuff.tickFunction = function():*
-            {
-               if(!CH2.currentCharacter.isIdle || !CH2.currentCharacter.hasIdleBonuses)
-               {
-                  idleBuff.isFinished = true;
-                  idleBuff.onFinish();
-               }
-            };
-            idleBuff.tooltipFunction = function():Object
-            {
-               return {
-                  "header":"Idle",
-                  "body":"When you do not actively attack or activate a skill for " + MS_DELAY_BEFORE_IDLE / 1000 + " seconds you are treated as idle.\n\n" + "When idle you deal " + idleDamageMultiplier * 100 + "% of base damage.\n" + "And receieve " + idleMonsterGoldMultiplier * 100 + "% of base gold."
-               };
-            };
-            this.buffs.addBuff(idleBuff);
-         }
          this.buffs.updateBuffs(dt);
          this.updateRubyShopFields(dt);
          if(Math.floor(this.timeOnlineMilliseconds / 3600000) != Math.floor((this.timeOnlineMilliseconds - dt) / 3600000))
          {
             this.sendServerStatsUpdate();
          }
+         this.worldEntity.x = this.x;
+         this.worldEntity.y = this.y;
       }
       
       public function updateOfflineProgress() : void
@@ -1553,6 +1666,18 @@ package models
          });
       }
       
+      public function changeState(newState:int) : void
+      {
+         if(this.changeStateHandler)
+         {
+            this.changeStateHandler.changeStateOverride(newState);
+         }
+         else
+         {
+            this.changeStateDefault(newState);
+         }
+      }
+      
       public function changeStateDefault(newState:int) : void
       {
          switch(newState)
@@ -1576,6 +1701,18 @@ package models
          this.state = newState;
       }
       
+      public function attack(attackData:AttackData) : void
+      {
+         if(this.attackHandler)
+         {
+            this.attackHandler.attackOverride(attackData);
+         }
+         else
+         {
+            this.attackDefault(attackData);
+         }
+      }
+      
       public function attackDefault(attackData:AttackData) : void
       {
          var i:int = 0;
@@ -1586,7 +1723,7 @@ package models
          if(attackData.isPierce)
          {
             attackRange = 250;
-            monstersAttacked = CH2.world.monsters.getMonstersInCenter(x,y,attackRange);
+            monstersAttacked = CH2.world.monsters.getMonstersInCenter(this.x,this.y,attackRange);
          }
          else
          {
@@ -1625,6 +1762,18 @@ package models
          }
       }
       
+      public function clickAttack(doesCostEnergy:Boolean = true) : void
+      {
+         if(this.clickAttackHandler)
+         {
+            this.clickAttackHandler.clickAttackOverride(doesCostEnergy);
+         }
+         else
+         {
+            this.clickAttackDefault(doesCostEnergy);
+         }
+      }
+      
       public function clickAttackDefault(doesCostEnergy:Boolean = true) : void
       {
          var closestMonster:Monster = null;
@@ -1649,9 +1798,21 @@ package models
          }
          else
          {
-            IdleHeroUIManager.instance.mainUI.hud.showInsufficientEnergy();
+            CH2UI.instance.mainUI.hud.showInsufficientEnergy();
          }
          this.buffs.onClick(null);
+      }
+      
+      public function autoAttack() : void
+      {
+         if(this.autoAttackHandler)
+         {
+            this.autoAttackHandler.autoAttackOverride();
+         }
+         else
+         {
+            this.autoAttackDefault();
+         }
       }
       
       public function autoAttackDefault() : void
@@ -1665,6 +1826,18 @@ package models
          this.addEnergy(this.energyRegeneration,false);
       }
       
+      public function onClickAttack() : void
+      {
+         if(this.onClickAttackHandler)
+         {
+            this.onClickAttackHandler.onClickAttackOverride();
+         }
+         else
+         {
+            this.onClickAttackDefault();
+         }
+      }
+      
       public function onClickAttackDefault() : void
       {
          var attackData:AttackData = new AttackData();
@@ -1674,26 +1847,61 @@ package models
          this.attack(attackData);
       }
       
+      public function onTeleportAttack() : void
+      {
+         if(this.onTeleportAttackHandler)
+         {
+            this.onTeleportAttackHandler.onTeleportAttackOverride();
+         }
+         else
+         {
+            this.onTeleportAttackDefault();
+         }
+      }
+      
       public function onTeleportAttackDefault() : void
       {
-         var attackData:AttackData = new AttackData();
-         attackData.isClickAttack = true;
-         attackData.isTeleportAttack = true;
-         attackData.damage = this.clickDamage;
          if(!CH2.world.getNextMonster())
          {
             return;
          }
-         var previousY:Number = y;
-         y = CH2.world.getNextMonster().y - this.attackRange;
-         this.changeState(STATE_COMBAT);
-         this.characterDisplay.playDash(y - previousY);
+         var attackData:AttackData = new AttackData();
+         attackData.isClickAttack = true;
+         attackData.isTeleportAttack = true;
+         attackData.damage = this.clickDamage;
+         this.teleport();
          this.attack(attackData);
+      }
+      
+      public function teleport() : void
+      {
+         if(!CH2.world.getNextMonster())
+         {
+            return;
+         }
+         var previousY:Number = this.y;
+         this.y = CH2.world.getNextMonster().y - this.attackRange;
+         this.changeState(STATE_COMBAT);
+         if(IdleHeroMain.IS_RENDERING)
+         {
+            this.characterDisplay.playDash(this.y - previousY);
+         }
+      }
+      
+      public function onKilledMonster(monster:Monster) : void
+      {
+         if(this.onKilledMonsterHandler)
+         {
+            this.onKilledMonsterHandler.onKilledMonsterOverride(monster);
+         }
+         else
+         {
+            this.onKilledMonsterDefault(monster);
+         }
       }
       
       public function onKilledMonsterDefault(monster:Monster) : void
       {
-         var monstersWorthNothing:int = 0;
          this.monstersKilled++;
          CH2.user.totalMonstersKilled++;
          if(this.monstersKilledPerZone.hasOwnProperty(this.currentZone))
@@ -1706,28 +1914,21 @@ package models
          }
          if(this.isOnHighestZone)
          {
-            IdleHeroUIManager.instance.mainUI.hud.update(0);
+            CH2UI.instance.mainUI.hud.update(0);
          }
-         if(this.highestMonstersKilled[this.currentWorldId] < monster.zoneSpawned * this.monstersPerZone)
+         if(monster.isBoss)
          {
-            monstersWorthNothing = this.highestMonstersKilled[this.currentWorldId] - (monster.zoneSpawned - 1) * this.monstersPerZone;
-            if(this.monstersKilledOnCurrentZone > monstersWorthNothing)
-            {
-               if(monster.isBoss)
-               {
-                  this.highestMonstersKilled[this.currentWorldId] = monster.zoneSpawned * this.monstersPerZone;
-               }
-               else
-               {
-                  this.highestMonstersKilled[CH2.currentCharacter.currentWorldId] = (monster.zoneSpawned - 1) * this.monstersPerZone + this.monstersKilledOnCurrentZone;
-               }
-               if(!this.runsCompletedPerWorld.hasOwnProperty(this.currentWorldId))
-               {
-                  this.runsCompletedPerWorld[this.currentWorldId] = 0;
-               }
-               this.addExperience(Formulas.instance.getMonsterExperience(monster.zoneSpawned,monster.isBoss));
-            }
+            this.highestMonstersKilled[this.currentWorldId] = monster.zoneSpawned * this.monstersPerZone;
          }
+         else
+         {
+            this.highestMonstersKilled[CH2.currentCharacter.currentWorldId] = (monster.zoneSpawned - 1) * this.monstersPerZone + this.monstersKilledOnCurrentZone;
+         }
+         if(!this.runsCompletedPerWorld.hasOwnProperty(this.currentWorldId))
+         {
+            this.runsCompletedPerWorld[this.currentWorldId] = 0;
+         }
+         this.addExperience(Formulas.instance.getMonsterExperience(monster));
          if(CH2.user.isProgressionModeActive && !CH2.user.isOnBossZone && this.hasCompletedCurrentZone() && !CH2.user.isOnFinalBossZone)
          {
             this.eventLogger.logEvent(EventLog.BEAT_ZONE);
@@ -1751,6 +1952,18 @@ package models
       public function resetMonstersKilledOnZone(zone:int) : void
       {
          this.monstersKilledPerZone[zone] = 0;
+      }
+      
+      public function onZoneChanged(zoneNumber:int) : void
+      {
+         if(this.onZoneChangedHandler)
+         {
+            this.onZoneChangedHandler.onZoneChangedOverride(zoneNumber);
+         }
+         else
+         {
+            this.onZoneChangedDefault(zoneNumber);
+         }
       }
       
       public function onZoneChangedDefault(zoneNumber:int) : void
@@ -1869,6 +2082,18 @@ package models
          this.addExperience(bonusExperience);
       }
       
+      public function onWorldFinished() : void
+      {
+         if(this.onWorldFinishedHandler)
+         {
+            this.onWorldFinishedHandler.onWorldFinishedOverride();
+         }
+         else
+         {
+            this.onWorldFinishedDefault();
+         }
+      }
+      
       public function onWorldFinishedDefault() : void
       {
          this.didFinishWorld = true;
@@ -1880,11 +2105,6 @@ package models
          else
          {
             this.runsCompletedPerWorld[this.currentWorldId] = 1;
-         }
-         if(this.currentWorldId > this.highestWorldCompleted && this.currentWorldId % 15 == 0)
-         {
-            this.drainWorldsUpTo(this.currentWorldId);
-            this.addGild(this.currentWorldId);
          }
          if(this.currentWorldId > this.highestWorldCompleted)
          {
@@ -1912,6 +2132,15 @@ package models
          });
       }
       
+      public function getCalculatedEnergyCost(skill:Skill) : Number
+      {
+         if(this.getCalculatedEnergyCostHandler)
+         {
+            return this.getCalculatedEnergyCostHandler.getCalculatedEnergyCostOverride(skill);
+         }
+         return this.getCalculatedEnergyCostDefault(skill);
+      }
+      
       public function getCalculatedEnergyCostDefault(skill:Skill) : Number
       {
          if(!skill.usesMaxEnergy)
@@ -1919,6 +2148,18 @@ package models
             return skill.energyCost * (1 - this.energyCostReduction);
          }
          return this.maxEnergy;
+      }
+      
+      public function onAscension() : void
+      {
+         if(this.onAscensionHandler)
+         {
+            this.onAscensionHandler.onAscensionOverride();
+         }
+         else
+         {
+            this.onAscensionDefault();
+         }
       }
       
       public function onAscensionDefault() : void
@@ -1941,12 +2182,18 @@ package models
       
       public function get damage() : BigNumber
       {
-         var dmg:BigNumber = this.inventory.getEquippedDamage().add(this.unarmedDamage).multiplyN(this.ancientShardDamageMultiplier).multiplyN(1 + (!!this.powerRuneActivated?POWER_RUNE_DAMAGE_BONUS:0)).multiplyN(this.damageMultiplier).multiply(this.gildedDamageMultiplier);
+         var dmg:BigNumber = this.inventory.getEquippedDamage().add(this.unarmedDamage);
+         dmg.timesEqualsN(this.ancientShardDamageMultiplier);
+         dmg.timesEqualsN(1 + (!!this.powerRuneActivated?POWER_RUNE_DAMAGE_BONUS:0));
+         dmg.timesEqualsN(this.damageMultiplier);
+         dmg.timesEquals(this.gildedDamageMultiplier);
          if(this.isIdle)
          {
-            dmg = dmg.multiplyN(this.idleDamageMultiplier);
+            dmg.timesEqualsN(this.idleDamageMultiplier);
          }
-         return dmg.floor().max(new BigNumber(1));
+         dmg.floorInPlace();
+         dmg.atLeastOne();
+         return dmg;
       }
       
       public function get characterDamageMultipliers() : BigNumber
@@ -1969,9 +2216,9 @@ package models
          return this.getStat(CH2.STAT_TREASURE_CHEST_GOLD);
       }
       
-      public function get bossGold() : Number
+      public function get monsterGold() : Number
       {
-         return this.getStat(CH2.STAT_BOSS_GOLD);
+         return this.getStat(CH2.STAT_MONSTER_GOLD);
       }
       
       public function get clickableGold() : Number
@@ -2224,13 +2471,17 @@ package models
          var key:* = null;
          for(key in this.levelGraphNodeTypes)
          {
-            this.levelGraphNodeTypes[key].setupFunction();
+            if(this.levelGraphNodeTypes[key].setupFunction)
+            {
+               this.levelGraphNodeTypes[key].setupFunction();
+            }
          }
       }
       
       public function setupSkills() : void
       {
          var _loc1_:Skill = null;
+         var _loc2_:* = null;
          for each(_loc1_ in staticSkillInstances)
          {
             if(!this.getSkill(_loc1_.uid))
@@ -2244,9 +2495,14 @@ package models
                this.initializeStaticValues(_loc1_.uid);
             }
          }
-         for each(_loc1_ in this.skills)
+         for(_loc2_ in this.skills)
          {
-            if(_loc1_.isActive)
+            _loc1_ = this.skills[_loc2_];
+            if(!this.getStaticSkill(_loc1_.uid))
+            {
+               delete this.skills[_loc2_];
+            }
+            else if(_loc1_.isActive)
             {
                this.activeSkills.push(_loc1_);
             }
@@ -2269,7 +2525,8 @@ package models
          if(this.skills[replaceUid] && this.skills[replaceUid].isActive)
          {
             slot = this.skills[replaceUid].slot;
-            IdleHeroUIManager.instance.mainUI.hud.skillBar.skillSlots[slot].skillSlotUI.skill = null;
+            CH2UI.instance.mainUI.hud.skillBar.skillSlots[slot].skillSlotUI.skill = null;
+            CH2UI.instance.mainUI.hud.skillBar.skillSlots[slot].skillSlotUI.removeItemIcon();
             this.deactivateSkill(replaceUid);
          }
          this.activateSkill(newSkill.uid);
@@ -2323,13 +2580,11 @@ package models
       
       public function cooldownSkills(dt:int) : void
       {
-         var id:* = null;
-         for(id in this.skills)
+         var skill:Skill = null;
+         var cooldownTime:Number = dt * CH2.currentCharacter.hasteRating;
+         for each(skill in this.activeSkills)
          {
-            if(this.skills[id].isActive)
-            {
-               this.skills[id].cooldownRemaining = this.skills[id].cooldownRemaining - dt * CH2.currentCharacter.hasteRating;
-            }
+            skill.cooldownRemaining = skill.cooldownRemaining - cooldownTime;
          }
       }
       
@@ -2351,6 +2606,7 @@ package models
          {
             if(!skill.isActive)
             {
+               skill.timeOfUnlock = CH2.user.totalMsecsPlayed;
                skill.isActive = true;
                skill.slot = this.getFirstOpenSkillBarSlot();
                if(skill.slot < 0)
@@ -2402,27 +2658,49 @@ package models
          return -1;
       }
       
+      public function addGold(goldToAdd:BigNumber) : void
+      {
+         if(this.addGoldHandler)
+         {
+            this.addGoldHandler.addGoldOverride(goldToAdd);
+         }
+         else
+         {
+            this.addGoldDefault(goldToAdd);
+         }
+      }
+      
       public function addGoldDefault(goldToAdd:BigNumber) : void
       {
-         this.gold = this.gold.add(goldToAdd);
+         this.gold.plusEquals(goldToAdd);
          if(goldToAdd.gtN(0))
          {
-            this.totalGold = this.totalGold.add(goldToAdd);
+            this.totalGold.plusEquals(goldToAdd);
             this.logGold(goldToAdd);
          }
          else
          {
+            CH2.user.addUserInputActions("SPENT_GOLD");
             this.logGoldSpent(goldToAdd.multiplyN(-1));
          }
-         if(!this.gold.ltN(0))
-         {
-         }
-         IdleHeroUIManager.instance.refreshGoldDisplays();
+         CH2UI.instance.refreshGoldDisplays();
       }
       
       public function subtractGold(goldToSubtract:BigNumber) : void
       {
          this.addGold(goldToSubtract.multiplyN(-1));
+      }
+      
+      public function addRubies(rubiesToAdd:Number, type:String = "", id:String = "") : void
+      {
+         if(this.addRubiesHandler)
+         {
+            this.addRubiesHandler.addRubiesOverride(rubiesToAdd,type,id);
+         }
+         else
+         {
+            this.addRubiesDefault(rubiesToAdd,type,id);
+         }
       }
       
       public function addRubiesDefault(rubiesToAdd:Number, type:String = "", id:String = "") : void
@@ -2432,12 +2710,24 @@ package models
          {
             this.totalRubies = this.totalRubies + rubiesToAdd;
          }
-         IdleHeroUIManager.instance.refreshRubiesDisplays();
+         CH2UI.instance.refreshRubiesDisplays();
       }
       
       public function subtractRubies(rubiesToSubtract:Number, type:String = "", id:String = "") : void
       {
          this.addRubies(rubiesToSubtract * -1,type,id);
+      }
+      
+      public function regenerateManaAndEnergy(time:Number) : void
+      {
+         if(this.regenerateManaAndEnergyHandler)
+         {
+            this.regenerateManaAndEnergyHandler.regenerateManaAndEnergyOverride(time);
+         }
+         else
+         {
+            this.regenerateManaAndEnergyDefault(time);
+         }
       }
       
       public function regenerateManaAndEnergyDefault(time:Number) : void
@@ -2452,15 +2742,26 @@ package models
          return 1 / SECONDS_FROM_ZERO_TO_BASE_MAX_MANA_WITHOUT_MANA_REGEN_STATS * this.statBaseValues[CH2.STAT_TOTAL_MANA] * this.manaRegenMultiplier;
       }
       
+      public function addEnergy(amount:Number, showFloatingText:Boolean = true) : void
+      {
+         if(this.addEnergyHandler)
+         {
+            this.addEnergyHandler.addEnergyOverride(amount,showFloatingText);
+         }
+         else
+         {
+            this.addEnergyDefault(amount,showFloatingText);
+         }
+      }
+      
       public function addEnergyDefault(amount:Number, showFloatingText:Boolean = true) : void
       {
          var previousEnergy:Number = this.energy;
-         this.energy = this.energy + amount;
-         if(this.energy > this.maxEnergy)
+         if(this.energy < this.maxEnergy || amount < 0 || this.energy == this.maxEnergy && amount > this.energyRegeneration)
          {
-            this.energy = this.maxEnergy;
+            this.energy = this.energy + amount;
          }
-         else if(this.energy < 0)
+         if(this.energy < 0)
          {
             this.energy = 0;
          }
@@ -2468,25 +2769,40 @@ package models
          {
             this.logEnergyUsed(new BigNumber(amount * -1));
          }
+         if(this.energy == 0)
+         {
+            this.timeOfLastOutOfEnergy = CH2.user.totalMsecsPlayed;
+         }
          if(this.energy != previousEnergy && showFloatingText)
          {
             if(this.energy > previousEnergy)
             {
-               IdleHeroUIManager.instance.mainUI.hud.playEnergyGainedEffect();
+               CH2UI.instance.mainUI.hud.playEnergyGainedEffect();
             }
-            IdleHeroUIManager.instance.mainUI.hud.showEnergyUsed(this.energy - previousEnergy);
+            CH2UI.instance.mainUI.hud.showEnergyUsed(this.energy - previousEnergy);
+         }
+      }
+      
+      public function addMana(amount:Number, showFloatingText:Boolean = true) : void
+      {
+         if(this.addManaHandler)
+         {
+            this.addManaHandler.addManaOverride(amount,showFloatingText);
+         }
+         else
+         {
+            this.addManaDefault(amount,showFloatingText);
          }
       }
       
       public function addManaDefault(amount:Number, showFloatingText:Boolean = true) : void
       {
          var previousMana:Number = this.mana;
-         this.mana = this.mana + amount;
-         if(this.mana > this.maxMana)
+         if(this.mana <= this.maxMana || amount < 0)
          {
-            this.mana = this.maxMana;
+            this.mana = this.mana + amount;
          }
-         else if(this.mana < 0)
+         if(this.mana < 0)
          {
             this.mana = 0;
          }
@@ -2498,10 +2814,19 @@ package models
          {
             if(this.mana > previousMana)
             {
-               IdleHeroUIManager.instance.mainUI.hud.playManaGainedEffect();
+               CH2UI.instance.mainUI.hud.playManaGainedEffect();
             }
-            IdleHeroUIManager.instance.mainUI.hud.showManaUsed(this.mana - previousMana);
+            CH2UI.instance.mainUI.hud.showManaUsed(this.mana - previousMana);
          }
+      }
+      
+      public function canUseSkill(skill:Skill) : Boolean
+      {
+         if(this.canUseSkillHandler)
+         {
+            return this.canUseSkillHandler.canUseSkillOverride(skill);
+         }
+         return this.canUseSkillDefault(skill);
       }
       
       public function canUseSkillDefault(skill:Skill) : Boolean
@@ -2522,10 +2847,34 @@ package models
          return null;
       }
       
+      public function onUsedSkill(skill:Skill) : void
+      {
+         if(this.onUsedSkillHandler)
+         {
+            this.onUsedSkillHandler.onUsedSkillOverride(skill);
+         }
+         else
+         {
+            this.onUsedSkillDefault(skill);
+         }
+      }
+      
       public function onUsedSkillDefault(skill:Skill) : void
       {
          CH2.currentCharacter.buffs.onSkillUse(skill);
          this.totalSkillsUsed++;
+      }
+      
+      public function levelUpItem(item:Item, amount:Number = 1) : void
+      {
+         if(this.levelUpItemHandler)
+         {
+            this.levelUpItemHandler.levelUpItemOverride(item,amount);
+         }
+         else
+         {
+            this.levelUpItemDefault(item,amount);
+         }
       }
       
       public function levelUpItemDefault(item:Item, amount:Number = 1) : void
@@ -2536,15 +2885,31 @@ package models
             this.subtractGold(item.cost(amount));
             item.level = item.level + amount;
             this.inventory.cachedEquippedDamage.base = -1;
-            this.excitingUpgradeCheck();
-            this.timeSinceLastItemInteraction = 0;
+            if(IdleHeroMain.IS_RENDERING)
+            {
+               this.excitingUpgradeCheck();
+               CH2UI.instance.mainUI.mainPanel.itemsPanel.updateAllEquipAndCatalogSlots();
+               CH2UI.instance.mainUI.mainPanel.itemsPanel.equipSlots[item.type].updateMultiplierMeter();
+            }
             this.totalUpgradesToItems++;
-            IdleHeroUIManager.instance.mainUI.mainPanel.itemsPanel.updateAllEquipAndCatalogSlots();
-            IdleHeroUIManager.instance.mainUI.mainPanel.itemsPanel.equipSlots[item.type].updateMultiplierMeter();
+            this.timeOfLastItemUpgrade = CH2.user.totalMsecsPlayed;
+            item.updateNextPurchaseInfo(this.shouldLevelToNextMultiplier);
          }
          else
          {
             Trace("Not enough gold to level item slot " + this.inventory.getSlotFromItem(item.uid) + " " + amount + "x");
+         }
+      }
+      
+      public function buyNextItemBonus(item:Item) : void
+      {
+         if(this.buyNextItemBonusHandler)
+         {
+            this.buyNextItemBonusHandler.buyNextItemBonusOverride(item);
+         }
+         else
+         {
+            this.buyNextItemBonusDefault(item);
          }
       }
       
@@ -2563,40 +2928,105 @@ package models
             }
          }
          this.subtractGold(upgradeCost);
+         this.timeOfLastItemUpgrade = CH2.user.totalMsecsPlayed;
       }
       
-      public function sellItem(index:Number) : void
+      public function canAffordAPurchaseOnAllItems() : Boolean
       {
-         this.addGold(this.inventory.getItemInSlot(index).currentSellCost());
-         this.inventory.deleteItem(index);
+         var item:Item = null;
+         var inventory:Array = this.inventory.items;
+         for each(item in inventory)
+         {
+            if(!this.canAffordLevelUpPurchase(item))
+            {
+               return false;
+            }
+         }
+         return inventory.length > 0;
+      }
+      
+      public function canAffordLevelUpPurchase(item:Item) : Boolean
+      {
+         return this.gold.gte(item.costForNextPurchase);
+      }
+      
+      public function setUpgradeToNextMultiplier(value:Boolean) : void
+      {
+         var item:Item = null;
+         this.shouldLevelToNextMultiplier = value;
+         for each(item in this.inventory.items)
+         {
+            item.updateNextPurchaseInfo(value);
+         }
+      }
+      
+      public function purchaseCatalogItem(index:int) : void
+      {
+         if(this.purchaseCatalogItemHandler)
+         {
+            this.purchaseCatalogItemHandler.purchaseCatalogItemOverride(index);
+         }
+         else
+         {
+            this.purchaseCatalogItemDefault(index);
+         }
       }
       
       public function purchaseCatalogItemDefault(index:int) : void
       {
+         var previousMaxMana:Number = NaN;
+         var previousMaxEnergy:Number = NaN;
          var itemToPurchase:Item = this.catalogItemsForSale[index];
          var itemCost:BigNumber = itemToPurchase.cost();
          if(this.gold.gte(itemCost) && !this.isPurchasingLocked)
          {
+            previousMaxMana = this.maxMana;
+            previousMaxEnergy = this.maxEnergy;
             this.eventLogger.logEvent(EventLog.PURCHASED_ITEM);
             this.inputLogger.recordInput(GameActions.PURCHASE_ITEM,index);
             this.subtractGold(itemCost);
             this.inventory.replaceItem(itemToPurchase);
-            IdleHeroUIManager.instance.mainUI.mainPanel.itemsPanel.equipSlots[itemToPurchase.type].reloadItemIcon();
-            IdleHeroUIManager.instance.mainUI.mainPanel.itemsPanel.equipSlots[itemToPurchase.type].playPurchaseAnimation();
-            IdleHeroUIManager.instance.mainUI.mainPanel.itemsPanel.hideBuyGlowOnSlot(CH2.currentCharacter.currentCatalogRank % 8);
+            itemToPurchase.updateNextPurchaseInfo(this.shouldLevelToNextMultiplier);
+            CH2UI.instance.mainUI.mainPanel.itemsPanel.equipSlots[itemToPurchase.type].reloadItemIcon();
+            CH2UI.instance.mainUI.mainPanel.itemsPanel.equipSlots[itemToPurchase.type].playPurchaseAnimation();
+            CH2UI.instance.mainUI.mainPanel.itemsPanel.hideBuyGlowOnSlot(CH2.currentCharacter.currentCatalogRank % 8);
             this.currentCatalogRank++;
             this.generateCatalog();
             this.excitingUpgradeCheck();
-            IdleHeroUIManager.instance.mainUI.mainPanel.itemsPanel.updateAllEquipAndCatalogSlots();
-            IdleHeroUIManager.instance.mainUI.mainPanel.itemsPanel.updateEquipSlotDisplay();
-            IdleHeroUIManager.instance.mainUI.mainPanel.itemsPanel.updateCatalogSlot();
-            IdleHeroUIManager.instance.refreshDamageDisplays();
-            this.timeSinceLastItemInteraction = 0;
+            CH2UI.instance.mainUI.mainPanel.itemsPanel.updateAllEquipAndCatalogSlots();
+            CH2UI.instance.mainUI.mainPanel.itemsPanel.updateEquipSlotDisplay();
+            CH2UI.instance.mainUI.mainPanel.itemsPanel.updateCatalogSlot();
+            CH2UI.instance.refreshDamageDisplays();
             this.totalCatalogItemsPurchased++;
+            this.timeOfLastCatalogPurchase = CH2.user.totalMsecsPlayed;
+            if(this.maxMana > previousMaxMana)
+            {
+               this.addMana(this.maxMana - previousMaxMana);
+            }
+            if(this.maxEnergy > previousMaxEnergy)
+            {
+               this.addEnergy(this.maxEnergy - previousMaxEnergy);
+            }
+            if(itemToPurchase.tier > this.highestItemTierSeen)
+            {
+               this.highestItemTierSeen = itemToPurchase.tier;
+            }
          }
          else
          {
             Trace("Not enough gold to purchase item rank " + this.currentCatalogRank);
+         }
+      }
+      
+      public function generateCatalog() : void
+      {
+         if(this.generateCatalogHandler)
+         {
+            this.generateCatalogHandler.generateCatalogOverride();
+         }
+         else
+         {
+            this.generateCatalogDefault();
          }
       }
       
@@ -2615,7 +3045,7 @@ package models
             {
                _loc5_ = new Item();
                _loc5_.level = 1;
-               _loc5_.init(_loc3_,this.currentCatalogRank + 1,!_loc2_,0,_loc4_.bonuses);
+               _loc5_.init(_loc3_,this.currentWorld.itemCostCurve,this.currentWorld.costMultiplier,this.currentCatalogRank + 1,_loc4_.bonuses);
                this.catalogItemsForSale.push(_loc5_);
             }
          }
@@ -2623,43 +3053,57 @@ package models
          {
             _loc5_ = new Item();
             _loc5_.level = 1;
-            _loc5_.init(_loc3_,this.currentCatalogRank + 1,!_loc2_);
+            _loc5_.init(_loc3_,this.currentWorld.itemCostCurve,this.currentWorld.costMultiplier,this.currentCatalogRank + 1);
             if(!_loc2_)
             {
                _loc2_ = _loc5_.isCursed;
             }
             this.catalogItemsForSale.push(_loc5_);
          }
-         IdleHeroUIManager.instance.refreshCatalogDisplay();
+         CH2UI.instance.refreshCatalogDisplay();
+      }
+      
+      public function get itemPurchasesLocked() : Boolean
+      {
+         return this.isPurchasingLocked;
       }
       
       public function lockItemPurchases() : void
       {
          this.isPurchasingLocked = true;
-         IdleHeroUIManager.instance.refreshCatalogDisplay();
+         CH2UI.instance.refreshCatalogDisplay();
       }
       
       public function unlockItemPurchases() : void
       {
          this.isPurchasingLocked = false;
-         IdleHeroUIManager.instance.refreshCatalogDisplay();
+         CH2UI.instance.refreshCatalogDisplay();
       }
       
-      public function learnTalentDefault(name:String) : void
+      public function getCurrentCatalogPrice() : BigNumber
       {
-         var talent:Talent = new Talent();
-         talent.name = name;
-         talent.apply();
-         this.talents.push(talent);
+         return this.catalogItemsForSale[0].cost();
+      }
+      
+      public function walk(dt:Number) : void
+      {
+         if(this.walkHandler)
+         {
+            this.walkHandler.walkOverride(dt);
+         }
+         else
+         {
+            this.walkDefault(dt);
+         }
       }
       
       public function walkDefault(dt:Number) : void
       {
          var distanceWalked:Number = this.walkSpeed * (dt / 1000) * ONE_METER_Y_DISTANCE;
          var closestMonster:Monster = CH2.world.getNextMonster();
-         var distanceToNextMonster:Number = closestMonster != null?Number(closestMonster.y - this.attackRange - y):Number(1000);
+         var distanceToNextMonster:Number = closestMonster != null?Number(closestMonster.y - this.attackRange - this.y):Number(1000);
          distanceWalked = Math.min(distanceWalked,distanceToNextMonster);
-         y = y + distanceWalked;
+         this.y = this.y + distanceWalked;
          this.totalRunDistance = this.totalRunDistance + distanceWalked;
          if(this.isNextMonsterInRange)
          {
@@ -2686,7 +3130,32 @@ package models
       
       public function getClassStat(statId:int) : Number
       {
-         return this.getStatAtLevel(statId,this.getStatLevel(statId));
+         var i:int = 0;
+         if(!this.classStatsCached)
+         {
+            for(i = 0; i < CH2.STATS.length; i++)
+            {
+               this.cachedClassStats[i] = this.getStatAtLevel(i,this.getStatLevel(i));
+            }
+            this.classStatsCached = true;
+         }
+         return this.cachedClassStats[statId];
+      }
+      
+      public function setClassStatsCached(value:Boolean) : void
+      {
+         if(this.classStatsCached)
+         {
+            this.classStatsCached = value;
+         }
+      }
+      
+      public function resetStatLevels() : void
+      {
+         if(this.statLevels)
+         {
+            this.statLevels = {};
+         }
       }
       
       public function getStatLevel(statId:int) : Number
@@ -2769,6 +3238,7 @@ package models
          {
             this.statLevels[statId] = levelsToAdd;
          }
+         this.classStatsCached = false;
          this.inventory.cachedEquippedDamage.base = -1;
       }
       
@@ -2788,10 +3258,14 @@ package models
          var whatever:BigNumber = this.totalStatPoints;
          this.totalStatPointsV2++;
          this.hasNewSkillTreePointsAvailable = true;
+         this.timeOfLastLevelUp = CH2.user.totalMsecsPlayed;
          this.levelUpStat(CH2.STAT_DAMAGE);
          this.eventLogger.logEvent(EventLog.LEVELED_UP);
-         this.addEnergy(this.maxEnergy - this.energy,false);
-         IdleHeroUIManager.instance.refreshLevelDisplays();
+         if(this.energy < this.maxEnergy)
+         {
+            this.addEnergy(this.maxEnergy - this.energy,false);
+         }
+         CH2UI.instance.refreshLevelDisplays();
          CH2.user.remoteStatsTracking.addEvent({
             "type":"levelUp",
             "highestWorld":this.highestWorldCompleted,
@@ -2817,35 +3291,39 @@ package models
          }
          if(didLevel)
          {
-            if(IdleHeroUIManager.instance.mainUI)
+            if(CH2UI.instance.mainUI)
             {
-               IdleHeroUIManager.instance.mainUI.mainPanel.graphPanel.redrawGraph();
-               if(IdleHeroUIManager.instance.mainUI.mainPanel.isOnGraphPanel)
+               CH2UI.instance.mainUI.mainPanel.graphPanel.redrawGraph();
+               if(CH2UI.instance.mainUI.mainPanel.isOnGraphPanel)
                {
-                  IdleHeroUIManager.instance.mainUI.mainPanel.graphPanel.updateInteractiveLayer();
+                  CH2UI.instance.mainUI.mainPanel.graphPanel.updateInteractiveLayer();
                }
             }
             if(this.characterDisplay)
             {
                this.characterDisplay.playLevelUp();
             }
-            this.timeSinceLastLevelUp = 0;
          }
-         IdleHeroUIManager.instance.refreshXPDisplays();
-         IdleHeroUIManager.instance.refreshWorldStatDisplay();
+         CH2UI.instance.refreshXPDisplays();
+         CH2UI.instance.refreshWorldStatDisplay();
       }
       
       public function getLevelUpCostToNextLevel(level:Number) : BigNumber
       {
-         if(level <= 10)
+         if(this.getLevelUpCostToNextLevelHandler)
          {
-            return new BigNumber(180 + (level - 1) * 150);
+            return this.getLevelUpCostToNextLevelHandler.getLevelUpCostToNextLevelOverride(level);
          }
-         if(level <= 20)
+         return this.getLevelUpCostToNextLevelDefault(level);
+      }
+      
+      public function getLevelUpCostToNextLevelDefault(level:Number) : BigNumber
+      {
+         if(level <= 6)
          {
-            return new BigNumber(1380 + (level - 10) * 300);
+            return new BigNumber(500 + (level - 1) * 300);
          }
-         return new BigNumber(4380 + (level - 20) * 500);
+         return new BigNumber(2000 + (level - 6) * 500);
       }
       
       public function getLevelUpCostToNextLevelOld(level:Number) : BigNumber
@@ -2867,11 +3345,76 @@ package models
          return this.flavor;
       }
       
-      public function addGild(param1:Number) : void
+      public function partialRespec(param1:int) : void
+      {
+         var _loc8_:int = 0;
+         var _loc9_:Skill = null;
+         var _loc10_:Number = NaN;
+         var _loc2_:Number = this.statLevels[CH2.STAT_AUTOMATOR_SPEED];
+         var _loc3_:Number = this.statLevels[CH2.STAT_DAMAGE];
+         var _loc4_:Object = this.nodesPurchased;
+         var _loc5_:Object = this.undoNodes;
+         var _loc6_:Number = this.totalStatPointsV2;
+         var _loc7_:Character = new Character();
+         _loc7_.name = this.name;
+         Characters.populateStaticFields(_loc7_);
+         this.buffs.removeAllBuffs();
+         for(_loc8_ = 0; _loc8_ < this.activeSkills.length; _loc8_++)
+         {
+            _loc9_ = this.activeSkills[_loc8_];
+            _loc10_ = null;
+            if(_loc9_ && _loc9_.isActive)
+            {
+               _loc10_ = _loc9_.slot;
+               if(_loc10_ >= 0 && CH2UI.instance.mainUI)
+               {
+                  CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc10_].removeChild(CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc10_].skillSlotUI);
+                  CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc10_].onDropRemoved(CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc10_].skillSlotUI);
+               }
+            }
+         }
+         this.deactivateAllSkills();
+         for(_loc8_ = 0; _loc8_ < this.lostOnGilding.length; _loc8_++)
+         {
+            this[this.lostOnGilding[_loc8_]] = _loc7_[this.lostOnGilding[_loc8_]];
+         }
+         this.setupSkills();
+         this.statLevels[CH2.STAT_AUTOMATOR_SPEED] = _loc2_;
+         this.statLevels[CH2.STAT_DAMAGE] = _loc3_;
+         this.totalStatPointsV2 = _loc6_;
+         for(_loc8_ = 0; _loc8_ < this.levelGraph.nodes.length; _loc8_++)
+         {
+            if(this.levelGraph.nodes[_loc8_])
+            {
+               if(_loc4_.hasOwnProperty(this.levelGraph.nodes[_loc8_].id))
+               {
+                  if(_loc5_.hasOwnProperty(this.levelGraph.nodes[_loc8_].id) && _loc5_[this.levelGraph.nodes[_loc8_].id] > param1)
+                  {
+                     this.levelGraph.purchaseNode(this.levelGraph.nodes[_loc8_].id);
+                  }
+               }
+            }
+         }
+         if(this.characterDisplay)
+         {
+            this.characterDisplay.characterUI.removeAll();
+         }
+      }
+      
+      public function addGild(worldId:Number) : Boolean
+      {
+         if(this.addGildHandler)
+         {
+            return this.addGildHandler.addGildOverride(worldId);
+         }
+         return this.addGildDefault(worldId);
+      }
+      
+      public function addGildDefault(param1:Number) : void
       {
          var _loc4_:int = 0;
-         var _loc6_:Skill = null;
-         var _loc7_:Number = NaN;
+         var _loc8_:Skill = null;
+         var _loc9_:Number = NaN;
          var _loc2_:Number = this.statLevels[CH2.STAT_AUTOMATOR_SPEED];
          var _loc3_:Character = new Character();
          _loc3_.name = this.name;
@@ -2879,15 +3422,15 @@ package models
          this.buffs.removeAllBuffs();
          for(_loc4_ = 0; _loc4_ < this.activeSkills.length; _loc4_++)
          {
-            _loc6_ = this.activeSkills[_loc4_];
-            _loc7_ = null;
-            if(_loc6_ && _loc6_.isActive)
+            _loc8_ = this.activeSkills[_loc4_];
+            _loc9_ = null;
+            if(_loc8_ && _loc8_.isActive)
             {
-               _loc7_ = _loc6_.slot;
-               if(_loc7_ >= 0 && IdleHeroUIManager.instance.mainUI)
+               _loc9_ = _loc8_.slot;
+               if(_loc9_ >= 0 && CH2UI.instance.mainUI)
                {
-                  IdleHeroUIManager.instance.mainUI.hud.skillBar.skillSlots[_loc7_].removeChild(IdleHeroUIManager.instance.mainUI.hud.skillBar.skillSlots[_loc7_].skillSlotUI);
-                  IdleHeroUIManager.instance.mainUI.hud.skillBar.skillSlots[_loc7_].onDropRemoved(IdleHeroUIManager.instance.mainUI.hud.skillBar.skillSlots[_loc7_].skillSlotUI);
+                  CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc9_].removeChild(CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc9_].skillSlotUI);
+                  CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc9_].onDropRemoved(CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc9_].skillSlotUI);
                }
             }
          }
@@ -2897,48 +3440,43 @@ package models
             this[this.lostOnGilding[_loc4_]] = _loc3_[this.lostOnGilding[_loc4_]];
          }
          this.setupSkills();
+         CH2.currentCharacter.setClassStatsCached(false);
+         CH2.currentCharacter.resetStatLevels();
+         this.timeSinceLastAncientShardPurchase = ANCIENT_SHARD_PURCHASE_COOLDOWN;
+         this.gilds = Math.floor((param1 - 1) / this.worldsPerGild);
+         this.level = param1 * 5 + 6 + (this.gilds - 1) * 5;
+         this.experience = new BigNumber(0);
+         var _loc5_:BigNumber = this.getLevelUpCostToNextLevel(this.level);
+         _loc5_.timesEqualsN(0.8);
+         this.experience = _loc5_;
          this.statLevels[CH2.STAT_AUTOMATOR_SPEED] = _loc2_;
-         this.gilds = param1 / 15;
-         var _loc5_:Number = GILD_DAMAGE_INCREASE;
-         if(this.gilds == 1)
-         {
-            this.gildedDamageMultiplier = new BigNumber("2.1446e37").multiplyN(_loc5_);
-         }
-         else
-         {
-            this.gildedDamageMultiplier = new BigNumber("2.1446e37").multiplyN(_loc5_).multiply(new BigNumber("4.9708e31").multiplyN(_loc5_).pow(this.gilds - 1));
-         }
+         this.statLevels[CH2.STAT_DAMAGE] = this.level;
+         var _loc6_:BigNumber = new BigNumber(0);
+         _loc6_.base = this.gildedDamageMultiplier.base;
+         _loc6_.power = this.gildedDamageMultiplier.power;
+         this.gildedDamageMultiplier = Formulas.instance.getWorldDifficulty(param1).divideN(this.getClassStat(CH2.STAT_DAMAGE));
+         var _loc7_:BigNumber = this.gildedDamageMultiplier.divide(_loc6_);
          if(this.characterDisplay)
          {
             this.characterDisplay.characterUI.removeAll();
          }
-         if(this.gilds == 1)
-         {
-            IdleHeroUIManager.instance.showSimpleGamePopup("Congratulations!",_("Congratulations! You\'ve completed a gilded world. Your base damage has been multiplied by %s%, and your skill tree has been reset, but your Automator upgrades remain.",_loc5_ * 100),null,"Continue");
-         }
-         switch(this.gilds)
-         {
-            case 1:
-               this.totalExperience.fromFloat(9642857.10071949);
-               this.level = 213;
-               break;
-            case 2:
-               this.totalExperience.fromFloat(35357142.1160879);
-               this.level = 393;
-               break;
-            case 3:
-               this.totalExperience.fromFloat(77142856.0572141);
-               this.level = 573;
-               break;
-            case 4:
-               this.totalExperience.fromFloat(134999998.542101);
-               this.level = 752;
-               break;
-            case 5:
-               this.totalExperience.fromFloat(208928569.574619);
-               this.level = 931;
-         }
+         this.showCongratsPopupWhenUIIsCreated(_loc7_);
          this.totalStatPointsV2 = 6;
+      }
+      
+      public function showCongratsPopupWhenUIIsCreated(gildedDamageChange:BigNumber) : void
+      {
+         if(CH2UI.instance.doesGameUIExist)
+         {
+            CH2UI.instance.showSimpleGamePopup("Congratulations!",_("Congratulations! You\'ve completed a gilded world. Your base damage has been multiplied by %s%, and your skill tree has been reset, but your Automator upgrades remain.",CH2.game.formattedNumber(gildedDamageChange.multiplyN(100))),null,"Continue");
+         }
+         else
+         {
+            SetTimedEvent.addEvent(function():*
+            {
+               showCongratsPopupWhenUIIsCreated(gildedDamageChange);
+            },250);
+         }
       }
       
       public function playCastAnimation() : void
@@ -2976,14 +3514,65 @@ package models
          }
       }
       
+      public function numNodeType(type:String) : int
+      {
+         var key:* = null;
+         var num:int = 0;
+         for(key in this.nodesPurchased)
+         {
+            if(this.levelGraph.nodes[key].type == type)
+            {
+               num++;
+            }
+         }
+         return num;
+      }
+      
+      public function finishWorld() : void
+      {
+         CH2.game.doGameStateAction(IdleHeroMain.ACTION_PLAYER_FINISHED_WORLD);
+         this.onWorldFinished();
+         this.onAscension();
+      }
+      
+      public function shouldRubyShopActivate() : Boolean
+      {
+         if(this.shouldRubyShopActivateHandler)
+         {
+            return this.shouldRubyShopActivateHandler.shouldRubyShopActivateOverride();
+         }
+         return this.shouldRubyShopActivateDefault();
+      }
+      
       private function shouldRubyShopActivateDefault() : Boolean
       {
-         return this.timeSinceLastRubyShopAppearance > RUBY_SHOP_APPEARANCE_COOLDOWN && !CH2.world.isBossZone(this.currentZone) && !this.didFinishWorld && this.totalRubies >= 50;
+         return this.timeSinceLastRubyShopAppearance > RUBY_SHOP_APPEARANCE_COOLDOWN && !CH2.world.isBossZone(this.currentZone) && !this.didFinishWorld && this.totalRubies >= 50 && !CH2.world.massiveOrangeFish.isActive;
+      }
+      
+      public function shouldRubyShopDeactivate() : Boolean
+      {
+         if(this.shouldRubyShopDeactivateHandler)
+         {
+            return this.shouldRubyShopDeactivateHandler.shouldRubyShopDeactivateOverride();
+         }
+         return this.shouldRubyShopDeactivateDefault();
       }
       
       private function shouldRubyShopDeactivateDefault() : Boolean
       {
          return this.timeSinceLastRubyShopAppearance > RUBY_SHOP_APPEARANCE_DURATION || CH2.world.isBossZone(this.currentZone) || this.didFinishWorld;
+      }
+      
+      public function populateRubyPurchaseOptions() : void
+      {
+         if(this.populateRubyPurchaseOptionsHandler)
+         {
+            this.populateRubyPurchaseOptionsHandler.populateRubyPurchaseOptionsOverride();
+         }
+         else
+         {
+            this.populateRubyPurchaseOptionsDefault();
+         }
       }
       
       public function populateRubyPurchaseOptionsDefault() : void
@@ -3098,6 +3687,18 @@ package models
          return null;
       }
       
+      public function generateRubyShop() : void
+      {
+         if(this.generateRubyShopHandler)
+         {
+            this.generateRubyShopHandler.generateRubyShopOverride();
+         }
+         else
+         {
+            this.generateRubyShopDefault();
+         }
+      }
+      
       public function generateRubyShopDefault() : void
       {
          this.currentRubyShop = [];
@@ -3126,9 +3727,22 @@ package models
          }
       }
       
+      public function updateRubyShopFields(dt:int) : void
+      {
+         if(this.updateRubyShopFieldsHandler)
+         {
+            this.updateRubyShopFieldsHandler.updateRubyShopFieldsOverride(dt);
+         }
+         else
+         {
+            this.updateRubyShopFieldsDefault(dt);
+         }
+      }
+      
       public function updateRubyShopFieldsDefault(dt:int) : void
       {
          this.timeSinceLastAncientShardPurchase = this.timeSinceLastAncientShardPurchase + dt;
+         this.timeSinceLastAutomatorPointPurchase = this.timeSinceLastAutomatorPointPurchase + dt;
          this.timeSinceTimeMetalDetectorActivated = this.timeSinceTimeMetalDetectorActivated + dt;
          if(this.timeMetalDetectorActive && this.timeSinceTimeMetalDetectorActivated > METAL_DETECTOR_TIME_DURATION)
          {
@@ -3149,6 +3763,7 @@ package models
             rubyPurchase.onPurchase();
             this.rubies = this.rubies - rubyPurchasePrice;
          }
+         CH2UI.instance.mainUI.rightPanel.currentPanel.refreshAll();
       }
       
       public function getDefaultSoldOutText() : String
@@ -3218,7 +3833,7 @@ package models
       
       public function getAncientShardDescription() : String
       {
-         return _("Permanently multiply your damage by x%s.",ANCIENT_SHARD_DAMAGE_BONUS);
+         return _("Multiply your damage by x%s until the next time you Gild.",ANCIENT_SHARD_DAMAGE_BONUS);
       }
       
       public function onAncientShardPurchase() : void
@@ -3237,9 +3852,30 @@ package models
          return this.timeSinceLastAncientShardPurchase > ANCIENT_SHARD_PURCHASE_COOLDOWN;
       }
       
+      public function getAutomatorPointDescription() : String
+      {
+         return _("Gives you 1 automator point");
+      }
+      
+      public function onAutomatorPointPurchase() : void
+      {
+         CH2.currentCharacter.automatorPoints++;
+         this.timeSinceLastAutomatorPointPurchase = 0;
+      }
+      
+      public function canAutomatorPointAppear() : Boolean
+      {
+         return this.timeSinceLastAutomatorPointPurchase > AUTOMATOR_POINT_PURCHASE_COOLDOWN;
+      }
+      
+      public function canPurchaseAutomatorPoint() : Boolean
+      {
+         return this.timeSinceLastAutomatorPointPurchase > AUTOMATOR_POINT_PURCHASE_COOLDOWN;
+      }
+      
       public function getTimeMetalDetectorDescription() : String
       {
-         return _("Increases your gold gained by +%s% for %s.",METAL_DETECTOR_GOLD_BONUS * 100,TimeFormatter.formatTimeDescriptive(METAL_DETECTOR_TIME_DURATION / 1000).replace(" ",""));
+         return _("Increases your gold gained by +%s% for %s.",(METAL_DETECTOR_GOLD_BONUS - 1) * 100,TimeFormatter.formatTimeDescriptive(METAL_DETECTOR_TIME_DURATION / 1000).replace(" ",""));
       }
       
       public function onTimeMetalDetectorPurchase() : void
@@ -3260,7 +3896,7 @@ package models
       
       public function getZoneMetalDetectorDescription() : String
       {
-         return _("Increases your gold gained by +%s% for %s.",METAL_DETECTOR_GOLD_BONUS * 100,_("%s zones",METAL_DETECTOR_ZONE_DURATION));
+         return _("Increases your gold gained by +%s% for %s.",(METAL_DETECTOR_GOLD_BONUS - 1) * 100,_("%s zones",METAL_DETECTOR_ZONE_DURATION));
       }
       
       public function onZoneMetalDetectorPurchase() : void
@@ -3286,7 +3922,7 @@ package models
       
       public function onBagOfGoldPurchase() : void
       {
-         ItemDropManager.instance.goldSplash(Formulas.instance.getGoldForBagOfGold(),x - 100,y - 250,this,"N",0.25);
+         ItemDropManager.instance.goldSplash(Formulas.instance.getGoldForBagOfGold(),this.x - 100,this.y - 250,this,"N",0.25);
       }
       
       public function canBagOfGoldAppear() : Boolean
@@ -3321,14 +3957,17 @@ package models
       
       public function updateStats(dt:Number) : void
       {
-         this.trackedDps.update(dt);
-         this.trackedOverkill.update(dt);
-         this.trackedGoldGained.update(dt);
-         this.trackedGoldSpent.update(dt);
-         this.trackedEnergyUsed.update(dt);
-         this.trackedManaUsed.update(dt);
-         this.trackedFrameMsec.update(dt);
-         this.trackedXPEarned.update(dt);
+         if(IdleHeroMain.IS_RENDERING)
+         {
+            this.trackedDps.update(dt);
+            this.trackedOverkill.update(dt);
+            this.trackedGoldGained.update(dt);
+            this.trackedGoldSpent.update(dt);
+            this.trackedEnergyUsed.update(dt);
+            this.trackedManaUsed.update(dt);
+            this.trackedFrameMsec.update(dt);
+            this.trackedXPEarned.update(dt);
+         }
       }
       
       public function logXPEarned(value:BigNumber) : void
@@ -3399,29 +4038,110 @@ package models
          }
       }
       
-      public function migrate() : void
+      public function migrate(characterInstance:Character) : void
       {
-         var i:int = 0;
          trace("migrating version " + this.version + " to " + IdleHeroMain.SAVE_VERSION);
-         if(this.version == 0)
+         this.onMigration(characterInstance);
+         this.version = IdleHeroMain.SAVE_VERSION;
+      }
+      
+      public function onMigration(characterInstance:Character) : void
+      {
+         if(this.onMigrationHandler)
          {
-            if(this.highestWorldCompleted >= 15 && this.gilds == 0)
+            this.onMigrationHandler.onMigrationOverride(characterInstance);
+         }
+         else
+         {
+            this.onMigrationDefault(characterInstance);
+         }
+      }
+      
+      public function onMigrationDefault(characterInstance:Character) : void
+      {
+      }
+      
+      public function populateTutorials() : void
+      {
+         var staticTutorial:Tutorial = null;
+         var tutorial:Tutorial = null;
+         if(this.currentTutorial != null)
+         {
+            this.currentTutorial.isInProgress = false;
+            this.currentTutorial.onEndFunction();
+            this.currentTutorial = null;
+         }
+         this.tutorials = [];
+         for each(staticTutorial in Character.staticTutorialInstances[this.name])
+         {
+            if(staticTutorial.doesPlayerRequireFunction())
             {
-               this.runsCompletedPerWorld = {};
-               this.highestMonstersKilled = {};
-               for(i = 0; i <= 15; i++)
-               {
-                  this.runsCompletedPerWorld[i] = 0;
-                  this.highestMonstersKilled[i] = 0;
-               }
-               this.highestWorldCompleted = 1;
-               this.currentWorldId = 15;
-               CH2.user.finishWorld();
-               CH2.user.ascensionWorlds.ascensionWorlds = [];
-               this.totalStatPointsV2 = this.totalStatPointsV2 + 3;
+               tutorial = new Tutorial();
+               tutorial.priority = staticTutorial.priority;
+               tutorial.doesPlayerRequireFunction = staticTutorial.doesPlayerRequireFunction;
+               tutorial.shouldStartFunction = staticTutorial.shouldStartFunction;
+               tutorial.shouldEndFunction = staticTutorial.shouldEndFunction;
+               tutorial.onStartFunction = staticTutorial.onStartFunction;
+               tutorial.onEndFunction = staticTutorial.onEndFunction;
+               this.tutorials.push(tutorial);
             }
          }
-         this.version = IdleHeroMain.SAVE_VERSION;
+      }
+      
+      public function get itemTierReachedThisWorld() : int
+      {
+         var item:Item = null;
+         if(this.inventory.length > 0)
+         {
+            item = this.inventory.items[0];
+            return item.tier;
+         }
+         return 0;
+      }
+      
+      public function getItemDamage(item:Item) : BigNumber
+      {
+         if(this.getItemDamageHandler)
+         {
+            return this.getItemDamageHandler.getItemDamageOverride(item);
+         }
+         return this.getItemDamageDefault(item);
+      }
+      
+      public function getItemDamageDefault(item:Item) : BigNumber
+      {
+         if(item.skills.length > 0)
+         {
+            return new BigNumber(0);
+         }
+         var result:BigNumber = item.baseCost.divideN(30);
+         if(CH2.currentAscensionWorld && CH2.currentAscensionWorld.worldNumber <= 2)
+         {
+            result.timesEqualsN(Math.pow(0.86,item.rank - 1));
+         }
+         else
+         {
+            result.timesEqualsN(Math.pow(0.9,item.rank - 1));
+         }
+         result.timesEqualsN(1 + item.bonusDamage);
+         if(item.rank < 4)
+         {
+            result.timesEqualsN(5 - item.rank);
+         }
+         result.floorInPlace();
+         result.timesEqualsN(item.level);
+         result.timesEqualsN(Math.pow(this.item10LvlDmgMultiplier,Math.floor(item.level / 10)));
+         result.timesEqualsN(Math.pow(this.item20LvlDmgMultiplier,Math.floor(item.level / 20)));
+         if(item.level >= 50)
+         {
+            result.timesEqualsN(this.item50LvlDmgMultiplier);
+            if(item.level >= 100)
+            {
+               result.timesEqualsN(this.item100LvlDmgMultiplier);
+            }
+         }
+         result.timesEqualsN(this.getMultiplierForItemType(item.type));
+         return result;
       }
    }
 }
