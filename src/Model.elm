@@ -24,7 +24,7 @@ import Dict.Extra
 import Draggable
 import GameData as G
 import GameData.Stats as GS
-import Json.Decode as Decode
+import Json.Decode as D
 import Lazy as Lazy exposing (Lazy)
 import List.Extra
 import Math.Vector2 as V2
@@ -35,6 +35,7 @@ import Ports
 import Process
 import Regex as Regex exposing (Regex)
 import Route as Route exposing (Features, Route)
+import SaveFile exposing (SaveFile)
 import Set as Set exposing (Set)
 import Task
 import Time
@@ -59,7 +60,7 @@ type Msg
     | Resize WindowSize
     | ToggleSidebar
     | SaveFileSelected String
-    | SaveFileImport Ports.SaveFileData
+    | SaveFileImport D.Value
 
 
 type alias Model =
@@ -79,6 +80,7 @@ type alias Model =
     , zoom : Float
     , center : V2.Vec2
     , drag : Draggable.State ()
+    , etherealItemInventory : Maybe SaveFile.EtherealItemInventory
     , error : Maybe Error
     }
 
@@ -101,7 +103,7 @@ type TooltipState
 
 
 type alias Flags =
-    { gameData : Decode.Value
+    { gameData : D.Value
     , changelog : String
     , windowSize : WindowSize
     }
@@ -109,7 +111,7 @@ type alias Flags =
 
 init : Flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags loc urlKey =
-    case Decode.decodeValue G.decoder flags.gameData of
+    case D.decodeValue G.decoder flags.gameData of
         Ok gameData ->
             let
                 route =
@@ -147,6 +149,7 @@ init flags loc urlKey =
                             )
               , center = V2.vec2 0 0
               , drag = Draggable.init
+              , etherealItemInventory = Nothing
               , error = error
               }
             , Cmd.batch
@@ -410,42 +413,51 @@ update msg model =
         SaveFileSelected elemId ->
             ( model, Ports.saveFileSelected elemId )
 
-        SaveFileImport data ->
-            let
-                _ =
-                    Debug.log "SaveFileImport" data
+        SaveFileImport json ->
+            case D.decodeValue SaveFile.decoder json of
+                Err err ->
+                    ( { model
+                        | etherealItemInventory = Nothing
+                        , error = err |> D.errorToString |> SaveImportError |> Just
+                      }
+                    , Cmd.none
+                    )
 
-                game =
-                    model.graph |> Maybe.map .game |> Maybe.withDefault (G.latestVersion model.gameData)
+                Ok data ->
+                    let
+                        _ =
+                            Debug.log "SaveFileImport" data
 
-                saveHero =
-                    case data.error of
-                        Nothing ->
+                        game =
+                            model.graph |> Maybe.map .game |> Maybe.withDefault (G.latestVersion model.gameData)
+
+                        saveHero =
                             Dict.Extra.find (\k v -> v.name == data.hero) game.heroes
 
-                        _ ->
-                            Nothing
+                        saveBuild =
+                            String.join "&" data.build
 
-                saveBuild =
-                    String.join "&" data.build
+                        cmd =
+                            case saveHero of
+                                Just hero ->
+                                    Route.Home
+                                        { version = game.versionSlug
+                                        , search = model.searchString
+                                        , hero = Tuple.first hero
+                                        , build = Just saveBuild
+                                        }
+                                        |> Route.stringify
+                                        |> Nav.pushUrl model.urlKey
 
-                cmd =
-                    case saveHero of
-                        Just hero ->
-                            Route.Home
-                                { version = game.versionSlug
-                                , search = model.searchString
-                                , hero = Tuple.first hero
-                                , build = Just saveBuild
-                                }
-                                |> Route.stringify
-                                |> Nav.pushUrl model.urlKey
-
-                        _ ->
-                            Cmd.none
-            in
-            -- show errors, and/or redirect to the imported build
-            ( { model | error = data.error |> Maybe.map SaveImportError }, cmd )
+                                _ ->
+                                    Cmd.none
+                    in
+                    ( { model
+                        | etherealItemInventory = Just data.etherealItemInventory
+                        , error = Nothing
+                      }
+                    , cmd
+                    )
 
         NavRequest req ->
             -- https://package.elm-lang.org/packages/elm/browser/latest/Browser#UrlRequest

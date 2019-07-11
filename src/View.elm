@@ -9,6 +9,7 @@ import Html.Events as E
 import Model as M
 import Route as Route exposing (Route)
 import View.Changelog
+import View.EthItems
 import View.SkillTree
 import View.Spreadsheet
 import View.Stats
@@ -58,6 +59,9 @@ viewBody model =
 
         Route.StatsTSV params ->
             View.Spreadsheet.view model params
+
+        Route.EthItems ->
+            H.div [] (header ++ [ View.EthItems.view model ])
 
 
 gameVersion : M.Model -> G.GameVersionData

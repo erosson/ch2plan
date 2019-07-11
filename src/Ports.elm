@@ -1,14 +1,9 @@
-port module Ports exposing (SaveFileData, saveFileContentRead, saveFileSelected)
+port module Ports exposing (saveFileContentRead, saveFileSelected)
 
-
-type alias SaveFileData =
-    { hero : String
-    , build : List String
-    , error : Maybe String
-    }
+import Json.Decode as D
 
 
 port saveFileSelected : String -> Cmd msg
 
 
-port saveFileContentRead : (SaveFileData -> msg) -> Sub msg
+port saveFileContentRead : (D.Value -> msg) -> Sub msg

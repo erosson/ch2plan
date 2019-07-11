@@ -26,6 +26,9 @@ view header model graph =
 
                 Just params_ ->
                     params_
+
+        ethItemCount =
+            model.etherealItemInventory |> Maybe.Extra.unwrap 0 Dict.size
     in
     H.div [ A.class "skill-tree-main" ]
         [ View.Graph.view model graph
@@ -39,6 +42,7 @@ view header model graph =
                        , H.p [] [ H.text <| graph.char.flavor ]
                        , viewVersionNav graph.game params
                        , viewSearch model params.version
+                       , H.p [] [ H.a [ Route.href <| Route.EthItems ] [ H.text <| String.fromInt ethItemCount, H.text " ethereal items" ] ]
                        , H.p [] [ H.a [ Route.href <| Route.Stats params ] [ H.text "Statistics:" ] ]
                        , View.Stats.viewStatsSummary <| GS.statTable <| M.statsSummary graph
                        , H.p [] [ H.a [ Route.href <| Route.Stats params ] [ H.text <| String.fromInt (Set.size graph.selected) ++ " skill points" ] ]
@@ -106,9 +110,8 @@ viewError error =
                         M.SearchRegexError ->
                             "Search error"
 
-                        M.SaveImportError _ ->
-                            -- the string here is only meaningful to devs
-                            "Couldn't load that saved game."
+                        M.SaveImportError err ->
+                            "Couldn't load that saved game: " ++ err
 
                         M.BuildNodesError err ->
                             "Invalid build: " ++ err

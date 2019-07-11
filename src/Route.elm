@@ -82,6 +82,7 @@ type Route
     = Home HomeParams
     | Stats HomeParams
     | StatsTSV HomeParams
+    | EthItems
     | Changelog
     | NotFound
     | Root LegacyHomeParams
@@ -172,6 +173,7 @@ parser =
         , P.map Stats <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "s" </> encodedString </> P.string
         , P.map StatsTSV <| P.map HomeParams <| homeQS <| P.s "tsv" </> encodedString </> P.string </> maybeString
         , P.map StatsTSV <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "tsv" </> encodedString </> P.string
+        , P.map EthItems <| P.s "ethitems"
         , P.map Changelog <| P.s "changelog"
         ]
 
@@ -266,6 +268,9 @@ stringify route =
 
         Changelog ->
             "#/changelog"
+
+        EthItems ->
+            "#/ethitems"
 
         NotFound ->
             Debug.todo "why are you stringifying Route.NotFound?"
