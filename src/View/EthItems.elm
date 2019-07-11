@@ -20,12 +20,11 @@ view model =
                     [ th [] [ text "item id" ]
                     , th [] [ text "slot" ]
                     , th [] [ text "rarity" ]
-                    , th [] [ text "icon id" ]
                     , th [] [ text "gild" ]
                     , th [] [ text "stat-src" ]
                     , th [] [ text "->" ]
-                    , th [] [ text "stat-dest" ]
                     , th [] [ text "rate" ]
+                    , th [] [ text "stat-dest" ]
                     , th [] [ text "total" ]
                     , th [] [ text "uniqueStat" ]
                     ]
@@ -36,9 +35,37 @@ view model =
 viewItem : EtherealItem -> List (Html msg)
 viewItem item =
     [ td [] [ text item.id ]
-    , td [] [ text <| String.fromInt item.slot ]
+    , td []
+        [ text <|
+            case item.slot of
+                0 ->
+                    "Weapon"
+
+                1 ->
+                    "Helmet"
+
+                2 ->
+                    "Chest"
+
+                3 ->
+                    "Ring"
+
+                4 ->
+                    "Pants"
+
+                5 ->
+                    "Gloves"
+
+                6 ->
+                    "Feet"
+
+                7 ->
+                    "Back"
+
+                _ ->
+                    String.fromInt item.slot
+        ]
     , td [] [ text <| String.fromInt item.rarity ]
-    , td [] [ text <| String.fromInt item.iconId ]
     , td [] [ text <| String.fromInt item.mainStat.gild ]
     , td [ style "float" "right" ]
         [ case SaveFile.sourceStat item.mainStat of
@@ -49,8 +76,8 @@ viewItem item =
                 text src
         ]
     , td [] [ text "->" ]
-    , td [] [ text item.mainStat.key ]
-    , td [] [ text <| String.fromFloat item.mainStat.calculatedExchangeRate ]
+    , td [] [ text <| String.slice 0 4 <| String.fromFloat item.mainStat.calculatedExchangeRate ]
+    , td [] [ text <| String.replace "ethereal" "" item.mainStat.key ]
     , td [] [ text <| String.fromFloat item.mainStat.calculatedValue ]
     , td []
         (case item.uniqueStat of

@@ -29,6 +29,11 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 ---
 
+## 2019-07-10
+
+- Update to live version 0.9.7.
+- Added a new page to examine an imported save's ethereal items. Still under construction.
+
 ## 2018-12-24
 
 - Update to live version 0.8.1-(early access), and PTR version 0.9.0-(experimental).

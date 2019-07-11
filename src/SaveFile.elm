@@ -38,9 +38,36 @@ type alias EtherealStat =
 
 sourceStatIds : Dict String String
 sourceStatIds =
-    Dict.fromList
-        [ ( "Id4", "Haste" )
-        ]
+    -- DEFAULT_UPGRADABLE_STATS in helpfulAdventurer.as3
+    [ "Gold Received"
+    , "Movement Speed"
+    , "Crit Chance"
+    , "Crit Damage"
+    , "Haste"
+    , "Mana Regen"
+    , "Idle Damage"
+    , "Clickable Gold"
+    , "Click Damage"
+    , "Treasure Chest Chance"
+    , "Monster Gold"
+    , "Item Cost Reduction"
+    , "Total Mana"
+    , "Total Energy"
+    , "Clickable Chance"
+    , "Bonus Gold Chance"
+    , "Treasure Chest Gold"
+    , "Pierce Chance"
+    , "Weapon Damage"
+    , "Helm Damage"
+    , "Chest Damage"
+    , "Ring Damage"
+    , "Pants Damage"
+    , "Gloves Damage"
+    , "Feet Damage"
+    , "Back Damage"
+    ]
+        |> List.indexedMap (\i -> Tuple.pair ("Id" ++ String.fromInt i))
+        |> Dict.fromList
 
 
 sourceStat : EtherealStat -> Maybe String
@@ -81,7 +108,11 @@ successDecoder =
     D.map3 SaveFile
         (D.field "hero" D.string)
         (D.field "build" <| D.list D.string)
-        (D.field "etherealItemInventory" inventoryDecoder)
+        (D.field "etherealItemInventory" inventoryDecoder
+            -- support old versions with no eth items
+            |> D.maybe
+            |> D.map (Maybe.withDefault Dict.empty)
+        )
 
 
 inventoryDecoder : D.Decoder EtherealItemInventory
