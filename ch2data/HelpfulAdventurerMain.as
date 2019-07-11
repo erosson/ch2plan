@@ -3,6 +3,7 @@
 	import com.doogog.utils.MiscUtils;
 	import com.playsaurus.managers.BigNumberFormatter;
 	import com.playsaurus.numbers.BigNumber;
+	import com.playsaurus.utils.StringFormatter;
 	import flash.display.Sprite;
 	import heroclickerlib.CH2;
 	import com.playsaurus.model.Model;
@@ -19,6 +20,9 @@
 	import models.Buff;
 	import models.Character;
 	import models.Characters;
+	import models.EtherealItem;
+	import models.EtherealItemStat;
+	import models.EtherealItemStatChoice;
 	import models.Item;
 	import models.ItemStat;
 	import models.Items;
@@ -28,6 +32,8 @@
 	import models.AttackData;
 	import models.Tutorial;
 	import models.RubyPurchase;
+	import models.AscensionWorld;
+	import models.AscensionWorlds;
 	import heroclickerlib.GpuMovieClip;
 	import heroclickerlib.managers.CH2AssetManager;
 	import com.gskinner.utils.Rnd;
@@ -36,7 +42,8 @@
 	import models.UserData;
 	import ui.CH2UI;
 	import ui.TutorialManager;
-	
+	import it.sephiroth.gettext._;
+
 	public dynamic class HelpfulAdventurerMain extends Sprite
 	{
 		public static const CHARACTER_NAME:String = "Helpful Adventurer";
@@ -58,7 +65,18 @@
 		public static const BIG_GIANT_CLICK:String = CHARACTER_ASSET_GROUP+"_bigGiantClick";
 		public static const HUGE_CLICK_CRACK:String = CHARACTER_ASSET_GROUP+"_hugeClickCrack";
 		public static const BUFF_INDICATOR:String = CHARACTER_ASSET_GROUP+"_indicator";
-		public static const ENERGY_CHARGE:String = CHARACTER_ASSET_GROUP+"_energyCharge";
+		public static const ENERGY_CHARGE:String = CHARACTER_ASSET_GROUP + "_energyCharge";
+		
+		// World Trait IDs
+		
+		public static const WT_ROBUST:int = 0;
+		public static const WT_EXHAUSTING:int = 1;
+		public static const WT_BANAL:int = 2;
+		public static const WT_GARGANTUAN:int = 3;
+		public static const WT_UNDERFED:int = 4;
+		public static const WT_UNSTABLE:int = 5;
+		public static const WT_INCOME_TAX:int = 6;
+		public static const WT_SPEED_LIMIT:int = 7;
 		
 		public static const GRAPH_NODE_NINE_CLICK_MULTIPLIER:Number = 2;
 		public static const GRAPH_NODE_BIG_CLICKS_MULTIPLIER:Number = 2;
@@ -70,8 +88,8 @@
 		public static const GRAPH_NODE_POWER_SURGE_DAMAGE_INCREASE:Number = 1.5;
 		public static const ENERGIZE_BASE_MANA_COST:Number = 25;
 		public static const GRAPH_NODE_ENERGIZE_MANA_COST_REDUCTION:Number = 0.5;
-		public static const CLICKSTORM_TOOLTIP:String = "Consumes 1.25 energy per second to click 2.5 times per second, until you run out of energy. Speed increases over time.";
-		public static const CRITSTORM_TOOLTIP:String = "Consumes 1.25 energy per second to click 2.5 times per second, until you run out of energy. Clicks from this skill have +100% chance of being critical strikes. Speed increases over time.";
+		public static const CLICKSTORM_TOOLTIP:String = "Consumes 2.5 energy per second to click 5 times per second, until you run out of energy. Speed increases over time.";
+		public static const CRITSTORM_TOOLTIP:String = "Consumes 2.5 energy per second to click 5 times per second, until you run out of energy. Clicks from this skill have double chance of being critical strikes. Speed increases over time.";
 		public static const GOLDENCLICKS_TOOLTIP:String = "Consumes 1.25 energy per second to click 2.5 times per second, until you run out of energy. Doubles gold gained while active. Speed increases over time.";
 		public static const CLICKTORRENT_TOOLTIP:String = "Consumes 10 energy per second to click 30 times per second, until you run out of energy. Speed increases over time.";
 		public static const AUTOATTACKSTORM_TOOLTIP:String = "Consumes 1.25 mana per second to auto attack 2.5 times per second, until you run out of mana. Speed increases over time.";
@@ -194,10 +212,119 @@
 		{
 			helpfulAdventurer.assetGroupName = CHARACTER_ASSET_GROUP;
 			
+			helpfulAdventurer.worldTraits[WT_ROBUST] = {
+				"name": "Robust",
+				"description": "Critical hit chance reduced by 100%."
+			};
+			helpfulAdventurer.worldTraits[WT_EXHAUSTING] = {
+				"name": "Exhausting",
+				"description": "Attacking temporarily reduces your haste."
+			};
+			helpfulAdventurer.worldTraits[WT_BANAL] = {
+				"name": "Banal",
+				"description": "Mana regenerates at 10% the normal rate."
+			};
+			helpfulAdventurer.worldTraits[WT_GARGANTUAN] = {
+				"name": "Gargantuan",
+				"description": "Five heckin' chonkers per zone."
+			};
+			helpfulAdventurer.worldTraits[WT_UNDERFED] = {
+				"name": "Underfed",
+				"description": "Lots of itty bitties."
+			};
+			helpfulAdventurer.worldTraits[WT_UNSTABLE] = {
+				"name": "Unstable",
+				"description": "All energy is lost upon reaching maximum energy."
+			};
+			helpfulAdventurer.worldTraits[WT_INCOME_TAX] = {
+				"name": "Income Tax",
+				"description": "An aggressive tax structure that scales with multipliers to monster gold."
+			};
+			helpfulAdventurer.worldTraits[WT_SPEED_LIMIT] = {
+				"name": "Speed Limit",
+				"description": "Fines will be issued for dashing."
+			};
+			
+			helpfulAdventurer.hardcodedWorldTraits = {
+				//"2": {
+					//"traitIDs": [WT_UNDERFED]
+				//},
+				//"3": {
+					//"traitIDs": [WT_UNSTABLE]
+				//},
+				"31": {
+					"traitIDs": [WT_ROBUST]
+				},
+				"61": {
+					"traitIDs": [WT_EXHAUSTING]
+				},
+				"91": {
+					"traitIDs": [WT_GARGANTUAN]
+				}
+			};
+			
+			helpfulAdventurer.etherealTraitTooltipInfo = {
+				"ExtraMulticlicks": {
+					"tooltipFormat": "+%s clicks to your MultiClick",
+					"valueFunction": function(levels:Number):Number {
+						return 2 * levels;
+					}
+				},
+				"BigClickStacks": {
+					"tooltipFormat": "+%s clicks empowered by Big Clicks",
+					"valueFunction": function(levels:Number):Number {
+						return levels;
+					}
+				},
+				"BigClicksDamage": {
+					"tooltipFormat": "x%s% damage done by Big Clicks",
+					"valueFunction": function(levels:Number):Number {
+						return Math.pow(1.25, levels);
+					}
+				},
+				"HugeClickDamage": {
+					"tooltipFormat": "x%s% damage done by Huge Click",
+					"valueFunction": function(levels:Number):Number {
+						return Math.pow(1.25, levels);
+					}
+				},
+				"ManaCritDamage": {
+					"tooltipFormat": "x%s% damage of Mana Crit",
+					"valueFunction": function(levels:Number):Number {
+						return Math.pow(1.25, levels);
+					}
+				},
+				"ImprovedEnergize": {
+					"tooltipFormat": "+%s% duration of Energize",
+					"valueFunction": function(levels:Number):Number {
+						return 0.2 * levels;
+					}
+				},
+				"SustainedPowersurge": {
+					"tooltipFormat": "x%s% duration of Powersurge",
+					"valueFunction": function(levels:Number):Number {
+						return Math.pow(1.2, levels);
+					}
+				},
+				"ImprovedPowersurge": {
+					"tooltipFormat": "x%s% damage bonus of Powersurge",
+					"valueFunction": function(levels:Number):Number {
+						return Math.pow(1.25, levels);
+					}
+				},
+				"ImprovedReload": {
+					"tooltipFormat": "+%s% Reload effect",
+					"valueFunction": function(levels:Number):Number {
+						return 0.5 * levels * 100;
+					}
+				}
+			}
+			
 			helpfulAdventurer.levelGraphNodeTypes = {
 				"G": { 
 					"name": "Gold",
-					"tooltip": "Multiplies your gold received from all sources by 110%.",
+					"tooltip": "1 Level of Gold Received. Multiplies your gold received from all sources by 110%.",
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_GOLD, 1),
 					"flavorText": "We can also say that it is multiplied by 1.1, but that sounds so much weaker.",
 					"setupFunction": function(){},
 					"purchaseFunction": function() { CH2.currentCharacter.levelUpStat(CH2.STAT_GOLD)},
@@ -205,7 +332,8 @@
 				},
 				"Cc": { 
 					"name": "Crit Chance",
-					"tooltip": "Adds 2% to your chance to score a critical hit." ,
+					"tooltip": "1 Level of Critical Chance. Adds 2% to your chance to score a critical hit.",
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_CRIT_CHANCE, 1),
 					"flavorText": "Ever wonder what happens when you get over 100% Crit Chance? The Ancients once knew, but that is ancient history.",
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_CRIT_CHANCE)},
@@ -213,7 +341,8 @@
 				},
 				"Cd": { 
 					"name": "Crit Damage",
-					"tooltip": "Multiplies the damage of your critical hits by 120%." ,
+					"tooltip": "1 Level of Critical Damage. Multiplies the damage of your critical hits by 120%.",
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_CRIT_DAMAGE, 1),
 					"flavorText": "When a number is multiplied by a fixed amount (greater than 1) many times, that number is said to grow \"exponentially\". This is because that process is usually represented by a formula that uses exponential notation.",
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_CRIT_DAMAGE)},
@@ -221,7 +350,8 @@
 				},			
 				"H": { 
 					"name": "Haste",
-					"tooltip": "Multiplies your Haste by 105%." ,
+					"tooltip": "1 Level of Haste. Multiplies your Haste by 105%.",
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_HASTE, 1),
 					"flavorText": "Haste affects the rate that you auto-attack, and all cooldown speeds, including Automator cooldown speeds.",
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_HASTE)},
@@ -229,7 +359,8 @@
 				},
 				"Gc": { 
 					"name": "Clickable Gold",
-					"tooltip": "Multiplies your gold received from clickables by 150%." ,
+					"tooltip": "1 Level of Clickable Gold. Multiplies your gold received from clickables by 150%." ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_CLICKABLE_GOLD, 1),
 					"flavorText": "If only someone could click on them before they go off the screen.",
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_CLICKABLE_GOLD)},
@@ -237,7 +368,8 @@
 				},
 				"Cl": { 
 					"name": "Click Damage",
-					"tooltip": "Multiplies your click damage by 110%." ,
+					"tooltip": "1 Level of Click Damage. Multiplies your click damage by 110%." ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_CLICK_DAMAGE, 1),
 					"flavorText": "This affects damage from all skills that \"click\". But it does not affect auto-attacks, because those are not \"clicks\".",
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_CLICK_DAMAGE)},
@@ -245,7 +377,8 @@
 				},
 				"Gb": { 
 					"name": "Monster Gold",
-					"tooltip": "Multiplies gold received by monsters by 120%." ,
+					"tooltip": "1 Level of Monster Gold. Multiplies gold received by monsters by 120%." ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_MONSTER_GOLD, 1),
 					"flavorText": "", //AO: Need new flavor text
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_MONSTER_GOLD)},
@@ -253,7 +386,8 @@
 				},
 				"Ir": { 
 					"name": "Item Cost Reduction",
-					"tooltip": "Multiplies the gold costs of buying and leveling equipment by 0.92." ,
+					"tooltip": "1 Level of Item Cost Reduction. Multiplies the gold costs of buying and leveling equipment by 0.92." ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_ITEM_COST_REDUCTION, 1),
 					"flavorText": "Rufus sometimes wonders why he can't compete in the Gold market. He always felt like there was a mysterious seller undercutting him.",
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_ITEM_COST_REDUCTION)},
@@ -261,7 +395,8 @@
 				},
 				"Mt": { 
 					"name": "Total Mana",
-					"tooltip": "Increases your maximum mana by 25." ,
+					"tooltip": "1 Level of Total Mana. Increases your maximum mana by 25." ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_TOTAL_MANA, 1),
 					"flavorText": "If a fixed amount is added to a number many times, that number is said to grow \"linearly\". This is because if you plot it out on an x/y graph, you'll see a line.",
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_TOTAL_MANA)},
@@ -269,7 +404,8 @@
 				},
 				"Mr": { 
 					"name": "Mana Regeneration",
-					"tooltip": "Multiplies your mana regeneration rate by 110%." ,
+					"tooltip": "1 Level of Mana Regeneration. Multiplies your mana regeneration rate by 110%." ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_MANA_REGEN, 1),
 					"flavorText": "You will get 10% more mana per minute than before you had this upgrade.",
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_MANA_REGEN)},
@@ -277,7 +413,8 @@
 				},
 				"En": { 
 					"name": "Total Energy",
-					"tooltip": "Increases your maximum energy by 25." ,
+					"tooltip": "1 Level of Total Energy. Increases your maximum energy by 25." ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_TOTAL_ENERGY, 1),
 					"flavorText": "If a fixed amount is added to a number many times, that number is said to grow \"linearly\". This is because if you plot it out on an x/y graph, you'll see a line.",
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_TOTAL_ENERGY)},
@@ -285,7 +422,8 @@
 				},
 				"Gp": { 
 					"name": "Gold Piles",
-					"tooltip": "Multiplies the number of gold piles found by 110%." ,
+					"tooltip": "1 Level of Gold Piles. Multiplies the number of gold piles found by 110%." ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_CLICKABLE_CHANCE, 1),
 					"flavorText": "This only affects piles of gold. Not other clickables." ,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_CLICKABLE_CHANCE)},
@@ -293,7 +431,8 @@
 				},
 				"Bg": { 
 					"name": "Bonus Gold Chance",
-					"tooltip": "Adds 1% to your chance of finding bonus gold." ,
+					"tooltip": "1 Level of Bonus Gold Chance. Adds 1% to your chance of finding bonus gold." ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_BONUS_GOLD_CHANCE, 1),
 					"flavorText": "When killing monsters, bonus gold may appear. This is a linear bonus, like Crit Chance." ,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_BONUS_GOLD_CHANCE)},
@@ -301,7 +440,8 @@
 				},
 				"Tc": { 
 					"name": "Treasure Chest Chance",
-					"tooltip": "Adds 2% to the chance that a monster happens to be a treasure chest." ,
+					"tooltip": "1 Level of Treasure Chest Chance. Adds 2% to the chance that a monster happens to be a treasure chest." ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_TREASURE_CHEST_CHANCE, 1),
 					"flavorText": "Making good use of the lingering powers of a once-loathed ancient known as Thusia.",
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_TREASURE_CHEST_CHANCE)},
@@ -309,15 +449,17 @@
 				},
 				"Tg": { 
 					"name": "Treasure Chest Gold",
-					"tooltip": "Multiplies the gold received from treasure chest monsters by 125%." ,
+					"tooltip": "1 Level of Treasure Chest Gold. Multiplies the gold received from treasure chest monsters by 125%." ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_TREASURE_CHEST_GOLD, 1),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_TREASURE_CHEST_GOLD)},
 					"icon": "treasureGold"
 				},
 				"I1": { 
-					"name": "Equipment: Sword",
-					"tooltip": "Multiplies the damage you deal with swords by 150%" ,
+					"name": "Equipment: Weapon",
+					"tooltip": "1 Level of Weapon Damage. Multiplies the damage you deal with weapons by 150%" ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_ITEM_WEAPON_DAMAGE, 1),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_ITEM_WEAPON_DAMAGE)},
@@ -325,7 +467,8 @@
 				},
 				"I2": { 
 					"name": "Equipment: Helmet",
-					"tooltip": "Multiplies the damage you deal with helmets by 150%" ,
+					"tooltip": "1 Level of Helmet Damage. Multiplies the damage you deal with helmets by 150%" ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_ITEM_HEAD_DAMAGE, 1),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_ITEM_HEAD_DAMAGE)},
@@ -333,7 +476,8 @@
 				},
 				"I3": { 
 					"name": "Equipment: Breastplate",
-					"tooltip": "Multiplies the damage you deal with breastplates by 150%" ,
+					"tooltip": "1 Level of Breastplate Damage. Multiplies the damage you deal with breastplates by 150%" ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_ITEM_CHEST_DAMAGE, 1),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_ITEM_CHEST_DAMAGE)},
@@ -341,7 +485,8 @@
 				},
 				"I4": { 
 					"name": "Equipment: Ring",
-					"tooltip": "Multiplies the damage you deal with rings by 150%" ,
+					"tooltip": "1 Level of Ring Damage. Multiplies the damage you deal with rings by 150%" ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_ITEM_RING_DAMAGE, 1),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_ITEM_RING_DAMAGE)},
@@ -349,7 +494,8 @@
 				},
 				"I5": { 
 					"name": "Equipment: Pants",
-					"tooltip": "Multiplies the damage you deal with pants by 150%" ,
+					"tooltip": "1 Level of Pants Damage. Multiplies the damage you deal with pants by 150%" ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_ITEM_LEGS_DAMAGE, 1),
 					"flavorText": "Pants shouldn't do damage, that's ridiculous.",
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_ITEM_LEGS_DAMAGE)},
@@ -357,7 +503,8 @@
 				},
 				"I6": { 
 					"name": "Equipment: Gloves",
-					"tooltip": "Multiplies the damage you deal with gloves by 150%" ,
+					"tooltip": "1 Level of Gloves Damage. Multiplies the damage you deal with gloves by 150%" ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_ITEM_HANDS_DAMAGE, 1),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_ITEM_HANDS_DAMAGE)},
@@ -365,7 +512,8 @@
 				},
 				"I7": { 
 					"name": "Equipment: Boots",
-					"tooltip": "Multiplies the damage you deal with boots by 150%" ,
+					"tooltip": "1 Level of Boots Damage. Multiplies the damage you deal with boots by 150%" ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_ITEM_FEET_DAMAGE, 1),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_ITEM_FEET_DAMAGE)},
@@ -373,7 +521,8 @@
 				},
 				"I8": { 
 					"name": "Equipment: Cape",
-					"tooltip": "Multiplies the damage you deal with capes by 150%" ,
+					"tooltip": "1 Level of Cape Damage. Multiplies the damage you deal with capes by 150%" ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_ITEM_BACK_DAMAGE, 1),
 					"flavorText": "If you wear these in real life, people will think something is wrong with you.",
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_ITEM_BACK_DAMAGE)},
@@ -392,42 +541,47 @@
 				//####################################################################
 				"Mu": {
 					"name": "Increased MultiClicks",
-					"tooltip": "Adds 3 clicks to your multiclick, at the cost of 1 additional energy.",
+					"tooltip": "1 Level of Increased MultiClicks. Adds 2 clicks to your MultiClick.",
+					"tooltipFunction": getAddTraitTooltipFunction("ExtraMulticlicks", 1),
 					"flavorText": "No matter how many of these upgrades you get, MultiClick will take the same amount of time to perform all of its clicks.",
 					"setupFunction": function(){},
-					"purchaseFunction": function() { CH2.currentCharacter.addTrait("ExtraMulticlicks", 3); CH2.currentCharacter.getSkill("MultiClick").energyCost += 1; },
+					"purchaseFunction": function() { CH2.currentCharacter.addTrait("ExtraMulticlicks", 1, true); CH2.currentCharacter.addTrait("TreeExtraMulticlicks", 1); },
 					"icon": "nineClicks"
 				},
 				"Bc": { 
 					"name": "More Big Clicks",
-					"tooltip": "Increases the number of clicks empowered by Big Clicks by 1.",
+					"tooltip": "1 Level of More Big Clicks. Increases the number of clicks empowered by Big Clicks by 1.",
+					"tooltipFunction": getAddTraitTooltipFunction("BigClickStacks", 1),
 					"flavorText": "They march loyally behind you in unison, each one prepared to sacrifice itself for your cause.",
 					"setupFunction": function(){},
-					"purchaseFunction": function() { CH2.currentCharacter.addTrait("BigClickStacks", 1)},
+					"purchaseFunction": function() { CH2.currentCharacter.addTrait("BigClickStacks", 1, true); CH2.currentCharacter.addTrait("TreeBigClickStacks", 1); },
 					"icon": "iconBigClicks"
 				},
 				"Bd": { 
 					"name": "Bigger Big Clicks",
-					"tooltip": "Multiplies the damage done by Big Clicks by 125%",
+					"tooltip": "1 Level of Bigger Big Clicks. Multiplies the damage done by Big Clicks by 125%",
+					"tooltipFunction": getAddTraitTooltipFunction("BigClicksDamage", 1),
 					"flavorText": "They might not look any bigger when you get this upgrade. They're bigger on the inside. In fact, they weigh a lot more.",
 					"setupFunction": function(){},
-					"purchaseFunction": function() { CH2.currentCharacter.addTrait("BigClicksDamage", 1)},
+					"purchaseFunction": function() { CH2.currentCharacter.addTrait("BigClicksDamage", 1, true); CH2.currentCharacter.addTrait("TreeBigClicksDamage", 1); },
 					"icon": "iconBigClicks"
 				},
 				"Hd": { 
 					"name": "Huger Huge Click",
-					"tooltip": "Multiplies the damage done by Huge Click by 125%",
+					"tooltip": "1 Level of Huger Huge Clicks. Multiplies the damage done by Huge Click by 125%",
+					"tooltipFunction": getAddTraitTooltipFunction("HugeClickDamage", 1),
 					"flavorText": "It actually gets bigger. But there is an unusual visual side effect that the rest of the world increases in size proportionally.",
 					"setupFunction": function(){},
-					"purchaseFunction": function() {CH2.currentCharacter.addTrait("HugeClickDamage", 1);},
+					"purchaseFunction": function() { CH2.currentCharacter.addTrait("HugeClickDamage", 1, true); CH2.currentCharacter.addTrait("TreeHugeClickDamage", 1); },
 					"icon": "hugeClicks"
 				},
 				"Md": { 
 					"name": "Mana Crit Damage",
-					"tooltip": "Multiplies the damage of Mana Crit by 125%",
+					"tooltip": "1 Level of Mana Crit Damage. Multiplies the damage of Mana Crit by 125%",
+					"tooltipFunction": getAddTraitTooltipFunction("ManaCritDamage", 1),
 					"flavorText": null,
 					"setupFunction": function(){},
-					"purchaseFunction": function() {CH2.currentCharacter.addTrait("ManaCritDamage", 1);},
+					"purchaseFunction": function() { CH2.currentCharacter.addTrait("ManaCritDamage", 1, true); CH2.currentCharacter.addTrait("TreeManaCritDamage", 1); },
 					"icon": "manaClick"
 				},
 				"Kh": { 
@@ -449,10 +603,11 @@
 				},
 				"Ea": { 
 					"name": "Improved Energize",
-					"tooltip": "Increases the duration of Energize by 20% of its original duration.",
+					"tooltip": "1 Level of Improved Energize. Increases the duration of Energize by 20% of its original duration.",
+					"tooltipFunction": getAddTraitTooltipFunction("ImprovedEnergize", 1),
 					"flavorText": null,
 					"setupFunction": function(){},
-					"purchaseFunction": function() {CH2.currentCharacter.addTrait("ImprovedEnergize", 1);},
+					"purchaseFunction": function() { CH2.currentCharacter.addTrait("ImprovedEnergize", 1, true); CH2.currentCharacter.addTrait("TreeImprovedEnergize", 1); },
 					"icon": "energize"
 				},
 				"Ph": { 
@@ -465,26 +620,29 @@
 				},
 				"Pt": { 
 					"name": "Sustained Powersurge",
-					"tooltip": "Multiplies the duration of Powersurge by 120%.",
+					"tooltip": "1 Level of Sustained Powersurge. Multiplies the duration of Powersurge by 120%.",
+					"tooltipFunction": getAddTraitTooltipFunction("SustainedPowersurge", 1),
 					"flavorText": null,
 					"setupFunction": function(){},
-					"purchaseFunction": function() {CH2.currentCharacter.addTrait("SustainedPowersurge", 1);},
+					"purchaseFunction": function() { CH2.currentCharacter.addTrait("SustainedPowersurge", 1, true); CH2.currentCharacter.addTrait("TreeSustainedPowersurge", 1); },
 					"icon": "powersurgeDuration"
 				},
 				"Pa": { 
 					"name": "Improved Powersurge",
-					"tooltip": "Multiplies the damage bonus of Powersurge by 125%.",
+					"tooltip": "1 Level of Improved Powersurge. Multiplies the damage bonus of Powersurge by 125%.",
+					"tooltipFunction": getAddTraitTooltipFunction("ImprovedPowersurge", 1),
 					"flavorText": null,
 					"setupFunction": function(){},
-					"purchaseFunction": function() {CH2.currentCharacter.addTrait("ImprovedPowersurge", 1);},
+					"purchaseFunction": function() { CH2.currentCharacter.addTrait("ImprovedPowersurge", 1, true); CH2.currentCharacter.addTrait("TreeImprovedPowersurge", 1); },
 					"icon": "powersurgeDamage"
 				},
 				"Ra": { 
 					"name": "Improved Reload",
-					"tooltip": "Increases the effect of Reload by 20% of its base effect." ,
+					"tooltip": "1 Level of Improved Reload. Increases the effect of Reload by 50% of its base effect." ,
+					"tooltipFunction": getAddTraitTooltipFunction("ImprovedReload", 1),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function() { CH2.currentCharacter.addTrait("ImprovedReload", 1); },
+					"purchaseFunction": function() { CH2.currentCharacter.addTrait("ImprovedReload", 1, true);  CH2.currentCharacter.addTrait("TreeImprovedReload", 1); },
 					"icon": "improvedReload"
 				},
 				"Rh": { 
@@ -554,7 +712,7 @@
 				},
 				"T7": { 
 					"name": "Skill: Mana Crit",
-					"tooltip": "Clicks with a 100% chance to score a critical hit." ,
+					"tooltip": "Clicks with +100% chance to score a critical hit." ,
 					"flavorText": "It stacks. Everything stacks.",
 					"setupFunction": function() {},
 					"purchaseFunction": function() { addSkill("Mana Crit")(); },
@@ -573,7 +731,8 @@
 				//###################################################################
 				"qG": {
 					"name": "Mammon's Greed",
-					"tooltip": "Multiplies your gold received from all sources by 133%.",
+					"tooltip": "3 Levels of Gold Received. Multiplies your gold received from all sources by 133%.",
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_GOLD, 3),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_GOLD, 3)},
@@ -581,7 +740,8 @@
 				},
 				"qCd": {
 					"name": "Precision of Bhaal",
-					"tooltip": "Multiplies the damage of your critical hits by 172.8%.",
+					"tooltip": "3 Levels of Critical Damage. Multiplies the damage of your critical hits by 172.8%.",
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_CRIT_DAMAGE, 3),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_CRIT_DAMAGE, 3)},
@@ -589,7 +749,8 @@
 				},
 				"qH": {
 					"name": "Vaagur's Impatience",
-					"tooltip": "Multiplies your Haste by 115.7%." ,
+					"tooltip": "3 Levels of Haste. Multiplies your Haste by 115.7%." ,
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_HASTE, 3),
 					"flavorText": "Haste affects the rate that you auto-attack, and all cooldown speeds, including Automator cooldown speeds.",
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_HASTE, 3)},
@@ -597,7 +758,8 @@
 				},
 				"qGc": {
 					"name": "Revolc's Blessing",
-					"tooltip": "Multiplies your gold received from clickables by 337.5%.",
+					"tooltip": "3 Levels of Clickable Gold. Multiplies your gold received from clickables by 337.5%.",
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_CLICKABLE_GOLD, 3),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_CLICKABLE_GOLD, 3)},
@@ -605,7 +767,8 @@
 				},
 				"qCl": {
 					"name": "The Wrath of Fragsworth",
-					"tooltip": "Multiplies your click damage by 133%.",
+					"tooltip": "3 Levels of Click Damage. Multiplies your click damage by 133%.",
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_CLICK_DAMAGE, 3),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_CLICK_DAMAGE, 3)},
@@ -613,7 +776,8 @@
 				},
 				"qGb": {
 					"name": "Mimzee's Kindness",
-					"tooltip": "Multiplies gold received by monsters by 172.8%.",
+					"tooltip": "3 Levels of Monster Gold. Multiplies gold received by monsters by 172.8%.",
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_MONSTER_GOLD, 3),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_MONSTER_GOLD, 3)},
@@ -621,7 +785,8 @@
 				},
 				"qIr": {
 					"name": "The Thrift of Dogcog",
-					"tooltip": "Reduces the cost of buying and leveling items by 22%.",
+					"tooltip": "3 Levels of Item Cost Reduction. Reduces the cost of buying and leveling items by 22%.",
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_ITEM_COST_REDUCTION, 3),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_ITEM_COST_REDUCTION, 3)},
@@ -629,7 +794,8 @@
 				},
 				"qMt": {
 					"name": "Energon's Ions",
-					"tooltip": "Increases your maximum Mana by 100.",
+					"tooltip": "4 Levels of Total Mana. Increases your maximum Mana by 100.",
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_TOTAL_MANA, 4),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_TOTAL_MANA, 4)},
@@ -637,7 +803,8 @@
 				},
 				"qMr": {
 					"name": "Energon's Grace",
-					"tooltip": "Multiplies your mana regeneration by 133%.",
+					"tooltip": "3 Levels of Mana Regeneration. Multiplies your mana regeneration by 133%.",
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_MANA_REGEN, 3),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_MANA_REGEN, 3)},
@@ -645,7 +812,8 @@
 				},
 				"qEn": {
 					"name": "Juggernaut's Pittance",
-					"tooltip": "Increases your maximum Energy by 100.",
+					"tooltip": "4 Levels of Total Energy. Increases your maximum Energy by 100.",
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_TOTAL_ENERGY, 4),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_TOTAL_ENERGY, 4)},
@@ -653,7 +821,8 @@
 				},
 				"qGp": {
 					"name": "The Vision of Iris",
-					"tooltip": "Multiplies the number of gold piles found by 130%.",
+					"tooltip": "3 Levels of Gold Piles. Multiplies the number of gold piles found by 130%.",
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_CLICKABLE_CHANCE, 3),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_CLICKABLE_CHANCE, 3)},
@@ -661,7 +830,8 @@
 				},
 				"qBg": {
 					"name": "Fortuna's Luck",
-					"tooltip": "Adds 3% to your chance of finding bonus gold.",
+					"tooltip": "3 Levels of Bonus Gold Chance. Adds 3% to your chance of finding bonus gold.",
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_BONUS_GOLD_CHANCE, 3),
 					"flavorText": "When killing monsters, bonus gold may appear. This is a linear bonus, like Crit Chance." ,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_BONUS_GOLD_CHANCE, 3)},
@@ -669,7 +839,8 @@
 				},
 				"qTc": {
 					"name": "Mimzee's Favor",
-					"tooltip": "Adds 6% to the chance that a monster happens to be a treasure chest.",
+					"tooltip": "3 Levels of Treasure Chest Chance. Adds 6% to the chance that a monster happens to be a treasure chest.",
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_TREASURE_CHEST_CHANCE, 3),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_TREASURE_CHEST_CHANCE, 3)},
@@ -677,7 +848,8 @@
 				},
 				"qTg": {
 					"name": "Mimzee's Blessing",
-					"tooltip": "Multiplies your gold received from treasure chests by 195%.",
+					"tooltip": "3 Levels of Treasure Chest Gold. Multiplies your gold received from treasure chests by 195%.",
+					"tooltipFunction": getAddStatTooltipFunction(CH2.STAT_TREASURE_CHEST_GOLD, 3),
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.levelUpStat(CH2.STAT_TREASURE_CHEST_GOLD, 3)},
@@ -685,42 +857,47 @@
 				},
 				"qMu": {
 					"name": "Mega Increased MultiClicks",
-					"tooltip": "Adds 9 clicks to your multiclick, at the cost of 3 additional energy.",
+					"tooltip": "3 Levels of Increased MultiClicks. Adds 6 clicks to your MultiClick.",
+					"tooltipFunction": getAddTraitTooltipFunction("ExtraMulticlicks", 3),
 					"flavorText": null,
 					"setupFunction": function(){},
-					"purchaseFunction": function() { CH2.currentCharacter.addTrait("ExtraMulticlicks", 9); CH2.currentCharacter.getSkill("MultiClick").energyCost += 3; },
+					"purchaseFunction": function() { CH2.currentCharacter.addTrait("ExtraMulticlicks", 3, true);  CH2.currentCharacter.addTrait("TreeExtraMulticlicks", 3); },
 					"icon": "nineClicks"
 				},
 				"qBc": { 
 					"name": "Mega More Big Clicks",
-					"tooltip": "Increases the number of clicks empowered by Big Clicks by 3.",
+					"tooltip": "3 Levels of More Big Clicks. Increases the number of clicks empowered by Big Clicks by 3.",
+					"tooltipFunction": getAddTraitTooltipFunction("BigClickStacks", 3),
 					"flavorText": null,
 					"setupFunction": function(){},
-					"purchaseFunction": function() { CH2.currentCharacter.addTrait("BigClickStacks", 3)},
+					"purchaseFunction": function() { CH2.currentCharacter.addTrait("BigClickStacks", 3, true); CH2.currentCharacter.addTrait("TreeBigClickStacks", 3); },
 					"icon": "iconBigClicks"
 				},
 				"qBd": { 
 					"name": "Mega Bigger Big Clicks",
-					"tooltip": "Multiplies the damage done by Big Clicks by 195%",
+					"tooltip": "3 Levels of Bigger Big Clicks. Multiplies the damage done by Big Clicks by 195%",
+					"tooltipFunction": getAddTraitTooltipFunction("BigClicksDamage", 3),
 					"flavorText": null,
 					"setupFunction": function(){},
-					"purchaseFunction": function() { CH2.currentCharacter.addTrait("BigClicksDamage", 3)},
+					"purchaseFunction": function() { CH2.currentCharacter.addTrait("BigClicksDamage", 3, true); CH2.currentCharacter.addTrait("TreeBigClicksDamage", 3); },
 					"icon": "iconBigClicks"
 				},
 				"qHd": { 
 					"name": "Mega Huger Huge Click",
-					"tooltip": "Multiplies the damage of Huge Click by 195%",
+					"tooltip": "3 Levels of Huger Huge Click. Multiplies the damage of Huge Click by 195%",
+					"tooltipFunction": getAddTraitTooltipFunction("HugeClickDamage", 3),
 					"flavorText": null,
 					"setupFunction": function(){},
-					"purchaseFunction": function() {CH2.currentCharacter.addTrait("HugeClickDamage", 3);},
+					"purchaseFunction": function() { CH2.currentCharacter.addTrait("HugeClickDamage", 3, true); CH2.currentCharacter.addTrait("TreeHugeClickDamage", 3); },
 					"icon": "hugeClicks"
 				},
 				"qMd": { 
 					"name": "Mega Mana Crit Damage",
-					"tooltip": "Multiplies the damage done by Mana Crits by 195%",
+					"tooltip": "3 Levels of Mana Crit Damage. Multiplies the damage done by Mana Crits by 195%",
+					"tooltipFunction": getAddTraitTooltipFunction("ManaCritDamage", 3),
 					"flavorText": null,
 					"setupFunction": function(){},
-					"purchaseFunction": function() {CH2.currentCharacter.addTrait("ManaCritDamage", 3);},
+					"purchaseFunction": function() { CH2.currentCharacter.addTrait("ManaCritDamage", 3, true); CH2.currentCharacter.addTrait("TreeManaCritDamage", 3); },
 					"icon": "manaClick"
 				},
 				"Q21": { 
@@ -797,7 +974,7 @@
 				},
 				"Q30": { 
 					"name": "Managize",
-					"tooltip": "Energize becomes Managize, which restores 25% of your mana at the cost of 120 energy." ,
+					"tooltip": "Energize becomes Managize, which restores 25% of your mana at the cost of 120 energy over 15 seconds." ,
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() { CH2.currentCharacter.replaceSkill("Energize", CH2.currentCharacter.getStaticSkill("Managize")); },  
@@ -885,7 +1062,7 @@
 				},
 				"Q66": { 
 					"name": "Critical Powersurge",
-					"tooltip": "PowerSurge, upon activating, increases Crit Chance by 1% every second until it ends." ,
+					"tooltip": "PowerSurge gradually increases Crit Chance while active, reaching +60% at the end of its duration.",
 					"flavorText": null,
 					"setupFunction": function(){},
 					"purchaseFunction": function() {CH2.currentCharacter.addTrait("PowerSurgeCritChance", 1);},  
@@ -1537,11 +1714,11 @@
 					"icon": "automator"
 				},
 				"V": { 
-					"name": "Automator Point",
-					"tooltip": "Adds an Automator Point.",
+					"name": "Automator Points",
+					"tooltip": "Adds 2 Automator Points.",
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function() { CH2.currentCharacter.automatorPoints++;  },
+					"purchaseFunction": function() { CH2.currentCharacter.automatorPoints = CH2.currentCharacter.automatorPoints + 2;  },
 					"icon": "automator"
 				},
 				//###################################################################
@@ -1751,6 +1928,51 @@
 					"purchaseFunction": function() { CH2.currentCharacter.automator.unlockStone(CHARACTER_NAME+"_28"); },
 					"icon": ""
 				},
+				"S18": {
+                    "name": "Stone: First World Of Gild",
+                    "tooltip": "A stone that can activate when you are on the first world of a gild." ,
+                    "flavorText": null,
+                    "costsAutomatorPoint": true,
+                    "setupFunction": function() { addFirstWorldOfGildStone(); },
+                    "purchaseFunction": function() { CH2.currentCharacter.automator.unlockStone(CHARACTER_NAME+"_29"); },
+                    "icon": ""
+                },
+                "S19": {
+                    "name": "Stone: Not First World Of Gild",
+                    "tooltip": "A stone that can activate when you are not on the first world of a gild." ,
+                    "flavorText": null,
+                    "costsAutomatorPoint": true,
+                    "setupFunction": function() { addNotFirstWorldOfGildStone(); },
+                    "purchaseFunction": function() { CH2.currentCharacter.automator.unlockStone(CHARACTER_NAME+"_30"); },
+                    "icon": ""
+                },
+				"S26": {
+                    "name": "Stone: Next monster more than 90 cm away",
+                    "tooltip": "A stone that can activate when the next monster is more than 90 cm away." ,
+                    "flavorText": null,
+                    "costsAutomatorPoint": true,
+                    "setupFunction": function() { addGreaterThanMonsterDistanceStone(); },
+                    "purchaseFunction": function() { CH2.currentCharacter.automator.unlockStone(CHARACTER_NAME+"_31"); },
+                    "icon": ""
+                },
+				"S27": {
+                    "name": "Stone: Not a Boss Zone",
+                    "tooltip": "A stone that can activate when you are not on a boss zone." ,
+                    "flavorText": null,
+                    "costsAutomatorPoint": true,
+                    "setupFunction": function() { addNotABossZoneStone(); },
+                    "purchaseFunction": function() { CH2.currentCharacter.automator.unlockStone(CHARACTER_NAME+"_32"); },
+                    "icon": "gemAttemptBoss"
+                },
+				"S28": {
+                    "name": "Stone: Next monster less than 90 cm away",
+                    "tooltip": "A stone that can activate when the next monster is less than 90 cm away." ,
+                    "flavorText": null,
+                    "costsAutomatorPoint": true,
+                    "setupFunction": function() { addLessThanMonsterDistanceStone(); },
+                    "purchaseFunction": function() { CH2.currentCharacter.automator.unlockStone(CHARACTER_NAME+"_33"); },
+                    "icon": ""
+                },
 				"S53": { 
 					"name": "Stone: Autoattackstorm is not active",
 					"tooltip": "A stone that can activate when Autoattackstorm is not active." ,
@@ -1840,11 +2062,20 @@
 					"setupFunction": function() {addBuffComparisonStone("PreloadGT0", "Preload > 0", "A stone that can activate when Preload is active.", "Preload", CH2.COMPARISON_GT, 0); },
 					"purchaseFunction": function() { CH2.currentCharacter.automator.unlockStone("PreloadGT0"); },
 					"icon": "gemReload"
+				},
+				"S84": { 
+					"name": "Stone: Preload is not active",
+					"tooltip": "A stone that can activate when Preload is not active." ,
+					"flavorText": null,
+					"costsAutomatorPoint": true,
+					"setupFunction": function() {addBuffComparisonStone("PreloadEQ0", "Preload = 0", "A stone that can activate when Preload is not active.", "Preload", CH2.COMPARISON_EQ, 0); },
+					"purchaseFunction": function() { CH2.currentCharacter.automator.unlockStone("PreloadEQ0"); },
+					"icon": "gemReload"
 				}
 			}
 			
-			helpfulAdventurer.levelGraphObject = {"edges":[{"1":[77,541]},{"2":[341,405]},{"3":[831,838]},{"4":[346,347]},{"5":[662,663]},{"6":[200,207]},{"7":[126,128]},{"8":[319,423]},{"9":[5,8]},{"10":[669,670]},{"11":[119,122]},{"12":[250,259]},{"13":[154,215]},{"14":[488,543]},{"15":[203,259]},{"16":[123,643]},{"17":[78,654]},{"18":[517,563]},{"19":[189,193]},{"20":[360,425]},{"21":[204,205]},{"22":[17,841]},{"23":[185,241]},{"24":[131,186]},{"25":[548,560]},{"26":[51,194]},{"27":[528,529]},{"28":[324,434]},{"29":[358,361]},{"30":[16,21]},{"31":[404,439]},{"32":[184,189]},{"33":[327,437]},{"34":[442,657]},{"35":[108,450]},{"36":[146,193]},{"37":[526,597]},{"38":[490,554]},{"39":[41,129]},{"40":[160,161]},{"41":[157,216]},{"42":[830,831]},{"43":[87,633]},{"44":[516,614]},{"45":[386,391]},{"46":[94,461]},{"47":[262,270]},{"48":[340,367]},{"49":[157,220]},{"50":[61,62]},{"51":[312,387]},{"52":[16,25]},{"53":[489,541]},{"54":[384,385]},{"55":[370,415]},{"56":[534,586]},{"57":[61,457]},{"58":[75,114]},{"59":[652,653]},{"60":[234,235]},{"61":[649,650]},{"62":[179,269]},{"63":[517,528]},{"64":[472,514]},{"65":[546,549]},{"66":[83,104]},{"67":[510,512]},{"68":[317,331]},{"69":[56,667]},{"70":[155,262]},{"71":[778,822]},{"72":[343,368]},{"73":[307,392]},{"74":[506,510]},{"75":[35,36]},{"76":[88,630]},{"77":[592,605]},{"78":[140,275]},{"79":[400,401]},{"80":[180,249]},{"81":[1,2]},{"82":[315,331]},{"83":[271,277]},{"84":[76,634]},{"85":[626,646]},{"86":[311,359]},{"87":[840,846]},{"88":[84,633]},{"89":[834,836]},{"90":[832,840]},{"91":[482,618]},{"92":[556,560]},{"93":[99,441]},{"94":[638,640]},{"95":[203,206]},{"96":[164,169]},{"97":[66,70]},{"98":[393,403]},{"99":[96,655]},{"100":[570,574]},{"101":[320,423]},{"102":[469,639]},{"103":[282,458]},{"104":[63,170]},{"105":[53,430]},{"106":[207,208]},{"107":[296,398]},{"108":[149,222]},{"109":[140,249]},{"110":[559,562]},{"111":[168,187]},{"112":[523,524]},{"113":[547,599]},{"114":[287,444]},{"115":[253,254]},{"116":[290,646]},{"117":[151,265]},{"118":[576,577]},{"119":[561,602]},{"120":[477,583]},{"121":[208,209]},{"122":[336,663]},{"123":[564,565]},{"124":[387,388]},{"125":[54,582]},{"126":[236,239]},{"127":[485,522]},{"128":[42,130]},{"129":[807,824]},{"130":[17,22]},{"131":[335,336]},{"132":[211,212]},{"133":[571,574]},{"134":[427,439]},{"135":[579,580]},{"136":[574,575]},{"137":[463,625]},{"138":[177,178]},{"139":[339,368]},{"140":[100,448]},{"141":[102,107]},{"142":[33,50]},{"143":[11,12]},{"144":[142,171]},{"145":[479,515]},{"146":[378,431]},{"147":[233,267]},{"148":[214,276]},{"149":[548,557]},{"150":[487,614]},{"151":[473,562]},{"152":[72,82]},{"153":[91,121]},{"154":[809,824]},{"155":[520,523]},{"156":[532,568]},{"157":[401,402]},{"158":[559,568]},{"159":[521,522]},{"160":[115,117]},{"161":[21,36]},{"162":[805,843]},{"163":[81,108]},{"164":[143,192]},{"165":[127,379]},{"166":[325,363]},{"167":[28,32]},{"168":[309,407]},{"169":[779,822]},{"170":[304,316]},{"171":[489,539]},{"172":[126,632]},{"173":[328,666]},{"174":[358,388]},{"175":[239,273]},{"176":[400,424]},{"177":[85,227]},{"178":[816,836]},{"179":[601,620]},{"180":[132,197]},{"181":[363,408]},{"182":[541,542]},{"183":[254,255]},{"184":[783,805]},{"185":[243,245]},{"186":[45,606]},{"187":[53,340]},{"188":[73,125]},{"189":[623,624]},{"190":[468,637]},{"191":[207,228]},{"192":[538,539]},{"193":[783,848]},{"194":[295,403]},{"195":[298,406]},{"196":[790,845]},{"197":[175,202]},{"198":[122,123]},{"199":[471,520]},{"200":[198,229]},{"201":[557,558]},{"202":[624,625]},{"203":[793,827]},{"204":[69,658]},{"205":[114,674]},{"206":[264,266]},{"207":[549,550]},{"208":[237,270]},{"209":[90,92]},{"210":[229,673]},{"211":[814,816]},{"212":[191,192]},{"213":[20,21]},{"214":[48,49]},{"215":[422,424]},{"216":[80,462]},{"217":[165,169]},{"218":[176,177]},{"219":[342,376]},{"220":[64,65]},{"221":[226,237]},{"222":[17,18]},{"223":[97,628]},{"224":[179,213]},{"225":[119,446]},{"226":[138,214]},{"227":[588,612]},{"228":[537,543]},{"229":[389,420]},{"230":[222,280]},{"231":[641,642]},{"232":[377,378]},{"233":[356,439]},{"234":[543,544]},{"235":[487,529]},{"236":[481,558]},{"237":[305,348]},{"238":[342,430]},{"239":[519,563]},{"240":[175,181]},{"241":[273,278]},{"242":[216,245]},{"243":[202,280]},{"244":[483,531]},{"245":[379,416]},{"246":[308,319]},{"247":[503,599]},{"248":[171,172]},{"249":[200,227]},{"250":[151,259]},{"251":[670,673]},{"252":[395,405]},{"253":[219,221]},{"254":[318,429]},{"255":[355,432]},{"256":[342,418]},{"257":[118,123]},{"258":[512,513]},{"259":[323,398]},{"260":[476,527]},{"261":[75,459]},{"262":[101,441]},{"263":[527,535]},{"264":[566,567]},{"265":[486,587]},{"266":[146,210]},{"267":[486,505]},{"268":[231,672]},{"269":[345,411]},{"270":[494,565]},{"271":[382,383]},{"272":[841,842]},{"273":[334,434]},{"274":[380,386]},{"275":[74,124]},{"276":[316,351]},{"277":[11,14]},{"278":[338,397]},{"279":[553,554]},{"280":[471,519]},{"281":[24,63]},{"282":[503,504]},{"283":[159,204]},{"284":[132,166]},{"285":[829,847]},{"286":[519,553]},{"287":[110,112]},{"288":[161,162]},{"289":[29,846]},{"290":[806,809]},{"291":[787,791]},{"292":[325,438]},{"293":[536,538]},{"294":[317,413]},{"295":[799,808]},{"296":[109,654]},{"297":[790,825]},{"298":[338,355]},{"299":[374,375]},{"300":[64,460]},{"301":[23,38]},{"302":[385,386]},{"303":[19,25]},{"304":[297,410]},{"305":[392,432]},{"306":[806,812]},{"307":[573,606]},{"308":[215,221]},{"309":[308,371]},{"310":[349,429]},{"311":[67,658]},{"312":[482,540]},{"313":[665,666]},{"314":[106,468]},{"315":[113,121]},{"316":[305,431]},{"317":[79,124]},{"318":[179,180]},{"319":[515,545]},{"320":[396,412]},{"321":[99,102]},{"322":[224,236]},{"323":[153,274]},{"324":[484,580]},{"325":[218,219]},{"326":[159,183]},{"327":[253,257]},{"328":[144,238]},{"329":[54,55]},{"330":[591,612]},{"331":[399,433]},{"332":[57,116]},{"333":[479,510]},{"334":[563,564]},{"335":[572,588]},{"336":[372,409]},{"337":[634,636]},{"338":[630,648]},{"339":[83,664]},{"340":[589,669]},{"341":[798,825]},{"342":[71,469]},{"343":[158,179]},{"344":[811,818]},{"345":[366,411]},{"346":[100,125]},{"347":[361,421]},{"348":[500,607]},{"349":[29,784]},{"350":[284,287]},{"351":[511,569]},{"352":[234,270]},{"353":[117,466]},{"354":[571,600]},{"355":[42,59]},{"356":[293,418]},{"357":[612,613]},{"358":[335,351]},{"359":[85,86]},{"360":[267,274]},{"361":[531,533]},{"362":[182,213]},{"363":[611,615]},{"364":[628,629]},{"365":[109,632]},{"366":[165,166]},{"367":[511,539]},{"368":[530,535]},{"369":[640,648]},{"370":[640,653]},{"371":[513,514]},{"372":[480,547]},{"373":[152,182]},{"374":[142,170]},{"375":[627,656]},{"376":[58,96]},{"377":[137,177]},{"378":[498,615]},{"379":[780,802]},{"380":[801,811]},{"381":[493,556]},{"382":[115,124]},{"383":[94,95]},{"384":[364,414]},{"385":[513,537]},{"386":[780,789]},{"387":[577,578]},{"388":[830,832]},{"389":[359,362]},{"390":[589,598]},{"391":[550,595]},{"392":[10,11]},{"393":[402,429]},{"394":[194,201]},{"395":[455,626]},{"396":[268,269]},{"397":[505,569]},{"398":[248,254]},{"399":[26,46]},{"400":[572,586]},{"401":[59,668]},{"402":[671,672]},{"403":[173,178]},{"404":[474,551]},{"405":[353,397]},{"406":[49,124]},{"407":[91,93]},{"408":[794,844]},{"409":[301,425]},{"410":[248,250]},{"411":[289,651]},{"412":[15,37]},{"413":[231,233]},{"414":[218,272]},{"415":[87,88]},{"416":[104,465]},{"417":[385,440]},{"418":[271,272]},{"419":[128,470]},{"420":[504,520]},{"421":[72,465]},{"422":[344,391]},{"423":[107,111]},{"424":[491,578]},{"425":[146,199]},{"426":[240,243]},{"427":[312,374]},{"428":[795,796]},{"429":[135,247]},{"430":[74,75]},{"431":[593,617]},{"432":[403,409]},{"433":[603,608]},{"434":[307,364]},{"435":[181,211]},{"436":[226,228]},{"437":[362,363]},{"438":[141,174]},{"439":[173,266]},{"440":[545,589]},{"441":[299,429]},{"442":[106,652]},{"443":[310,357]},{"444":[43,118]},{"445":[456,631]},{"446":[133,255]},{"447":[32,34]},{"448":[787,845]},{"449":[71,656]},{"450":[172,174]},{"451":[481,609]},{"452":[542,618]},{"453":[285,460]},{"454":[660,674]},{"455":[100,109]},{"456":[281,453]},{"457":[561,566]},{"458":[187,188]},{"459":[23,31]},{"460":[474,594]},{"461":[788,829]},{"462":[570,572]},{"463":[799,828]},{"464":[644,645]},{"465":[51,260]},{"466":[350,353]},{"467":[64,113]},{"468":[627,628]},{"469":[286,647]},{"470":[582,583]},{"471":[329,330]},{"472":[838,839]},{"473":[39,40]},{"474":[141,181]},{"475":[387,420]},{"476":[364,415]},{"477":[801,828]},{"478":[508,536]},{"479":[450,644]},{"480":[602,611]},{"481":[197,198]},{"482":[153,240]},{"483":[834,835]},{"484":[514,552]},{"485":[618,619]},{"486":[60,73]},{"487":[371,426]},{"488":[337,428]},{"489":[339,367]},{"490":[199,201]},{"491":[287,647]},{"492":[525,526]},{"493":[92,93]},{"494":[29,814]},{"495":[578,581]},{"496":[290,451]},{"497":[580,581]},{"498":[311,365]},{"499":[573,608]},{"500":[799,823]},{"501":[62,110]},{"502":[524,525]},{"503":[365,382]},{"504":[200,205]},{"505":[24,569]},{"506":[354,369]},{"507":[81,659]},{"508":[445,635]},{"509":[95,97]},{"510":[183,209]},{"511":[231,232]},{"512":[365,373]},{"513":[131,163]},{"514":[476,597]},{"515":[798,823]},{"516":[803,818]},{"517":[57,59]},{"518":[286,447]},{"519":[50,51]},{"520":[813,820]},{"521":[76,114]},{"522":[150,225]},{"523":[534,576]},{"524":[567,612]},{"525":[327,328]},{"526":[501,521]},{"527":[112,445]},{"528":[222,223]},{"529":[213,217]},{"530":[156,218]},{"531":[139,244]},{"532":[797,833]},{"533":[650,657]},{"534":[249,252]},{"535":[5,6]},{"536":[496,586]},{"537":[18,794]},{"538":[127,642]},{"539":[590,607]},{"540":[120,447]},{"541":[323,370]},{"542":[103,636]},{"543":[807,813]},{"544":[246,266]},{"545":[232,238]},{"546":[480,517]},{"547":[518,552]},{"548":[540,610]},{"549":[145,231]},{"550":[146,202]},{"551":[30,48]},{"552":[294,394]},{"553":[326,437]},{"554":[498,593]},{"555":[42,443]},{"556":[71,96]},{"557":[148,207]},{"558":[284,288]},{"559":[835,842]},{"560":[65,67]},{"561":[32,38]},{"562":[46,47]},{"563":[380,390]},{"564":[497,604]},{"565":[571,585]},{"566":[283,635]},{"567":[621,622]},{"568":[776,785]},{"569":[812,837]},{"570":[7,33]},{"571":[786,792]},{"572":[10,26]},{"573":[354,427]},{"574":[502,503]},{"575":[775,797]},{"576":[575,579]},{"577":[546,601]},{"578":[9,39]},{"579":[324,661]},{"580":[321,371]},{"581":[310,435]},{"582":[84,128]},{"583":[241,242]},{"584":[664,665]},{"585":[343,390]},{"586":[318,323]},{"587":[322,353]},{"588":[561,562]},{"589":[492,532]},{"590":[212,251]},{"591":[820,843]},{"592":[551,566]},{"593":[509,533]},{"594":[55,89]},{"595":[796,815]},{"596":[292,347]},{"597":[777,785]},{"598":[334,339]},{"599":[552,557]},{"600":[136,266]},{"601":[824,844]},{"602":[341,406]},{"603":[501,502]},{"604":[195,196]},{"605":[794,819]},{"606":[517,518]},{"607":[34,35]},{"608":[6,14]},{"609":[584,585]},{"610":[156,217]},{"611":[52,53]},{"612":[467,658]},{"613":[779,788]},{"614":[292,400]},{"615":[144,185]},{"616":[577,667]},{"617":[532,533]},{"618":[244,245]},{"619":[337,422]},{"620":[12,30]},{"621":[117,118]},{"622":[393,419]},{"623":[131,195]},{"624":[224,225]},{"625":[394,395]},{"626":[43,44]},{"627":[396,407]},{"628":[507,510]},{"629":[414,426]},{"630":[83,84]},{"631":[260,261]},{"632":[188,191]},{"633":[630,631]},{"634":[551,560]},{"635":[364,369]},{"636":[800,810]},{"637":[252,257]},{"638":[68,464]},{"639":[314,339]},{"640":[320,408]},{"641":[209,210]},{"642":[630,655]},{"643":[96,98]},{"644":[145,230]},{"645":[139,242]},{"646":[448,640]},{"647":[290,627]},{"648":[475,546]},{"649":[483,525]},{"650":[297,324]},{"651":[352,389]},{"652":[37,52]},{"653":[776,792]},{"654":[413,425]},{"655":[235,274]},{"656":[47,620]},{"657":[44,45]},{"658":[530,596]},{"659":[288,289]},{"660":[381,671]},{"661":[164,264]},{"662":[336,440]},{"663":[576,608]},{"664":[78,87]},{"665":[97,449]},{"666":[72,88]},{"667":[810,817]},{"668":[147,226]},{"669":[142,184]},{"670":[70,621]},{"671":[784,798]},{"672":[66,461]},{"673":[51,190]},{"674":[21,22]},{"675":[433,438]},{"676":[68,662]},{"677":[333,437]},{"678":[505,506]},{"679":[345,346]},{"680":[276,277]},{"681":[786,815]},{"682":[449,622]},{"683":[246,247]},{"684":[111,451]},{"685":[176,257]},{"686":[406,412]},{"687":[464,632]},{"688":[515,516]},{"689":[356,360]},{"690":[102,106]},{"691":[60,103]},{"692":[499,603]},{"693":[781,804]},{"694":[76,101]},{"695":[284,285]},{"696":[377,416]},{"697":[361,425]},{"698":[591,611]},{"699":[544,558]},{"700":[389,391]},{"701":[129,192]},{"702":[300,352]},{"703":[320,354]},{"704":[454,651]},{"705":[167,170]},{"706":[373,404]},{"707":[105,643]},{"708":[467,623]},{"709":[306,322]},{"710":[348,349]},{"711":[499,613]},{"712":[596,616]},{"713":[562,616]},{"714":[41,77]},{"715":[223,224]},{"716":[132,167]},{"717":[619,620]},{"718":[313,390]},{"719":[155,263]},{"720":[251,256]},{"721":[492,530]},{"722":[4,6]},{"723":[605,606]},{"724":[17,839]},{"725":[778,791]},{"726":[133,196]},{"727":[239,263]},{"728":[78,452]},{"729":[56,668]},{"730":[636,637]},{"731":[138,212]},{"732":[804,837]},{"733":[446,649]},{"734":[500,573]},{"735":[781,826]},{"736":[323,421]},{"737":[105,120]},{"738":[277,278]},{"739":[592,620]},{"740":[357,399]},{"741":[282,283]},{"742":[151,268]},{"743":[498,600]},{"744":[222,256]},{"745":[477,584]},{"746":[478,502]},{"747":[2,3]},{"748":[95,98]},{"749":[821,826]},{"750":[321,436]},{"751":[160,169]},{"752":[375,376]},{"753":[331,344]},{"754":[357,436]},{"755":[388,407]},{"756":[116,118]},{"757":[91,281]},{"758":[329,437]},{"759":[638,639]},{"760":[333,384]},{"761":[204,261]},{"762":[625,629]},{"763":[190,191]},{"764":[215,273]},{"765":[6,13]},{"766":[53,372]},{"767":[587,598]},{"768":[62,90]},{"769":[79,80]},{"770":[288,624]},{"771":[290,645]},{"772":[549,604]},{"773":[27,32]},{"774":[219,220]},{"775":[27,29]},{"776":[3,4]},{"777":[162,163]},{"778":[241,641]},{"779":[580,582]},{"780":[330,383]},{"781":[13,40]},{"782":[330,331]},{"783":[596,617]},{"784":[497,605]},{"785":[332,410]},{"786":[337,419]},{"787":[555,565]},{"788":[495,574]},{"789":[782,803]},{"790":[86,393]},{"791":[819,833]},{"792":[61,89]},{"793":[69,70]},{"794":[302,433]},{"795":[332,336]},{"796":[152,206]},{"797":[89,130]},{"798":[275,276]},{"799":[590,595]},{"800":[60,68]},{"801":[172,173]},{"802":[782,793]},{"803":[395,417]},{"804":[8,15]},{"805":[643,659]},{"806":[350,435]},{"807":[660,661]},{"808":[80,659]},{"809":[306,379]},{"810":[227,230]},{"811":[522,589]},{"812":[258,265]},{"813":[507,508]},{"814":[134,253]},{"815":[158,271]},{"816":[609,610]},{"817":[346,381]},{"818":[304,328]},{"819":[58,82]},{"820":[135,279]},{"821":[161,229]},{"822":[303,439]},{"823":[548,555]},{"824":[92,442]},{"825":[775,777]},{"826":[257,258]},{"827":[590,594]},{"828":[403,417]},{"829":[366,419]},{"830":[142,168]},{"831":[291,345]},{"832":[481,550]},{"833":[57,458]},{"834":[488,536]},{"835":[186,279]},{"836":[378,381]},{"837":[7,8]},{"838":[490,509]},{"839":[789,821]},{"840":[802,817]}],"nodes":[{"1":{"val":"T1","x":0,"y":-84}},{"2":{"val":"T2","x":85,"y":-1}},{"3":{"val":"T3","x":1,"y":82}},{"4":{"val":"T4","x":-81,"y":0}},{"5":{"val":"T5","x":-211,"y":131}},{"6":{"val":"V","x":-211,"y":0}},{"7":{"val":"G","x":-349,"y":196}},{"8":{"val":"T8","x":-211,"y":268}},{"9":{"val":"V","x":-423,"y":-84}},{"10":{"val":"Mt","x":-342,"y":-185}},{"11":{"val":"T7","x":-211,"y":-266}},{"12":{"val":"Cd","x":-71,"y":-182}},{"13":{"val":"V","x":-339,"y":0}},{"14":{"val":"T6","x":-211,"y":-134}},{"15":{"val":"H","x":-74,"y":197}},{"16":{"val":"A04","x":15666,"y":-283}},{"17":{"val":"A38","x":15740,"y":-633}},{"18":{"val":"A39","x":15741,"y":-758}},{"19":{"val":"S52","x":15593,"y":-62}},{"20":{"val":"A07","x":15815,"y":-282}},{"21":{"val":"A02","x":15741,"y":-377}},{"22":{"val":"A39","x":15740,"y":-501}},{"23":{"val":"S66","x":15888,"y":-61}},{"24":{"val":"Gp","x":-1489,"y":51}},{"25":{"val":"S51","x":15593,"y":-189}},{"26":{"val":"V","x":-389,"y":-329}},{"27":{"val":"A39","x":15741,"y":255}},{"28":{"val":"A08","x":15666,"y":32}},{"29":{"val":"A38","x":15741,"y":384}},{"30":{"val":"V","x":-27,"y":-328}},{"31":{"val":"S67","x":15888,"y":-189}},{"32":{"val":"A05","x":15741,"y":129}},{"33":{"val":"V","x":-400,"y":342}},{"34":{"val":"A39","x":15741,"y":0}},{"35":{"val":"A00","x":15741,"y":-125}},{"36":{"val":"A39","x":15741,"y":-254}},{"37":{"val":"V","x":-26,"y":342}},{"38":{"val":"A06","x":15816,"y":34}},{"39":{"val":"V","x":-507,"y":-1}},{"40":{"val":"V","x":-423,"y":82}},{"41":{"val":"Ir","x":-793,"y":-35}},{"42":{"val":"V","x":108,"y":-1772}},{"43":{"val":"Gc","x":-39,"y":-1138}},{"44":{"val":"Cc","x":-234,"y":-1113}},{"45":{"val":"Gp","x":-427,"y":-1093}},{"46":{"val":"Bd","x":-503,"y":-438}},{"47":{"val":"qMr","x":-614,"y":-543}},{"48":{"val":"Cc","x":87,"y":-438}},{"49":{"val":"qCd","x":205,"y":-544}},{"50":{"val":"Hd","x":-503,"y":427}},{"51":{"val":"qG","x":-614,"y":520}},{"52":{"val":"Mu","x":86,"y":429}},{"53":{"val":"qH","x":206,"y":520}},{"54":{"val":"Gc","x":-193,"y":-2104}},{"55":{"val":"Gp","x":-39,"y":-2079}},{"56":{"val":"Mr","x":-174,"y":-1631}},{"57":{"val":"Bd","x":146,"y":-1468}},{"58":{"val":"Rh","x":1883,"y":-863}},{"59":{"val":"Bc","x":107,"y":-1614}},{"60":{"val":"I7","x":1106,"y":-119}},{"61":{"val":"Cc","x":254,"y":-2027}},{"62":{"val":"I3","x":382,"y":-2127}},{"63":{"val":"Ea","x":-1505,"y":224}},{"64":{"val":"Bg","x":1074,"y":-1851}},{"65":{"val":"Cl","x":1228,"y":-1868}},{"66":{"val":"Tg","x":1796,"y":-1561}},{"67":{"val":"Gc","x":1385,"y":-1875}},{"68":{"val":"H","x":1236,"y":-65}},{"69":{"val":"Gb","x":1605,"y":-1791}},{"70":{"val":"G","x":1698,"y":-1661}},{"71":{"val":"Bc","x":1622,"y":-1023}},{"72":{"val":"Mu","x":1890,"y":-583}},{"73":{"val":"Mu","x":1213,"y":-233}},{"74":{"val":"Mu","x":449,"y":-575}},{"75":{"val":"H","x":552,"y":-466}},{"76":{"val":"V","x":816,"y":-444}},{"77":{"val":"Gp","x":-785,"y":-172}},{"78":{"val":"V","x":1544,"y":-457}},{"79":{"val":"Pa","x":466,"y":-778}},{"80":{"val":"V","x":605,"y":-887}},{"81":{"val":"Pt","x":660,"y":-1069}},{"82":{"val":"Hd","x":1914,"y":-724}},{"83":{"val":"H","x":1920,"y":-215}},{"84":{"val":"Bd","x":1788,"y":-265}},{"85":{"val":"Hd","x":-262,"y":1152}},{"86":{"val":"G","x":-219,"y":1016}},{"87":{"val":"I4","x":1674,"y":-507}},{"88":{"val":"Md","x":1752,"y":-615}},{"89":{"val":"Mt","x":110,"y":-2045}},{"90":{"val":"G","x":493,"y":-2227}},{"91":{"val":"I4","x":811,"y":-2032}},{"92":{"val":"V","x":617,"y":-2144}},{"93":{"val":"Cl","x":764,"y":-2155}},{"94":{"val":"Md","x":1879,"y":-1304}},{"95":{"val":"I8","x":1805,"y":-1183}},{"96":{"val":"V","x":1744,"y":-942}},{"97":{"val":"Kh","x":1668,"y":-1241}},{"98":{"val":"Md","x":1837,"y":-1046}},{"99":{"val":"Md","x":693,"y":-767}},{"100":{"val":"Pa","x":1308,"y":-443}},{"101":{"val":"Cc","x":717,"y":-579}},{"102":{"val":"Hd","x":829,"y":-763}},{"103":{"val":"Kh","x":988,"y":-196}},{"104":{"val":"Bc","x":1961,"y":-342}},{"105":{"val":"I3","x":603,"y":-1215}},{"106":{"val":"G","x":946,"y":-695}},{"107":{"val":"Ra","x":947,"y":-841}},{"108":{"val":"Cd","x":776,"y":-1170}},{"109":{"val":"Ir","x":1348,"y":-310}},{"110":{"val":"Md","x":429,"y":-2002}},{"111":{"val":"Ph","x":970,"y":-958}},{"112":{"val":"Cd","x":376,"y":-1870}},{"113":{"val":"Tc","x":1066,"y":-1987}},{"114":{"val":"Bc","x":667,"y":-364}},{"115":{"val":"Mr","x":270,"y":-819}},{"116":{"val":"Eh","x":122,"y":-1312}},{"117":{"val":"Ea","x":207,"y":-987}},{"118":{"val":"I1","x":143,"y":-1147}},{"119":{"val":"G","x":555,"y":-1413}},{"120":{"val":"Cc","x":691,"y":-1329}},{"121":{"val":"Ir","x":951,"y":-2081}},{"122":{"val":"Cd","x":426,"y":-1344}},{"123":{"val":"Ph","x":301,"y":-1241}},{"124":{"val":"Md","x":325,"y":-663}},{"125":{"val":"Md","x":1178,"y":-364}},{"126":{"val":"Mu","x":1563,"y":-112}},{"127":{"val":"Hd","x":392,"y":2166}},{"128":{"val":"I5","x":1699,"y":-163}},{"129":{"val":"Gc","x":-897,"y":60}},{"130":{"val":"I2","x":23,"y":-1909}},{"131":{"val":"qMt","x":-2345,"y":618}},{"132":{"val":"qEn","x":-1880,"y":156}},{"133":{"val":"qGp","x":-2344,"y":976}},{"134":{"val":"qIr","x":-2246,"y":1050}},{"135":{"val":"qGc","x":-2258,"y":959}},{"136":{"val":"Q43","x":-2144,"y":787}},{"137":{"val":"qHd","x":-1679,"y":1158}},{"138":{"val":"qIr","x":-1526,"y":1279}},{"139":{"val":"qBd","x":-224,"y":2344}},{"140":{"val":"qG","x":-1746,"y":1410}},{"141":{"val":"qG","x":-1598,"y":971}},{"142":{"val":"Q44","x":-1495,"y":466}},{"143":{"val":"qGp","x":-707,"y":139}},{"144":{"val":"qH","x":-220,"y":2054}},{"145":{"val":"qMu","x":-353,"y":1554}},{"146":{"val":"qBg","x":-1027,"y":837}},{"147":{"val":"qGb","x":-676,"y":1504}},{"148":{"val":"qHd","x":-728,"y":1213}},{"149":{"val":"Q42","x":-829,"y":1167}},{"150":{"val":"qTc","x":-810,"y":1272}},{"151":{"val":"Q41","x":-2178,"y":1669}},{"152":{"val":"qHd","x":-2178,"y":1960}},{"153":{"val":"qBd","x":-494,"y":2016}},{"154":{"val":"Q45","x":-932,"y":1926}},{"155":{"val":"qTg","x":-723,"y":1827}},{"156":{"val":"qG","x":-1467,"y":2108}},{"157":{"val":"qHd","x":-745,"y":2256}},{"158":{"val":"qGb","x":-1576,"y":1793}},{"159":{"val":"qH","x":-537,"y":823}},{"160":{"val":"qMr","x":-2104,"y":382}},{"161":{"val":"I6","x":-2239,"y":319}},{"162":{"val":"Gc","x":-2373,"y":364}},{"163":{"val":"Gp","x":-2388,"y":494}},{"164":{"val":"G","x":-2055,"y":570}},{"165":{"val":"Mt","x":-1799,"y":411}},{"166":{"val":"Mr","x":-1905,"y":286}},{"167":{"val":"V","x":-1734,"y":224}},{"168":{"val":"Kh","x":-1352,"y":404}},{"169":{"val":"En","x":-1954,"y":467}},{"170":{"val":"Eh","x":-1606,"y":340}},{"171":{"val":"Gp","x":-1588,"y":592}},{"172":{"val":"Gc","x":-1709,"y":699}},{"173":{"val":"I4","x":-1845,"y":782}},{"174":{"val":"Cd","x":-1635,"y":833}},{"175":{"val":"Cl","x":-1286,"y":915}},{"176":{"val":"Rh","x":-1912,"y":1225}},{"177":{"val":"I3","x":-1837,"y":1085}},{"178":{"val":"Ra","x":-1808,"y":925}},{"179":{"val":"V","x":-1734,"y":1821}},{"180":{"val":"Mr","x":-1787,"y":1675}},{"181":{"val":"I5","x":-1439,"y":941}},{"182":{"val":"Ph","x":-1996,"y":1956}},{"183":{"val":"Hd","x":-666,"y":884}},{"184":{"val":"Cd","x":-1383,"y":565}},{"185":{"val":"Hd","x":-89,"y":2073}},{"186":{"val":"G","x":-2219,"y":680}},{"187":{"val":"Bd","x":-1195,"y":368}},{"188":{"val":"Bc","x":-1029,"y":344}},{"189":{"val":"Cc","x":-1242,"y":621}},{"190":{"val":"Gp","x":-737,"y":414}},{"191":{"val":"V","x":-871,"y":334}},{"192":{"val":"I8","x":-846,"y":198}},{"193":{"val":"G","x":-1174,"y":748}},{"194":{"val":"Ir","x":-727,"y":624}},{"195":{"val":"I2","x":-2398,"y":726}},{"196":{"val":"Hd","x":-2391,"y":854}},{"197":{"val":"Hd","x":-2033,"y":147}},{"198":{"val":"Ra","x":-2179,"y":167}},{"199":{"val":"Tg","x":-968,"y":704}},{"200":{"val":"Ir","x":-447,"y":1162}},{"201":{"val":"Tc","x":-874,"y":595}},{"202":{"val":"Tc","x":-1141,"y":935}},{"203":{"val":"Md","x":-2358,"y":1760}},{"204":{"val":"V","x":-411,"y":897}},{"205":{"val":"Eh","x":-390,"y":1033}},{"206":{"val":"Pa","x":-2299,"y":1884}},{"207":{"val":"I1","x":-588,"y":1170}},{"208":{"val":"Bg","x":-667,"y":1064}},{"209":{"val":"G","x":-772,"y":970}},{"210":{"val":"Gb","x":-880,"y":875}},{"211":{"val":"Hd","x":-1387,"y":1074}},{"212":{"val":"G","x":-1396,"y":1214}},{"213":{"val":"I7","x":-1817,"y":1968}},{"214":{"val":"Ea","x":-1459,"y":1405}},{"215":{"val":"V","x":-1074,"y":1906}},{"216":{"val":"Pa","x":-606,"y":2310}},{"217":{"val":"Pt","x":-1637,"y":2026}},{"218":{"val":"Cc","x":-1288,"y":2114}},{"219":{"val":"Cd","x":-1105,"y":2170}},{"220":{"val":"Md","x":-923,"y":2212}},{"221":{"val":"Bd","x":-1108,"y":2039}},{"222":{"val":"V","x":-970,"y":1142}},{"223":{"val":"Tg","x":-987,"y":1269}},{"224":{"val":"Ir","x":-1005,"y":1398}},{"225":{"val":"Gb","x":-850,"y":1397}},{"226":{"val":"Gp","x":-564,"y":1427}},{"227":{"val":"Mu","x":-347,"y":1274}},{"228":{"val":"G","x":-532,"y":1292}},{"229":{"val":"Rh","x":-2308,"y":209}},{"230":{"val":"H","x":-320,"y":1415}},{"231":{"val":"I3","x":-278,"y":1683}},{"232":{"val":"Bd","x":-216,"y":1802}},{"233":{"val":"Ea","x":-405,"y":1714}},{"234":{"val":"Gb","x":-559,"y":1748}},{"235":{"val":"Bg","x":-569,"y":1878}},{"236":{"val":"Bg","x":-973,"y":1535}},{"237":{"val":"Gc","x":-501,"y":1544}},{"238":{"val":"Bc","x":-166,"y":1933}},{"239":{"val":"Ra","x":-958,"y":1677}},{"240":{"val":"Ph","x":-638,"y":2038}},{"241":{"val":"Mu","x":-31,"y":2188}},{"242":{"val":"H","x":-94,"y":2301}},{"243":{"val":"Pt","x":-575,"y":2166}},{"244":{"val":"Cl","x":-335,"y":2268}},{"245":{"val":"I5","x":-472,"y":2260}},{"246":{"val":"Tg","x":-1961,"y":930}},{"247":{"val":"Tc","x":-2116,"y":943}},{"248":{"val":"Gc","x":-2368,"y":1371}},{"249":{"val":"Hd","x":-1847,"y":1536}},{"250":{"val":"Gp","x":-2362,"y":1511}},{"251":{"val":"Ra","x":-1257,"y":1171}},{"252":{"val":"Mt","x":-1959,"y":1422}},{"253":{"val":"G","x":-2153,"y":1183}},{"254":{"val":"I1","x":-2313,"y":1253}},{"255":{"val":"Cd","x":-2361,"y":1115}},{"256":{"val":"Rh","x":-1110,"y":1152}},{"257":{"val":"V","x":-2059,"y":1307}},{"258":{"val":"Cd","x":-2173,"y":1390}},{"259":{"val":"I8","x":-2327,"y":1639}},{"260":{"val":"Ea","x":-510,"y":637}},{"261":{"val":"Kh","x":-408,"y":749}},{"262":{"val":"Ir","x":-745,"y":1685}},{"263":{"val":"Rh","x":-870,"y":1783}},{"264":{"val":"Cl","x":-1932,"y":644}},{"265":{"val":"Cc","x":-2155,"y":1533}},{"266":{"val":"V","x":-1996,"y":772}},{"267":{"val":"Eh","x":-344,"y":1829}},{"268":{"val":"Hd","x":-2036,"y":1719}},{"269":{"val":"Cl","x":-1890,"y":1776}},{"270":{"val":"V","x":-615,"y":1631}},{"271":{"val":"G","x":-1427,"y":1843}},{"272":{"val":"Gc","x":-1332,"y":1970}},{"273":{"val":"G","x":-1077,"y":1766}},{"274":{"val":"I4","x":-438,"y":1910}},{"275":{"val":"Eh","x":-1628,"y":1497}},{"276":{"val":"Kh","x":-1474,"y":1552}},{"277":{"val":"I6","x":-1410,"y":1697}},{"278":{"val":"Hd","x":-1245,"y":1736}},{"279":{"val":"Gb","x":-2276,"y":814}},{"280":{"val":"I2","x":-1032,"y":1020}},{"281":{"val":"Md","x":751,"y":-1903}},{"282":{"val":"Cl","x":370,"y":-1569}},{"283":{"val":"Cc","x":237,"y":-1659}},{"284":{"val":"Cl","x":997,"y":-1646}},{"285":{"val":"Cd","x":882,"y":-1742}},{"286":{"val":"Md","x":816,"y":-1421}},{"287":{"val":"V","x":847,"y":-1613}},{"288":{"val":"Pt","x":1100,"y":-1543}},{"289":{"val":"Cc","x":1100,"y":-1421}},{"290":{"val":"I2","x":1228,"y":-1080}},{"291":{"val":"qG","x":-12,"y":1367}},{"292":{"val":"qHd","x":266,"y":1504}},{"293":{"val":"Q81","x":263,"y":803}},{"294":{"val":"qH","x":543,"y":932}},{"295":{"val":"qBg","x":-151,"y":766}},{"296":{"val":"Q84","x":802,"y":1253}},{"297":{"val":"qCd","x":752,"y":154}},{"298":{"val":"qBd","x":454,"y":1140}},{"299":{"val":"qH","x":658,"y":1374}},{"300":{"val":"Q82","x":930,"y":726}},{"301":{"val":"qHd","x":1132,"y":961}},{"302":{"val":"Q86","x":1464,"y":1926}},{"303":{"val":"Q85","x":1258,"y":1304}},{"304":{"val":"qCl","x":1622,"y":314}},{"305":{"val":"qTg","x":526,"y":1785}},{"306":{"val":"qIr","x":651,"y":2068}},{"307":{"val":"qH","x":1088,"y":1534}},{"308":{"val":"qMu","x":1227,"y":1810}},{"309":{"val":"qBc","x":607,"y":996}},{"310":{"val":"qBd","x":1240,"y":2235}},{"311":{"val":"qHd","x":1882,"y":1351}},{"312":{"val":"qH","x":782,"y":851}},{"313":{"val":"qHd","x":772,"y":644}},{"314":{"val":"qH","x":768,"y":510}},{"315":{"val":"qBd","x":1401,"y":908}},{"316":{"val":"Kh","x":1632,"y":178}},{"317":{"val":"Hd","x":1502,"y":1020}},{"318":{"val":"Cd","x":893,"y":1437}},{"319":{"val":"H","x":1373,"y":1802}},{"320":{"val":"Bc","x":1570,"y":1646}},{"321":{"val":"Cl","x":1203,"y":2006}},{"322":{"val":"Rh","x":774,"y":2120}},{"323":{"val":"V","x":978,"y":1332}},{"324":{"val":"Ph","x":624,"y":72}},{"325":{"val":"Mu","x":1771,"y":1833}},{"326":{"val":"Q83","x":1518,"y":607}},{"327":{"val":"I6","x":1750,"y":452}},{"328":{"val":"Cd","x":1774,"y":311}},{"329":{"val":"Kh","x":1709,"y":678}},{"330":{"val":"Cd","x":1667,"y":807}},{"331":{"val":"Md","x":1555,"y":893}},{"332":{"val":"Pa","x":1050,"y":236}},{"333":{"val":"Bd","x":1555,"y":445}},{"334":{"val":"Md","x":595,"y":281}},{"335":{"val":"Cd","x":1325,"y":236}},{"336":{"val":"I7","x":1183,"y":279}},{"337":{"val":"V","x":23,"y":1186}},{"338":{"val":"Q88","x":943,"y":1937}},{"339":{"val":"I8","x":653,"y":416}},{"340":{"val":"Cd","x":331,"y":426}},{"341":{"val":"Cl","x":242,"y":1194}},{"342":{"val":"V","x":385,"y":687}},{"343":{"val":"Mu","x":927,"y":433}},{"344":{"val":"En","x":1474,"y":761}},{"345":{"val":"I2","x":-24,"y":1505}},{"346":{"val":"Gp","x":90,"y":1583}},{"347":{"val":"Bc","x":229,"y":1634}},{"348":{"val":"H","x":673,"y":1717}},{"349":{"val":"Bd","x":778,"y":1606}},{"350":{"val":"Mu","x":989,"y":2233}},{"351":{"val":"Pt","x":1472,"y":184}},{"352":{"val":"V","x":1078,"y":692}},{"353":{"val":"V","x":898,"y":2148}},{"354":{"val":"I1","x":1492,"y":1541}},{"355":{"val":"H","x":852,"y":1839}},{"356":{"val":"Eh","x":1435,"y":1173}},{"357":{"val":"Ea","x":1381,"y":2191}},{"358":{"val":"Mu","x":941,"y":1096}},{"359":{"val":"G","x":1913,"y":1479}},{"360":{"val":"Bd","x":1303,"y":1153}},{"361":{"val":"H","x":1077,"y":1111}},{"362":{"val":"Cl","x":1891,"y":1612}},{"363":{"val":"Kh","x":1791,"y":1702}},{"364":{"val":"V","x":1222,"y":1581}},{"365":{"val":"I5","x":1828,"y":1216}},{"366":{"val":"Gb","x":-129,"y":1269}},{"367":{"val":"Hd","x":496,"y":409}},{"368":{"val":"Cl","x":818,"y":348}},{"369":{"val":"Mu","x":1362,"y":1596}},{"370":{"val":"I6","x":1094,"y":1385}},{"371":{"val":"I8","x":1123,"y":1897}},{"372":{"val":"G","x":115,"y":624}},{"373":{"val":"Mu","x":1695,"y":1261}},{"374":{"val":"Cl","x":662,"y":752}},{"375":{"val":"Mu","x":522,"y":807}},{"376":{"val":"H","x":521,"y":660}},{"377":{"val":"Tc","x":259,"y":1947}},{"378":{"val":"Rh","x":216,"y":1805}},{"379":{"val":"Tg","x":511,"y":2079}},{"380":{"val":"H","x":1065,"y":555}},{"381":{"val":"Bg","x":90,"y":1726}},{"382":{"val":"H","x":1807,"y":1062}},{"383":{"val":"Bd","x":1754,"y":920}},{"384":{"val":"H","x":1415,"y":431}},{"385":{"val":"Mu","x":1312,"y":502}},{"386":{"val":"Bc","x":1214,"y":596}},{"387":{"val":"Kh","x":921,"y":913}},{"388":{"val":"Cl","x":841,"y":1012}},{"389":{"val":"Cl","x":1207,"y":791}},{"390":{"val":"Bd","x":913,"y":575}},{"391":{"val":"I4","x":1329,"y":699}},{"392":{"val":"Hd","x":956,"y":1594}},{"393":{"val":"Tc","x":-76,"y":994}},{"394":{"val":"Hd","x":388,"y":947}},{"395":{"val":"Bd","x":233,"y":932}},{"396":{"val":"H","x":626,"y":1173}},{"397":{"val":"G","x":985,"y":2058}},{"398":{"val":"Mr","x":916,"y":1210}},{"399":{"val":"I7","x":1500,"y":2109}},{"400":{"val":"I4","x":380,"y":1419}},{"401":{"val":"G","x":492,"y":1500}},{"402":{"val":"Cl","x":633,"y":1532}},{"403":{"val":"I1","x":-45,"y":865}},{"404":{"val":"Cl","x":1544,"y":1290}},{"405":{"val":"Kh","x":273,"y":1066}},{"406":{"val":"Mt","x":366,"y":1244}},{"407":{"val":"I3","x":723,"y":1072}},{"408":{"val":"qH","x":1695,"y":1609}},{"409":{"val":"Tg","x":35,"y":744}},{"410":{"val":"Cc","x":903,"y":173}},{"411":{"val":"Gc","x":-141,"y":1409}},{"412":{"val":"Bc","x":518,"y":1266}},{"413":{"val":"Cl","x":1355,"y":1033}},{"414":{"val":"Hd","x":1137,"y":1690}},{"415":{"val":"Bd","x":1214,"y":1441}},{"416":{"val":"I3","x":394,"y":1985}},{"417":{"val":"H","x":85,"y":906}},{"418":{"val":"I5","x":248,"y":672}},{"419":{"val":"Ir","x":-104,"y":1128}},{"420":{"val":"G","x":1055,"y":846}},{"421":{"val":"Hd","x":1067,"y":1234}},{"422":{"val":"Ra","x":129,"y":1275}},{"423":{"val":"Hd","x":1507,"y":1754}},{"424":{"val":"H","x":254,"y":1343}},{"425":{"val":"I2","x":1207,"y":1068}},{"426":{"val":"H","x":1035,"y":1795}},{"427":{"val":"Cd","x":1436,"y":1423}},{"428":{"val":"Q87","x":117,"y":1085}},{"429":{"val":"Mu","x":766,"y":1469}},{"430":{"val":"Bd","x":345,"y":561}},{"431":{"val":"G","x":376,"y":1822}},{"432":{"val":"Kh","x":879,"y":1703}},{"433":{"val":"V","x":1577,"y":2003}},{"434":{"val":"H","x":519,"y":169}},{"435":{"val":"Kh","x":1111,"y":2262}},{"436":{"val":"G","x":1320,"y":2080}},{"437":{"val":"V","x":1651,"y":548}},{"438":{"val":"Bd","x":1685,"y":1930}},{"439":{"val":"V","x":1397,"y":1301}},{"440":{"val":"qHd","x":1199,"y":412}},{"441":{"val":"qH","x":602,"y":-666}},{"442":{"val":"qBd","x":596,"y":-2007}},{"443":{"val":"Q63","x":259,"y":-1801}},{"444":{"val":"Q64","x":728,"y":-1547}},{"445":{"val":"qBd","x":502,"y":-1774}},{"446":{"val":"qMd","x":507,"y":-1546}},{"447":{"val":"qCd","x":845,"y":-1274}},{"448":{"val":"qCd","x":1225,"y":-551}},{"449":{"val":"qCd","x":1577,"y":-1359}},{"450":{"val":"qCl","x":848,"y":-1044}},{"451":{"val":"qCd","x":1080,"y":-1044}},{"452":{"val":"Q61","x":1454,"y":-552}},{"453":{"val":"qCd","x":729,"y":-1769}},{"454":{"val":"qMd","x":1078,"y":-1271}},{"455":{"val":"Q66","x":1224,"y":-774}},{"456":{"val":"qMd","x":1453,"y":-775}},{"457":{"val":"qEn","x":216,"y":-2168}},{"458":{"val":"qMr","x":299,"y":-1451}},{"459":{"val":"qHd","x":420,"y":-406}},{"460":{"val":"qGb","x":920,"y":-1862}},{"461":{"val":"qIr","x":1895,"y":-1446}},{"462":{"val":"Q62","x":778,"y":-914}},{"463":{"val":"Q65","x":1262,"y":-1272}},{"464":{"val":"qMu","x":1378,"y":-94}},{"465":{"val":"qH","x":1861,"y":-444}},{"466":{"val":"qMt","x":347,"y":-1062}},{"467":{"val":"qG","x":1339,"y":-1683}},{"468":{"val":"qBd","x":1018,"y":-587}},{"469":{"val":"qCl","x":1487,"y":-967}},{"470":{"val":"qBd","x":1624,"y":-271}},{"471":{"val":"Q27","x":-2253,"y":-908}},{"472":{"val":"Q26","x":-1910,"y":-565}},{"473":{"val":"Q30","x":-1650,"y":-1470}},{"474":{"val":"qMt","x":-1331,"y":-1142}},{"475":{"val":"Q24","x":-1068,"y":-692}},{"476":{"val":"qBd","x":-2143,"y":-1744}},{"477":{"val":"qCd","x":-553,"y":-2256}},{"478":{"val":"qGc","x":-2244,"y":-586}},{"479":{"val":"qIr","x":-1896,"y":-244}},{"480":{"val":"qMt","x":-2085,"y":-741}},{"481":{"val":"qMr","x":-1322,"y":-820}},{"482":{"val":"qTg","x":-1059,"y":-370}},{"483":{"val":"Q21","x":-2133,"y":-1422}},{"484":{"val":"Q28","x":-544,"y":-1934}},{"485":{"val":"Q23","x":-2233,"y":-359}},{"486":{"val":"qBg","x":-1890,"y":-17}},{"487":{"val":"qGp","x":-2121,"y":-467}},{"488":{"val":"Q25","x":-1311,"y":-593}},{"489":{"val":"qG","x":-1048,"y":-143}},{"490":{"val":"qGp","x":-2123,"y":-1195}},{"491":{"val":"qMd","x":-533,"y":-1707}},{"492":{"val":"qGc","x":-1782,"y":-1543}},{"493":{"val":"qEn","x":-1848,"y":-1285}},{"494":{"val":"Q29","x":-2012,"y":-1132}},{"495":{"val":"qBd","x":-673,"y":-1890}},{"496":{"val":"qCl","x":-630,"y":-1677}},{"497":{"val":"qBd","x":-793,"y":-924}},{"498":{"val":"qEn","x":-1265,"y":-2024}},{"499":{"val":"Q22","x":-813,"y":-1473}},{"500":{"val":"qCd","x":-803,"y":-1151}},{"501":{"val":"Cd","x":-2384,"y":-492}},{"502":{"val":"I6","x":-2365,"y":-614}},{"503":{"val":"Mu","x":-2391,"y":-746}},{"504":{"val":"Kh","x":-2389,"y":-878}},{"505":{"val":"I3","x":-1729,"y":-54}},{"506":{"val":"Mr","x":-1743,"y":-181}},{"507":{"val":"Rh","x":-1623,"y":-321}},{"508":{"val":"Ra","x":-1514,"y":-423}},{"509":{"val":"Hd","x":-2039,"y":-1317}},{"510":{"val":"V","x":-1777,"y":-309}},{"511":{"val":"Bg","x":-1385,"y":-111}},{"512":{"val":"En","x":-1757,"y":-431}},{"513":{"val":"I5","x":-1738,"y":-561}},{"514":{"val":"V","x":-1804,"y":-670}},{"515":{"val":"Gp","x":-2025,"y":-210}},{"516":{"val":"Eh","x":-2035,"y":-326}},{"517":{"val":"V","x":-1951,"y":-776}},{"518":{"val":"Gc","x":-1827,"y":-840}},{"519":{"val":"Pt","x":-2115,"y":-905}},{"520":{"val":"I8","x":-2358,"y":-1008}},{"521":{"val":"Cc","x":-2353,"y":-372}},{"522":{"val":"V","x":-2312,"y":-251}},{"523":{"val":"Pt","x":-2336,"y":-1126}},{"524":{"val":"Ph","x":-2314,"y":-1248}},{"525":{"val":"Pa","x":-2262,"y":-1372}},{"526":{"val":"G","x":-2253,"y":-1505}},{"527":{"val":"Cd","x":-1991,"y":-1781}},{"528":{"val":"Cd","x":-1984,"y":-651}},{"529":{"val":"Cc","x":-2100,"y":-593}},{"530":{"val":"H","x":-1739,"y":-1674}},{"531":{"val":"I1","x":-2030,"y":-1520}},{"532":{"val":"Md","x":-1799,"y":-1409}},{"533":{"val":"V","x":-1944,"y":-1410}},{"534":{"val":"Mr","x":-656,"y":-1517}},{"535":{"val":"Ir","x":-1837,"y":-1793}},{"536":{"val":"I2","x":-1364,"y":-447}},{"537":{"val":"Mt","x":-1585,"y":-569}},{"538":{"val":"G","x":-1279,"y":-317}},{"539":{"val":"V","x":-1213,"y":-174}},{"540":{"val":"Gp","x":-1180,"y":-465}},{"541":{"val":"Tc","x":-926,"y":-216}},{"542":{"val":"Tg","x":-854,"y":-341}},{"543":{"val":"Gp","x":-1454,"y":-638}},{"544":{"val":"Cc","x":-1535,"y":-759}},{"545":{"val":"G","x":-2156,"y":-239}},{"546":{"val":"V","x":-985,"y":-814}},{"547":{"val":"Bd","x":-2191,"y":-811}},{"548":{"val":"Eh","x":-1597,"y":-1049}},{"549":{"val":"Cl","x":-1038,"y":-946}},{"550":{"val":"Ea","x":-1186,"y":-883}},{"551":{"val":"Kh","x":-1437,"y":-1249}},{"552":{"val":"Mu","x":-1703,"y":-776}},{"553":{"val":"Rh","x":-2118,"y":-1024}},{"554":{"val":"Ra","x":-2216,"y":-1104}},{"555":{"val":"Ea","x":-1736,"y":-1086}},{"556":{"val":"Mr","x":-1720,"y":-1220}},{"557":{"val":"En","x":-1627,"y":-903}},{"558":{"val":"Cd","x":-1468,"y":-874}},{"559":{"val":"Eh","x":-1527,"y":-1344}},{"560":{"val":"I2","x":-1575,"y":-1184}},{"561":{"val":"Bd","x":-1375,"y":-1515}},{"562":{"val":"V","x":-1509,"y":-1480}},{"563":{"val":"I7","x":-1980,"y":-907}},{"564":{"val":"Gp","x":-1847,"y":-970}},{"565":{"val":"V","x":-1876,"y":-1108}},{"566":{"val":"Rh","x":-1355,"y":-1370}},{"567":{"val":"Ra","x":-1203,"y":-1413}},{"568":{"val":"Gp","x":-1674,"y":-1345}},{"569":{"val":"Ir","x":-1560,"y":-70}},{"570":{"val":"Mt","x":-901,"y":-1863}},{"571":{"val":"Pa","x":-949,"y":-2061}},{"572":{"val":"En","x":-896,"y":-1720}},{"573":{"val":"I7","x":-654,"y":-1196}},{"574":{"val":"I5","x":-804,"y":-1979}},{"575":{"val":"Gp","x":-714,"y":-2087}},{"576":{"val":"Pa","x":-517,"y":-1444}},{"577":{"val":"Pt","x":-428,"y":-1564}},{"578":{"val":"I6","x":-377,"y":-1708}},{"579":{"val":"Kh","x":-554,"y":-2110}},{"580":{"val":"V","x":-408,"y":-2012}},{"581":{"val":"Cd","x":-356,"y":-1857}},{"582":{"val":"Cc","x":-333,"y":-2128}},{"583":{"val":"Md","x":-408,"y":-2227}},{"584":{"val":"Ph","x":-712,"y":-2225}},{"585":{"val":"Pt","x":-850,"y":-2168}},{"586":{"val":"V","x":-782,"y":-1621}},{"587":{"val":"Tc","x":-2033,"y":-1}},{"588":{"val":"G","x":-1022,"y":-1647}},{"589":{"val":"I4","x":-2247,"y":-141}},{"590":{"val":"V","x":-1120,"y":-1141}},{"591":{"val":"Mu","x":-1218,"y":-1625}},{"592":{"val":"Cc","x":-686,"y":-789}},{"593":{"val":"H","x":-1404,"y":-1951}},{"594":{"val":"En","x":-1219,"y":-1237}},{"595":{"val":"Mt","x":-1191,"y":-1023}},{"596":{"val":"I3","x":-1606,"y":-1728}},{"597":{"val":"Cl","x":-2206,"y":-1632}},{"598":{"val":"Tg","x":-2126,"y":-101}},{"599":{"val":"Bc","x":-2263,"y":-706}},{"600":{"val":"Kh","x":-1106,"y":-2067}},{"601":{"val":"I8","x":-846,"y":-756}},{"602":{"val":"Bc","x":-1403,"y":-1663}},{"603":{"val":"H","x":-710,"y":-1372}},{"604":{"val":"Eh","x":-901,"y":-1012}},{"605":{"val":"Cd","x":-643,"y":-935}},{"606":{"val":"Kh","x":-594,"y":-1068}},{"607":{"val":"Mr","x":-962,"y":-1162}},{"608":{"val":"Ph","x":-576,"y":-1304}},{"609":{"val":"Kh","x":-1231,"y":-710}},{"610":{"val":"Gc","x":-1162,"y":-595}},{"611":{"val":"V","x":-1295,"y":-1753}},{"612":{"val":"I4","x":-1105,"y":-1522}},{"613":{"val":"Hd","x":-955,"y":-1513}},{"614":{"val":"Ea","x":-1998,"y":-442}},{"615":{"val":"Gc","x":-1247,"y":-1887}},{"616":{"val":"Ea","x":-1537,"y":-1615}},{"617":{"val":"Bd","x":-1515,"y":-1841}},{"618":{"val":"I1","x":-935,"y":-442}},{"619":{"val":"G","x":-809,"y":-535}},{"620":{"val":"En","x":-725,"y":-654}},{"621":{"val":"Ra","x":1567,"y":-1601}},{"622":{"val":"Pt","x":1492,"y":-1477}},{"623":{"val":"Md","x":1186,"y":-1681}},{"624":{"val":"Bd","x":1248,"y":-1529}},{"625":{"val":"V","x":1317,"y":-1404}},{"626":{"val":"Cc","x":1248,"y":-900}},{"627":{"val":"Pa","x":1363,"y":-1158}},{"628":{"val":"Hd","x":1528,"y":-1212}},{"629":{"val":"I7","x":1440,"y":-1325}},{"630":{"val":"Cc","x":1633,"y":-699}},{"631":{"val":"I1","x":1583,"y":-838}},{"632":{"val":"Hd","x":1453,"y":-216}},{"633":{"val":"Kh","x":1727,"y":-384}},{"634":{"val":"Bd","x":812,"y":-284}},{"635":{"val":"Pt","x":389,"y":-1697}},{"636":{"val":"I8","x":957,"y":-340}},{"637":{"val":"Cl","x":1017,"y":-456}},{"638":{"val":"Ir","x":1336,"y":-759}},{"639":{"val":"Cd","x":1370,"y":-887}},{"640":{"val":"V","x":1338,"y":-628}},{"641":{"val":"Kh","x":111,"y":2223}},{"642":{"val":"Bc","x":256,"y":2211}},{"643":{"val":"Cc","x":454,"y":-1153}},{"644":{"val":"G","x":956,"y":-1138}},{"645":{"val":"Cl","x":1104,"y":-1165}},{"646":{"val":"V","x":1339,"y":-1007}},{"647":{"val":"I5","x":933,"y":-1507}},{"648":{"val":"Cl","x":1489,"y":-664}},{"649":{"val":"Rh","x":605,"y":-1651}},{"650":{"val":"Pa","x":615,"y":-1793}},{"651":{"val":"Cd","x":968,"y":-1377}},{"652":{"val":"Bd","x":1076,"y":-749}},{"653":{"val":"I6","x":1189,"y":-667}},{"654":{"val":"H","x":1472,"y":-353}},{"655":{"val":"Pt","x":1730,"y":-802}},{"656":{"val":"Md","x":1480,"y":-1087}},{"657":{"val":"Kh","x":525,"y":-1901}},{"658":{"val":"I6","x":1457,"y":-1760}},{"659":{"val":"Cl","x":520,"y":-1012}},{"660":{"val":"Bd","x":468,"y":-165}},{"661":{"val":"H","x":524,"y":-35}},{"662":{"val":"Cd","x":1314,"y":44}},{"663":{"val":"Mu","x":1206,"y":134}},{"664":{"val":"Cd","x":1904,"y":-78}},{"665":{"val":"Md","x":1912,"y":60}},{"666":{"val":"H","x":1858,"y":191}},{"667":{"val":"Cd","x":-286,"y":-1529}},{"668":{"val":"Md","x":-34,"y":-1571}},{"669":{"val":"Gc","x":-2362,"y":-61}},{"670":{"val":"Bd","x":-2235,"y":28}},{"671":{"val":"Ir","x":-36,"y":1704}},{"672":{"val":"Hd","x":-152,"y":1621}},{"673":{"val":"Gp","x":-2361,"y":93}},{"674":{"val":"Cd","x":559,"y":-270}},{"775":{"val":"S06","x":16063,"y":-435}},{"776":{"val":"S13","x":16146,"y":-66}},{"777":{"val":"S14","x":16147,"y":-319}},{"778":{"val":"A23","x":15331,"y":-58}},{"779":{"val":"A29","x":15332,"y":-320}},{"780":{"val":"S75","x":15189,"y":128}},{"781":{"val":"S72","x":15189,"y":-374}},{"782":{"val":"S21","x":16283,"y":127}},{"783":{"val":"S10","x":16283,"y":-376}},{"784":{"val":"A39","x":15741,"y":510}},{"785":{"val":"S16","x":16146,"y":-197}},{"786":{"val":"S65","x":16064,"y":184}},{"787":{"val":"A28","x":15415,"y":184}},{"788":{"val":"S64","x":15415,"y":-435}},{"789":{"val":"S74","x":15188,"y":3}},{"790":{"val":"A20","x":15577,"y":409}},{"791":{"val":"A22","x":15331,"y":67}},{"792":{"val":"S15","x":16147,"y":67}},{"793":{"val":"S79","x":16283,"y":2}},{"794":{"val":"A39","x":15740,"y":-888}},{"795":{"val":"S61","x":15824,"y":520}},{"796":{"val":"S12","x":15904,"y":409}},{"797":{"val":"S04","x":15983,"y":-548}},{"798":{"val":"A39","x":15741,"y":638}},{"799":{"val":"S62","x":15741,"y":892}},{"800":{"val":"S83","x":15557,"y":637}},{"801":{"val":"S24","x":15922,"y":636}},{"802":{"val":"S82","x":15283,"y":257}},{"803":{"val":"S78","x":16195,"y":250}},{"804":{"val":"A15","x":15280,"y":-502}},{"805":{"val":"S09","x":16194,"y":-501}},{"806":{"val":"S70","x":15555,"y":-883}},{"807":{"val":"S01","x":15836,"y":-1006}},{"808":{"val":"S63","x":15648,"y":763}},{"809":{"val":"S69","x":15641,"y":-1004}},{"810":{"val":"S77","x":15467,"y":512}},{"811":{"val":"S23","x":16011,"y":511}},{"812":{"val":"S71","x":15466,"y":-760}},{"813":{"val":"S02","x":15921,"y":-886}},{"814":{"val":"A12","x":15834,"y":252}},{"815":{"val":"S11","x":15985,"y":295}},{"816":{"val":"S59","x":15926,"y":125}},{"817":{"val":"S76","x":15375,"y":385}},{"818":{"val":"S22","x":16102,"y":382}},{"819":{"val":"S03","x":15823,"y":-771}},{"820":{"val":"S07","x":16011,"y":-760}},{"821":{"val":"S81","x":15189,"y":-122}},{"822":{"val":"A24","x":15331,"y":-193}},{"823":{"val":"A39","x":15741,"y":763}},{"824":{"val":"S68","x":15740,"y":-1141}},{"825":{"val":"A21","x":15657,"y":520}},{"826":{"val":"S73","x":15189,"y":-251}},{"827":{"val":"S20","x":16283,"y":-125}},{"828":{"val":"S25","x":15833,"y":762}},{"829":{"val":"A25","x":15496,"y":-548}},{"830":{"val":"A37","x":15460,"y":-127}},{"831":{"val":"S54","x":15460,"y":-255}},{"832":{"val":"S58","x":15460,"y":0}},{"833":{"val":"S05","x":15902,"y":-660}},{"834":{"val":"A36","x":16014,"y":-128}},{"835":{"val":"S56","x":16014,"y":-255}},{"836":{"val":"S60","x":16014,"y":0}},{"837":{"val":"S80","x":15374,"y":-632}},{"838":{"val":"S53","x":15555,"y":-382}},{"839":{"val":"A11","x":15647,"y":-507}},{"840":{"val":"S57","x":15550,"y":124}},{"841":{"val":"A14","x":15832,"y":-507}},{"842":{"val":"S55","x":15925,"y":-378}},{"843":{"val":"S08","x":16105,"y":-626}},{"844":{"val":"A39","x":15740,"y":-1012}},{"845":{"val":"A26","x":15495,"y":295}},{"846":{"val":"A13","x":15642,"y":250}},{"847":{"val":"A30","x":15575,"y":-659}},{"848":{"val":"S17","x":16283,"y":-251}}]};
-
+			helpfulAdventurer.levelGraphObject = {"edges":[{"1":[641, 642]}, {"2":[812, 837]}, {"3":[799, 828]}, {"4":[526, 597]}, {"5":[308, 371]}, {"6":[778, 791]}, {"7":[293, 418]}, {"8":[341, 406]}, {"9":[292, 400]}, {"10":[517, 563]}, {"11":[151, 265]}, {"12":[6, 14]}, {"13":[630, 655]}, {"14":[71, 96]}, {"15":[660, 661]}, {"16":[343, 368]}, {"17":[636, 637]}, {"18":[649, 650]}, {"19":[185, 241]}, {"20":[313, 390]}, {"21":[375, 376]}, {"22":[783, 805]}, {"23":[576, 608]}, {"24":[484, 580]}, {"25":[211, 212]}, {"26":[561, 566]}, {"27":[57, 59]}, {"28":[138, 212]}, {"29":[780, 802]}, {"30":[358, 361]}, {"31":[519, 553]}, {"32":[329, 437]}, {"33":[311, 359]}, {"34":[775, 797]}, {"35":[231, 233]}, {"36":[92, 442]}, {"37":[548, 557]}, {"38":[63, 170]}, {"39":[588, 612]}, {"40":[530, 596]}, {"41":[486, 505]}, {"42":[572, 588]}, {"43":[194, 201]}, {"44":[475, 546]}, {"45":[302, 433]}, {"46":[601, 620]}, {"47":[203, 206]}, {"48":[638, 639]}, {"49":[81, 108]}, {"50":[325, 363]}, {"51":[573, 608]}, {"52":[563, 564]}, {"53":[395, 405]}, {"54":[811, 818]}, {"55":[53, 372]}, {"56":[456, 631]}, {"57":[286, 647]}, {"58":[798, 825]}, {"59":[222, 256]}, {"60":[327, 437]}, {"61":[834, 835]}, {"62":[849, 850]}, {"63":[222, 223]}, {"64":[219, 220]}, {"65":[532, 568]}, {"66":[576, 577]}, {"67":[71, 656]}, {"68":[780, 789]}, {"69":[783, 856]}, {"70":[393, 403]}, {"71":[850, 854]}, {"72":[253, 257]}, {"73":[803, 818]}, {"74":[134, 253]}, {"75":[150, 225]}, {"76":[287, 444]}, {"77":[365, 373]}, {"78":[384, 385]}, {"79":[323, 398]}, {"80":[11, 12]}, {"81":[285, 460]}, {"82":[135, 247]}, {"83":[512, 513]}, {"84":[799, 823]}, {"85":[325, 438]}, {"86":[314, 339]}, {"87":[820, 843]}, {"88":[611, 615]}, {"89":[590, 595]}, {"90":[260, 261]}, {"91":[284, 285]}, {"92":[507, 510]}, {"93":[473, 562]}, {"94":[43, 118]}, {"95":[68, 662]}, {"96":[189, 193]}, {"97":[354, 427]}, {"98":[483, 525]}, {"99":[396, 412]}, {"100":[32, 34]}, {"101":[590, 594]}, {"102":[327, 328]}, {"103":[612, 613]}, {"104":[75, 459]}, {"105":[157, 220]}, {"106":[536, 538]}, {"107":[319, 423]}, {"108":[46, 47]}, {"109":[793, 827]}, {"110":[16, 25]}, {"111":[640, 648]}, {"112":[644, 645]}, {"113":[142, 168]}, {"114":[23, 38]}, {"115":[518, 552]}, {"116":[555, 565]}, {"117":[816, 836]}, {"118":[159, 204]}, {"119":[835, 842]}, {"120":[474, 594]}, {"121":[123, 643]}, {"122":[21, 36]}, {"123":[577, 667]}, {"124":[593, 617]}, {"125":[54, 55]}, {"126":[139, 242]}, {"127":[91, 121]}, {"128":[41, 129]}, {"129":[596, 616]}, {"130":[323, 370]}, {"131":[284, 287]}, {"132":[564, 565]}, {"133":[507, 508]}, {"134":[304, 328]}, {"135":[108, 450]}, {"136":[476, 597]}, {"137":[115, 117]}, {"138":[135, 279]}, {"139":[796, 815]}, {"140":[154, 215]}, {"141":[106, 468]}, {"142":[133, 196]}, {"143":[350, 353]}, {"144":[497, 604]}, {"145":[830, 831]}, {"146":[557, 558]}, {"147":[450, 644]}, {"148":[177, 178]}, {"149":[337, 419]}, {"150":[393, 419]}, {"151":[288, 624]}, {"152":[784, 798]}, {"153":[78, 87]}, {"154":[487, 529]}, {"155":[249, 252]}, {"156":[132, 167]}, {"157":[779, 822]}, {"158":[355, 432]}, {"159":[294, 394]}, {"160":[318, 429]}, {"161":[502, 503]}, {"162":[304, 316]}, {"163":[84, 128]}, {"164":[100, 448]}, {"165":[61, 62]}, {"166":[549, 550]}, {"167":[315, 331]}, {"168":[116, 118]}, {"169":[794, 844]}, {"170":[624, 625]}, {"171":[337, 422]}, {"172":[650, 657]}, {"173":[5, 8]}, {"174":[200, 227]}, {"175":[219, 221]}, {"176":[510, 512]}, {"177":[514, 552]}, {"178":[80, 462]}, {"179":[346, 347]}, {"180":[311, 365]}, {"181":[76, 101]}, {"182":[343, 390]}, {"183":[208, 209]}, {"184":[801, 811]}, {"185":[209, 210]}, {"186":[199, 201]}, {"187":[126, 128]}, {"188":[467, 658]}, {"189":[471, 519]}, {"190":[292, 347]}, {"191":[7, 33]}, {"192":[223, 224]}, {"193":[534, 586]}, {"194":[358, 388]}, {"195":[161, 229]}, {"196":[88, 630]}, {"197":[819, 833]}, {"198":[402, 429]}, {"199":[477, 583]}, {"200":[467, 623]}, {"201":[200, 205]}, {"202":[310, 435]}, {"203":[591, 612]}, {"204":[8, 15]}, {"205":[79, 124]}, {"206":[290, 451]}, {"207":[112, 445]}, {"208":[446, 649]}, {"209":[77, 541]}, {"210":[401, 402]}, {"211":[171, 172]}, {"212":[582, 583]}, {"213":[48, 49]}, {"214":[75, 114]}, {"215":[29, 814]}, {"216":[511, 539]}, {"217":[394, 395]}, {"218":[498, 593]}, {"219":[59, 668]}, {"220":[119, 122]}, {"221":[51, 194]}, {"222":[132, 166]}, {"223":[164, 264]}, {"224":[26, 46]}, {"225":[404, 439]}, {"226":[341, 405]}, {"227":[303, 439]}, {"228":[321, 371]}, {"229":[490, 509]}, {"230":[498, 615]}, {"231":[854, 859]}, {"232":[128, 470]}, {"233":[792, 857]}, {"234":[215, 221]}, {"235":[377, 416]}, {"236":[1, 2]}, {"237":[70, 621]}, {"238":[110, 112]}, {"239":[142, 171]}, {"240":[72, 82]}, {"241":[2, 3]}, {"242":[670, 673]}, {"243":[231, 232]}, {"244":[222, 280]}, {"245":[403, 417]}, {"246":[503, 504]}, {"247":[372, 409]}, {"248":[240, 243]}, {"249":[69, 70]}, {"250":[6, 13]}, {"251":[520, 523]}, {"252":[117, 118]}, {"253":[454, 651]}, {"254":[387, 388]}, {"255":[162, 163]}, {"256":[336, 440]}, {"257":[800, 810]}, {"258":[312, 374]}, {"259":[76, 114]}, {"260":[380, 386]}, {"261":[307, 364]}, {"262":[244, 245]}, {"263":[176, 177]}, {"264":[200, 207]}, {"265":[246, 247]}, {"266":[361, 421]}, {"267":[179, 269]}, {"268":[810, 817]}, {"269":[493, 556]}, {"270":[147, 226]}, {"271":[160, 169]}, {"272":[797, 833]}, {"273":[132, 197]}, {"274":[553, 554]}, {"275":[403, 409]}, {"276":[56, 667]}, {"277":[241, 242]}, {"278":[202, 280]}, {"279":[469, 639]}, {"280":[545, 589]}, {"281":[61, 457]}, {"282":[301, 425]}, {"283":[254, 255]}, {"284":[794, 819]}, {"285":[638, 640]}, {"286":[778, 822]}, {"287":[149, 222]}, {"288":[364, 415]}, {"289":[626, 646]}, {"290":[337, 428]}, {"291":[72, 88]}, {"292":[101, 441]}, {"293":[17, 22]}, {"294":[559, 568]}, {"295":[61, 89]}, {"296":[805, 843]}, {"297":[671, 672]}, {"298":[97, 628]}, {"299":[776, 785]}, {"300":[528, 529]}, {"301":[527, 535]}, {"302":[156, 217]}, {"303":[111, 451]}, {"304":[57, 458]}, {"305":[215, 273]}, {"306":[389, 391]}, {"307":[789, 821]}, {"308":[213, 217]}, {"309":[422, 424]}, {"310":[342, 430]}, {"311":[45, 606]}, {"312":[65, 67]}, {"313":[788, 829]}, {"314":[490, 554]}, {"315":[9, 39]}, {"316":[561, 602]}, {"317":[519, 563]}, {"318":[630, 631]}, {"319":[468, 637]}, {"320":[172, 174]}, {"321":[508, 536]}, {"322":[474, 551]}, {"323":[218, 272]}, {"324":[300, 352]}, {"325":[307, 392]}, {"326":[838, 839]}, {"327":[348, 349]}, {"328":[395, 417]}, {"329":[321, 436]}, {"330":[113, 121]}, {"331":[489, 539]}, {"332":[516, 614]}, {"333":[561, 562]}, {"334":[332, 336]}, {"335":[32, 38]}, {"336":[815, 857]}, {"337":[34, 35]}, {"338":[336, 663]}, {"339":[834, 836]}, {"340":[27, 32]}, {"341":[100, 109]}, {"342":[237, 270]}, {"343":[309, 407]}, {"344":[139, 244]}, {"345":[95, 97]}, {"346":[102, 107]}, {"347":[312, 387]}, {"348":[339, 368]}, {"349":[830, 832]}, {"350":[80, 659]}, {"351":[100, 125]}, {"352":[634, 636]}, {"353":[117, 466]}, {"354":[207, 208]}, {"355":[27, 29]}, {"356":[531, 533]}, {"357":[81, 659]}, {"358":[283, 635]}, {"359":[378, 381]}, {"360":[56, 668]}, {"361":[96, 655]}, {"362":[495, 574]}, {"363":[16, 21]}, {"364":[239, 273]}, {"365":[114, 674]}, {"366":[12, 30]}, {"367":[592, 605]}, {"368":[218, 219]}, {"369":[297, 324]}, {"370":[580, 582]}, {"371":[239, 263]}, {"372":[138, 214]}, {"373":[488, 536]}, {"374":[344, 391]}, {"375":[567, 612]}, {"376":[345, 411]}, {"377":[366, 411]}, {"378":[145, 231]}, {"379":[574, 575]}, {"380":[356, 360]}, {"381":[231, 672]}, {"382":[140, 275]}, {"383":[365, 382]}, {"384":[517, 528]}, {"385":[175, 202]}, {"386":[579, 580]}, {"387":[357, 399]}, {"388":[17, 839]}, {"389":[322, 353]}, {"390":[775, 777]}, {"391":[103, 636]}, {"392":[389, 420]}, {"393":[477, 584]}, {"394":[463, 625]}, {"395":[566, 567]}, {"396":[799, 808]}, {"397":[127, 379]}, {"398":[552, 557]}, {"399":[120, 447]}, {"400":[445, 635]}, {"401":[43, 44]}, {"402":[630, 648]}, {"403":[330, 383]}, {"404":[85, 227]}, {"405":[158, 179]}, {"406":[546, 549]}, {"407":[53, 340]}, {"408":[35, 36]}, {"409":[186, 279]}, {"410":[338, 397]}, {"411":[23, 31]}, {"412":[168, 187]}, {"413":[142, 170]}, {"414":[41, 77]}, {"415":[78, 654]}, {"416":[141, 174]}, {"417":[64, 65]}, {"418":[243, 245]}, {"419":[79, 80]}, {"420":[64, 113]}, {"421":[95, 98]}, {"422":[324, 661]}, {"423":[448, 640]}, {"424":[318, 323]}, {"425":[137, 177]}, {"426":[332, 410]}, {"427":[226, 237]}, {"428":[540, 610]}, {"429":[87, 88]}, {"430":[92, 93]}, {"431":[290, 627]}, {"432":[273, 278]}, {"433":[665, 666]}, {"434":[183, 209]}, {"435":[335, 351]}, {"436":[814, 816]}, {"437":[802, 817]}, {"438":[499, 603]}, {"439":[506, 510]}, {"440":[813, 820]}, {"441":[790, 845]}, {"442":[577, 578]}, {"443":[252, 257]}, {"444":[87, 633]}, {"445":[513, 514]}, {"446":[106, 652]}, {"447":[596, 617]}, {"448":[107, 111]}, {"449":[546, 601]}, {"450":[226, 228]}, {"451":[234, 235]}, {"452":[352, 389]}, {"453":[94, 95]}, {"454":[532, 533]}, {"455":[72, 465]}, {"456":[449, 622]}, {"457":[24, 63]}, {"458":[102, 106]}, {"459":[359, 362]}, {"460":[7, 8]}, {"461":[790, 825]}, {"462":[191, 192]}, {"463":[621, 622]}, {"464":[126, 632]}, {"465":[360, 425]}, {"466":[524, 525]}, {"467":[494, 565]}, {"468":[187, 188]}, {"469":[241, 641]}, {"470":[497, 605]}, {"471":[155, 263]}, {"472":[160, 161]}, {"473":[198, 229]}, {"474":[234, 270]}, {"475":[295, 403]}, {"476":[190, 191]}, {"477":[603, 608]}, {"478":[486, 587]}, {"479":[538, 539]}, {"480":[349, 429]}, {"481":[227, 230]}, {"482":[787, 791]}, {"483":[455, 626]}, {"484":[513, 537]}, {"485":[471, 520]}, {"486":[235, 274]}, {"487":[264, 266]}, {"488":[798, 823]}, {"489":[515, 545]}, {"490":[156, 218]}, {"491":[286, 447]}, {"492":[335, 336]}, {"493":[377, 378]}, {"494":[505, 569]}, {"495":[328, 666]}, {"496":[549, 604]}, {"497":[20, 21]}, {"498":[786, 792]}, {"499":[131, 163]}, {"500":[570, 574]}, {"501":[207, 228]}, {"502":[511, 569]}, {"503":[291, 345]}, {"504":[590, 607]}, {"505":[400, 401]}, {"506":[781, 826]}, {"507":[551, 566]}, {"508":[627, 656]}, {"509":[824, 849]}, {"510":[83, 664]}, {"511":[353, 397]}, {"512":[592, 620]}, {"513":[591, 611]}, {"514":[161, 162]}, {"515":[204, 205]}, {"516":[275, 276]}, {"517":[69, 658]}, {"518":[310, 357]}, {"519":[267, 274]}, {"520":[58, 82]}, {"521":[464, 632]}, {"522":[388, 407]}, {"523":[500, 607]}, {"524":[146, 199]}, {"525":[392, 432]}, {"526":[501, 502]}, {"527":[386, 391]}, {"528":[618, 619]}, {"529":[251, 256]}, {"530":[317, 331]}, {"531":[232, 238]}, {"532":[320, 354]}, {"533":[66, 461]}, {"534":[57, 116]}, {"535":[308, 319]}, {"536":[42, 443]}, {"537":[181, 211]}, {"538":[795, 796]}, {"539":[165, 169]}, {"540":[54, 582]}, {"541":[399, 433]}, {"542":[414, 426]}, {"543":[236, 239]}, {"544":[804, 837]}, {"545":[62, 90]}, {"546":[83, 104]}, {"547":[609, 610]}, {"548":[129, 192]}, {"549":[781, 804]}, {"550":[537, 543]}, {"551":[782, 803]}, {"552":[115, 124]}, {"553":[250, 259]}, {"554":[60, 73]}, {"555":[522, 589]}, {"556":[317, 413]}, {"557":[342, 418]}, {"558":[385, 386]}, {"559":[109, 632]}, {"560":[78, 452]}, {"561":[492, 532]}, {"562":[602, 611]}, {"563":[356, 439]}, {"564":[51, 260]}, {"565":[282, 458]}, {"566":[406, 412]}, {"567":[153, 274]}, {"568":[550, 595]}, {"569":[373, 404]}, {"570":[479, 515]}, {"571":[501, 521]}, {"572":[821, 826]}, {"573":[776, 792]}, {"574":[339, 367]}, {"575":[39, 40]}, {"576":[517, 518]}, {"577":[188, 191]}, {"578":[195, 196]}, {"579":[498, 600]}, {"580":[152, 182]}, {"581":[306, 379]}, {"582":[60, 103]}, {"583":[413, 425]}, {"584":[76, 634]}, {"585":[492, 530]}, {"586":[831, 838]}, {"587":[151, 259]}, {"588":[268, 269]}, {"589":[570, 572]}, {"590":[442, 657]}, {"591":[669, 670]}, {"592":[572, 586]}, {"593":[91, 93]}, {"594":[806, 812]}, {"595":[105, 643]}, {"596":[4, 6]}, {"597":[96, 98]}, {"598":[214, 276]}, {"599":[73, 125]}, {"600":[542, 618]}, {"601":[556, 560]}, {"602":[52, 53]}, {"603":[488, 543]}, {"604":[329, 330]}, {"605":[282, 283]}, {"606":[64, 460]}, {"607":[481, 558]}, {"608":[13, 40]}, {"609":[50, 51]}, {"610":[382, 383]}, {"611":[91, 281]}, {"612":[479, 510]}, {"613":[122, 123]}, {"614":[330, 331]}, {"615":[547, 599]}, {"616":[544, 558]}, {"617":[55, 89]}, {"618":[427, 439]}, {"619":[299, 429]}, {"620":[472, 514]}, {"621":[396, 407]}, {"622":[175, 181]}, {"623":[363, 408]}, {"624":[144, 185]}, {"625":[152, 206]}, {"626":[276, 277]}, {"627":[623, 624]}, {"628":[233, 267]}, {"629":[58, 96]}, {"630":[324, 434]}, {"631":[361, 425]}, {"632":[619, 620]}, {"633":[184, 189]}, {"634":[33, 50]}, {"635":[229, 673]}, {"636":[832, 840]}, {"637":[90, 92]}, {"638":[478, 502]}, {"639":[257, 258]}, {"640":[777, 785]}, {"641":[489, 541]}, {"642":[224, 236]}, {"643":[385, 440]}, {"644":[10, 11]}, {"645":[68, 464]}, {"646":[151, 268]}, {"647":[37, 52]}, {"648":[496, 586]}, {"649":[541, 542]}, {"650":[140, 249]}, {"651":[62, 110]}, {"652":[11, 14]}, {"653":[340, 367]}, {"654":[320, 408]}, {"655":[580, 581]}, {"656":[182, 213]}, {"657":[378, 431]}, {"658":[589, 669]}, {"659":[643, 659]}, {"660":[660, 674]}, {"661":[480, 547]}, {"662":[143, 192]}, {"663":[571, 574]}, {"664":[840, 846]}, {"665":[530, 535]}, {"666":[342, 376]}, {"667":[21, 22]}, {"668":[364, 369]}, {"669":[333, 437]}, {"670":[305, 431]}, {"671":[841, 842]}, {"672":[248, 254]}, {"673":[146, 193]}, {"674":[18, 794]}, {"675":[49, 124]}, {"676":[30, 48]}, {"677":[807, 813]}, {"678":[627, 628]}, {"679":[316, 351]}, {"680":[131, 195]}, {"681":[371, 426]}, {"682":[476, 527]}, {"683":[42, 130]}, {"684":[534, 576]}, {"685":[305, 348]}, {"686":[42, 59]}, {"687":[326, 437]}, {"688":[829, 847]}, {"689":[159, 183]}, {"690":[350, 435]}, {"691":[334, 339]}, {"692":[807, 824]}, {"693":[180, 249]}, {"694":[17, 18]}, {"695":[85, 86]}, {"696":[17, 841]}, {"697":[212, 251]}, {"698":[491, 578]}, {"699":[354, 369]}, {"700":[253, 254]}, {"701":[652, 653]}, {"702":[589, 598]}, {"703":[362, 363]}, {"704":[118, 123]}, {"705":[357, 436]}, {"706":[89, 130]}, {"707":[97, 449]}, {"708":[505, 506]}, {"709":[503, 599]}, {"710":[500, 573]}, {"711":[573, 606]}, {"712":[28, 32]}, {"713":[142, 184]}, {"714":[548, 555]}, {"715":[290, 645]}, {"716":[338, 355]}, {"717":[145, 230]}, {"718":[370, 415]}, {"719":[148, 207]}, {"720":[587, 598]}, {"721":[296, 398]}, {"722":[288, 289]}, {"723":[51, 190]}, {"724":[44, 45]}, {"725":[779, 788]}, {"726":[24, 569]}, {"727":[481, 609]}, {"728":[628, 629]}, {"729":[480, 517]}, {"730":[290, 646]}, {"731":[284, 288]}, {"732":[173, 266]}, {"733":[664, 665]}, {"734":[204, 261]}, {"735":[562, 616]}, {"736":[5, 6]}, {"737":[381, 671]}, {"738":[578, 581]}, {"739":[334, 434]}, {"740":[559, 562]}, {"741":[173, 178]}, {"742":[843, 856]}, {"743":[131, 186]}, {"744":[499, 613]}, {"745":[543, 544]}, {"746":[167, 170]}, {"747":[482, 540]}, {"748":[782, 793]}, {"749":[197, 198]}, {"750":[67, 658]}, {"751":[433, 438]}, {"752":[133, 255]}, {"753":[104, 465]}, {"754":[99, 441]}, {"755":[127, 642]}, {"756":[379, 416]}, {"757":[277, 278]}, {"758":[158, 271]}, {"759":[71, 469]}, {"760":[164, 169]}, {"761":[783, 848]}, {"762":[83, 84]}, {"763":[109, 654]}, {"764":[662, 663]}, {"765":[380, 390]}, {"766":[144, 238]}, {"767":[119, 446]}, {"768":[504, 520]}, {"769":[94, 461]}, {"770":[165, 166]}, {"771":[640, 653]}, {"772":[481, 550]}, {"773":[281, 453]}, {"774":[179, 213]}, {"775":[47, 620]}, {"776":[271, 277]}, {"777":[525, 526]}, {"778":[575, 579]}, {"779":[571, 585]}, {"780":[786, 815]}, {"781":[787, 845]}, {"782":[84, 633]}, {"783":[262, 270]}, {"784":[246, 266]}, {"785":[19, 25]}, {"786":[482, 618]}, {"787":[801, 828]}, {"788":[172, 173]}, {"789":[333, 384]}, {"790":[74, 124]}, {"791":[176, 257]}, {"792":[806, 809]}, {"793":[258, 265]}, {"794":[824, 844]}, {"795":[216, 245]}, {"796":[523, 524]}, {"797":[60, 68]}, {"798":[10, 26]}, {"799":[387, 420]}, {"800":[289, 651]}, {"801":[287, 647]}, {"802":[153, 240]}, {"803":[157, 216]}, {"804":[605, 606]}, {"805":[298, 406]}, {"806":[400, 424]}, {"807":[203, 259]}, {"808":[29, 784]}, {"809":[364, 414]}, {"810":[515, 516]}, {"811":[509, 533]}, {"812":[374, 375]}, {"813":[625, 629]}, {"814":[136, 266]}, {"815":[366, 419]}, {"816":[29, 846]}, {"817":[146, 202]}, {"818":[105, 120]}, {"819":[3, 4]}, {"820":[346, 381]}, {"821":[571, 600]}, {"822":[809, 824]}, {"823":[584, 585]}, {"824":[331, 344]}, {"825":[179, 180]}, {"826":[271, 272]}, {"827":[15, 37]}, {"828":[345, 346]}, {"829":[155, 262]}, {"830":[99, 102]}, {"831":[306, 322]}, {"832":[146, 210]}, {"833":[297, 410]}, {"834":[66, 70]}, {"835":[551, 560]}, {"836":[485, 522]}, {"837":[521, 522]}, {"838":[323, 421]}, {"839":[74, 75]}, {"840":[320, 423]}, {"841":[86, 393]}, {"842":[141, 181]}, {"843":[548, 560]}, {"844":[483, 531]}, {"845":[53, 430]}, {"846":[224, 225]}, {"847":[487, 614]}, {"848":[248, 250]}], "nodes":[{"1":{"x":0, "val":"T1", "y": -84}}, {"2":{"x":85, "val":"T2", "y": -1}}, {"3":{"x":1, "val":"T3", "y":82}}, {"4":{"x": -81, "val":"T4", "y":0}}, {"5":{"x": -211, "val":"T5", "y":131}}, {"6":{"x": -211, "val":"V", "y":0}}, {"7":{"x": -349, "val":"G", "y":196}}, {"8":{"x": -211, "val":"T8", "y":268}}, {"9":{"x": -423, "val":"V", "y": -84}}, {"10":{"x": -342, "val":"Mt", "y": -185}}, {"11":{"x": -211, "val":"T7", "y": -266}}, {"12":{"x": -71, "val":"Cd", "y": -182}}, {"13":{"x": -339, "val":"V", "y":0}}, {"14":{"x": -211, "val":"T6", "y": -134}}, {"15":{"x": -74, "val":"H", "y":197}}, {"16":{"x":15666, "val":"A04", "y": -283}}, {"17":{"x":15740, "val":"A38", "y": -633}}, {"18":{"x":15741, "val":"A39", "y": -758}}, {"19":{"x":15593, "val":"S52", "y": -62}}, {"20":{"x":15815, "val":"A07", "y": -282}}, {"21":{"x":15741, "val":"A02", "y": -377}}, {"22":{"x":15740, "val":"A39", "y": -501}}, {"23":{"x":15888, "val":"S66", "y": -61}}, {"24":{"x": -1489, "val":"Gp", "y":51}}, {"25":{"x":15593, "val":"S51", "y": -189}}, {"26":{"x": -389, "val":"V", "y": -329}}, {"27":{"x":15741, "val":"A39", "y":255}}, {"28":{"x":15666, "val":"A08", "y":32}}, {"29":{"x":15741, "val":"A38", "y":384}}, {"30":{"x": -27, "val":"V", "y": -328}}, {"31":{"x":15888, "val":"S67", "y": -189}}, {"32":{"x":15741, "val":"A05", "y":129}}, {"33":{"x": -400, "val":"V", "y":342}}, {"34":{"x":15741, "val":"A39", "y":0}}, {"35":{"x":15741, "val":"A00", "y": -125}}, {"36":{"x":15741, "val":"A39", "y": -254}}, {"37":{"x": -26, "val":"V", "y":342}}, {"38":{"x":15816, "val":"A06", "y":34}}, {"39":{"x": -507, "val":"V", "y": -1}}, {"40":{"x": -423, "val":"V", "y":82}}, {"41":{"x": -793, "val":"Ir", "y": -35}}, {"42":{"x":108, "val":"V", "y": -1772}}, {"43":{"x": -39, "val":"Gc", "y": -1138}}, {"44":{"x": -234, "val":"Cc", "y": -1113}}, {"45":{"x": -427, "val":"Gp", "y": -1093}}, {"46":{"x": -503, "val":"Bd", "y": -438}}, {"47":{"x": -614, "val":"qMr", "y": -543}}, {"48":{"x":87, "val":"Cc", "y": -438}}, {"49":{"x":205, "val":"qCd", "y": -544}}, {"50":{"x": -503, "val":"Hd", "y":427}}, {"51":{"x": -614, "val":"qG", "y":520}}, {"52":{"x":86, "val":"Mu", "y":429}}, {"53":{"x":206, "val":"qH", "y":520}}, {"54":{"x": -193, "val":"Gc", "y": -2104}}, {"55":{"x": -39, "val":"Gp", "y": -2079}}, {"56":{"x": -174, "val":"Mr", "y": -1631}}, {"57":{"x":146, "val":"Bd", "y": -1468}}, {"58":{"x":1883, "val":"Rh", "y": -863}}, {"59":{"x":107, "val":"Bc", "y": -1614}}, {"60":{"x":1106, "val":"I7", "y": -119}}, {"61":{"x":254, "val":"Cc", "y": -2027}}, {"62":{"x":382, "val":"I3", "y": -2127}}, {"63":{"x": -1505, "val":"Ea", "y":224}}, {"64":{"x":1074, "val":"Bg", "y": -1851}}, {"65":{"x":1228, "val":"Cl", "y": -1868}}, {"66":{"x":1796, "val":"Tg", "y": -1561}}, {"67":{"x":1385, "val":"Gc", "y": -1875}}, {"68":{"x":1236, "val":"H", "y": -65}}, {"69":{"x":1605, "val":"Gb", "y": -1791}}, {"70":{"x":1698, "val":"G", "y": -1661}}, {"71":{"x":1622, "val":"Bc", "y": -1023}}, {"72":{"x":1890, "val":"Mu", "y": -583}}, {"73":{"x":1213, "val":"Mu", "y": -233}}, {"74":{"x":449, "val":"Mu", "y": -575}}, {"75":{"x":552, "val":"H", "y": -466}}, {"76":{"x":816, "val":"V", "y": -444}}, {"77":{"x": -785, "val":"Gp", "y": -172}}, {"78":{"x":1544, "val":"V", "y": -457}}, {"79":{"x":466, "val":"Pa", "y": -778}}, {"80":{"x":605, "val":"V", "y": -887}}, {"81":{"x":660, "val":"Pt", "y": -1069}}, {"82":{"x":1914, "val":"Hd", "y": -724}}, {"83":{"x":1920, "val":"H", "y": -215}}, {"84":{"x":1788, "val":"Bd", "y": -265}}, {"85":{"x": -262, "val":"Hd", "y":1152}}, {"86":{"x": -219, "val":"G", "y":1016}}, {"87":{"x":1674, "val":"I4", "y": -507}}, {"88":{"x":1752, "val":"Md", "y": -615}}, {"89":{"x":110, "val":"Mt", "y": -2045}}, {"90":{"x":493, "val":"G", "y": -2227}}, {"91":{"x":811, "val":"I4", "y": -2032}}, {"92":{"x":617, "val":"V", "y": -2144}}, {"93":{"x":764, "val":"Cl", "y": -2155}}, {"94":{"x":1879, "val":"Md", "y": -1304}}, {"95":{"x":1805, "val":"I8", "y": -1183}}, {"96":{"x":1744, "val":"V", "y": -942}}, {"97":{"x":1668, "val":"Kh", "y": -1241}}, {"98":{"x":1837, "val":"Md", "y": -1046}}, {"99":{"x":693, "val":"Md", "y": -767}}, {"100":{"x":1308, "val":"Pa", "y": -443}}, {"101":{"x":717, "val":"Cc", "y": -579}}, {"102":{"x":829, "val":"Hd", "y": -763}}, {"103":{"x":988, "val":"Kh", "y": -196}}, {"104":{"x":1961, "val":"Bc", "y": -342}}, {"105":{"x":603, "val":"I3", "y": -1215}}, {"106":{"x":946, "val":"G", "y": -695}}, {"107":{"x":947, "val":"Ra", "y": -841}}, {"108":{"x":776, "val":"Cd", "y": -1170}}, {"109":{"x":1348, "val":"Ir", "y": -310}}, {"110":{"x":429, "val":"Md", "y": -2002}}, {"111":{"x":970, "val":"Ph", "y": -958}}, {"112":{"x":376, "val":"Cd", "y": -1870}}, {"113":{"x":1066, "val":"Tc", "y": -1987}}, {"114":{"x":667, "val":"Bc", "y": -364}}, {"115":{"x":270, "val":"Mr", "y": -819}}, {"116":{"x":122, "val":"Eh", "y": -1312}}, {"117":{"x":207, "val":"Ea", "y": -987}}, {"118":{"x":143, "val":"I1", "y": -1147}}, {"119":{"x":555, "val":"G", "y": -1413}}, {"120":{"x":691, "val":"Cc", "y": -1329}}, {"121":{"x":951, "val":"Ir", "y": -2081}}, {"122":{"x":426, "val":"Cd", "y": -1344}}, {"123":{"x":301, "val":"Ph", "y": -1241}}, {"124":{"x":325, "val":"Md", "y": -663}}, {"125":{"x":1178, "val":"Md", "y": -364}}, {"126":{"x":1563, "val":"Mu", "y": -112}}, {"127":{"x":392, "val":"Hd", "y":2166}}, {"128":{"x":1699, "val":"I5", "y": -163}}, {"129":{"x": -897, "val":"Gc", "y":60}}, {"130":{"x":23, "val":"I2", "y": -1909}}, {"131":{"x": -2345, "val":"qMt", "y":618}}, {"132":{"x": -1880, "val":"qEn", "y":156}}, {"133":{"x": -2344, "val":"qGp", "y":976}}, {"134":{"x": -2246, "val":"qIr", "y":1050}}, {"135":{"x": -2258, "val":"qGc", "y":959}}, {"136":{"x": -2144, "val":"Q43", "y":787}}, {"137":{"x": -1679, "val":"qHd", "y":1158}}, {"138":{"x": -1526, "val":"qIr", "y":1279}}, {"139":{"x": -224, "val":"qBd", "y":2344}}, {"140":{"x": -1746, "val":"qG", "y":1410}}, {"141":{"x": -1598, "val":"qG", "y":971}}, {"142":{"x": -1495, "val":"Q44", "y":466}}, {"143":{"x": -707, "val":"qGp", "y":139}}, {"144":{"x": -220, "val":"qH", "y":2054}}, {"145":{"x": -353, "val":"qMu", "y":1554}}, {"146":{"x": -1027, "val":"qBg", "y":837}}, {"147":{"x": -676, "val":"qGb", "y":1504}}, {"148":{"x": -728, "val":"qHd", "y":1213}}, {"149":{"x": -829, "val":"Q42", "y":1167}}, {"150":{"x": -810, "val":"qTc", "y":1272}}, {"151":{"x": -2178, "val":"Q41", "y":1669}}, {"152":{"x": -2178, "val":"qHd", "y":1960}}, {"153":{"x": -494, "val":"qBd", "y":2016}}, {"154":{"x": -932, "val":"Q45", "y":1926}}, {"155":{"x": -723, "val":"qTg", "y":1827}}, {"156":{"x": -1467, "val":"qG", "y":2108}}, {"157":{"x": -745, "val":"qHd", "y":2256}}, {"158":{"x": -1576, "val":"qGb", "y":1793}}, {"159":{"x": -537, "val":"qH", "y":823}}, {"160":{"x": -2104, "val":"qMr", "y":382}}, {"161":{"x": -2239, "val":"I6", "y":319}}, {"162":{"x": -2373, "val":"Gc", "y":364}}, {"163":{"x": -2388, "val":"Gp", "y":494}}, {"164":{"x": -2055, "val":"G", "y":570}}, {"165":{"x": -1799, "val":"Mt", "y":411}}, {"166":{"x": -1905, "val":"Mr", "y":286}}, {"167":{"x": -1734, "val":"V", "y":224}}, {"168":{"x": -1352, "val":"Kh", "y":404}}, {"169":{"x": -1954, "val":"En", "y":467}}, {"170":{"x": -1606, "val":"Eh", "y":340}}, {"171":{"x": -1588, "val":"Gp", "y":592}}, {"172":{"x": -1709, "val":"Gc", "y":699}}, {"173":{"x": -1845, "val":"I4", "y":782}}, {"174":{"x": -1635, "val":"Cd", "y":833}}, {"175":{"x": -1286, "val":"Cl", "y":915}}, {"176":{"x": -1912, "val":"Rh", "y":1225}}, {"177":{"x": -1837, "val":"I3", "y":1085}}, {"178":{"x": -1808, "val":"Ra", "y":925}}, {"179":{"x": -1734, "val":"V", "y":1821}}, {"180":{"x": -1787, "val":"Mr", "y":1675}}, {"181":{"x": -1439, "val":"I5", "y":941}}, {"182":{"x": -1996, "val":"Ph", "y":1956}}, {"183":{"x": -666, "val":"Hd", "y":884}}, {"184":{"x": -1383, "val":"Cd", "y":565}}, {"185":{"x": -89, "val":"Hd", "y":2073}}, {"186":{"x": -2219, "val":"G", "y":680}}, {"187":{"x": -1195, "val":"Bd", "y":368}}, {"188":{"x": -1029, "val":"Bc", "y":344}}, {"189":{"x": -1242, "val":"Cc", "y":621}}, {"190":{"x": -737, "val":"Gp", "y":414}}, {"191":{"x": -871, "val":"V", "y":334}}, {"192":{"x": -846, "val":"I8", "y":198}}, {"193":{"x": -1174, "val":"G", "y":748}}, {"194":{"x": -727, "val":"Ir", "y":624}}, {"195":{"x": -2398, "val":"I2", "y":726}}, {"196":{"x": -2391, "val":"Hd", "y":854}}, {"197":{"x": -2033, "val":"Hd", "y":147}}, {"198":{"x": -2179, "val":"Ra", "y":167}}, {"199":{"x": -968, "val":"Tg", "y":704}}, {"200":{"x": -447, "val":"Ir", "y":1162}}, {"201":{"x": -874, "val":"Tc", "y":595}}, {"202":{"x": -1141, "val":"Tc", "y":935}}, {"203":{"x": -2358, "val":"Md", "y":1760}}, {"204":{"x": -411, "val":"V", "y":897}}, {"205":{"x": -390, "val":"Eh", "y":1033}}, {"206":{"x": -2299, "val":"Pa", "y":1884}}, {"207":{"x": -588, "val":"I1", "y":1170}}, {"208":{"x": -667, "val":"Bg", "y":1064}}, {"209":{"x": -772, "val":"G", "y":970}}, {"210":{"x": -880, "val":"Gb", "y":875}}, {"211":{"x": -1387, "val":"Hd", "y":1074}}, {"212":{"x": -1396, "val":"G", "y":1214}}, {"213":{"x": -1817, "val":"I7", "y":1968}}, {"214":{"x": -1459, "val":"Ea", "y":1405}}, {"215":{"x": -1074, "val":"V", "y":1906}}, {"216":{"x": -606, "val":"Pa", "y":2310}}, {"217":{"x": -1637, "val":"Pt", "y":2026}}, {"218":{"x": -1288, "val":"Cc", "y":2114}}, {"219":{"x": -1105, "val":"Cd", "y":2170}}, {"220":{"x": -923, "val":"Md", "y":2212}}, {"221":{"x": -1108, "val":"Bd", "y":2039}}, {"222":{"x": -970, "val":"V", "y":1142}}, {"223":{"x": -987, "val":"Tg", "y":1269}}, {"224":{"x": -1005, "val":"Ir", "y":1398}}, {"225":{"x": -850, "val":"Gb", "y":1397}}, {"226":{"x": -564, "val":"Gp", "y":1427}}, {"227":{"x": -347, "val":"Mu", "y":1274}}, {"228":{"x": -532, "val":"G", "y":1292}}, {"229":{"x": -2308, "val":"Rh", "y":209}}, {"230":{"x": -320, "val":"H", "y":1415}}, {"231":{"x": -278, "val":"I3", "y":1683}}, {"232":{"x": -216, "val":"Bd", "y":1802}}, {"233":{"x": -405, "val":"Ea", "y":1714}}, {"234":{"x": -559, "val":"Gb", "y":1748}}, {"235":{"x": -569, "val":"Bg", "y":1878}}, {"236":{"x": -973, "val":"Bg", "y":1535}}, {"237":{"x": -501, "val":"Gc", "y":1544}}, {"238":{"x": -166, "val":"Bc", "y":1933}}, {"239":{"x": -958, "val":"Ra", "y":1677}}, {"240":{"x": -638, "val":"Ph", "y":2038}}, {"241":{"x": -31, "val":"Mu", "y":2188}}, {"242":{"x": -94, "val":"H", "y":2301}}, {"243":{"x": -575, "val":"Pt", "y":2166}}, {"244":{"x": -335, "val":"Cl", "y":2268}}, {"245":{"x": -472, "val":"I5", "y":2260}}, {"246":{"x": -1961, "val":"Tg", "y":930}}, {"247":{"x": -2116, "val":"Tc", "y":943}}, {"248":{"x": -2368, "val":"Gc", "y":1371}}, {"249":{"x": -1847, "val":"Hd", "y":1536}}, {"250":{"x": -2362, "val":"Gp", "y":1511}}, {"251":{"x": -1257, "val":"Ra", "y":1171}}, {"252":{"x": -1959, "val":"Mt", "y":1422}}, {"253":{"x": -2153, "val":"G", "y":1183}}, {"254":{"x": -2313, "val":"I1", "y":1253}}, {"255":{"x": -2361, "val":"Cd", "y":1115}}, {"256":{"x": -1110, "val":"Rh", "y":1152}}, {"257":{"x": -2059, "val":"V", "y":1307}}, {"258":{"x": -2173, "val":"Cd", "y":1390}}, {"259":{"x": -2327, "val":"I8", "y":1639}}, {"260":{"x": -510, "val":"Ea", "y":637}}, {"261":{"x": -408, "val":"Kh", "y":749}}, {"262":{"x": -745, "val":"Ir", "y":1685}}, {"263":{"x": -870, "val":"Rh", "y":1783}}, {"264":{"x": -1932, "val":"Cl", "y":644}}, {"265":{"x": -2155, "val":"Cc", "y":1533}}, {"266":{"x": -1996, "val":"V", "y":772}}, {"267":{"x": -344, "val":"Eh", "y":1829}}, {"268":{"x": -2036, "val":"Hd", "y":1719}}, {"269":{"x": -1890, "val":"Cl", "y":1776}}, {"270":{"x": -615, "val":"V", "y":1631}}, {"271":{"x": -1427, "val":"G", "y":1843}}, {"272":{"x": -1332, "val":"Gc", "y":1970}}, {"273":{"x": -1077, "val":"G", "y":1766}}, {"274":{"x": -438, "val":"I4", "y":1910}}, {"275":{"x": -1628, "val":"Eh", "y":1497}}, {"276":{"x": -1474, "val":"Kh", "y":1552}}, {"277":{"x": -1410, "val":"I6", "y":1697}}, {"278":{"x": -1245, "val":"Hd", "y":1736}}, {"279":{"x": -2276, "val":"Gb", "y":814}}, {"280":{"x": -1032, "val":"I2", "y":1020}}, {"281":{"x":751, "val":"Md", "y": -1903}}, {"282":{"x":370, "val":"Cl", "y": -1569}}, {"283":{"x":237, "val":"Cc", "y": -1659}}, {"284":{"x":997, "val":"Cl", "y": -1646}}, {"285":{"x":882, "val":"Cd", "y": -1742}}, {"286":{"x":816, "val":"Md", "y": -1421}}, {"287":{"x":847, "val":"V", "y": -1613}}, {"288":{"x":1100, "val":"Pt", "y": -1543}}, {"289":{"x":1100, "val":"Cc", "y": -1421}}, {"290":{"x":1228, "val":"I2", "y": -1080}}, {"291":{"x": -12, "val":"qG", "y":1367}}, {"292":{"x":266, "val":"qHd", "y":1504}}, {"293":{"x":263, "val":"Q81", "y":803}}, {"294":{"x":543, "val":"qH", "y":932}}, {"295":{"x": -151, "val":"qBg", "y":766}}, {"296":{"x":802, "val":"Q84", "y":1253}}, {"297":{"x":752, "val":"qCd", "y":154}}, {"298":{"x":454, "val":"qBd", "y":1140}}, {"299":{"x":658, "val":"qH", "y":1374}}, {"300":{"x":930, "val":"Q82", "y":726}}, {"301":{"x":1132, "val":"qHd", "y":961}}, {"302":{"x":1464, "val":"Q86", "y":1926}}, {"303":{"x":1258, "val":"Q85", "y":1304}}, {"304":{"x":1622, "val":"qCl", "y":314}}, {"305":{"x":526, "val":"qTg", "y":1785}}, {"306":{"x":651, "val":"qIr", "y":2068}}, {"307":{"x":1088, "val":"qH", "y":1534}}, {"308":{"x":1227, "val":"qMu", "y":1810}}, {"309":{"x":607, "val":"qBc", "y":996}}, {"310":{"x":1240, "val":"qBd", "y":2235}}, {"311":{"x":1882, "val":"qHd", "y":1351}}, {"312":{"x":782, "val":"qH", "y":851}}, {"313":{"x":772, "val":"qHd", "y":644}}, {"314":{"x":768, "val":"qH", "y":510}}, {"315":{"x":1401, "val":"qBd", "y":908}}, {"316":{"x":1632, "val":"Kh", "y":178}}, {"317":{"x":1502, "val":"Hd", "y":1020}}, {"318":{"x":893, "val":"Cd", "y":1437}}, {"319":{"x":1373, "val":"H", "y":1802}}, {"320":{"x":1570, "val":"Bc", "y":1646}}, {"321":{"x":1203, "val":"Cl", "y":2006}}, {"322":{"x":774, "val":"Rh", "y":2120}}, {"323":{"x":978, "val":"V", "y":1332}}, {"324":{"x":624, "val":"Ph", "y":72}}, {"325":{"x":1771, "val":"Mu", "y":1833}}, {"326":{"x":1518, "val":"Q83", "y":607}}, {"327":{"x":1750, "val":"I6", "y":452}}, {"328":{"x":1774, "val":"Cd", "y":311}}, {"329":{"x":1709, "val":"Kh", "y":678}}, {"330":{"x":1667, "val":"Cd", "y":807}}, {"331":{"x":1555, "val":"Md", "y":893}}, {"332":{"x":1050, "val":"Pa", "y":236}}, {"333":{"x":1555, "val":"Bd", "y":445}}, {"334":{"x":595, "val":"Md", "y":281}}, {"335":{"x":1325, "val":"Cd", "y":236}}, {"336":{"x":1183, "val":"I7", "y":279}}, {"337":{"x":23, "val":"V", "y":1186}}, {"338":{"x":943, "val":"Q88", "y":1937}}, {"339":{"x":653, "val":"I8", "y":416}}, {"340":{"x":331, "val":"Cd", "y":426}}, {"341":{"x":242, "val":"Cl", "y":1194}}, {"342":{"x":385, "val":"V", "y":687}}, {"343":{"x":927, "val":"Mu", "y":433}}, {"344":{"x":1474, "val":"En", "y":761}}, {"345":{"x": -24, "val":"I2", "y":1505}}, {"346":{"x":90, "val":"Gp", "y":1583}}, {"347":{"x":229, "val":"Bc", "y":1634}}, {"348":{"x":673, "val":"H", "y":1717}}, {"349":{"x":778, "val":"Bd", "y":1606}}, {"350":{"x":989, "val":"Mu", "y":2233}}, {"351":{"x":1472, "val":"Pt", "y":184}}, {"352":{"x":1078, "val":"V", "y":692}}, {"353":{"x":898, "val":"V", "y":2148}}, {"354":{"x":1492, "val":"I1", "y":1541}}, {"355":{"x":852, "val":"H", "y":1839}}, {"356":{"x":1435, "val":"Eh", "y":1173}}, {"357":{"x":1381, "val":"Ea", "y":2191}}, {"358":{"x":941, "val":"Mu", "y":1096}}, {"359":{"x":1913, "val":"G", "y":1479}}, {"360":{"x":1303, "val":"Bd", "y":1153}}, {"361":{"x":1077, "val":"H", "y":1111}}, {"362":{"x":1891, "val":"Cl", "y":1612}}, {"363":{"x":1791, "val":"Kh", "y":1702}}, {"364":{"x":1222, "val":"V", "y":1581}}, {"365":{"x":1828, "val":"I5", "y":1216}}, {"366":{"x": -129, "val":"Gb", "y":1269}}, {"367":{"x":496, "val":"Hd", "y":409}}, {"368":{"x":818, "val":"Cl", "y":348}}, {"369":{"x":1362, "val":"Mu", "y":1596}}, {"370":{"x":1094, "val":"I6", "y":1385}}, {"371":{"x":1123, "val":"I8", "y":1897}}, {"372":{"x":115, "val":"G", "y":624}}, {"373":{"x":1695, "val":"Mu", "y":1261}}, {"374":{"x":662, "val":"Cl", "y":752}}, {"375":{"x":522, "val":"Mu", "y":807}}, {"376":{"x":521, "val":"H", "y":660}}, {"377":{"x":259, "val":"Tc", "y":1947}}, {"378":{"x":216, "val":"Rh", "y":1805}}, {"379":{"x":511, "val":"Tg", "y":2079}}, {"380":{"x":1065, "val":"H", "y":555}}, {"381":{"x":90, "val":"Bg", "y":1726}}, {"382":{"x":1807, "val":"H", "y":1062}}, {"383":{"x":1754, "val":"Bd", "y":920}}, {"384":{"x":1415, "val":"H", "y":431}}, {"385":{"x":1312, "val":"Mu", "y":502}}, {"386":{"x":1214, "val":"Bc", "y":596}}, {"387":{"x":921, "val":"Kh", "y":913}}, {"388":{"x":841, "val":"Cl", "y":1012}}, {"389":{"x":1207, "val":"Cl", "y":791}}, {"390":{"x":913, "val":"Bd", "y":575}}, {"391":{"x":1329, "val":"I4", "y":699}}, {"392":{"x":956, "val":"Hd", "y":1594}}, {"393":{"x": -76, "val":"Tc", "y":994}}, {"394":{"x":388, "val":"Hd", "y":947}}, {"395":{"x":233, "val":"Bd", "y":932}}, {"396":{"x":626, "val":"H", "y":1173}}, {"397":{"x":985, "val":"G", "y":2058}}, {"398":{"x":916, "val":"Mr", "y":1210}}, {"399":{"x":1500, "val":"I7", "y":2109}}, {"400":{"x":380, "val":"I4", "y":1419}}, {"401":{"x":492, "val":"G", "y":1500}}, {"402":{"x":633, "val":"Cl", "y":1532}}, {"403":{"x": -45, "val":"I1", "y":865}}, {"404":{"x":1544, "val":"Cl", "y":1290}}, {"405":{"x":273, "val":"Kh", "y":1066}}, {"406":{"x":366, "val":"Mt", "y":1244}}, {"407":{"x":723, "val":"I3", "y":1072}}, {"408":{"x":1695, "val":"qH", "y":1609}}, {"409":{"x":35, "val":"Tg", "y":744}}, {"410":{"x":903, "val":"Cc", "y":173}}, {"411":{"x": -141, "val":"Gc", "y":1409}}, {"412":{"x":518, "val":"Bc", "y":1266}}, {"413":{"x":1355, "val":"Cl", "y":1033}}, {"414":{"x":1137, "val":"Hd", "y":1690}}, {"415":{"x":1214, "val":"Bd", "y":1441}}, {"416":{"x":394, "val":"I3", "y":1985}}, {"417":{"x":85, "val":"H", "y":906}}, {"418":{"x":248, "val":"I5", "y":672}}, {"419":{"x": -104, "val":"Ir", "y":1128}}, {"420":{"x":1055, "val":"G", "y":846}}, {"421":{"x":1067, "val":"Hd", "y":1234}}, {"422":{"x":129, "val":"Ra", "y":1275}}, {"423":{"x":1507, "val":"Hd", "y":1754}}, {"424":{"x":254, "val":"H", "y":1343}}, {"425":{"x":1207, "val":"I2", "y":1068}}, {"426":{"x":1035, "val":"H", "y":1795}}, {"427":{"x":1436, "val":"Cd", "y":1423}}, {"428":{"x":117, "val":"Q87", "y":1085}}, {"429":{"x":766, "val":"Mu", "y":1469}}, {"430":{"x":345, "val":"Bd", "y":561}}, {"431":{"x":376, "val":"G", "y":1822}}, {"432":{"x":879, "val":"Kh", "y":1703}}, {"433":{"x":1577, "val":"V", "y":2003}}, {"434":{"x":519, "val":"H", "y":169}}, {"435":{"x":1111, "val":"Kh", "y":2262}}, {"436":{"x":1320, "val":"G", "y":2080}}, {"437":{"x":1651, "val":"V", "y":548}}, {"438":{"x":1685, "val":"Bd", "y":1930}}, {"439":{"x":1397, "val":"V", "y":1301}}, {"440":{"x":1199, "val":"qHd", "y":412}}, {"441":{"x":602, "val":"qH", "y": -666}}, {"442":{"x":596, "val":"qBd", "y": -2007}}, {"443":{"x":259, "val":"Q63", "y": -1801}}, {"444":{"x":728, "val":"Q64", "y": -1547}}, {"445":{"x":502, "val":"qBd", "y": -1774}}, {"446":{"x":507, "val":"qMd", "y": -1546}}, {"447":{"x":845, "val":"qCd", "y": -1274}}, {"448":{"x":1225, "val":"qCd", "y": -551}}, {"449":{"x":1577, "val":"qCd", "y": -1359}}, {"450":{"x":848, "val":"qCl", "y": -1044}}, {"451":{"x":1080, "val":"qCd", "y": -1044}}, {"452":{"x":1454, "val":"Q61", "y": -552}}, {"453":{"x":729, "val":"qCd", "y": -1769}}, {"454":{"x":1078, "val":"qMd", "y": -1271}}, {"455":{"x":1224, "val":"Q66", "y": -774}}, {"456":{"x":1453, "val":"qMd", "y": -775}}, {"457":{"x":216, "val":"qEn", "y": -2168}}, {"458":{"x":299, "val":"qMr", "y": -1451}}, {"459":{"x":420, "val":"qHd", "y": -406}}, {"460":{"x":920, "val":"qGb", "y": -1862}}, {"461":{"x":1895, "val":"qIr", "y": -1446}}, {"462":{"x":778, "val":"Q62", "y": -914}}, {"463":{"x":1262, "val":"Q65", "y": -1272}}, {"464":{"x":1378, "val":"qMu", "y": -94}}, {"465":{"x":1861, "val":"qH", "y": -444}}, {"466":{"x":347, "val":"qMt", "y": -1062}}, {"467":{"x":1339, "val":"qG", "y": -1683}}, {"468":{"x":1018, "val":"qBd", "y": -587}}, {"469":{"x":1487, "val":"qCl", "y": -967}}, {"470":{"x":1624, "val":"qBd", "y": -271}}, {"471":{"x": -2253, "val":"Q27", "y": -908}}, {"472":{"x": -1910, "val":"Q26", "y": -565}}, {"473":{"x": -1650, "val":"Q30", "y": -1470}}, {"474":{"x": -1331, "val":"qMt", "y": -1142}}, {"475":{"x": -1068, "val":"Q24", "y": -692}}, {"476":{"x": -2143, "val":"qBd", "y": -1744}}, {"477":{"x": -553, "val":"qCd", "y": -2256}}, {"478":{"x": -2244, "val":"qGc", "y": -586}}, {"479":{"x": -1896, "val":"qIr", "y": -244}}, {"480":{"x": -2085, "val":"qMt", "y": -741}}, {"481":{"x": -1322, "val":"qMr", "y": -820}}, {"482":{"x": -1059, "val":"qTg", "y": -370}}, {"483":{"x": -2133, "val":"Q21", "y": -1422}}, {"484":{"x": -544, "val":"Q28", "y": -1934}}, {"485":{"x": -2233, "val":"Q23", "y": -359}}, {"486":{"x": -1890, "val":"qBg", "y": -17}}, {"487":{"x": -2121, "val":"qGp", "y": -467}}, {"488":{"x": -1311, "val":"Q25", "y": -593}}, {"489":{"x": -1048, "val":"qG", "y": -143}}, {"490":{"x": -2123, "val":"qGp", "y": -1195}}, {"491":{"x": -533, "val":"qMd", "y": -1707}}, {"492":{"x": -1782, "val":"qGc", "y": -1543}}, {"493":{"x": -1848, "val":"qEn", "y": -1285}}, {"494":{"x": -2012, "val":"Q29", "y": -1132}}, {"495":{"x": -673, "val":"qBd", "y": -1890}}, {"496":{"x": -630, "val":"qCl", "y": -1677}}, {"497":{"x": -793, "val":"qBd", "y": -924}}, {"498":{"x": -1265, "val":"qEn", "y": -2024}}, {"499":{"x": -813, "val":"Q22", "y": -1473}}, {"500":{"x": -803, "val":"qCd", "y": -1151}}, {"501":{"x": -2384, "val":"Cd", "y": -492}}, {"502":{"x": -2365, "val":"I6", "y": -614}}, {"503":{"x": -2391, "val":"Mu", "y": -746}}, {"504":{"x": -2389, "val":"Kh", "y": -878}}, {"505":{"x": -1729, "val":"I3", "y": -54}}, {"506":{"x": -1743, "val":"Mr", "y": -181}}, {"507":{"x": -1623, "val":"Rh", "y": -321}}, {"508":{"x": -1514, "val":"Ra", "y": -423}}, {"509":{"x": -2039, "val":"Hd", "y": -1317}}, {"510":{"x": -1777, "val":"V", "y": -309}}, {"511":{"x": -1385, "val":"Bg", "y": -111}}, {"512":{"x": -1757, "val":"En", "y": -431}}, {"513":{"x": -1738, "val":"I5", "y": -561}}, {"514":{"x": -1804, "val":"V", "y": -670}}, {"515":{"x": -2025, "val":"Gp", "y": -210}}, {"516":{"x": -2035, "val":"Eh", "y": -326}}, {"517":{"x": -1951, "val":"V", "y": -776}}, {"518":{"x": -1827, "val":"Gc", "y": -840}}, {"519":{"x": -2115, "val":"Pt", "y": -905}}, {"520":{"x": -2358, "val":"I8", "y": -1008}}, {"521":{"x": -2353, "val":"Cc", "y": -372}}, {"522":{"x": -2312, "val":"V", "y": -251}}, {"523":{"x": -2336, "val":"Pt", "y": -1126}}, {"524":{"x": -2314, "val":"Ph", "y": -1248}}, {"525":{"x": -2262, "val":"Pa", "y": -1372}}, {"526":{"x": -2253, "val":"G", "y": -1505}}, {"527":{"x": -1991, "val":"Cd", "y": -1781}}, {"528":{"x": -1984, "val":"Cd", "y": -651}}, {"529":{"x": -2100, "val":"Cc", "y": -593}}, {"530":{"x": -1739, "val":"H", "y": -1674}}, {"531":{"x": -2030, "val":"I1", "y": -1520}}, {"532":{"x": -1799, "val":"Md", "y": -1409}}, {"533":{"x": -1944, "val":"V", "y": -1410}}, {"534":{"x": -656, "val":"Mr", "y": -1517}}, {"535":{"x": -1837, "val":"Ir", "y": -1793}}, {"536":{"x": -1364, "val":"I2", "y": -447}}, {"537":{"x": -1585, "val":"Mt", "y": -569}}, {"538":{"x": -1279, "val":"G", "y": -317}}, {"539":{"x": -1213, "val":"V", "y": -174}}, {"540":{"x": -1180, "val":"Gp", "y": -465}}, {"541":{"x": -926, "val":"Tc", "y": -216}}, {"542":{"x": -854, "val":"Tg", "y": -341}}, {"543":{"x": -1454, "val":"Gp", "y": -638}}, {"544":{"x": -1535, "val":"Cc", "y": -759}}, {"545":{"x": -2156, "val":"G", "y": -239}}, {"546":{"x": -985, "val":"V", "y": -814}}, {"547":{"x": -2191, "val":"Bd", "y": -811}}, {"548":{"x": -1597, "val":"Eh", "y": -1049}}, {"549":{"x": -1038, "val":"Cl", "y": -946}}, {"550":{"x": -1186, "val":"Ea", "y": -883}}, {"551":{"x": -1437, "val":"Kh", "y": -1249}}, {"552":{"x": -1703, "val":"Mu", "y": -776}}, {"553":{"x": -2118, "val":"Rh", "y": -1024}}, {"554":{"x": -2216, "val":"Ra", "y": -1104}}, {"555":{"x": -1736, "val":"Ea", "y": -1086}}, {"556":{"x": -1720, "val":"Mr", "y": -1220}}, {"557":{"x": -1627, "val":"En", "y": -903}}, {"558":{"x": -1468, "val":"Cd", "y": -874}}, {"559":{"x": -1527, "val":"Eh", "y": -1344}}, {"560":{"x": -1575, "val":"I2", "y": -1184}}, {"561":{"x": -1375, "val":"Bd", "y": -1515}}, {"562":{"x": -1509, "val":"V", "y": -1480}}, {"563":{"x": -1980, "val":"I7", "y": -907}}, {"564":{"x": -1847, "val":"Gp", "y": -970}}, {"565":{"x": -1876, "val":"V", "y": -1108}}, {"566":{"x": -1355, "val":"Rh", "y": -1370}}, {"567":{"x": -1203, "val":"Ra", "y": -1413}}, {"568":{"x": -1674, "val":"Gp", "y": -1345}}, {"569":{"x": -1560, "val":"Ir", "y": -70}}, {"570":{"x": -901, "val":"Mt", "y": -1863}}, {"571":{"x": -949, "val":"Pa", "y": -2061}}, {"572":{"x": -896, "val":"En", "y": -1720}}, {"573":{"x": -654, "val":"I7", "y": -1196}}, {"574":{"x": -804, "val":"I5", "y": -1979}}, {"575":{"x": -714, "val":"Gp", "y": -2087}}, {"576":{"x": -517, "val":"Pa", "y": -1444}}, {"577":{"x": -428, "val":"Pt", "y": -1564}}, {"578":{"x": -377, "val":"I6", "y": -1708}}, {"579":{"x": -554, "val":"Kh", "y": -2110}}, {"580":{"x": -408, "val":"V", "y": -2012}}, {"581":{"x": -356, "val":"Cd", "y": -1857}}, {"582":{"x": -333, "val":"Cc", "y": -2128}}, {"583":{"x": -408, "val":"Md", "y": -2227}}, {"584":{"x": -712, "val":"Ph", "y": -2225}}, {"585":{"x": -850, "val":"Pt", "y": -2168}}, {"586":{"x": -782, "val":"V", "y": -1621}}, {"587":{"x": -2033, "val":"Tc", "y": -1}}, {"588":{"x": -1022, "val":"G", "y": -1647}}, {"589":{"x": -2247, "val":"I4", "y": -141}}, {"590":{"x": -1120, "val":"V", "y": -1141}}, {"591":{"x": -1218, "val":"Mu", "y": -1625}}, {"592":{"x": -686, "val":"Cc", "y": -789}}, {"593":{"x": -1404, "val":"H", "y": -1951}}, {"594":{"x": -1219, "val":"En", "y": -1237}}, {"595":{"x": -1191, "val":"Mt", "y": -1023}}, {"596":{"x": -1606, "val":"I3", "y": -1728}}, {"597":{"x": -2206, "val":"Cl", "y": -1632}}, {"598":{"x": -2126, "val":"Tg", "y": -101}}, {"599":{"x": -2263, "val":"Bc", "y": -706}}, {"600":{"x": -1106, "val":"Kh", "y": -2067}}, {"601":{"x": -846, "val":"I8", "y": -756}}, {"602":{"x": -1403, "val":"Bc", "y": -1663}}, {"603":{"x": -710, "val":"H", "y": -1372}}, {"604":{"x": -901, "val":"Eh", "y": -1012}}, {"605":{"x": -643, "val":"Cd", "y": -935}}, {"606":{"x": -594, "val":"Kh", "y": -1068}}, {"607":{"x": -962, "val":"Mr", "y": -1162}}, {"608":{"x": -576, "val":"Ph", "y": -1304}}, {"609":{"x": -1231, "val":"Kh", "y": -710}}, {"610":{"x": -1162, "val":"Gc", "y": -595}}, {"611":{"x": -1295, "val":"V", "y": -1753}}, {"612":{"x": -1105, "val":"I4", "y": -1522}}, {"613":{"x": -955, "val":"Hd", "y": -1513}}, {"614":{"x": -1998, "val":"Ea", "y": -442}}, {"615":{"x": -1247, "val":"Gc", "y": -1887}}, {"616":{"x": -1537, "val":"Ea", "y": -1615}}, {"617":{"x": -1515, "val":"Bd", "y": -1841}}, {"618":{"x": -935, "val":"I1", "y": -442}}, {"619":{"x": -809, "val":"G", "y": -535}}, {"620":{"x": -725, "val":"En", "y": -654}}, {"621":{"x":1567, "val":"Ra", "y": -1601}}, {"622":{"x":1492, "val":"Pt", "y": -1477}}, {"623":{"x":1186, "val":"Md", "y": -1681}}, {"624":{"x":1248, "val":"Bd", "y": -1529}}, {"625":{"x":1317, "val":"V", "y": -1404}}, {"626":{"x":1248, "val":"Cc", "y": -900}}, {"627":{"x":1363, "val":"Pa", "y": -1158}}, {"628":{"x":1528, "val":"Hd", "y": -1212}}, {"629":{"x":1440, "val":"I7", "y": -1325}}, {"630":{"x":1633, "val":"Cc", "y": -699}}, {"631":{"x":1583, "val":"I1", "y": -838}}, {"632":{"x":1453, "val":"Hd", "y": -216}}, {"633":{"x":1727, "val":"Kh", "y": -384}}, {"634":{"x":812, "val":"Bd", "y": -284}}, {"635":{"x":389, "val":"Pt", "y": -1697}}, {"636":{"x":957, "val":"I8", "y": -340}}, {"637":{"x":1017, "val":"Cl", "y": -456}}, {"638":{"x":1336, "val":"Ir", "y": -759}}, {"639":{"x":1370, "val":"Cd", "y": -887}}, {"640":{"x":1338, "val":"V", "y": -628}}, {"641":{"x":111, "val":"Kh", "y":2223}}, {"642":{"x":256, "val":"Bc", "y":2211}}, {"643":{"x":454, "val":"Cc", "y": -1153}}, {"644":{"x":956, "val":"G", "y": -1138}}, {"645":{"x":1104, "val":"Cl", "y": -1165}}, {"646":{"x":1339, "val":"V", "y": -1007}}, {"647":{"x":933, "val":"I5", "y": -1507}}, {"648":{"x":1489, "val":"Cl", "y": -664}}, {"649":{"x":605, "val":"Rh", "y": -1651}}, {"650":{"x":615, "val":"Pa", "y": -1793}}, {"651":{"x":968, "val":"Cd", "y": -1377}}, {"652":{"x":1076, "val":"Bd", "y": -749}}, {"653":{"x":1189, "val":"I6", "y": -667}}, {"654":{"x":1472, "val":"H", "y": -353}}, {"655":{"x":1730, "val":"Pt", "y": -802}}, {"656":{"x":1480, "val":"Md", "y": -1087}}, {"657":{"x":525, "val":"Kh", "y": -1901}}, {"658":{"x":1457, "val":"I6", "y": -1760}}, {"659":{"x":520, "val":"Cl", "y": -1012}}, {"660":{"x":468, "val":"Bd", "y": -165}}, {"661":{"x":524, "val":"H", "y": -35}}, {"662":{"x":1314, "val":"Cd", "y":44}}, {"663":{"x":1206, "val":"Mu", "y":134}}, {"664":{"x":1904, "val":"Cd", "y": -78}}, {"665":{"x":1912, "val":"Md", "y":60}}, {"666":{"x":1858, "val":"H", "y":191}}, {"667":{"x": -286, "val":"Cd", "y": -1529}}, {"668":{"x": -34, "val":"Md", "y": -1571}}, {"669":{"x": -2362, "val":"Gc", "y": -61}}, {"670":{"x": -2235, "val":"Bd", "y":28}}, {"671":{"x": -36, "val":"Ir", "y":1704}}, {"672":{"x": -152, "val":"Hd", "y":1621}}, {"673":{"x": -2361, "val":"Gp", "y":93}}, {"674":{"x":559, "val":"Cd", "y": -270}}, {"775":{"x":16063, "val":"S06", "y": -435}}, {"776":{"x":16146, "val":"S13", "y": -66}}, {"777":{"x":16147, "val":"S14", "y": -319}}, {"778":{"x":15331, "val":"A23", "y": -58}}, {"779":{"x":15332, "val":"A29", "y": -320}}, {"780":{"x":15189, "val":"S75", "y":128}}, {"781":{"x":15189, "val":"S72", "y": -374}}, {"782":{"x":16283, "val":"S21", "y":127}}, {"783":{"x":16283, "val":"S10", "y": -376}}, {"784":{"x":15741, "val":"A39", "y":510}}, {"785":{"x":16146, "val":"S16", "y": -197}}, {"786":{"x":16026, "val":"S65", "y":153}}, {"787":{"x":15415, "val":"A28", "y":184}}, {"788":{"x":15415, "val":"S64", "y": -435}}, {"789":{"x":15188, "val":"S74", "y":3}}, {"790":{"x":15577, "val":"A20", "y":409}}, {"791":{"x":15331, "val":"A22", "y":67}}, {"792":{"x":16147, "val":"S15", "y":67}}, {"793":{"x":16283, "val":"S79", "y":2}}, {"794":{"x":15740, "val":"A39", "y": -888}}, {"795":{"x":15824, "val":"S61", "y":520}}, {"796":{"x":15904, "val":"S12", "y":409}}, {"797":{"x":15983, "val":"S04", "y": -548}}, {"798":{"x":15741, "val":"A39", "y":638}}, {"799":{"x":15741, "val":"S62", "y":892}}, {"800":{"x":15557, "val":"S83", "y":637}}, {"801":{"x":15922, "val":"S24", "y":636}}, {"802":{"x":15283, "val":"S82", "y":257}}, {"803":{"x":16195, "val":"S78", "y":250}}, {"804":{"x":15280, "val":"A15", "y": -502}}, {"805":{"x":16157, "val":"S09", "y": -481}}, {"806":{"x":15555, "val":"S70", "y": -883}}, {"807":{"x":15836, "val":"S01", "y": -1006}}, {"808":{"x":15648, "val":"S63", "y":763}}, {"809":{"x":15641, "val":"S69", "y": -1004}}, {"810":{"x":15467, "val":"S77", "y":512}}, {"811":{"x":16011, "val":"S23", "y":511}}, {"812":{"x":15466, "val":"S71", "y": -760}}, {"813":{"x":15921, "val":"S02", "y": -886}}, {"814":{"x":15834, "val":"A12", "y":252}}, {"815":{"x":15985, "val":"S11", "y":295}}, {"816":{"x":15926, "val":"S59", "y":125}}, {"817":{"x":15375, "val":"S76", "y":385}}, {"818":{"x":16102, "val":"S22", "y":382}}, {"819":{"x":15823, "val":"S03", "y": -771}}, {"820":{"x":16011, "val":"S07", "y": -760}}, {"821":{"x":15189, "val":"S81", "y": -122}}, {"822":{"x":15331, "val":"A24", "y": -193}}, {"823":{"x":15741, "val":"A39", "y":763}}, {"824":{"x":15740, "val":"S68", "y": -1141}}, {"825":{"x":15657, "val":"A21", "y":520}}, {"826":{"x":15189, "val":"S73", "y": -251}}, {"827":{"x":16283, "val":"S20", "y": -125}}, {"828":{"x":15833, "val":"S25", "y":762}}, {"829":{"x":15496, "val":"A25", "y": -548}}, {"830":{"x":15460, "val":"A37", "y": -127}}, {"831":{"x":15460, "val":"S54", "y": -255}}, {"832":{"x":15460, "val":"S58", "y":0}}, {"833":{"x":15902, "val":"S05", "y": -660}}, {"834":{"x":16014, "val":"A36", "y": -128}}, {"835":{"x":16014, "val":"S56", "y": -255}}, {"836":{"x":16014, "val":"S60", "y":0}}, {"837":{"x":15374, "val":"S80", "y": -632}}, {"838":{"x":15555, "val":"S53", "y": -382}}, {"839":{"x":15647, "val":"A11", "y": -507}}, {"840":{"x":15550, "val":"S57", "y":124}}, {"841":{"x":15832, "val":"A14", "y": -507}}, {"842":{"x":15925, "val":"S55", "y": -378}}, {"843":{"x":16105, "val":"S08", "y": -626}}, {"844":{"x":15740, "val":"A39", "y": -1012}}, {"845":{"x":15495, "val":"A26", "y":295}}, {"846":{"x":15642, "val":"A13", "y":250}}, {"847":{"x":15575, "val":"A30", "y": -659}}, {"848":{"x":16283, "val":"S17", "y": -251}}, {"849":{"x":15739, "val":"S18", "y": -1309}}, {"850":{"x":15855, "val":"S19", "y": -1169}}, {"854":{"x":15968, "val":"S26", "y": -1033}}, {"856":{"x":16226, "val":"S27", "y": -527}}, {"857":{"x":16114, "val":"S84", "y":209}}, {"859":{"x":16073, "val":"S28", "y": -898}}]};
+			
 			helpfulAdventurer.levelGraph = LevelGraph.loadGraph(helpfulAdventurer.levelGraphObject, helpfulAdventurer);
 			
 			helpfulAdventurer.name = "Helpful Adventurer";
@@ -1858,6 +2089,7 @@
 			helpfulAdventurer.startingSkills = [];
 			helpfulAdventurer.upgradeableStats = Character.DEFAULT_UPGRADEABLE_STATS;
 			helpfulAdventurer.assetGroupName = CHARACTER_ASSET_GROUP;
+			helpfulAdventurer.gildStartBuild = [1, 2, 3, 4, 6, 35];
 			//helpfulAdventurer.onCharacterDisplayCreated = null;
 			
 			//types
@@ -1890,7 +2122,7 @@
 			tripleClick.ignoresGCD = false;
 			tripleClick.maximumRange = 9000;
 			tripleClick.minimumRange = 0;
-			tripleClick.tooltipFunction = function():Object{ return this.skillTooltip("Clicks " + Math.ceil((5 + CH2.currentCharacter.getTrait("ExtraMulticlicks")) * (CH2.currentCharacter.getTrait("Flurry") ? CH2.currentCharacter.hasteRating : 1))  + " times.  Dashing consumes 20% of remaining clicks."); };
+			tripleClick.tooltipFunction = function():Object{ return this.skillTooltip("Clicks " + Math.ceil((5 + (2 * CH2.currentCharacter.getTrait("ExtraMulticlicks"))) * (CH2.currentCharacter.getTrait("Flurry") ? CH2.currentCharacter.hasteRating : 1))  + " times.  Dashing consumes 20% of remaining clicks."); };
 			
 			var bigClicks:Skill = new Skill();
 			bigClicks.modName = MOD_INFO["name"];
@@ -1951,7 +2183,27 @@
 			manaClick.ignoresGCD = false;
 			manaClick.maximumRange = 9000;
 			manaClick.minimumRange = 0;
-			manaClick.tooltipFunction = function():Object{ return this.skillTooltip("Clicks with a 100% chance to score a critical hit."); };
+			manaClick.tooltipFunction = function():Object{
+				var character:Character = CH2.currentCharacter;
+				var manaClickTooltip:String = "Clicks with +100% chance to critical hit";
+				var manaClickDamageBonus:Number = 0;
+				
+				if (character.getTrait("ImprovedManaCrit"))
+				{
+					manaClickDamageBonus = Math.pow(1.25, character.getTrait("ManaCritDamage")) * (1 + character.criticalChance);
+				}
+				else
+				{
+					manaClickDamageBonus = Math.pow(1.25, character.getTrait("ManaCritDamage"));
+				}
+				
+				if (manaClickDamageBonus > 1)
+				{
+					manaClickTooltip += " and a " + (manaClickDamageBonus * 100).toFixed(0) + "% damage bonus";
+				}
+				
+				return this.skillTooltip(manaClickTooltip + "."); 
+			};
 			
 			var clickstorm:Skill = new Skill();
 			clickstorm.modName = MOD_INFO["name"];
@@ -2052,7 +2304,7 @@
 			managize.cooldown = 60000;
 			managize.iconId = 35;
 			managize.manaCost = 0;
-			managize.energyCost = 120;
+			managize.energyCost = 0;
 			managize.consumableOnly = false;
 			managize.minimumAscensions = 0;
 			managize.effectFunction = managizeEffect;
@@ -2060,7 +2312,12 @@
 			managize.maximumRange = 9000;
 			managize.minimumRange = 0;
 			managize.usesMaxEnergy = false;
-			managize.tooltipFunction = function():Object{ return this.skillTooltip("Restores " + (25 + (25 * 0.2 * CH2.currentCharacter.getTrait("ImprovedEnergize"))).toFixed(0) + "% of your maximum mana."); };
+			managize.tooltipFunction = function():Object {
+				var character:Character = CH2.currentCharacter;
+				var duration:Number = 15;
+				duration += (15 * (0.2 * character.getTrait("ImprovedEnergize")));
+				return this.skillTooltip("Restores " + (character.maxMana * 0.25 / 15).toFixed(2) + " mana  at a cost of " + (120/duration).toFixed(2) + " energy every " + (1 / character.hasteRating).toFixed(2) + " seconds over " + (duration * (1 / character.hasteRating)).toFixed(2) + " seconds."); 
+			};
 			
 			var energizeExtend:Skill = new Skill();
 			energizeExtend.modName = MOD_INFO["name"];
@@ -2195,7 +2452,6 @@
 			addSkillTreeTabTutorial();
 			addAutomatorTabTutorial();
 			addMainPanelTutorial();
-			addRubyShopTutorial();
 		}
 		
 		public function createFixedFirstRunCatalogs(data:Array):void
@@ -2307,42 +2563,6 @@
 				CH2.user.totalMsecsPlayed - character.timeOfLastCatalogPurchase > Character.TIME_UNTIL_PLAYER_NEEDS_HINT_MS &&
 				CH2.user.totalMsecsPlayed - character.timeOfLastItemUpgrade > Character.TIME_UNTIL_PLAYER_NEEDS_HINT_MS &&
 				character.gold.gte(character.getCurrentCatalogPrice());
-		}
-		
-		public function addRubyShopTutorial():void
-		{
-			var tutorial:Tutorial = new Tutorial();
-			
-			tutorial.priority = 9;
-			
-			tutorial.doesPlayerRequireFunction = function():Boolean {
-				var character:Character = CH2.currentCharacter;
-				return character.highestWorldCompleted < 1 && !character.hasSeenRubyShopPanel;
-			};
-			
-			tutorial.shouldStartFunction = function():Boolean {
-				var character:Character = CH2.currentCharacter;
-				return !character.hasSeenRubyShopPanel &&
-					character.highestWorldCompleted < 1 && 
-					character.timeSinceLastRubyShopAppearance > Character.TIME_UNTIL_PLAYER_NEEDS_RUBY_SHOP_HINT_MS && 
-					character.timeSinceLastRubyShopAppearance < Character.RUBY_SHOP_APPEARANCE_DURATION;
-			};
-			
-			tutorial.onStartFunction = function():void {
-				TutorialManager.instance.addRightPanelTutorialArrow(tutorial);
-			};
-			
-			tutorial.shouldEndFunction = function():Boolean {
-				var character:Character = CH2.currentCharacter;
-				return character.hasSeenRubyShopPanel ||
-					character.timeSinceLastRubyShopAppearance >= Character.RUBY_SHOP_APPEARANCE_DURATION;
-			};
-			
-			tutorial.onEndFunction = function():void {
-				TutorialManager.instance.removeTutorialArrow(tutorial);
-			};
-			
-			addHelpfulAdventurerStaticTutorial("Ruby_Shop_Tutorial", tutorial);
 		}
 		
 		public function addMainPanelTutorial():void
@@ -2621,6 +2841,11 @@
 			CH2.currentCharacter.automator.unlockStone(CHARACTER_NAME+"_16");
 			CH2.currentCharacter.automator.unlockStone(CHARACTER_NAME+"_11");
 			CH2.currentCharacter.automator.unlockGem(CHARACTER_NAME+"_23");
+			
+			if (CH2.currentCharacter.gilds > 0 ) 
+			{
+				CH2.currentCharacter.automatorPoints++;
+			}
 		}
 		
 		private function onClickActivate():Boolean
@@ -2955,6 +3180,57 @@
 			})
 		}
 		
+		private function addFirstWorldOfGildStone():void
+        {
+            CH2.currentCharacter.automator.addStone(CHARACTER_NAME+"_29", "First World Of Gild", "First world Of Gild", "A stone that can activate when you are on the first world of a gild.", function ():Boolean
+            {
+                return (CH2.currentCharacter.currentWorldId % CH2.currentCharacter.worldsPerGild == 1); 
+            })
+        }
+        
+        private function addNotFirstWorldOfGildStone():void
+        {
+            CH2.currentCharacter.automator.addStone(CHARACTER_NAME+"_30", "Not First World Of Gild", "Not first world Of Gild", "A stone that can activate when you are not on the first world of a gild.", function ():Boolean
+            {
+                return (CH2.currentCharacter.currentWorldId % CH2.currentCharacter.worldsPerGild != 1);   
+            })
+        }    
+		
+		private function addGreaterThanMonsterDistanceStone():void
+        {
+            CH2.currentCharacter.automator.addStone(CHARACTER_NAME+"_31", "Next Monster > 90 cm Away", "Next monster > 90 cm away", "A stone that can activate when the next monster is greater than 90 cm away.", function ():Boolean
+            {
+			var nextMonster = CH2.world.getNextMonster();
+			if ( nextMonster == null)
+				{
+					return false;
+				}
+				var nearestMonsterDistance:Number = Math.abs(nextMonster.y - CH2.currentCharacter.y);
+				return (nearestMonsterDistance > 90);
+            })
+        }  
+
+		private function addLessThanMonsterDistanceStone():void
+        {
+            CH2.currentCharacter.automator.addStone(CHARACTER_NAME+"_33", "Next Monster < 90 cm Away", "Next monster < 90 cm away", "A stone that can activate when the next monster is less than 90 cm away.", function ():Boolean
+            {
+			var nextMonster = CH2.world.getNextMonster();
+			if ( nextMonster == null)
+				{
+					return false;
+				}
+				var nearestMonsterDistance:Number = Math.abs(nextMonster.y - CH2.currentCharacter.y);
+				return (nearestMonsterDistance <= 90);
+            })
+        }  
+		
+		private function addNotABossZoneStone():void
+        {
+            CH2.currentCharacter.automator.addStone(CHARACTER_NAME+"_32", "Not A Boss Zone", "Not a boss zone", "A stone that can activate when you are not on a boss zone.", function ():Boolean
+            {
+				return !CH2.user.isOnBossZone;
+            })
+        }  
 		private function addBuffComparisonStone(stoneId:String, stoneName:String, stoneDescription:String, buffName:String, comparison:int, comparisonValue:int):void
 		{
 			var stoneFunction:Function;
@@ -2986,12 +3262,12 @@
 		
 		public function addBigClicksGTMultiClicksStone():void
 		{
-			CH2.currentCharacter.automator.addStone("BigClicksGTMultiClicks", "Big Clicks > Multiclicks", "Big Clicks > Multiclicks", "A stone that activates if you have more Big Clicks than Multiclick can consume.", bigClicksGTMulticlicks);
+			CH2.currentCharacter.automator.addStone("BigClicksGTMultiClicks", "Big Clicks > Multiclicks", "Big Clicks > Multiclicks", "A stone that activates if you have more Big Clicks than MultiClick can consume.", bigClicksGTMulticlicks);
 		}
 		
 		public function addBigClicksLTEMultiClicksStone():void
 		{
-			CH2.currentCharacter.automator.addStone("BigClicksLTEMultiClicks", "Big Clicks <= Multiclicks", "Big Clicks <= Multiclicks", "A stone that activates if your Multiclick would consume all of your Big Clicks.", bigClicksLTEMulticlicks);
+			CH2.currentCharacter.automator.addStone("BigClicksLTEMultiClicks", "Big Clicks <= Multiclicks", "Big Clicks <= Multiclicks", "A stone that activates if your MultiClick would consume all of your Big Clicks.", bigClicksLTEMulticlicks);
 		}
 		
 		private function addNextSetGem():void
@@ -3006,13 +3282,15 @@
 		
 		public function onNextSetGemActivate():Boolean
 		{
-			var currentQueueIndex:int = CH2.currentCharacter.automator.currentQueueIndex;
-			
-			CH2.currentCharacter.automator.setCurrentQueue(currentQueueIndex + 1);	
+			var nextQueueIndex:int = CH2.currentCharacter.automator.currentQueueIndex + 1;
 			
 			if (CH2UI.instance.mainUI && CH2UI.instance.mainUI.mainPanel && CH2UI.instance.mainUI.mainPanel.isOnAutomatorPanel)
 			{
-				CH2UI.instance.mainUI.mainPanel.refreshOpenTab();
+				CH2UI.instance.mainUI.mainPanel.automatorPanel.switchQueueSet(nextQueueIndex);
+			}
+			else
+			{
+				CH2.currentCharacter.automator.setCurrentQueue(nextQueueIndex);
 			}
 			return true;
 		}
@@ -3029,13 +3307,15 @@
 		
 		public function onPreviousSetGemActivate():Boolean
 		{
-			var currentQueueIndex:int = CH2.currentCharacter.automator.currentQueueIndex;
-			
-			CH2.currentCharacter.automator.setCurrentQueue(currentQueueIndex - 1);
+			var previousQueueIndex:int = CH2.currentCharacter.automator.currentQueueIndex - 1;
 			
 			if (CH2UI.instance.mainUI && CH2UI.instance.mainUI.mainPanel && CH2UI.instance.mainUI.mainPanel.isOnAutomatorPanel)
 			{
-				CH2UI.instance.mainUI.mainPanel.refreshOpenTab();
+				CH2UI.instance.mainUI.mainPanel.automatorPanel.switchQueueSet(previousQueueIndex);
+			}
+			else
+			{
+				CH2.currentCharacter.automator.setCurrentQueue(previousQueueIndex);
 			}
 			return true;
 		}
@@ -3115,49 +3395,52 @@
 			
 			if (character.getTrait("KillingFrenzy"))
 			{
-				
-				//if (character.buffs.hasBuffByName("Killing Frenzy")) {
-					//var killingFrenzy:Buff = character.buffs.getBuff("Killing Frenzy");
-					//killingFrenzy.timeSinceActivated = 0;
-					//killingFrenzy.buffStat(CH2.STAT_HASTE, 1.5);
-				//}
-				//else
-				{
-					var buff:Buff = new Buff();
-					buff.name = "Killing Frenzy";
-					buff.unhastened = true;
-					buff.iconId = 23;
-					buff.tooltipFunction = function() {
-						return {
-							"header": "Killing Frenzy",
-							"body": "Multiplies haste by " + buff.getStatValue(CH2.STAT_HASTE) * 100 + "% for 5 seconds." // Reduced by 10% per second."
-						};
-					}
-					buff.buffStat(CH2.STAT_HASTE, 1.5);
-					buff.duration = 5000;
-/*					buff.tickRate = 1000;
-					buff.tickFunction = function() {
-						buff.buffStat(CH2.STAT_HASTE, buff.getStatValue(CH2.STAT_HASTE) - 0.1);
-					}
-*/				
-					character.buffs.addBuff(buff);
+				var buff:Buff = new Buff();
+				buff.name = "Killing Frenzy";
+				buff.unhastened = true;
+				buff.iconId = 23;
+				buff.tooltipFunction = function() {
+					return {
+						"header": "Killing Frenzy",
+						"body": "Multiplies haste by " + buff.getStatValue(CH2.STAT_HASTE) * 100 + "% for 5 seconds." // Reduced by 10% per second."
+					};
 				}
+				buff.buffStat(CH2.STAT_HASTE, 1.5);
+				buff.duration = 5000;			
+				character.buffs.addBuff(buff);
 			}
 			
+			monster.level += character.getTrait("EtherealMonsterLevels");
+			
 			character.onKilledMonsterDefault(monster);
+		}
+		
+		public function onTeleportAttackOverride():void
+		{
+			if (CH2.currentAscensionWorld.traits[WT_SPEED_LIMIT])
+			{
+				CH2.currentCharacter.addGold(CH2.currentCharacter.gold.multiplyN( -0.2));
+			}
+			CH2.currentCharacter.onTeleportAttackDefault();
 		}
 		
 		//public function helpfulAdventurerAttack(attackData:AttackData):void
 		public function attackOverride(attackData:AttackData):void
 		{
-			if (CH2.currentCharacter.getTrait("LowEnergyDamageBonus") && CH2.currentCharacter.energy < CH2.currentCharacter.maxEnergy * 0.60)
+			var character:Character = CH2.currentCharacter;
+			if (CH2.currentAscensionWorld.traits[WT_ROBUST])
+			{
+				attackData.critChanceModifier = -100;
+			}
+			
+			if (character.getTrait("LowEnergyDamageBonus") && character.energy < character.maxEnergy * 0.60)
 			{
 				attackData.damage.timesEqualsN(2);
 			}
 			
 			var monsterHealth:BigNumber = new BigNumber(0);
 			
-			if (CH2.currentCharacter.getTrait("ManaCritOverflow"))
+			if (character.getTrait("ManaCritOverflow"))
 			{
 				var target:Monster = CH2.world.getNextMonster();
 				if (target)
@@ -3167,45 +3450,84 @@
 				}
 			}
 			
-			CH2.currentCharacter.attackDefault(attackData);
+			character.attackDefault(attackData);
 			
-			if (attackData.isAutoAttack && attackData.isCritical && CH2.currentCharacter.getTrait("AutoAttackCritMana") && !(CH2.currentCharacter.buffs.hasBuffByName("AutoAttackCritMana")))
+			if (!attackData.isAutoAttack && CH2.currentAscensionWorld.traits[WT_EXHAUSTING])
 			{
-				CH2.currentCharacter.addMana(1);
+				if (character.buffs.hasBuffByName("Exhaustion"))
+				{
+					var currentExhaustion:Buff = character.buffs.getBuff("Exhaustion");
+					if (currentExhaustion.stacks < 100000)
+					{
+						currentExhaustion.stacks += 1;
+						currentExhaustion.buffStat(CH2.STAT_HASTE, 0.95 * currentExhaustion.getStatValue(CH2.STAT_HASTE));
+						currentExhaustion.duration = 500 * currentExhaustion.stacks;
+					}
+					currentExhaustion.timeSinceActivated = 0;
+				}
+				else
+				{
+					var exhaustion:Buff = new Buff();
+					exhaustion.name = "Exhaustion";
+					exhaustion.iconId = 147;
+					exhaustion.isUntimedBuff = false;
+					exhaustion.duration = 500;
+					exhaustion.maximumStacks = 100000;
+					exhaustion.unhastened = true;
+					exhaustion.tickRate = 500;
+					exhaustion.tooltipFunction = function() {
+						return {
+							"header": "Exhaustion",
+							"body": "Tired of attacking, haste temporarily reduced."
+						};
+					}
+					exhaustion.buffStat(CH2.STAT_HASTE,  0.95);
+					exhaustion.tickFunction = function() {
+						var currentExhaustion:Buff = CH2.currentCharacter.buffs.getBuff("Exhaustion")
+						currentExhaustion.stacks -= 1;
+						currentExhaustion.buffStat(CH2.STAT_HASTE, 1 / 0.95 * currentExhaustion.getStatValue(CH2.STAT_HASTE));
+					}
+					character.buffs.addBuff(exhaustion);
+				}
+			}
+			
+			if (attackData.isAutoAttack && attackData.isCritical && character.getTrait("AutoAttackCritMana") && !(character.buffs.hasBuffByName("AutoAttackCritMana")))
+			{
+				character.addMana(1);
 				var buff:Buff = new Buff();
 				buff.name = "AutoAttackCritMana";
 				buff.iconId = 23;
 				buff.isUntimedBuff = false;
-				buff.duration = 1000;
+				buff.duration = 1000 * Math.pow(0.25, character.getTrait("EtherealJerator"));
 				buff.unhastened = true;
 						buff.tooltipFunction = function() {
 							return {
-								"header": "AutoAttackCritMana",
+								"header": "Jerator's Enchantment",
 								"body": "Gained 1 mana."
 							};
 						}
-				CH2.currentCharacter.buffs.addBuff(buff);
+				character.buffs.addBuff(buff);
 			}
 			
-			if (attackData.isCritical && (CH2.currentCharacter.getTrait("BhaalsRise") || CH2.currentCharacter.getTrait("BhallsRise")))
+			if (attackData.isCritical && (character.getTrait("BhaalsRise") || character.getTrait("BhallsRise")))
 			{
-				var manaCrit:Skill = CH2.currentCharacter.getSkill("Mana Crit");
+				var manaCrit:Skill = character.getSkill("Mana Crit");
 				if (manaCrit)
 				{	
 					manaCrit.cooldownRemaining -= 1000;
 				}
 			}
 			
-			if (attackData.isKillShot && attackData.isCritical && (CH2.currentCharacter.getTrait("CritKillPowerSurge") || CH2.currentCharacter.getTrait("CritKillPowerSurgeCooldown")))
+			if (attackData.isKillShot && attackData.isCritical && (character.getTrait("CritKillPowerSurge") || character.getTrait("CritKillPowerSurgeCooldown")))
 			{
-				var powerSurge:Skill = CH2.currentCharacter.getSkill("Powersurge");
+				var powerSurge:Skill = character.getSkill("Powersurge");
 				if (powerSurge)
 				{
 					powerSurge.cooldownRemaining -= 5000;
 				}
 			}
 			
-			if (attackData.isKillShot && (CH2.currentCharacter.buffs.hasBuffByName("Mana Crit")) && CH2.currentCharacter.getTrait("ManaCritOverflow"))
+			if (attackData.isKillShot && (character.buffs.hasBuffByName("Mana Crit")) && character.getTrait("ManaCritOverflow"))
 			{
 				var overflowDamage:BigNumber = attackData.damage.subtract(monsterHealth);
 				var nextTarget:Monster = CH2.world.getNextMonster();
@@ -3253,6 +3575,10 @@
 		//public function helpfulAdventurerAddGold(goldToAdd:BigNumber):void
 		public function addGoldOverride(goldToAdd:BigNumber):void
 		{
+			if (CH2.currentAscensionWorld.traits[WT_INCOME_TAX] && goldToAdd.isPositive)
+			{
+				goldToAdd.timesEqualsN(1 / CH2.currentCharacter.monsterGoldMultiplier);
+			}
 			if (CH2.currentCharacter.getTrait("HighEnergyGoldBonus") && (goldToAdd.gtN(0)) && CH2.currentCharacter.energy > 0.40 * CH2.currentCharacter.maxEnergy)
 			{
 				CH2.currentCharacter.addGoldDefault(goldToAdd);
@@ -3273,23 +3599,42 @@
 					if (target && (Math.abs(target.y - CH2.currentCharacter.y) < 200))
 					{
 						var attackData:AttackData = new AttackData();
-						attackData.damage = character.clickDamage.multiplyN(Math.abs(amount));
+						attackData.damage = character.clickDamage.multiplyN(Math.abs(amount) * (character.getTrait("EtherealDischarge") + 1));
 						attackData.isCritical = false;
 						attackData.monster = target;
 						target.takeDamage(attackData);
 						attackData.isClickAttack = true;
-						character.buffs.onAttack([attackData]);
+						character.buffs.onAttack(attackData);
 					}
 				}
 			}
 			
+			if (CH2.currentAscensionWorld.traits[WT_UNSTABLE] && ((character.energy + amount) >= character.maxEnergy))
+			{
+				amount = -character.energy;
+			}
 			character.addEnergyDefault(amount, showFloatingText);
+		}
+		
+		public function regenerateManaAndEnergyOverride(time:Number):void
+		{
+			var character:Character = CH2.currentCharacter;
+			
+			var timeInSeconds:Number = (time / 1000);
+			
+			var manaToAdd:Number = timeInSeconds * character.getManaRegenRate();
+			if (CH2.currentAscensionWorld.traits[WT_BANAL])
+			{
+				manaToAdd *= 0.1;
+			}
+			character.addMana(manaToAdd, false);
 		}
 		
 		//public function helpfulAdventurerAddMana(amount:Number, showFloatingText:Boolean = true):void
 		public function addManaOverride(amount:Number, showFloatingText:Boolean = true):void
 		{
 			var character:Character = CH2.currentCharacter;
+			
 			if (amount < 0)
 			{
 				if (character.getTrait("SpendManaHaste"))
@@ -3456,7 +3801,7 @@
 		public function multiClickCount():int
 		{
 			var character:Character = CH2.currentCharacter;
-			var buffClicks:int = 4 + character.getTrait("ExtraMulticlicks");
+			var buffClicks:int = 4 + (2 * character.getTrait("ExtraMulticlicks"));
 			if (character.getTrait("Flurry"))
 			{
 				buffClicks = (buffClicks + 1) * character.hasteRating - 1;
@@ -3474,11 +3819,20 @@
 			buff.tickRate = 50;
 			buff.duration = buff.tickRate * buffClicks;
 			buff.tickFunction = function() {
-				if (!CH2.currentCharacter.isNextMonsterInRange)
+				if (!character.isNextMonsterInRange && !character.getTrait("EtherealMultiClick"))
 				{
 					buff.timeSinceActivated += 0.2 * buff.timeLeft;
+					if (buff.timeLeft < buff.timeSinceLastTick) {
+						buff.timeSinceLastTick = buff.timeLeft;
+					}
 				}
 				character.clickAttack(false);
+			}
+			buff.tooltipFunction = function() {
+				return {
+					"header": "MultiClick",
+					"body": "Clicking " + Math.ceil((5 + (2 * CH2.currentCharacter.getTrait("ExtraMulticlicks"))) * (CH2.currentCharacter.getTrait("Flurry") ? CH2.currentCharacter.hasteRating : 1))  + " times, with " + Math.ceil(buff.timeLeft/buff.tickRate) + " remaining. Dashing consumes 20% of remaining clicks."
+				};
 			}
 			character.buffs.addBuff(buff);
 			character.clickAttack(false);
@@ -3495,7 +3849,8 @@
 			buff.tickRate = 1000 / 30;
 			buff.tickFunction = function() {
 				character.clickAttack(false);
-				character.addEnergy(-(1/3), false);
+				var costReduction:Number = Math.pow(0.5, character.getTrait("EtherealStorms"));
+				character.addEnergy(-(1/3) * costReduction, false);
 				if (character.energy <= 0) {
 					buff.isFinished = true;
 					buff.onFinish();
@@ -3523,24 +3878,25 @@
 			buff.name = "Clickstorm";
 			buff.iconId = 200;
 			buff.duration = 60000;
-			buff.tickRate = 400;
+			buff.tickRate = 200;
 			buff.tickFunction = function() {
 				character.clickAttack(false);
-				character.addEnergy(-0.5, false);
+				var costReduction:Number = Math.pow(0.5, character.getTrait("EtherealStorms"));
+				character.addEnergy(-0.5 * costReduction, false);
 				if (character.energy <= 0) {
 					buff.isFinished = true;
 					buff.onFinish();
 				}
 				if (buff.timeLeft <= buff.tickRate) {
 					buff.timeSinceActivated = 0;
-					tickSpeed++;
-					buff.tickRate = 400 / tickSpeed;
+					tickSpeed *= 2;
+					buff.tickRate = 200 / tickSpeed;
 				}
 			}
 			buff.tooltipFunction = function() {
 				return {
 					"header": "Clickstorm",
-					"body": "Clicking " + (2.5 * tickSpeed * character.hasteRating).toFixed(2) + " times per second. Consuming " + (1.25 * tickSpeed * character.hasteRating).toFixed(2) + " energy per second. Speed increases over time."
+					"body": "Clicking " + (5 * tickSpeed * character.hasteRating).toFixed(2) + " times per second. Consuming " + (2.5 * tickSpeed * character.hasteRating).toFixed(2) + " energy per second. Speed increases over time."
 				};
 			}
 			character.buffs.addBuff(buff);
@@ -3554,26 +3910,27 @@
 			buff.name = "Critstorm";
 			buff.iconId = 200;
 			buff.duration = 60000;
-			buff.tickRate = 400;
+			buff.tickRate = 200;
 			buff.tickFunction = function() {
-				buff.buffStat(CH2.STAT_CRIT_CHANCE, 1);
+				buff.buffStat(CH2.STAT_CRIT_CHANCE, CH2.currentCharacter.criticalChance);
 				character.clickAttack(false);
 				buff.buffStat(CH2.STAT_CRIT_CHANCE, 0);
-				character.addEnergy(-0.5, false);
+				var costReduction:Number = Math.pow(0.5, character.getTrait("EtherealStorms"));
+				character.addEnergy(-0.5 * costReduction, false);
 				if (character.energy <= 0) {
 					buff.isFinished = true;
 					buff.onFinish();
 				}
 				if (buff.timeLeft <= buff.tickRate) {
 					buff.timeSinceActivated = 0;
-					tickSpeed++;
-					buff.tickRate = 400 / tickSpeed;
+					tickSpeed *= 2;
+					buff.tickRate = 200 / tickSpeed;
 				}
 			}
 			buff.tooltipFunction = function() {
 				return {
 					"header": "Critstorm",
-					"body": "Critting " + (2.5 * tickSpeed * character.hasteRating).toFixed(2) + " times per second. Consuming " + (1.25 * tickSpeed * character.hasteRating).toFixed(2) + " energy per second. Speed increases over time."
+					"body": "Clicking " + (5 * tickSpeed * character.hasteRating).toFixed(2) + " times per second with double crit chance. Consuming " + (2.5 * tickSpeed * character.hasteRating).toFixed(2) + " energy per second. Speed increases over time."
 				};
 			}
 			character.buffs.addBuff(buff);
@@ -3590,7 +3947,8 @@
 			buff.tickRate = 400;
 			buff.tickFunction = function() {
 				character.clickAttack(false);
-				character.addEnergy(-0.5, false);
+				var costReduction:Number = Math.pow(0.5, character.getTrait("EtherealStorms"));
+				character.addEnergy(-0.5 * costReduction, false);
 				if (character.energy <= 0) {
 					buff.isFinished = true;
 					buff.onFinish();
@@ -3677,9 +4035,32 @@
 		public function managizeEffect():void
 		{
 			var character:Character = CH2.currentCharacter;
-			character.addMana((character.maxMana * 0.25) + ((character.maxMana * 0.25) * (0.2 * character.getTrait("ImprovedEnergize"))));
+			var buff:Buff = new Buff();
+			buff.name = "Managize";
+			buff.iconId = 35;
+			buff.duration = 15000;
+			buff.duration += 15000 * (0.2 * character.getTrait("ImprovedEnergize"));
+			buff.tickRate = 1000;
+			buff.tickFunction = function () {
+				if (character.energy >= 1)
+				{
+					character.addEnergy(-120*(1000/buff.duration));
+					character.addMana(character.maxMana * 0.25 / 15);
+				}
+			}
+			buff.finishFunction = function() {
+				removeEnergizeIndicator();
+			}
+			buff.tooltipFunction = function() {
+				return {
+					"header": "Managize",
+					"body": "Restoring " + (character.maxMana * 0.25 / 15).toFixed(2) + " mana every " + (1 / character.hasteRating).toFixed(2) + " second."
+				};
+			}
+			character.buffs.addBuff(buff);
+			addEnergizeIndicator();
 		}
-
+		
 		public function energizeExtendEffect():void						// Do Not Implement - Repeated use should increase buff duration by the base duration.
 		{
 			SoundManager.instance.playSound("Activate Potion");
@@ -3833,8 +4214,8 @@
 				buff.isUntimedBuff = true;
 				buff.stacks = stacksPerUse;
 				buff.maximumStacks = stacksPerUse;
-				buff.attackFunction = function(attackDatas:Array) {
-					if (attackDatas[0].isClickAttack) {
+				buff.attackFunction = function(attackData:AttackData) {
+					if (attackData.isClickAttack) {
 						
 						if (character.getTrait("DistributedBigClicks") && character.getTrait("Stormbringer"))
 						{
@@ -3856,7 +4237,7 @@
 								{
 									effect.scaleX = -1;
 								}
-								CH2.world.addEffect(effect, CH2.world.roomsFront, attackDatas[0].monster.x, attackDatas[0].monster.y, World.REMOVE_EFFECT_WHEN_FINISHED, 1, 10);
+								CH2.world.addEffect(effect, CH2.world.roomsFront, attackData.monster.x, attackData.monster.y, World.REMOVE_EFFECT_WHEN_FINISHED, 1, 10);
 								CH2.world.camera.shake(0.5, -25, 25);
 							}
 						}
@@ -3938,12 +4319,12 @@
 			buff.iconId = 150;
 			buff.isUntimedBuff = false;
 			buff.duration =  60000 * Math.pow(1.2, character.getTrait("SustainedPowersurge"));
-			buff.attackFunction = function(attackDatas:Array) {
-				if (attackDatas[0].isClickAttack) {
+			buff.attackFunction = function(attackData:AttackData) {
+				if (attackData.isClickAttack) {
 					var effect:GpuMovieClip = getBamplode(Rnd.integer(1,4));
 					effect.gotoAndPlay(1);
 					effect.isLooping = false;
-					CH2.world.addEffect(effect, CH2.world.roomsFront, attackDatas[0].monster.x, attackDatas[0].monster.y);
+					CH2.world.addEffect(effect, CH2.world.roomsFront, attackData.monster.x, attackData.monster.y);
 				}
 			}
 			buff.tooltipFunction = function() {
@@ -3956,8 +4337,7 @@
 			
 			if (character.getTrait("PowerSurgeCritChance"))
 			{
-				buff.tickRate = 1000;
-//				buff.buffStat(CH2.STAT_CRIT_CHANCE, -1.0);
+				buff.tickRate = buff.duration / 60;
 				buff.tickFunction = function() {
 					buff.buffStat(CH2.STAT_CRIT_CHANCE, buff.getStatValue(CH2.STAT_CRIT_CHANCE) + 0.01);
 				}
@@ -3983,8 +4363,8 @@
 			{
 				buff.stacks = 1;
 			}
-			buff.attackFunction = function(attackDatas:Array) {
-				if (attackDatas[0].isClickAttack)
+			buff.attackFunction = function(attackData:AttackData) {
+				if (attackData.isClickAttack)
 				{
 					if (buff.stacks % 20 == 1)
 					{
@@ -3993,7 +4373,7 @@
 							var effect:GpuMovieClip = CH2AssetManager.instance.getGpuMovieClip(HUGE_CLICK);
 							effect.gotoAndPlay(1);
 							effect.isLooping = false;
-							CH2.world.addEffect(effect, CH2.world.roomsFront, attackDatas[0].monster.x, attackDatas[0].monster.y);
+							CH2.world.addEffect(effect, CH2.world.roomsFront, attackData.monster.x, attackData.monster.y);
 							Shaker.add(CH2.world.roomsBack, -100, 100, 0.5, 0);
 							CH2.world.camera.shake(0.5, -100, 100);
 						}
@@ -4003,17 +4383,17 @@
 							var effect:GpuMovieClip = CH2AssetManager.instance.getGpuMovieClip(BIG_GIANT_CLICK);
 							effect.gotoAndPlay(1);
 							effect.isLooping = false;
-							CH2.world.addEffect(effect, CH2.world.roomsFront, attackDatas[0].monster.x, attackDatas[0].monster.y);
+							CH2.world.addEffect(effect, CH2.world.roomsFront, attackData.monster.x, attackData.monster.y);
 							Shaker.add(CH2.world.roomsBack, -200, 200, 0.5, 0);
 							CH2.world.camera.shake(0.5, -200, 200);
 						}
 						
-						if (!attackDatas[0].monster.isFinalBoss)
+						if (!attackData.monster.isFinalBoss)
 						{
 							var crackEffect:GpuMovieClip = CH2AssetManager.instance.getGpuMovieClip(HUGE_CLICK_CRACK);
 							crackEffect.gotoAndPlay(1);
 							crackEffect.isLooping = false;
-							CH2.world.addEffect(crackEffect, CH2.world.roomsBack, attackDatas[0].monster.x, attackDatas[0].monster.y, World.REMOVE_EFFECT_WHEN_OFFSCREEN);
+							CH2.world.addEffect(crackEffect, CH2.world.roomsBack, attackData.monster.x, attackData.monster.y, World.REMOVE_EFFECT_WHEN_OFFSCREEN);
 						}
 						
 						SoundManager.instance.playSound("huge_click", .8, SoundManager.EFFECTS_PRIORITY);
@@ -4084,7 +4464,14 @@
 				buff.buffStat(CH2.STAT_CLICK_DAMAGE, Math.pow(1.25, character.getTrait("ManaCritDamage")));
 			}
 			
-			buff.buffStat(CH2.STAT_CRIT_CHANCE, 1);
+			if (character.getTrait("EtherealManaCrit"))
+			{
+				buff.buffStat(CH2.STAT_CLICK_DAMAGE, buff.getStatValue(CH2.STAT_CLICK_DAMAGE) * 4 * character.getTrait("EtherealManaCrit"));
+			}
+			else
+			{
+				buff.buffStat(CH2.STAT_CRIT_CHANCE, 1);
+			}
 			character.buffs.addBuff(buff);
 			character.clickAttack();
 			character.buffs.removeBuff("Mana Crit");
@@ -4210,14 +4597,665 @@
 				characterInstance.generateCatalogHandler = this;
 				characterInstance.onMigrationHandler = this;
 				characterInstance.populateRubyPurchaseOptionsHandler = this;
+				characterInstance.getWorldTraitCountHandler = this;
+				characterInstance.applyWorldTraitsHandler = this;
+				characterInstance.onTeleportAttackHandler = this;
+				characterInstance.populateEtherealItemStatsHandler = this;
+				characterInstance.regenerateManaAndEnergyHandler = this;
 				
+				characterInstance.populateEtherealItemStats();
 				createFixedFirstRunCatalogs(FIXED_FIRST_RUN_CATALOG_DATA);
 			}
 		}
 		
-		//public function helpfulAdventurerOnMigration(characterInstance:Character):void
+		public static var etherealItemStatStats:Array = [];
+		public static var etherealItemTraitStats:Object = {};
+		public static var etherealItemTraitNames:Array = [
+			"ExtraMulticlicks",
+			"BigClickStacks",
+			"BigClicksDamage",
+			"HugeClickDamage",
+			"ManaCritDamage",
+			"ImprovedEnergize",
+			"SustainedPowersurge",
+			"ImprovedPowersurge",
+			"ImprovedReload"
+		];
+		
+		public function populateEtherealItemStatsOverride(characterInstance:Character):void
+		{
+            etherealItemStatStats[CH2.STAT_GOLD] = {
+                "sourcePower": 3.0612249,
+                "sourceWeight": 1,
+				"destinationPower": 1,
+                "destinationWeight": 1,
+				"namePrefix": "Mammon's",
+				"nameSuffix": "of Greed"
+            };
+            etherealItemStatStats[CH2.STAT_MOVEMENT_SPEED] = {
+                "sourcePower": 0,
+                "sourceWeight": 0,
+				"destinationPower": 1,
+                "destinationWeight": 1,
+				"namePrefix": "",
+				"nameSuffix": "of Swiftness"
+            };
+            etherealItemStatStats[CH2.STAT_CRIT_CHANCE] = {
+                "sourcePower": 7.894736842,
+                "sourceWeight": 1,
+				"destinationPower": 1,
+                "destinationWeight": 1,
+				"namePrefix": "Risen Bhaal's",
+				"nameSuffix": "of Rising"
+            };
+            etherealItemStatStats[CH2.STAT_CRIT_DAMAGE] = {
+                "sourcePower": 2.727272727,
+                "sourceWeight": 1,
+				"destinationPower": 0.5227586989,
+                "destinationWeight": 1,
+				"namePrefix": "Precise Bhaal's",
+				"nameSuffix": "of Precision"
+            };
+            etherealItemStatStats[CH2.STAT_HASTE] = {
+                "sourcePower": 2.586206897,
+                "sourceWeight": 1,
+				"destinationPower": 1,
+                "destinationWeight": 1,
+				"namePrefix": "Vaagur's",
+				"nameSuffix": "of Impatience"
+            };
+            etherealItemStatStats[CH2.STAT_MANA_REGEN] = {
+                "sourcePower": 7.142857143,
+                "sourceWeight": 1,
+				"destinationPower": 1,
+                "destinationWeight": 1,
+				"namePrefix": "Graceful Energon's",
+				"nameSuffix": "of Grace"
+            };
+            etherealItemStatStats[CH2.STAT_IDLE_GOLD] = {
+                "sourcePower": 0,
+                "sourceWeight": 0,
+				"destinationPower": 0,
+                "destinationWeight": 0,
+				"namePrefix": "",
+				"nameSuffix": ""
+            };
+            etherealItemStatStats[CH2.STAT_IDLE_DAMAGE] = {
+                "sourcePower": 0,
+                "sourceWeight": 0,
+				"destinationPower": 0,
+                "destinationWeight": 0,
+				"namePrefix": "",
+				"nameSuffix": ""
+            };
+            etherealItemStatStats[CH2.STAT_CLICKABLE_GOLD] = {
+                "sourcePower": 6.52173913,
+                "sourceWeight": 1,
+				"destinationPower": 0.2350638265,
+                "destinationWeight": 1,
+				"namePrefix": "Revolc's",
+				"nameSuffix": "of Blessings"
+            };
+            etherealItemStatStats[CH2.STAT_CLICK_DAMAGE] = {
+                "sourcePower": 4.166666667,
+                "sourceWeight": 1,
+				"destinationPower": 1,
+                "destinationWeight": 1,
+				"namePrefix": "Fragsworth's",
+				"nameSuffix": "of Wrath"
+            };
+            etherealItemStatStats[CH2.STAT_TREASURE_CHEST_CHANCE] = {
+                "sourcePower": 13.63636364,
+                "sourceWeight": 1,
+				"destinationPower": 1,
+                "destinationWeight": 1,
+				"namePrefix": "Favorable Mimzee's",
+				"nameSuffix": "of Coffers"
+            };
+            etherealItemStatStats[CH2.STAT_MONSTER_GOLD] = {
+                "sourcePower": 10,
+                "sourceWeight": 1,
+				"destinationPower": 0.8410066661,
+                "destinationWeight": 1,
+				"namePrefix": "Kind Mimzee's",
+				"nameSuffix": "of Kindness"
+            };
+            etherealItemStatStats[CH2.STAT_ITEM_COST_REDUCTION] = {
+                "sourcePower": 5.555555556,
+                "sourceWeight": 1,
+				"destinationPower": 1,
+                "destinationWeight": 1,
+				"namePrefix": "Dogcog's",
+				"nameSuffix": "of Thrift"
+            };
+            etherealItemStatStats[CH2.STAT_TOTAL_MANA] = {
+                "sourcePower": 6.25,
+                "sourceWeight": 1,
+				"destinationPower": 1,
+                "destinationWeight": 1,
+				"namePrefix": "Ionic Energon's",
+				"nameSuffix": "of Ions"
+            };
+            etherealItemStatStats[CH2.STAT_TOTAL_ENERGY] = {
+                "sourcePower": 6.52173913,
+                "sourceWeight": 1,
+				"destinationPower": 1,
+                "destinationWeight": 1,
+				"namePrefix": "Juggernaut's",
+				"nameSuffix": "of Pittance"
+            };
+            etherealItemStatStats[CH2.STAT_CLICKABLE_CHANCE] = {
+                "sourcePower": 5.172413793,
+                "sourceWeight": 1,
+				"destinationPower": 1,
+                "destinationWeight": 1,
+				"namePrefix": "Iris'",
+				"nameSuffix": "of Vision"
+            };
+            etherealItemStatStats[CH2.STAT_BONUS_GOLD_CHANCE] = {
+                "sourcePower": 10,
+                "sourceWeight": 1,
+				"destinationPower": 1,
+                "destinationWeight": 1,
+				"namePrefix": "Fortuna's",
+				"nameSuffix": "of Luck"
+            };
+            etherealItemStatStats[CH2.STAT_TREASURE_CHEST_GOLD] = {
+                "sourcePower": 8.823529412,
+                "sourceWeight": 1,
+				"destinationPower": 0.4271249572,
+                "destinationWeight": 1,
+				"namePrefix": "Blessed Mimzee's",
+				"nameSuffix": "of Treasures"
+            };
+            etherealItemStatStats[CH2.STAT_PIERCE_CHANCE] = {
+                "sourcePower": 0,
+                "sourceWeight": 0,
+				"destinationPower": 0,
+                "destinationWeight": 0,
+				"namePrefix": "",
+				"nameSuffix": ""
+            };
+            etherealItemStatStats[CH2.STAT_ENERGY_REGEN] = {
+                "sourcePower": 0,
+                "sourceWeight": 0,
+				"destinationPower": 0,
+                "destinationWeight": 0,
+				"namePrefix": "",
+				"nameSuffix": ""
+            };
+            etherealItemStatStats[CH2.STAT_DAMAGE] = {
+                "sourcePower": 0,
+                "sourceWeight": 0,
+				"destinationPower": 0,
+                "destinationWeight": 0,
+				"namePrefix": "",
+				"nameSuffix": ""
+            };
+            etherealItemStatStats[CH2.STAT_ENERGY_COST_REDUCTION] = {
+                "sourcePower": 0,
+                "sourceWeight": 0,
+				"destinationPower": 0,
+                "destinationWeight": 0,
+				"namePrefix": "",
+				"nameSuffix": ""
+            };
+            etherealItemStatStats[CH2.STAT_ITEM_WEAPON_DAMAGE] = {
+                "sourcePower": 18.75,
+                "sourceWeight": 0.125,
+				"destinationPower": 0.2350638265,
+                "destinationWeight": 0.125,
+				"namePrefix": "Fighter's",
+				"nameSuffix": "of Arms"
+            };
+            etherealItemStatStats[CH2.STAT_ITEM_HEAD_DAMAGE] = {
+                "sourcePower": 18.75,
+                "sourceWeight": 0.125,
+				"destinationPower": 0.2350638265,
+                "destinationWeight": 0.125,
+				"namePrefix": "Milliner's",
+				"nameSuffix": "of Skulls"
+            };
+            etherealItemStatStats[CH2.STAT_ITEM_CHEST_DAMAGE] = {
+                "sourcePower": 18.75,
+                "sourceWeight": 0.125,
+				"destinationPower": 0.2350638265,
+                "destinationWeight": 0.125,
+				"namePrefix": "Knight's",
+				"nameSuffix": "of Armor"
+            };
+            etherealItemStatStats[CH2.STAT_ITEM_RING_DAMAGE] = {
+                "sourcePower": 18.75,
+                "sourceWeight": 0.125,
+				"destinationPower": 0.2350638265,
+                "destinationWeight": 0.125,
+				"namePrefix": "Prince's",
+				"nameSuffix": "of Jewels"
+            };
+            etherealItemStatStats[CH2.STAT_ITEM_LEGS_DAMAGE] = {
+                "sourcePower": 18.75,
+                "sourceWeight": 0.125,
+				"destinationPower": 0.2350638265,
+                "destinationWeight": 0.125,
+				"namePrefix": "Runner's",
+				"nameSuffix": "of Limbs"
+            };
+            etherealItemStatStats[CH2.STAT_ITEM_HANDS_DAMAGE] = {
+                "sourcePower": 18.75,
+                "sourceWeight": 0.125,
+				"destinationPower": 0.2350638265,
+                "destinationWeight": 0.125,
+				"namePrefix": "Boxer's",
+				"nameSuffix": "of Fists"
+            };
+            etherealItemStatStats[CH2.STAT_ITEM_FEET_DAMAGE] = {
+                "sourcePower": 21.42857143,
+                "sourceWeight": 0.125,
+				"destinationPower": 0.2350638265,
+                "destinationWeight": 0.125,
+				"namePrefix": "Kicker's",
+				"nameSuffix": "of Toes"
+            };
+            etherealItemStatStats[CH2.STAT_ITEM_BACK_DAMAGE] = {
+                "sourcePower": 18.75,
+                "sourceWeight": 0.125,
+				"destinationPower": 0.2350638265,
+                "destinationWeight": 0.125,
+				"namePrefix": "Lurker's",
+				"nameSuffix": "of Mantles"
+            };
+            etherealItemStatStats[CH2.STAT_AUTOMATOR_SPEED] = {
+                "sourcePower": 0,
+                "sourceWeight": 0,
+				"destinationPower": 0,
+                "destinationWeight": 0,
+				"namePrefix": "",
+				"nameSuffix": ""
+            };
+			
+			etherealItemTraitStats["ExtraMulticlicks"] = {
+				"name": "Increased MultiClicks",
+				"sourcePower": 5.172413793,
+				"sourceWeight": 1,
+				"destinationPower": 1,
+				"destinationWeight": 1,
+				"namePrefix": "Clicker's",
+				"nameSuffix": "of Many Clicks"
+			};
+			etherealItemTraitStats["BigClickStacks"] = {
+				"name": "More Big Clicks",
+				"sourcePower": 9.375,
+				"sourceWeight": 1,
+				"destinationPower": 1,
+				"destinationWeight": 1,
+				"namePrefix": "Stacker's",
+				"nameSuffix": "of Stacking Clicks"
+			};
+			etherealItemTraitStats["BigClicksDamage"] = {
+				"name": "Bigger Big Clicks",
+				"sourcePower": 2.542372881,
+				"sourceWeight": 1,
+				"destinationPower": 0.4271249572,
+				"destinationWeight": 1,
+				"namePrefix": "Big",
+				"nameSuffix": "of Magnitude"
+			};
+			etherealItemTraitStats["HugeClickDamage"] = {
+				"name": "Huger Huge Click",
+				"sourcePower": 2.727272727,
+				"sourceWeight": 1,
+				"destinationPower": 0.4271249572,
+				"destinationWeight": 1,
+				"namePrefix": "Huge",
+				"nameSuffix": "of Enormity"
+			};
+			etherealItemTraitStats["ManaCritDamage"] = {
+				"name": "Mana Crit Damage",
+				"sourcePower": 4.838709677,
+				"sourceWeight": 1,
+				"destinationPower": 0.4271249572,
+				"destinationWeight": 1,
+				"namePrefix": "Critter's",
+				"nameSuffix": "of Ionic Precision"
+			};
+			etherealItemTraitStats["ImprovedEnergize"] = {
+				"name": "Improved Energize",
+				"sourcePower": 15,
+				"sourceWeight": 1,
+				"destinationPower": 1,
+				"destinationWeight": 1,
+				"namePrefix": "Energizer's",
+				"nameSuffix": "of Energy"
+			};
+			etherealItemTraitStats["SustainedPowersurge"] = {
+				"name": "Sustained Powersurge",
+				"sourcePower": 12.5,
+				"sourceWeight": 1,
+				"destinationPower": 0.5227586989,
+				"destinationWeight": 1,
+				"namePrefix": "Sustainer's",
+				"nameSuffix": "of Endurance"
+			};
+			etherealItemTraitStats["ImprovedPowersurge"] = {
+				"name": "Improved Powersurge",
+				"sourcePower": 15,
+				"sourceWeight": 1,
+				"destinationPower": 0.4271249572,
+				"destinationWeight": 1,
+				"namePrefix": "Surger's",
+				"nameSuffix": "of Power"
+			};
+			etherealItemTraitStats["ImprovedReload"] = {
+				"name": "Improved Reload",
+				"sourcePower": 15,
+				"sourceWeight": 1,
+				"destinationPower": 1,
+				"destinationWeight": 1,
+				"namePrefix": "Loader's",
+				"nameSuffix": "of Resources"
+			};
+			
+			var etherealItemStats:Object = { };
+			for each (var stat:Object in CH2.STATS)
+			{
+				var sourceStatStats:Object = etherealItemStatStats[stat["id"]];
+				if (sourceStatStats["destinationWeight"] > 0)
+				{
+					//Note: sourceStatStats is actually for the destination stat here, as there is no source stat for this type of item.
+					var etherealItemStatChoice:EtherealItemStatChoice = new EtherealItemStatChoice();
+					etherealItemStatChoice.id = stat["etherealTraitKey"] + "ForSkillPoints";
+					etherealItemStatChoice.key = stat["etherealTraitKey"];
+					etherealItemStatChoice.isSpecial = false;
+					etherealItemStatChoice.slots = stat["etherealSlots"];
+					etherealItemStatChoice.valueFunction = Character.scaleLinearlyWithSkillPoints(characterInstance);
+					etherealItemStatChoice.exchangeRateFunction = Character.etherealExchangeRateFunction(0.5 * sourceStatStats["destinationPower"]);
+					etherealItemStatChoice.weight = sourceStatStats["destinationWeight"];
+					etherealItemStatChoice.tooltipDescriptionFormat = "+%s levels of " + stat["displayName"] + " per skill point acquired";
+					etherealItemStatChoice.namePrefix = "Skillful";
+					etherealItemStatChoice.nameSuffix = sourceStatStats["nameSuffix"];
+					etherealItemStatChoice.params = {
+						"destinationId": stat["id"]
+					};
+					etherealItemStats[etherealItemStatChoice.id] = etherealItemStatChoice;
+				}
+				
+				if (sourceStatStats["sourceWeight"] > 0)
+				{
+					for each (var destinationStat:Object in CH2.STATS)
+					{
+						var destinationStatStats:Object = etherealItemStatStats[destinationStat["id"]];
+						if (destinationStat["canBeDestinationOfEtherealStat"])
+						{
+							var etherealItemStatChoice:EtherealItemStatChoice = new EtherealItemStatChoice();
+							etherealItemStatChoice.id = destinationStat["etherealTraitKey"] + "ForStatLevelsOfId" + stat["id"];
+							etherealItemStatChoice.key = destinationStat["etherealTraitKey"];
+							etherealItemStatChoice.isSpecial = false;
+							etherealItemStatChoice.slots = destinationStat["etherealSlots"];
+							etherealItemStatChoice.valueFunction = Character.scaleLinearlyWithStatLevel(stat["id"], characterInstance);
+							etherealItemStatChoice.exchangeRateFunction = Character.etherealExchangeRateFunction(sourceStatStats["sourcePower"] * destinationStatStats["destinationPower"]);
+							etherealItemStatChoice.weight = destinationStatStats["destinationWeight"] * sourceStatStats["sourceWeight"];
+							etherealItemStatChoice.tooltipDescriptionFormat = "+%s levels of " + destinationStat["displayName"] + " per level of " + stat["displayName"] + " from tree";
+							etherealItemStatChoice.namePrefix = sourceStatStats["namePrefix"];
+							etherealItemStatChoice.nameSuffix = destinationStatStats["nameSuffix"];
+							etherealItemStatChoice.params = {
+								"sourceId": stat["id"],
+								"destinationId": destinationStat["id"]
+							};
+							etherealItemStats[etherealItemStatChoice.id] = etherealItemStatChoice;
+						}
+					}
+					
+					for each (var destinationTraitName:String in etherealItemTraitNames)
+					{
+						var destinationTraitStats:Object = etherealItemTraitStats[destinationTraitName];
+						var etherealItemStatChoice:EtherealItemStatChoice = new EtherealItemStatChoice();
+						etherealItemStatChoice.id = destinationTraitName + "ForStatLevelsOfId" + stat["id"];
+						etherealItemStatChoice.key = destinationTraitName;
+						etherealItemStatChoice.isSpecial = false;
+						etherealItemStatChoice.slots = [0, 1, 2, 3, 4, 5, 6, 7];
+						etherealItemStatChoice.valueFunction = Character.scaleLinearlyWithStatLevel(stat["id"], characterInstance);
+						etherealItemStatChoice.exchangeRateFunction = Character.etherealExchangeRateFunction(sourceStatStats["sourcePower"] * destinationTraitStats["destinationPower"]);
+						etherealItemStatChoice.weight = destinationTraitStats["destinationWeight"] * sourceStatStats["sourceWeight"];
+						etherealItemStatChoice.tooltipDescriptionFormat = "+%s levels of " + destinationTraitStats["name"] + " per level of " + stat["displayName"] + " from tree";
+						etherealItemStatChoice.namePrefix = sourceStatStats["namePrefix"];
+						etherealItemStatChoice.nameSuffix = destinationTraitStats["nameSuffix"];
+						etherealItemStatChoice.params = {
+							"sourceId": stat["id"],
+							"destinationId": destinationTraitName
+						};
+						etherealItemStats[etherealItemStatChoice.id] = etherealItemStatChoice;
+					}
+				}
+			}
+			
+			for each (var sourceTraitName:String in etherealItemTraitNames)
+			{
+				var sourceTraitStats:Object = etherealItemTraitStats[sourceTraitName];
+				if (sourceTraitStats["destinationWeight"] > 0)
+				{
+					// Note: sourceTraitStats is for the destination trait here.
+					var etherealItemStatChoice:EtherealItemStatChoice = new EtherealItemStatChoice();
+					etherealItemStatChoice.id = sourceTraitName + "ForSkillPoints";
+					etherealItemStatChoice.key = sourceTraitName;
+					etherealItemStatChoice.isSpecial = false;
+					etherealItemStatChoice.slots = [0, 1, 2, 3, 4, 5, 6, 7];
+					etherealItemStatChoice.valueFunction = Character.scaleLinearlyWithSkillPoints(characterInstance);
+					etherealItemStatChoice.exchangeRateFunction = Character.etherealExchangeRateFunction(0.5 * sourceTraitStats["destinationPower"]);
+					etherealItemStatChoice.weight = sourceTraitStats["destinationWeight"];
+					etherealItemStatChoice.tooltipDescriptionFormat = "+%s levels of " + sourceTraitStats["name"] + " per skill point acquired";
+					etherealItemStatChoice.namePrefix = "Skillful";
+					etherealItemStatChoice.nameSuffix = sourceTraitStats["nameSuffix"];
+					etherealItemStatChoice.params = {
+						"destinationId": sourceTraitName
+					};
+					etherealItemStats[etherealItemStatChoice.id] = etherealItemStatChoice;
+				}
+				
+				if (sourceTraitStats["sourceWeight"] > 0)
+				{
+					for each (var destinationStat:Object in CH2.STATS)
+					{
+						var destinationStatStats:Object = etherealItemStatStats[destinationStat["id"]];
+						if (destinationStat["canBeDestinationOfEtherealStat"])
+						{
+							var etherealItemStatChoice:EtherealItemStatChoice = new EtherealItemStatChoice();
+							etherealItemStatChoice.id = destinationStat["etherealTraitKey"] + "ForTraitLevelsOf" + sourceTraitName;
+							etherealItemStatChoice.key = destinationStat["etherealTraitKey"];
+							etherealItemStatChoice.isSpecial = false;
+							etherealItemStatChoice.slots = destinationStat["etherealSlots"];
+							etherealItemStatChoice.valueFunction = Character.scaleLinearlyWithTraitLevel("Tree" + sourceTraitName, characterInstance);
+							etherealItemStatChoice.exchangeRateFunction = Character.etherealExchangeRateFunction(sourceTraitStats["sourcePower"] * destinationStatStats["destinationPower"]);
+							etherealItemStatChoice.weight = destinationStatStats["destinationWeight"] * sourceTraitStats["sourceWeight"];
+							etherealItemStatChoice.tooltipDescriptionFormat = "+%s levels of " + destinationStat["displayName"] + " per level of " + sourceTraitStats["name"] + " from tree";
+							etherealItemStatChoice.namePrefix = sourceTraitStats["namePrefix"];
+							etherealItemStatChoice.nameSuffix = destinationStatStats["nameSuffix"];
+							etherealItemStatChoice.params = {
+								"sourceId": sourceTraitName,
+								"destinationId": destinationStat["id"]
+							};
+							etherealItemStats[etherealItemStatChoice.id] = etherealItemStatChoice;
+						}
+					}
+					
+					for each (var destinationTraitName:String in etherealItemTraitNames)
+					{
+						var destinationTraitStats:Object = etherealItemTraitStats[destinationTraitName];
+						var etherealItemStatChoice:EtherealItemStatChoice = new EtherealItemStatChoice();
+						etherealItemStatChoice.id = destinationTraitName + "ForStatLevelsOf" + sourceTraitName;
+						etherealItemStatChoice.key = destinationTraitName;
+						etherealItemStatChoice.isSpecial = false;
+						etherealItemStatChoice.slots = [0, 1, 2, 3, 4, 5, 6, 7];
+						etherealItemStatChoice.valueFunction = Character.scaleLinearlyWithTraitLevel("Tree" + sourceTraitName, characterInstance);
+						etherealItemStatChoice.exchangeRateFunction = Character.etherealExchangeRateFunction(sourceTraitStats["sourcePower"] * destinationTraitStats["destinationPower"]);
+						etherealItemStatChoice.weight = destinationTraitStats["destinationWeight"] * sourceTraitStats["sourceWeight"];
+						etherealItemStatChoice.tooltipDescriptionFormat = "+%s levels of " + destinationTraitStats["name"] + " per level of " + sourceTraitStats["name"] + " from tree";
+						etherealItemStatChoice.namePrefix = sourceTraitStats["namePrefix"];
+						etherealItemStatChoice.nameSuffix = destinationTraitStats["nameSuffix"];
+						etherealItemStatChoice.params = {
+							"sourceId": sourceTraitName,
+							"destinationId": destinationTraitName
+						};
+						etherealItemStats[etherealItemStatChoice.id] = etherealItemStatChoice;
+					}
+				}
+			}
+			
+			// special ethereal items
+			var etherealItemSpecialChoices:Object = { };
+			var allSlots:Array = [0, 1, 2, 3, 4, 5, 6, 7];
+			
+			var etherealMulticlickSpecial:EtherealItemStatChoice = new EtherealItemStatChoice();
+			etherealMulticlickSpecial.id = "EtherealMultiClick";
+			etherealMulticlickSpecial.key = "EtherealMultiClick";
+			etherealMulticlickSpecial.isSpecial = true;
+			etherealMulticlickSpecial.slots = allSlots;
+			etherealMulticlickSpecial.valueFunction = Character.one();
+			etherealMulticlickSpecial.exchangeRateFunction = Character.one();
+			etherealMulticlickSpecial.weight = 1;
+			etherealMulticlickSpecial.tooltipDescriptionFormat = "Equip: Removes dash penalty from MultiClick.";
+			etherealMulticlickSpecial.namePrefix = "Dashing";
+			etherealMulticlickSpecial.nameSuffix = "";
+			etherealMulticlickSpecial.params = {};
+			etherealItemStats[etherealMulticlickSpecial.id] = etherealMulticlickSpecial;
+			
+			var etherealManaCritSpecial:EtherealItemStatChoice = new EtherealItemStatChoice();
+			etherealManaCritSpecial.id = "EtherealManaCrit";
+			etherealManaCritSpecial.key = "EtherealManaCrit";
+			etherealManaCritSpecial.isSpecial = true;
+			etherealManaCritSpecial.slots = allSlots;
+			etherealManaCritSpecial.valueFunction = Character.one();
+			etherealManaCritSpecial.exchangeRateFunction = Character.one();
+			etherealManaCritSpecial.weight = 1;
+			etherealManaCritSpecial.tooltipDescriptionFormat = "Equip: Replaces Mana Crit's guaranteed crit chance with a damage bonus.";
+			etherealManaCritSpecial.namePrefix = "Damaging";
+			etherealManaCritSpecial.nameSuffix = "";
+			etherealManaCritSpecial.params = {};
+			etherealItemStats[etherealManaCritSpecial.id] = etherealManaCritSpecial;
+			
+			var etherealMonsterLevelsSpecial:EtherealItemStatChoice = new EtherealItemStatChoice();
+			etherealMonsterLevelsSpecial.id = "EtherealMonsterLevels";
+			etherealMonsterLevelsSpecial.key = "EtherealMonsterLevels";
+			etherealMonsterLevelsSpecial.isSpecial = true;
+			etherealMonsterLevelsSpecial.slots = allSlots;
+			etherealMonsterLevelsSpecial.valueFunction = Character.one();
+			etherealMonsterLevelsSpecial.exchangeRateFunction = Character.one();
+			etherealMonsterLevelsSpecial.weight = 1;
+			etherealMonsterLevelsSpecial.tooltipDescriptionFormat = "Equip: Monsters count as higher level when awarding experience.";
+			etherealMonsterLevelsSpecial.namePrefix = "Rewarding";
+			etherealMonsterLevelsSpecial.nameSuffix = "";
+			etherealMonsterLevelsSpecial.params = {};
+			etherealItemStats[etherealMonsterLevelsSpecial.id] = etherealMonsterLevelsSpecial;
+			
+			var etherealStormsSpecial:EtherealItemStatChoice = new EtherealItemStatChoice();
+			etherealStormsSpecial.id = "EtherealStorms";
+			etherealStormsSpecial.key = "EtherealStorms";
+			etherealStormsSpecial.isSpecial = true;
+			etherealStormsSpecial.slots = allSlots;
+			etherealStormsSpecial.valueFunction = Character.one();
+			etherealStormsSpecial.exchangeRateFunction = Character.one();
+			etherealStormsSpecial.weight = 1;
+			etherealStormsSpecial.tooltipDescriptionFormat = "Equip: Reduces energy cost of Storms.";
+			etherealStormsSpecial.namePrefix = "Storming";
+			etherealStormsSpecial.nameSuffix = "";
+			etherealStormsSpecial.params = {};
+			etherealItemStats[etherealStormsSpecial.id] = etherealStormsSpecial;
+			
+			var etherealJeratorSpecial:EtherealItemStatChoice = new EtherealItemStatChoice();
+			etherealJeratorSpecial.id = "EtherealJerator";
+			etherealJeratorSpecial.key = "EtherealJerator";
+			etherealJeratorSpecial.isSpecial = true;
+			etherealJeratorSpecial.slots = allSlots;
+			etherealJeratorSpecial.valueFunction = Character.one();
+			etherealJeratorSpecial.exchangeRateFunction = Character.one();
+			etherealJeratorSpecial.weight = 1;
+			etherealJeratorSpecial.tooltipDescriptionFormat = "Equip: Reduces internal cooldown on Jerator's Enchantment";
+			etherealJeratorSpecial.namePrefix = "Cooling";
+			etherealJeratorSpecial.nameSuffix = "";
+			etherealJeratorSpecial.params = {};
+			etherealItemStats[etherealJeratorSpecial.id] = etherealJeratorSpecial;
+			
+			var etherealDischargeSpecial:EtherealItemStatChoice = new EtherealItemStatChoice();
+			etherealDischargeSpecial.id = "EtherealDischarge";
+			etherealDischargeSpecial.key = "EtherealDischarge";
+			etherealDischargeSpecial.isSpecial = true;
+			etherealDischargeSpecial.slots = allSlots;
+			etherealDischargeSpecial.valueFunction = Character.one();
+			etherealDischargeSpecial.exchangeRateFunction = Character.one();
+			etherealDischargeSpecial.weight = 1;
+			etherealDischargeSpecial.tooltipDescriptionFormat = "Equip: Increases Discharge damage.";
+			etherealDischargeSpecial.namePrefix = "Discharging";
+			etherealDischargeSpecial.nameSuffix = "";
+			etherealDischargeSpecial.params = {};
+			etherealItemStats[etherealDischargeSpecial.id] = etherealDischargeSpecial;
+			
+			var etherealRyanSpecial:EtherealItemStatChoice = new EtherealItemStatChoice();
+			etherealRyanSpecial.id = "EtherealRyan";
+			etherealRyanSpecial.key = "EtherealRyan";
+			etherealRyanSpecial.isSpecial = true;
+			etherealRyanSpecial.slots = allSlots;
+			etherealRyanSpecial.valueFunction = Character.one();
+			etherealRyanSpecial.exchangeRateFunction = Character.one();
+			etherealRyanSpecial.weight = 1 ^ 1;
+			etherealRyanSpecial.tooltipDescriptionFormat = "Equip: Confuse the hell out of Ryan for a couple minutes.";
+			etherealRyanSpecial.namePrefix = "Confusing";
+			etherealRyanSpecial.nameSuffix = "";
+			etherealRyanSpecial.params = {};
+			etherealItemStats[etherealRyanSpecial.id] = etherealRyanSpecial;
+			
+			characterInstance.etherealItemStats = etherealItemStats;
+		}
+		
+		public function statForSkillPointsTooltip(statChocie:EtherealItemStat):String
+		{
+			return _("+x% %s per skill point acquired.");
+		}
+		
+		public function statForStatLevelsOfIdTooltip(statChocie:EtherealItemStat):String
+		{
+			return _("+x% %s per %s node purchased.");
+		}
+		
 		public function onMigrationOverride(characterInstance:Character):void
 		{
+			CH2.currentCharacter = characterInstance;
+			
+			// 0.09
+			if (characterInstance.version <= 8)
+			{
+				if (characterInstance.gilds > 0)
+				{
+					var firstWorldOfGild:Number = Math.floor((characterInstance.highestWorldCompleted + 1) / characterInstance.worldsPerGild) * characterInstance.worldsPerGild + 1;
+					var levelDiff:Number = characterInstance.level - ((firstWorldOfGild) * 5 + 6);
+					characterInstance.statLevels[CH2.STAT_DAMAGE] = 0;
+					characterInstance.levelUpStat(CH2.STAT_DAMAGE, levelDiff);
+				}
+			}
+			
+			if (characterInstance.version <= 7)
+			{
+				if (characterInstance.gilds > 0)
+				{
+					var firstWorldOfGild:Number = Math.floor((characterInstance.highestWorldCompleted + 1) / characterInstance.worldsPerGild) * characterInstance.worldsPerGild + 1;
+					characterInstance.setGildBonus(firstWorldOfGild);
+				}
+			}
+			
+			if (characterInstance.version <= 6)
+			{
+				var highestWorld:int = characterInstance.highestWorldCompleted;
+				var highestEtherealItem:int = characterInstance.highestEtherealItemAcquired;
+				var worldsPerGild:int = characterInstance.worldsPerGild;
+				if (highestWorld != highestEtherealItem)
+				{
+					for (var i:int = highestWorld; (i > highestEtherealItem) && (i >= highestWorld - 40); i--)
+					{
+						characterInstance.addEtherealItemToInventory(characterInstance.rollEtherealItem(Math.floor((i + 1) / worldsPerGild)));
+						characterInstance.addEtherealItemToInventory(characterInstance.rollEtherealItem(Math.floor((i + 1) / worldsPerGild)));
+					}
+					characterInstance.highestEtherealItemAcquired = highestWorld;
+				}
+			}
+			
 			// 0.07
 			if (characterInstance.version <= 2)
 			{
@@ -4271,6 +5309,8 @@
 					characterInstance.totalStatPointsV2 += 3;
 				}
 			}
+			
+			CH2.currentCharacter = null;
 		}
 		
 		//public function helpfulAdventurerGetCalculatedEnergyCost(skill:Skill):Number
@@ -4301,6 +5341,27 @@
 		{
 			CH2.currentCharacter.clickAttackDefault(doesCostEnergy);
 		}*/
+		
+		public function applyWorldTraitsOverride(worldNumber:Number):void
+		{
+			var character:Character = CH2.currentCharacter;
+			var world:AscensionWorld = character.worlds.getWorld(worldNumber);
+			if (world.traits[WT_GARGANTUAN] && !world.traits[WT_UNDERFED])
+			{
+				character.monstersPerZone = 5;
+				character.monsterHealthMultiplier = 10;
+			}
+			else if (world.traits[WT_UNDERFED] && !world.traits[WT_GARGANTUAN])
+			{
+				character.monstersPerZone = 200;
+				character.monsterHealthMultiplier = 0.25;
+			}
+			else
+			{
+				character.monstersPerZone = 50;
+				character.monsterHealthMultiplier = 1;
+			}
+		}
 		
 		//public function setUpDisplay(display:CharacterDisplay):void
 		public function onCharacterDisplayCreatedOverride(display:CharacterDisplay):void
@@ -4516,19 +5577,18 @@
 		
 		public function canBuyMetalDetectors():Boolean
 		{
-			if (CH2.world && CH2.world.rubyBonusShop && CH2.world.rubyBonusShop.isActive)
+			var character:Character = CH2.currentCharacter;
+			if (character.isRubyShopAvailable())
 			{
-				var character:Character = CH2.currentCharacter;
 				var canPurchase:Boolean = false;
-				if (character.currentRubyShop.length > 0)
+				for (var i:int = 0; i < character.currentRubyShop.length; i++)
 				{
-					for (var i:int = 0; i < character.currentRubyShop.length; i++)
+					var currentPurchaseId:String = character.currentRubyShop[i].id;
+					var rubyPurchase:RubyPurchase = character.getRubyPurchaseInstance(currentPurchaseId);
+					if (currentPurchaseId == "zoneMetalDetector" || currentPurchaseId == "timeMetalDetector")
 					{
-						if (character.currentRubyShop[i].iconId == 5) //Probably a better way to do this
-						{
-							var rubyPurchasePrice:Number = character.currentRubyShop[i].price;
-							canPurchase = canPurchase || (character.rubies >= rubyPurchasePrice && character.currentRubyShop[i].canPurchase());
-						}
+						var rubyPurchasePrice:Number = rubyPurchase.price;
+						canPurchase = canPurchase || (character.rubies >= rubyPurchasePrice && rubyPurchase.canPurchase());
 					}
 				}
 				return canPurchase;
@@ -4541,19 +5601,18 @@
 		
 		public function canBuyRunes():Boolean
 		{
-			if (CH2.world && CH2.world.rubyBonusShop && CH2.world.rubyBonusShop.isActive)
+			var character:Character = CH2.currentCharacter;
+			if (character.isRubyShopAvailable())
 			{
-				var character:Character = CH2.currentCharacter;
 				var canPurchase:Boolean = false;
-				if (character.currentRubyShop.length > 0)
+				for (var i:int = 0; i < character.currentRubyShop.length; i++)
 				{
-					for (var i:int = 0; i < character.currentRubyShop.length; i++)
+					var currentPurchaseId:String = character.currentRubyShop[i].id;
+					var rubyPurchase:RubyPurchase = character.getRubyPurchaseInstance(currentPurchaseId);
+					if (currentPurchaseId == "luckRunePurchase" || currentPurchaseId == "speedRunePurchase" || currentPurchaseId == "powerRunePurchase")
 					{
-						if (character.currentRubyShop[i].iconId == 2 || character.currentRubyShop[i].iconId == 3 || character.currentRubyShop[i].iconId == 4) //Probably a better way to do this
-						{
-							var rubyPurchasePrice:Number = character.currentRubyShop[i].price;
-							canPurchase = canPurchase || (character.rubies >= rubyPurchasePrice && character.currentRubyShop[i].canPurchase());
-						}
+						var rubyPurchasePrice:Number = character.currentRubyShop[i].price;
+						canPurchase = canPurchase || (character.rubies >= rubyPurchasePrice && rubyPurchase.canPurchase());
 					}
 				}
 				return canPurchase;
@@ -4736,9 +5795,7 @@
 			}
 			if (CH2.currentCharacter.automator.numSetsUnlocked >= queueSet)
 			{
-				CH2.currentCharacter.automator.setCurrentQueue(queueSet);
-				CH2UI.instance.mainUI.mainPanel.refreshOpenTab();
-				CH2UI.instance.mainUI.mainPanel.automatorPanel.refreshPauseButton();
+				CH2UI.instance.mainUI.mainPanel.automatorPanel.switchQueueSet(queueSet);
 			}
 			return true;
 		}
@@ -4897,19 +5954,18 @@
 		
 		public function onBuyMetalDetectorsGemActivate():Boolean
 		{
-			if (CH2.world && CH2.world.rubyBonusShop && CH2.world.rubyBonusShop.isActive)
+			var character:Character = CH2.currentCharacter;
+			if (character.isRubyShopAvailable())
 			{
-				var character:Character = CH2.currentCharacter;
 				var madePurchase:Boolean = false;
-				if (character.currentRubyShop.length > 0)
+				for (var i:int = 0; i < character.currentRubyShop.length; i++)
 				{
-					for (var i:int = 0; i < character.currentRubyShop.length; i++)
+					var currentPurchaseId:String = character.currentRubyShop[i].id;
+					var rubyPurchase:RubyPurchase = character.getRubyPurchaseInstance(currentPurchaseId);
+					if (currentPurchaseId == "zoneMetalDetector" || currentPurchaseId == "timeMetalDetector")
 					{
-						if (character.currentRubyShop[i].iconId == 5) //Probably a better way to do this
-						{
-							CH2UI.instance.mainUI.rightPanel.currentPanel.doPurchase(character.currentRubyShop[i]);
-							madePurchase = true;
-						}
+						CH2UI.instance.mainUI.rightPanel.currentPanel.doPurchase(rubyPurchase);
+						madePurchase = true;
 					}
 				}
 				return madePurchase;
@@ -4926,15 +5982,14 @@
 			{
 				var character:Character = CH2.currentCharacter;
 				var madePurchase:Boolean = false;
-				if (character.currentRubyShop.length > 0)
+				for (var i:int = 0; i < character.currentRubyShop.length; i++)
 				{
-					for (var i:int = 0; i < character.currentRubyShop.length; i++)
+					var currentPurchaseId:String = character.currentRubyShop[i].id;
+					var rubyPurchase:RubyPurchase = character.getRubyPurchaseInstance(currentPurchaseId);
+					if (currentPurchaseId == "luckRunePurchase" || currentPurchaseId == "speedRunePurchase" || currentPurchaseId == "powerRunePurchase")
 					{
-						if (character.currentRubyShop[i].iconId == 2 || character.currentRubyShop[i].iconId == 3 || character.currentRubyShop[i].iconId == 4) //Probably a better way to do this
-						{
-							CH2UI.instance.mainUI.rightPanel.currentPanel.doPurchase(character.currentRubyShop[i]);
-							madePurchase = true;
-						}
+						CH2UI.instance.mainUI.rightPanel.currentPanel.doPurchase(rubyPurchase);
+						madePurchase = true;
 					}
 				}
 				return madePurchase;
@@ -5153,18 +6208,175 @@
 			character.populateRubyPurchaseOptionsDefault();
 			
 			var automatorPointPurchase:RubyPurchase = new RubyPurchase();
+			automatorPointPurchase.id = "automatorPointPurchase";
 			automatorPointPurchase.priority = 1;
 			automatorPointPurchase.name = "Automator Point";
 			automatorPointPurchase.price = 100;
-			automatorPointPurchase.iconId = 4;
+			automatorPointPurchase.iconId = 8;
 			automatorPointPurchase.getDescription = character.getAutomatorPointDescription;
 			automatorPointPurchase.getSoldOutText = character.getDefaultSoldOutText;
 			automatorPointPurchase.onPurchase = character.onAutomatorPointPurchase;
 			automatorPointPurchase.canAppear = character.canAutomatorPointAppear;
 			automatorPointPurchase.canPurchase = character.canPurchaseAutomatorPoint;
 			character.rubyPurchaseOptions.push(automatorPointPurchase);
+		}
+		
+		public function getWorldTraitCountOverride(worldNumber:int):int
+		{
+			var worldsPerGild:int = CH2.currentCharacter.worldsPerGild;
 			
+			if (worldNumber > worldsPerGild * 20)
+			{
+				return 3;
+			}
+			else if (worldNumber > worldsPerGild * 10)
+			{
+				return 2;
+			}
+			else if (worldNumber > worldsPerGild)
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		
+		public function getAddStatTooltipFunction(stat:int, level:int):Function
+		{
+			return function():String
+			{
+				if (CH2.currentCharacter.etherealItemInventory.length > 0) 
+				{
+					var etherealBonusInfo:String = "";
+					var equippedEtherealItems:Object = CH2.currentCharacter.equippedEtherealItems;
+					
+					for (var i = 0; i < 8; i++)
+					{
+						if (equippedEtherealItems[i] != -1)
+						{
+							var etherealItem:EtherealItem = CH2.currentCharacter.etherealItemInventory[equippedEtherealItems[i]];
+							for (var j = 0; j < etherealItem.stats.length; j++)
+							{
+								var params:Object = CH2.currentCharacter.getEtherealStatParams(etherealItem.stats[j].id);
+								if (params.hasOwnProperty("destinationId") && params.hasOwnProperty("sourceId"))
+								{
+									if (params["sourceId"] == stat)
+									{
+										var levels:Number = etherealItem.stats[j].calculatedExchangeRate * level;
+										
+										if (params["destinationId"] is String)
+										{
+											var destinationId:String = params["destinationId"];
+											etherealBonusInfo += "\n+" + (etherealItem.stats[j].calculatedExchangeRate * level).toFixed(2) + " Levels of " + etherealItemTraitStats[destinationId].name + " from Ethereal " + Item.SLOT_NAMES[i];
+											
+											var traitValueDescriptionFormat:String = helpfulAdventurer.etherealTraitTooltipInfo[destinationId]["tooltipFormat"];
+											var traitValueFunction:Function = helpfulAdventurer.etherealTraitTooltipInfo[destinationId]["valueFunction"];
+											var traitValue:Number = traitValueFunction(levels);
+											etherealBonusInfo += " (" + _(traitValueDescriptionFormat, traitValue.toFixed(2)) + ").";
+										}
+										else
+										{
+											var destinationIntId:int = params["destinationId"];
+											var valueFunction:Function = CH2.currentCharacter.statValueFunctions[destinationIntId];
+											
+											etherealBonusInfo += "\n+" + levels.toFixed(2) + " Levels of " + CH2.STATS[destinationIntId].displayName + " from Ethereal " + Item.SLOT_NAMES[i];
+											
+											if (destinationIntId == CH2.STAT_TOTAL_ENERGY || destinationIntId == CH2.STAT_TOTAL_MANA) 
+											{
+												etherealBonusInfo += " (+" + valueFunction(levels).toFixed(2) + " " + CH2.STATS[destinationIntId].displayName + ")";
+											}
+											else if (destinationIntId == CH2.STAT_TREASURE_CHEST_CHANCE || destinationIntId == CH2.STAT_BONUS_GOLD_CHANCE || destinationIntId == CH2.STAT_CRIT_CHANCE)
+											{
+												etherealBonusInfo += " (+" + (valueFunction(levels) * 100).toFixed(2) + "% " + CH2.STATS[destinationIntId].displayName + ")";
+											}
+											else
+											{
+												etherealBonusInfo += " (" + valueFunction(levels).toFixed(2) + "x " + CH2.STATS[destinationIntId].displayName + ")";
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					
+					if (etherealBonusInfo != "")
+					{
+						return StringFormatter.colorize("\n\nEthereal Item Bonus:", "#FFFF00") + etherealBonusInfo;
+					}
+				}
+				return null;
+			}
+		}
+			
+		public function getAddTraitTooltipFunction(trait:String, level:int):Function
+		{
+			return function():String
+			{
+				if (CH2.currentCharacter.etherealItemInventory.length > 0) 
+				{
+					var etherealBonusInfo:String = "";
+					var equippedEtherealItems:Object = CH2.currentCharacter.equippedEtherealItems;
+					
+					for (var i = 0; i < 8; i++)
+					{
+						if (equippedEtherealItems[i] != -1)
+						{
+							var etherealItem:EtherealItem = CH2.currentCharacter.etherealItemInventory[equippedEtherealItems[i]];
+							for (var j = 0; j < etherealItem.stats.length; j++)
+							{
+								var params:Object = CH2.currentCharacter.getEtherealStatParams(etherealItem.stats[j].id);
+								if (params.hasOwnProperty("destinationId") && params.hasOwnProperty("sourceId"))
+								{
+									if (params["sourceId"] == trait)
+									{
+										var levels:Number = etherealItem.stats[j].calculatedExchangeRate * level;
+										
+										if (params["destinationId"] is String)
+										{
+											var destinationId:String = params["destinationId"];
+											etherealBonusInfo += "\n+" + levels.toFixed(2) + " Levels of " + etherealItemTraitStats[destinationId].name + " from Ethereal " + Item.SLOT_NAMES[i];
+											
+											var traitValueDescriptionFormat:String = helpfulAdventurer.etherealTraitTooltipInfo[destinationId]["tooltipFormat"];
+											var traitValueFunction:Function = helpfulAdventurer.etherealTraitTooltipInfo[destinationId]["valueFunction"];
+											var traitValue:Number = traitValueFunction(levels);
+											etherealBonusInfo += " (" + _(traitValueDescriptionFormat, traitValue.toFixed(2)) + ").";
+										}
+										else
+										{
+											var destinationIntId:int = params["destinationId"];
+											var valueFunction:Function = CH2.currentCharacter.statValueFunctions[destinationIntId];
+											
+											etherealBonusInfo += "\n+" + levels.toFixed(2) + " Levels of " + CH2.STATS[destinationIntId].displayName + " from Ethereal " + Item.SLOT_NAMES[i];
+											
+											if (destinationIntId == CH2.STAT_TOTAL_ENERGY || destinationIntId == CH2.STAT_TOTAL_MANA) 
+											{
+												etherealBonusInfo += " (+" + valueFunction(levels).toFixed(2) + " " + CH2.STATS[destinationIntId].displayName + ")";
+											}
+											else if (destinationIntId == CH2.STAT_TREASURE_CHEST_CHANCE || destinationIntId == CH2.STAT_BONUS_GOLD_CHANCE || destinationIntId == CH2.STAT_CRIT_CHANCE)
+											{
+												etherealBonusInfo += " (+" + (valueFunction(levels) * 100).toFixed(2) + "% " + CH2.STATS[destinationIntId].displayName + ")";
+											}
+											else
+											{
+												etherealBonusInfo += " (" + valueFunction(levels).toFixed(2) + "x " + CH2.STATS[destinationIntId].displayName + ")";
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					
+					if (etherealBonusInfo != "")
+					{
+						return StringFormatter.colorize("\n\nEthereal Item Bonus:", "#FFFF00") + etherealBonusInfo;
+					}
+				}
+				return null;
+			}
 		}
 	}
-}
-
+}

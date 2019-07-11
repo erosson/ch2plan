@@ -274,7 +274,6 @@ package heroclickerlib.managers
          var cost:BigNumber = new BigNumber(worldCost);
          cost.timesEqualsN(Math.pow(1.16,level - 1));
          cost.floorInPlace();
-         cost.timesEqualsN(CH2.currentCharacter.itemCostReduction);
          return cost;
       }
       
@@ -346,26 +345,43 @@ package heroclickerlib.managers
          return result;
       }
       
-      public function getMonsterExperience(monster:Monster) : BigNumber
+      public function getMonsterExperience(param1:Monster) : BigNumber
       {
-         var character:Character = CH2.currentCharacter;
-         var characterLevel:Number = character.level;
-         var world:Number = CH2.currentAscensionWorld.worldNumber;
-         if(characterLevel > monster.level && characterLevel >= 50)
+         var _loc6_:Number = NaN;
+         var _loc7_:Number = NaN;
+         var _loc2_:Character = CH2.currentCharacter;
+         var _loc3_:Number = _loc2_.level;
+         var _loc4_:Number = CH2.currentAscensionWorld.worldNumber;
+         var _loc5_:BigNumber = new BigNumber(Math.floor(10 + param1.level / 5));
+         if(_loc3_ > 50)
          {
-            return new BigNumber(0);
+            if(_loc3_ <= param1.level)
+            {
+               _loc6_ = this.getGildDifficulty(CH2.currentCharacter.gilds);
+               _loc7_ = 1 / Math.pow(_loc6_,0.2);
+               _loc5_.timesEqualsN(Math.pow(_loc7_,_loc3_ - param1.level));
+               if(param1.level > _loc3_)
+               {
+                  _loc5_.timesEqualsN(param1.level + 1 - _loc3_);
+               }
+            }
+            else
+            {
+               _loc6_ = this.getGildDifficulty(CH2.currentCharacter.gilds);
+               _loc7_ = 1 / Math.pow(_loc6_,0.2);
+               _loc5_.timesEqualsN(Math.pow(_loc7_,_loc3_ - param1.level));
+               _loc5_.timesEqualsN(1 / (_loc3_ + 1 - param1.level));
+            }
          }
-         var reward:BigNumber = new BigNumber(Math.floor(10 + monster.level / 5));
-         reward.timesEqualsN(Math.pow(1.2,monster.level - characterLevel));
-         if(monster.isBoss)
+         if(param1.isBoss)
          {
-            reward.timesEqualsN(50);
+            _loc5_.timesEqualsN(50);
          }
          else
          {
-            reward.timesEqualsN(50 / character.monstersPerZone);
+            _loc5_.timesEqualsN(50 / _loc2_.monstersPerZone);
          }
-         return reward;
+         return _loc5_;
       }
       
       public function getZoneExperience(zone:int) : BigNumber
@@ -383,8 +399,14 @@ package heroclickerlib.managers
          return points;
       }
       
+      public function getGildDifficulty(gildNumber:Number) : Number
+      {
+         return Math.pow(1.1,gildNumber) * 13;
+      }
+      
       public function getWorldDifficulty(worldNumber:Number) : BigNumber
       {
+         var currentGild:Number = NaN;
          var currentGrowthRate:Number = NaN;
          var i:int = 0;
          if(worldNumber == 1)
@@ -392,15 +414,17 @@ package heroclickerlib.managers
             return new BigNumber(1);
          }
          var gildNumber:Number = Math.floor(worldNumber / CH2.currentCharacter.worldsPerGild);
-         var difficultyScale:BigNumber = new BigNumber(30);
+         var difficultyScale:BigNumber = new BigNumber(150);
          if(worldNumber > 2)
          {
-            currentGrowthRate = 10;
+            currentGild = 0;
+            currentGrowthRate = this.getGildDifficulty(0);
             for(i = 3; i <= worldNumber; i++)
             {
                if(i % CH2.currentCharacter.worldsPerGild == 1)
                {
-                  currentGrowthRate = currentGrowthRate + 0.5;
+                  currentGild++;
+                  currentGrowthRate = this.getGildDifficulty(currentGild);
                }
                difficultyScale.timesEqualsN(currentGrowthRate);
             }

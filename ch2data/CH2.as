@@ -113,6 +113,7 @@ package heroclickerlib
       public static function initStats() : *
       {
          STATS[STAT_GOLD] = {
+            "id":STAT_GOLD,
             "displayName":"Gold Received",
             "description":"Multiplies your gold received from all sources by x%s.",
             "amountOnItems":0.1,
@@ -120,9 +121,17 @@ package heroclickerlib
             "appearsInAllItemSlots":true,
             "iconId":95,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealGold",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_MOVEMENT_SPEED] = {
+            "id":STAT_MOVEMENT_SPEED,
             "displayName":"Movement Speed",
             "description":"Multiplies your movement speed by x%s.",
             "amountOnItems":0.05,
@@ -130,9 +139,17 @@ package heroclickerlib
             "appearsInAllItemSlots":false,
             "iconId":1,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealMovementSpeed",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_CRIT_CHANCE] = {
+            "id":STAT_CRIT_CHANCE,
             "displayName":"Critical Chance",
             "description":"Increases your chance to score a critical hit by %s%.",
             "amountOnItems":0.02,
@@ -140,9 +157,17 @@ package heroclickerlib
             "appearsInAllItemSlots":true,
             "iconId":70,
             "calculationType":ADDITIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealCritChance",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_CRIT_DAMAGE] = {
+            "id":STAT_CRIT_DAMAGE,
             "displayName":"Critical Damage",
             "description":"Multiplies the damage of your critical hits by x%s.",
             "amountOnItems":0.2,
@@ -150,9 +175,17 @@ package heroclickerlib
             "appearsInAllItemSlots":true,
             "iconId":81,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealCritDamage",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_HASTE] = {
+            "id":STAT_HASTE,
             "displayName":"Haste",
             "description":"Multiplies your auto-attack and cooldown speeds by x%s.",
             "amountOnItems":0.05,
@@ -160,9 +193,17 @@ package heroclickerlib
             "appearsInAllItemSlots":true,
             "iconId":1,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealHaste",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_IDLE_GOLD] = {
+            "id":STAT_IDLE_GOLD,
             "displayName":"Idle Gold",
             "description":"Multiplies your gold received by x%s while idle.",
             "amountOnItems":0.25,
@@ -170,9 +211,17 @@ package heroclickerlib
             "appearsInAllItemSlots":false,
             "iconId":1,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":false,
+            "canBeDestinationOfEtherealStat":false,
+            "etherealSlots":[],
+            "etherealTraitKey":"etherealIdleGold",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_IDLE_DAMAGE] = {
+            "id":STAT_IDLE_DAMAGE,
             "displayName":"Idle Damage",
             "description":"Multiplies your damage by x%s while idle.",
             "amountOnItems":0.25,
@@ -180,9 +229,17 @@ package heroclickerlib
             "appearsInAllItemSlots":false,
             "iconId":1,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":false,
+            "canBeDestinationOfEtherealStat":false,
+            "etherealSlots":[],
+            "etherealTraitKey":"etherealIdleDamage",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_CLICKABLE_GOLD] = {
+            "id":STAT_CLICKABLE_GOLD,
             "displayName":"Clickable Gold",
             "description":"Multiplies your gold received from clickables by x%s.",
             "amountOnItems":0.5,
@@ -190,9 +247,17 @@ package heroclickerlib
             "appearsInAllItemSlots":true,
             "iconId":1,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealClickableGold",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_CLICK_DAMAGE] = {
+            "id":STAT_CLICK_DAMAGE,
             "displayName":"Click Damage",
             "description":"Multiplies your click damage by x%s.",
             "amountOnItems":0.1,
@@ -200,9 +265,17 @@ package heroclickerlib
             "appearsInAllItemSlots":true,
             "iconId":8,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealClickDamage",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_MONSTER_GOLD] = {
+            "id":STAT_MONSTER_GOLD,
             "displayName":"Monster Gold",
             "description":"Multiplies your gold received from monsters by x%s.",
             "amountOnItems":0.12,
@@ -210,9 +283,17 @@ package heroclickerlib
             "appearsInAllItemSlots":true,
             "iconId":1,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealMonsterGold",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_ITEM_COST_REDUCTION] = {
+            "id":STAT_ITEM_COST_REDUCTION,
             "displayName":"Item Cost Reduction",
             "description":"Reduces the cost of buying and leveling items by %s.",
             "amountOnItems":0.1,
@@ -220,9 +301,17 @@ package heroclickerlib
             "appearsInAllItemSlots":false,
             "iconId":1,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":false,
+            "canBeDestinationOfEtherealStat":false,
+            "etherealSlots":[],
+            "etherealTraitKey":"etherealItemCostReduction",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_TOTAL_MANA] = {
+            "id":STAT_TOTAL_MANA,
             "displayName":"Total Mana",
             "description":"Increases the size of your mana pool %s.",
             "amountOnItems":25,
@@ -230,9 +319,17 @@ package heroclickerlib
             "appearsInAllItemSlots":true,
             "iconId":1,
             "calculationType":ADDITIVE,
-            "formattingFunction":unformatted
+            "formattingFunction":unformatted,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealTotalMana",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_MANA_REGEN] = {
+            "id":STAT_MANA_REGEN,
             "displayName":"Mana Regeneration",
             "description":"Increases your mana regeneration by %s.",
             "amountOnItems":0.05,
@@ -240,9 +337,17 @@ package heroclickerlib
             "appearsInAllItemSlots":true,
             "iconId":1,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealManaRegen",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_TOTAL_ENERGY] = {
+            "id":STAT_TOTAL_ENERGY,
             "displayName":"Total Energy",
             "description":"Increases the size of your energy pool by %s.",
             "amountOnItems":25,
@@ -250,9 +355,17 @@ package heroclickerlib
             "appearsInAllItemSlots":true,
             "iconId":1,
             "calculationType":ADDITIVE,
-            "formattingFunction":unformatted
+            "formattingFunction":unformatted,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealTotalEnergy",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_CLICKABLE_CHANCE] = {
+            "id":STAT_CLICKABLE_CHANCE,
             "displayName":"Gold Piles",
             "description":"Increases number of gold piles found by %s.",
             "amountOnItems":0.1,
@@ -260,9 +373,17 @@ package heroclickerlib
             "appearsInAllItemSlots":true,
             "iconId":1,
             "calculationType":ADDITIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[],
+            "etherealTraitKey":"etherealClickableChance",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_BONUS_GOLD_CHANCE] = {
+            "id":STAT_BONUS_GOLD_CHANCE,
             "displayName":"Bonus Gold Chance",
             "description":"Increases your chance of finding bonus gold by %s.",
             "amountOnItems":0.01,
@@ -270,9 +391,17 @@ package heroclickerlib
             "appearsInAllItemSlots":true,
             "iconId":1,
             "calculationType":ADDITIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealBonusGoldChance",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_TREASURE_CHEST_CHANCE] = {
+            "id":STAT_TREASURE_CHEST_CHANCE,
             "displayName":"Treasure Chest Chance",
             "description":"Increases the chance of finding a treasure chest by %s.",
             "amountOnItems":0.01,
@@ -280,9 +409,17 @@ package heroclickerlib
             "appearsInAllItemSlots":true,
             "iconId":1,
             "calculationType":ADDITIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealTreasureChestChance",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_TREASURE_CHEST_GOLD] = {
+            "id":STAT_TREASURE_CHEST_GOLD,
             "displayName":"Treasure Chest Gold",
             "description":"Multiplies your gold received from treasure chests by x%s.",
             "amountOnItems":0.25,
@@ -290,9 +427,17 @@ package heroclickerlib
             "appearsInAllItemSlots":true,
             "iconId":1,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealTreasureChestGold",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_PIERCE_CHANCE] = {
+            "id":STAT_PIERCE_CHANCE,
             "displayName":"Pierce Chance",
             "description":"Increases your chance to hit an additional monster by %s.",
             "amountOnItems":0.01,
@@ -300,9 +445,17 @@ package heroclickerlib
             "appearsInAllItemSlots":false,
             "iconId":1,
             "calculationType":ADDITIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":false,
+            "canBeDestinationOfEtherealStat":false,
+            "etherealSlots":[],
+            "etherealTraitKey":"etherealPierceChance",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_ENERGY_REGEN] = {
+            "id":STAT_ENERGY_REGEN,
             "displayName":"Energy Regeneration",
             "description":"Increases regenerated energy by %s.",
             "amountOnItems":0,
@@ -310,9 +463,17 @@ package heroclickerlib
             "appearsInAllItemSlots":false,
             "iconId":1,
             "calculationType":ADDITIVE,
-            "formattingFunction":unformatted
+            "formattingFunction":unformatted,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealEnergyRegen",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_DAMAGE] = {
+            "id":STAT_DAMAGE,
             "displayName":"Damage",
             "description":"Multiplies your damage by x%s.",
             "amountOnItems":0.25,
@@ -320,9 +481,17 @@ package heroclickerlib
             "appearsInAllItemSlots":false,
             "iconId":95,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":false,
+            "canBeDestinationOfEtherealStat":false,
+            "etherealSlots":[],
+            "etherealTraitKey":"etherealDamage",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_ENERGY_COST_REDUCTION] = {
+            "id":STAT_ENERGY_COST_REDUCTION,
             "displayName":"Energy Cost Reduction",
             "description":"Reduces the energy cost of your skills by %s%.",
             "amountOnItems":0.25,
@@ -330,89 +499,161 @@ package heroclickerlib
             "appearsInAllItemSlots":false,
             "iconId":95,
             "calculationType":ADDITIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealEnergyCostReduction",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
          };
          STATS[STAT_ITEM_WEAPON_DAMAGE] = {
-            "displayName":"",
+            "id":STAT_ITEM_WEAPON_DAMAGE,
+            "displayName":"Weapon Damage",
             "description":"",
             "amountOnItems":0.25,
             "itemDamageBoost":0,
             "appearsInAllItemSlots":false,
             "iconId":95,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealItemWeaponDamage",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":1,
+            "etherealDestinationWeight":1
          };
          STATS[STAT_ITEM_HEAD_DAMAGE] = {
-            "displayName":"",
+            "id":STAT_ITEM_HEAD_DAMAGE,
+            "displayName":"Helmet Damage",
             "description":"",
             "amountOnItems":0.25,
             "itemDamageBoost":0,
             "appearsInAllItemSlots":false,
             "iconId":95,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealItemHeadDamage",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":1,
+            "etherealDestinationWeight":1
          };
          STATS[STAT_ITEM_CHEST_DAMAGE] = {
-            "displayName":"",
+            "id":STAT_ITEM_CHEST_DAMAGE,
+            "displayName":"Breastplate Damage",
             "description":"",
             "amountOnItems":0.25,
             "itemDamageBoost":0,
             "appearsInAllItemSlots":false,
             "iconId":95,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealItemChestDamage",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":1,
+            "etherealDestinationWeight":1
          };
          STATS[STAT_ITEM_RING_DAMAGE] = {
-            "displayName":"",
+            "id":STAT_ITEM_RING_DAMAGE,
+            "displayName":"Ring Damage",
             "description":"",
             "amountOnItems":0.25,
             "itemDamageBoost":0,
             "appearsInAllItemSlots":false,
             "iconId":95,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealItemRingDamage",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":1,
+            "etherealDestinationWeight":1
          };
          STATS[STAT_ITEM_LEGS_DAMAGE] = {
-            "displayName":"",
+            "id":STAT_ITEM_LEGS_DAMAGE,
+            "displayName":"Pants Damage",
             "description":"",
             "amountOnItems":0.25,
             "itemDamageBoost":0,
             "appearsInAllItemSlots":false,
             "iconId":95,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealItemLegsDamage",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":1,
+            "etherealDestinationWeight":1
          };
          STATS[STAT_ITEM_HANDS_DAMAGE] = {
-            "displayName":"",
+            "id":STAT_ITEM_HANDS_DAMAGE,
+            "displayName":"Gloves Damage",
             "description":"",
             "amountOnItems":0.25,
             "itemDamageBoost":0,
             "appearsInAllItemSlots":false,
             "iconId":95,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealItemHandsDamage",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":1,
+            "etherealDestinationWeight":1
          };
          STATS[STAT_ITEM_FEET_DAMAGE] = {
-            "displayName":"",
+            "id":STAT_ITEM_FEET_DAMAGE,
+            "displayName":"Boots Damage",
             "description":"",
             "amountOnItems":0.25,
             "itemDamageBoost":0,
             "appearsInAllItemSlots":false,
             "iconId":95,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealItemFeetDamage",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":1,
+            "etherealDestinationWeight":1
          };
          STATS[STAT_ITEM_BACK_DAMAGE] = {
-            "displayName":"",
+            "id":STAT_ITEM_BACK_DAMAGE,
+            "displayName":"Cape Damage",
             "description":"",
             "amountOnItems":0.25,
             "itemDamageBoost":0,
             "appearsInAllItemSlots":false,
             "iconId":95,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealItemBackDamage",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":1,
+            "etherealDestinationWeight":1
          };
          STATS[STAT_AUTOMATOR_SPEED] = {
+            "id":STAT_AUTOMATOR_SPEED,
             "displayName":"Automator Speed",
             "description":"Increases the speed of your automator pointer by x%s.",
             "amountOnItems":0.25,
@@ -420,7 +661,14 @@ package heroclickerlib
             "appearsInAllItemSlots":false,
             "iconId":1,
             "calculationType":MULTIPLICATIVE,
-            "formattingFunction":percentFormat
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealAutomatorSpeed",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":1,
+            "etherealDestinationWeight":1
          };
       }
       
@@ -483,9 +731,9 @@ package heroclickerlib
          if(currentCharacter)
          {
             SaveManager.instance.save();
-            if(currentCharacter.characterDisplay)
+            if(CH2.currentCharacter.characterDisplay)
             {
-               currentCharacter.characterDisplay.characterUI.removeAll();
+               CH2.currentCharacter.characterDisplay.dispose();
             }
             currentCharacter.onCharacterUnloaded();
             CH2AssetManager.instance.disposeCharacter();
@@ -505,6 +753,7 @@ package heroclickerlib
          currentCharacter.populateRubyPurchaseOptions();
          currentCharacter.populateWorldEndAutomationOptions();
          currentCharacter.populateTutorials();
+         currentCharacter.populateEtherealItemStats();
          currentCharacter.automator.setupInventories();
          for(var i:int = 0; i < currentCharacter.startingSkills.length; i++)
          {
@@ -518,6 +767,10 @@ package heroclickerlib
          }
          game.doGameStateAction(IdleHeroMain.ACTION_PLAYER_SWITCHED_CHARACTERS);
          currentCharacter.applyPurchasedNodes();
+         if(currentCharacter != null)
+         {
+            currentCharacter.updateOfflineProgress();
+         }
       }
    }
 }

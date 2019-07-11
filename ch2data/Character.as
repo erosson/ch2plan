@@ -17,7 +17,6 @@ package models
    import heroclickerlib.managers.Trace;
    import heroclickerlib.world.CharacterDisplay;
    import it.sephiroth.gettext._;
-   import lib.managers.TextManager;
    import ui.CH2UI;
    
    public class Character extends Model
@@ -89,6 +88,8 @@ package models
       
       public static const ANCIENT_SHARD_PURCHASE_COOLDOWN:int = 84600000;
       
+      public static const ETHEREAL_ITEM_PURCHASE_COOLDOWN:int = 84600000;
+      
       public static const AUTOMATOR_POINT_PURCHASE_COOLDOWN:int = 14400000;
       
       public static const POWER_RUNE_DAMAGE_BONUS:Number = 1;
@@ -107,13 +108,19 @@ package models
       
       public static const DEFAULT_UPGRADEABLE_STATS:Array = [CH2.STAT_GOLD,CH2.STAT_MOVEMENT_SPEED,CH2.STAT_CRIT_CHANCE,CH2.STAT_CRIT_DAMAGE,CH2.STAT_HASTE,CH2.STAT_MANA_REGEN,CH2.STAT_IDLE_DAMAGE,CH2.STAT_CLICKABLE_GOLD,CH2.STAT_CLICK_DAMAGE,CH2.STAT_TREASURE_CHEST_CHANCE,CH2.STAT_MONSTER_GOLD,CH2.STAT_ITEM_COST_REDUCTION,CH2.STAT_TOTAL_MANA,CH2.STAT_TOTAL_ENERGY,CH2.STAT_CLICKABLE_CHANCE,CH2.STAT_BONUS_GOLD_CHANCE,CH2.STAT_TREASURE_CHEST_GOLD,CH2.STAT_PIERCE_CHANCE,CH2.STAT_ITEM_WEAPON_DAMAGE,CH2.STAT_ITEM_HEAD_DAMAGE,CH2.STAT_ITEM_CHEST_DAMAGE,CH2.STAT_ITEM_RING_DAMAGE,CH2.STAT_ITEM_LEGS_DAMAGE,CH2.STAT_ITEM_HANDS_DAMAGE,CH2.STAT_ITEM_FEET_DAMAGE,CH2.STAT_ITEM_BACK_DAMAGE];
       
-      public static const VALUES_RESET_AT_ASCENSION:Array = ["state","timeSinceLastClickAttack","timeSinceLastSkill","timeSinceLastAutoAttack","consecutiveOneShottedMonsters","gold","mana","energy","gcdRemaining","castTimeRemaining","castTime","skillBeingCast","buffs","inventory","currentCatalogRank","catalogItemsForSale","isPurchasingLocked","currentZone","highestZone","totalRunDistance","totalGold","monstersKilled","monstersKilledPerZone","powerRuneActivated","speedRuneActivated","luckRuneActivated","timeMetalDetectorActive","zoneMetalDetectorActive","zoneStartGold"];
+      public static const VALUES_RESET_AT_ASCENSION:Array = ["state","timeSinceLastClickAttack","timeSinceLastSkill","timeSinceLastAutoAttack","consecutiveOneShottedMonsters","gold","castTimeRemaining","castTime","skillBeingCast","buffs","inventory","currentCatalogRank","catalogItemsForSale","isPurchasingLocked","currentZone","highestZone","totalRunDistance","totalGold","monstersKilled","monstersKilledPerZone","powerRuneActivated","speedRuneActivated","luckRuneActivated","timeMetalDetectorActive","zoneMetalDetectorActive","zoneStartGold"];
+      
+      public static const NUMBER_OF_ETHEREAL_ITEM_SLOTS:int = 8;
+      
+      public static const MAX_ETHEREAL_STORAGE_SIZE:int = 72;
+      
+      public static const ETHEREAL_ITEM_RUBY_SELL_PRICE:int = 50;
       
       public static var staticTutorialInstances:Object = {};
       
       public static var staticSkillInstances:Object = {};
       
-      public static var staticFields:Array = ["flavorName","flavorClass","flavor","gender","flair","characterSelectOrder","availableForCreation","visibleOnCharacterSelect","defaultSaveName","startingSkills","levelCostScaling","upgradeableStats","assetGroupName","damageMultiplierBase","maxManaMultiplierBase","maxEnergyMultiplierBase","attackMsDelay","gcdBase","autoAttackDamageMultiplierBase","damageMultiplierValueFunction","maxManaMultiplierValueFunction","maxEnergyMultiplierValueFunction","damageMultiplierCostFunction","maxManaMultiplierCostFunction","maxEnergyMultiplierCostFunction","statValueFunctions","statBaseValues","statCostFunctions","monstersPerZone","monsterHealthMultiplier","attackRange","levelGraph","levelGraphNodeTypes"];
+      public static var staticFields:Array = ["flavorName","flavorClass","flavor","characterSelectOrder","availableForCreation","visibleOnCharacterSelect","defaultSaveName","startingSkills","levelCostScaling","upgradeableStats","assetGroupName","damageMultiplierBase","maxManaMultiplierBase","maxEnergyMultiplierBase","attackMsDelay","gcdBase","autoAttackDamageMultiplierBase","damageMultiplierValueFunction","maxManaMultiplierValueFunction","maxEnergyMultiplierValueFunction","damageMultiplierCostFunction","maxManaMultiplierCostFunction","maxEnergyMultiplierCostFunction","statValueFunctions","statBaseValues","statCostFunctions","monstersPerZone","monsterHealthMultiplier","attackRange","levelGraph","levelGraphNodeTypes","worldTraits","hardcodedWorldTraits","gildStartBuild","etherealTraitTooltipInfo"];
        
       
       public var isMouseOverClickableActivationUnlocked:Boolean = false;
@@ -121,6 +128,28 @@ package models
       public var numUserInputActions:Number;
       
       public var sidePanelIsVisible:Boolean;
+      
+      public var equippedEtherealItems:Object;
+      
+      public var etherealItemStorage:Object;
+      
+      public var etherealItemInventory:Array;
+      
+      public var etherealItemStats:Object;
+      
+      public var etherealItemStatChoices:Array;
+      
+      public var etherealItemSpecialChoices:Array;
+      
+      public var shouldShowNewEtherealItemPopup:Boolean = false;
+      
+      public var etherealItemIndiciesForPopup:Array;
+      
+      public var specialEtherealItemChance:Number = 0.03333333333333333;
+      
+      public var canChangeEtherealEquipment:Boolean = false;
+      
+      public var pendingEtherealEquipmentChanges:Object;
       
       public var modDependencies:Object;
       
@@ -160,9 +189,9 @@ package models
       
       public var creationTime:Number;
       
-      public var gender:String;
+      public var extendedVariables:ExtendedVariables;
       
-      public var flair:String;
+      public var serializedExtendedVariables:Object;
       
       public var roller:Roller;
       
@@ -189,6 +218,8 @@ package models
       public var ancientShards:Number = 0;
       
       public var timeSinceLastAncientShardPurchase:int = 84600000;
+      
+      public var timeSinceLastEtherealItemPurchase:int = 84600000;
       
       public var timeSinceLastAutomatorPointPurchase:int = 14400000;
       
@@ -332,6 +363,8 @@ package models
       
       public var hasSeenAutomatorPanel:Boolean = false;
       
+      public var hasSeenEtherealPanel:Boolean = false;
+      
       public var hasSeenWorldsPanel:Boolean = false;
       
       public var hasSeenMiscPanel:Boolean = false;
@@ -349,6 +382,8 @@ package models
       public var totalRubies:Number = 0;
       
       public var isItemPanelUnlockedHandler:Object = null;
+      
+      public var isEtherealPanelUnlockedHandler:Object = null;
       
       public var isGraphPanelUnlockedHandler:Object = null;
       
@@ -383,6 +418,8 @@ package models
       public var experienceForCurrentWorld:BigNumber;
       
       public var experience:BigNumber;
+      
+      public var highestEtherealItemAcquired:Number = 0;
       
       public var highestWorldCompleted:Number = 0;
       
@@ -498,6 +535,14 @@ package models
       
       public var traits:Object;
       
+      public var worldTraits:Array;
+      
+      public var hardcodedWorldTraits:Object;
+      
+      public var gildStartBuild:Array;
+      
+      public var etherealTraitTooltipInfo:Object;
+      
       public var characterDisplay:CharacterDisplay;
       
       public var worldEntity:WorldEntity;
@@ -505,6 +550,8 @@ package models
       public var x:Number;
       
       public var y:Number;
+      
+      public var applyWorldTraitsHandler:Object = null;
       
       public var onWorldStartedHandler:Object = null;
       
@@ -558,6 +605,8 @@ package models
       
       public var onAscensionHandler:Object = null;
       
+      public var damageValueHandler:Object = null;
+      
       public var addGoldHandler:Object = null;
       
       public var addRubiesHandler:Object = null;
@@ -586,15 +635,19 @@ package models
       
       private var classStatsCached:Boolean = false;
       
+      public var gainLevelHandler:Object = null;
+      
       public var getLevelUpCostToNextLevelHandler:Object = null;
       
       public var addGildHandler:Object = null;
       
       public var highestDamageExponent:Number = 0;
       
-      public var shouldRubyShopActivateHandler:Object = null;
+      public var isRubyShopAvailableHandler:Object = null;
       
-      public var shouldRubyShopDeactivateHandler:Object = null;
+      public var ancientShardPurchase:RubyPurchase;
+      
+      public var etherealItemPurchase:RubyPurchase;
       
       public var populateRubyPurchaseOptionsHandler:Object = null;
       
@@ -606,10 +659,41 @@ package models
       
       public var getItemDamageHandler:Object = null;
       
+      public var getWorldTraitCountHandler:Object = null;
+      
+      public var populateEtherealItemStatsHandler:Object = null;
+      
       public function Character()
       {
+         this.equippedEtherealItems = {
+            0:-1,
+            1:-1,
+            2:-1,
+            3:-1,
+            4:-1,
+            5:-1,
+            6:-1,
+            7:-1
+         };
+         this.etherealItemStorage = {};
+         this.etherealItemInventory = [];
+         this.etherealItemStats = {};
+         this.etherealItemStatChoices = [];
+         this.etherealItemSpecialChoices = [];
+         this.etherealItemIndiciesForPopup = [];
+         this.pendingEtherealEquipmentChanges = {
+            0:-1,
+            1:-1,
+            2:-1,
+            3:-1,
+            4:-1,
+            5:-1,
+            6:-1,
+            7:-1
+         };
          this.modDependencies = {};
          this.unarmedDamage = new BigNumber(1);
+         this.serializedExtendedVariables = {};
          this.roller = new Roller();
          this.gold = new BigNumber(0);
          this.zoneStartGold = new BigNumber(0);
@@ -647,6 +731,9 @@ package models
          this.nodesPurchased = {};
          this.undoNodes = {};
          this.traits = {};
+         this.worldTraits = new Array();
+         this.hardcodedWorldTraits = {};
+         this.gildStartBuild = new Array();
          this.worldEntity = new WorldEntity();
          this.cachedDamage = [];
          this.cachedClassStats = [];
@@ -658,6 +745,7 @@ package models
          this.x = 20;
          this.y = CHARACTER_ZONE_START_Y;
          this.worldEntity.removeOnZoneChanges = false;
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicObject,"serializedExtendedVariables");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicObject,"modDependencies");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"version");
          this.persist(GILD_PERSISTING_FALSE,registerDynamicBigNumber,"unarmedDamage");
@@ -665,6 +753,10 @@ package models
          this.persist(GILD_PERSISTING_TRUE,registerDynamicString,"name");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"roller",Roller);
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"startingRollerValue");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicObject,"equippedEtherealItems");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicObject,"etherealItemStorage");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicObject,"pendingEtherealEquipmentChanges");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicCollection,"etherealItemInventory",EtherealItem);
          this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"trackedDps",TrackedStat);
          this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"trackedOverkill",TrackedStat);
          this.persist(GILD_PERSISTING_TRUE,registerDynamicChild,"trackedGoldGained",TrackedStat);
@@ -700,6 +792,7 @@ package models
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeOfLastCatalogPurchase");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeSinceLastRubyShopAppearance");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeSinceLastAncientShardPurchase");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeSinceLastEtherealItemPurchase");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeSinceLastAutomatorPointPurchase");
          this.persist(GILD_PERSISTING_FALSE,registerDynamicNumber,"ancientShards");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"powerRuneActivated");
@@ -709,6 +802,7 @@ package models
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"timeSinceTimeMetalDetectorActivated");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"zoneMetalDetectorActive");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"zoneOfZoneMetalDetectorActivation");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicCollection,"currentRubyShop",RubyPurchase);
          this.persist(GILD_PERSISTING_TRUE,registerDynamicObject,"zoneToShowPerWorld");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicObject,"hasActivatedMassiveOrangeFish");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"didFinishWorld");
@@ -734,11 +828,13 @@ package models
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasSeenGraphPanel");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasSeenSkillsPanel");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasSeenAutomatorPanel");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasSeenEtherealPanel");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasSeenWorldsPanel");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasSeenMiscPanel");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasReceivedFirstTimeEnergy");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasSeenRubyShopPanel");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicBoolean,"hasNewSkillTreePointsAvailable");
+         this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"highestEtherealItemAcquired");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicString,"name");
          this.persist(GILD_PERSISTING_TRUE,registerDynamicNumber,"level");
          this.persist(GILD_PERSISTING_FALSE,registerDynamicNumber,"totalStatPointsV2");
@@ -882,6 +978,14 @@ package models
          this.statCostFunctions[CH2.STAT_AUTOMATOR_SPEED] = exponential(1.25);
       }
       
+      public static function one() : Function
+      {
+         return function(statLevel:Number):Number
+         {
+            return 1;
+         };
+      }
+      
       public static function linear(scale:Number, base:Number = 0) : Function
       {
          return function(statLevel:Number):Number
@@ -949,6 +1053,66 @@ package models
       public static function linear2(statLevel:Number) : Number
       {
          return 2 * statLevel;
+      }
+      
+      public static function scaleLinearlyWithStatLevel(statKey:String, characterInstance:Character) : Function
+      {
+         return function(exchangeRate:Number):Number
+         {
+            if(characterInstance.statLevels[statKey])
+            {
+               return exchangeRate * characterInstance.statLevels[statKey];
+            }
+            return 0;
+         };
+      }
+      
+      public static function scaleLinearlyWithTraitLevel(traitKey:String, characterInstance:Character) : Function
+      {
+         return function(exchangeRate:Number):Number
+         {
+            if(characterInstance.getTrait(traitKey))
+            {
+               return exchangeRate * characterInstance.getTrait(traitKey);
+            }
+            return 0;
+         };
+      }
+      
+      public static function scaleLinearlyWithSkillPoints(characterInstance:Character) : Function
+      {
+         return function(exchangeRate:Number):Number
+         {
+            return exchangeRate * characterInstance.totalStatPointsV2;
+         };
+      }
+      
+      public static function etherealExchangeRateFunction(scaler:Number) : Function
+      {
+         return function(gildNumber:int):Number
+         {
+            var ratio:* = undefined;
+            var basePlayerGrowth:* = 1.5;
+            var baseStatPointValue:* = 1.1;
+            var fractionOfLimit:* = 0.9;
+            var lessThanFive:* = gildNumber < 5;
+            var etherealItemCount:* = 8;
+            if(lessThanFive)
+            {
+               gildNumber = 5;
+            }
+            var upperLimit:* = Math.pow(Formulas.instance.getGildDifficulty(gildNumber),0.2) / basePlayerGrowth;
+            var limitOfBonus:* = upperLimit / baseStatPointValue;
+            var targetBonus:* = 1 + fractionOfLimit * (limitOfBonus - 1);
+            var targetMultiplierPerSlot:* = Math.pow(targetBonus,1 / 8);
+            var conversionRate:* = Math.log(targetMultiplierPerSlot) / Math.log(1.1);
+            if(lessThanFive)
+            {
+               ratio = 0.85 - 0.1 * (4 - gildNumber);
+               conversionRate = conversionRate * ratio;
+            }
+            return scaler * conversionRate;
+         };
       }
       
       public function get timeSinceLastActiveAction() : Number
@@ -1022,6 +1186,22 @@ package models
          return this.energy >= this.clickAttackEnergyCost;
       }
       
+      public function writeExtendedVariables() : void
+      {
+         if(this.extendedVariables)
+         {
+            this.serializedExtendedVariables = this.extendedVariables.toJsonObject();
+         }
+      }
+      
+      public function readExtendedVariables() : void
+      {
+         if(this.extendedVariables)
+         {
+            this.extendedVariables.fromJsonObject(this.serializedExtendedVariables);
+         }
+      }
+      
       public function isItemPanelUnlocked() : Boolean
       {
          if(this.isItemPanelUnlockedHandler)
@@ -1034,6 +1214,20 @@ package models
       public function isItemPanelUnlockedDefault() : Boolean
       {
          return true;
+      }
+      
+      public function isEtherealPanelUnlocked() : Boolean
+      {
+         if(this.isEtherealPanelUnlockedHandler)
+         {
+            return this.isEtherealPanelUnlockedHandler.isEtherealPanelUnlockedOverride();
+         }
+         return this.isEtherealPanelUnlockedDefault();
+      }
+      
+      public function isEtherealPanelUnlockedDefault() : Boolean
+      {
+         return this.hasSeenEtherealPanel || this.etherealItemInventory.length > 0;
       }
       
       public function isGraphPanelUnlocked() : Boolean
@@ -1257,9 +1451,15 @@ package models
          this.traits[trait] = value;
       }
       
-      public function addTrait(trait:String, value:Number) : void
+      public function addTrait(trait:String, value:Number, isEtherealTrait:Boolean = false) : void
       {
          this.traits[trait] = this.getTrait(trait) + value;
+         if(isEtherealTrait)
+         {
+            this.recalculateEtherealItemStats();
+            this.classStatsCached = false;
+            this.inventory.cachedEquippedDamage.base = -1;
+         }
       }
       
       public function canAffordCatalogItem(item:Item) : Boolean
@@ -1284,7 +1484,15 @@ package models
          this.hasNeverStartedWorld = false;
          this.onWorldStarted(worldNumber);
          this.generateCatalog();
+         CH2.currentCharacter.applyWorldTraits(worldNumber);
+         var startingGold:BigNumber = new BigNumber(1);
+         startingGold.timesEqualsN(CH2.currentCharacter.monsterGoldMultiplier);
+         var startingGoldMultiplier:Number = Math.max(CH2.currentCharacter.monsterGold,CH2.currentCharacter.clickableGold);
+         startingGold.timesEqualsN(startingGoldMultiplier);
+         CH2.currentCharacter.addGold(startingGold);
          this.didFinishWorld = false;
+         this.canChangeEtherealEquipment = false;
+         this.equipPendingEtherealItems();
          if(!this.highestMonstersKilled.hasOwnProperty(worldNumber))
          {
             this.highestMonstersKilled[worldNumber] = 0;
@@ -1293,10 +1501,10 @@ package models
          {
             worldIsInLastFiveOfGild = (this.currentWorldId - 1) % this.worldsPerGild >= this.worldsPerGild - 4;
             chanceToShowInWorld = !!worldIsInLastFiveOfGild?Number(0.25):Number(0.1);
-            willShowInCurrentWorld = CH2.roller.worldRoller.boolean(chanceToShowInWorld);
+            willShowInCurrentWorld = this.roller.worldRoller.boolean(chanceToShowInWorld);
             if(willShowInCurrentWorld)
             {
-               this.zoneToShowPerWorld[worldNumber] = CH2.roller.worldRoller.integer(35,90);
+               this.zoneToShowPerWorld[worldNumber] = this.roller.worldRoller.integer(35,90);
             }
             else
             {
@@ -1305,6 +1513,22 @@ package models
             this.hasActivatedMassiveOrangeFish[worldNumber] = false;
          }
          MusicManager.instance.shufflePlaylists();
+      }
+      
+      public function applyWorldTraits(worldNumber:Number) : void
+      {
+         if(this.applyWorldTraitsHandler)
+         {
+            this.applyWorldTraitsHandler.applyWorldTraitsOverride(worldNumber);
+         }
+         else
+         {
+            this.applyWorldTraitsDefault(worldNumber);
+         }
+      }
+      
+      public function applyWorldTraitsDefault(worldNumber:Number) : void
+      {
       }
       
       public function onWorldStarted(worldNumber:Number) : void
@@ -1325,7 +1549,6 @@ package models
          var expectedNumGilds:int = Math.floor((this.currentWorldId - 1) / this.worldsPerGild);
          if(this.gilds < expectedNumGilds)
          {
-            this.drainWorldsUpTo(this.currentWorldId - 1);
             this.addGild(this.currentWorldId);
          }
          this.timeOfLastRun = CH2.user.totalMsecsPlayed;
@@ -1394,7 +1617,7 @@ package models
       
       public function triggerGlobalCooldownDefault() : void
       {
-         this.gcdRemaining = this.gcd;
+         this.gcdRemaining = this.baseGCD;
       }
       
       public function unlockCharacter() : void
@@ -1464,6 +1687,28 @@ package models
          attemptHighestWorldOption.onWorldEndFunction = this.onWorldEndAttemptHighestWorld;
          attemptHighestWorldOption.isUnlockedFunction = this.isAttemptHighestWorldOnWorldEndUnlocked;
          this.worldEndAutomationOptions.push(attemptHighestWorldOption);
+         var stopBeforeGildOption:AutomatorWorldEndOption = new AutomatorWorldEndOption();
+         stopBeforeGildOption.name = "Attempt Next Up To Gild";
+         stopBeforeGildOption.onWorldEndFunction = this.onWorldEndStopBeforeGild;
+         stopBeforeGildOption.isUnlockedFunction = this.isStopBeforeGildOnWorldEndUnlocked;
+         this.worldEndAutomationOptions.push(stopBeforeGildOption);
+      }
+      
+      public function onWorldEndStopBeforeGild() : void
+      {
+         if((this.currentWorldId + 1) % this.worldsPerGild == 1)
+         {
+            this.ascend(this.currentWorldId);
+         }
+         else
+         {
+            this.ascend(this.currentWorldId + 1);
+         }
+      }
+      
+      public function isStopBeforeGildOnWorldEndUnlocked() : Boolean
+      {
+         return this.highestWorldCompleted >= WORLD_END_AUTOMATION_OPTIONS_UNLOCK_WORLD;
       }
       
       public function onWorldEndRerunCurrentWorld() : void
@@ -1540,10 +1785,16 @@ package models
          this.timeSinceLastClickAttack = this.timeSinceLastClickAttack + dt;
          this.timeSinceLastSkill = this.timeSinceLastSkill + dt;
          this.timeSinceLastAutoAttack = this.timeSinceLastAutoAttack + dt;
-         this.timeSinceLastRubyShopAppearance = this.timeSinceLastRubyShopAppearance + dt;
          this.timeSinceRegularMonsterHasDroppedRubies = this.timeSinceRegularMonsterHasDroppedRubies + dt;
          this.timeSinceLastOrangeFishAppearance = this.timeSinceLastOrangeFishAppearance + dt;
-         this.serverTimeOfLastUpdate = ServerTimeKeeper.instance.timestamp;
+         if(IdleHeroMain.IS_TIMELAPSE)
+         {
+            this.serverTimeOfLastUpdate = ServerTimeKeeper.instance.timestamp - 17 * (IdleHeroMain.totalTimeLapseLoops - IdleHeroMain.completedTimeLapseLoops);
+         }
+         else
+         {
+            this.serverTimeOfLastUpdate = ServerTimeKeeper.instance.timestamp;
+         }
          this.updateStats(dt);
          if(this.timeUntilDamageCache <= 0)
          {
@@ -1565,8 +1816,9 @@ package models
             this.regenerateManaAndEnergy(this.timeSinceRegen);
             this.timeSinceRegen = 0;
          }
-         this.cooldownSkills(dt);
-         this.gcdRemaining = this.gcdRemaining - dt;
+         var hasteThisFrame:Number = this.hasteRating;
+         this.cooldownSkills(dt,hasteThisFrame);
+         this.gcdRemaining = this.gcdRemaining - dt * Math.min(hasteThisFrame,this.baseGCD / this.gcdMinimum);
          if(IdleHeroMain.IS_RENDERING)
          {
             this.characterDisplay.update(dt);
@@ -1576,7 +1828,7 @@ package models
          switch(lockedState)
          {
             case STATE_PAUSED:
-               if(CH2.world.isBossZone && !this.isNextMonsterInRange && CH2.world.getNextMonster() != null)
+               if(CH2.world.isBossZone(this.currentZone) && !this.isNextMonsterInRange && CH2.world.getNextMonster() != null)
                {
                   if(this.characterDisplay.animationState != CharacterDisplay.STATE_WALKING)
                   {
@@ -1630,7 +1882,10 @@ package models
                   this.changeState(STATE_WALKING);
                }
          }
-         this.buffs.updateBuffs(dt);
+         if(!(CH2.world.isBossZone(this.currentZone) && !this.isNextMonsterInRange && CH2.world.getNextMonster() != null))
+         {
+            this.buffs.updateBuffs(dt,hasteThisFrame);
+         }
          this.updateRubyShopFields(dt);
          if(Math.floor(this.timeOnlineMilliseconds / 3600000) != Math.floor((this.timeOnlineMilliseconds - dt) / 3600000))
          {
@@ -1642,6 +1897,19 @@ package models
       
       public function updateOfflineProgress() : void
       {
+         var msecOfflineSinceLastSession:Number = NaN;
+         if(!CH2.user.disableOfflineProgress)
+         {
+            trace("OFFLINE PROGRESS");
+            if(this.serverTimeOfLastUpdate == 0)
+            {
+               this.serverTimeOfLastUpdate = ServerTimeKeeper.instance.timestamp;
+            }
+            msecOfflineSinceLastSession = ServerTimeKeeper.instance.timestamp - this.serverTimeOfLastUpdate;
+            msecOfflineSinceLastSession = Math.min(msecOfflineSinceLastSession,1000 * 60 * 60 * 12);
+            IdleHeroMain.NEED_TIMELAPSE = true;
+            IdleHeroMain.totalTimeLapseTime = msecOfflineSinceLastSession;
+         }
       }
       
       public function sendServerStatsUpdate() : void
@@ -1715,11 +1983,39 @@ package models
       
       public function attackDefault(attackData:AttackData) : void
       {
+         var monsterAttacked:Monster = CH2.world.getNextMonster();
+         if(!monsterAttacked)
+         {
+            return;
+         }
+         if(attackData.canCrit)
+         {
+            attackData.isCritical = this.roller.attackRoller.boolean(this.criticalChance + attackData.critChanceModifier);
+         }
+         else
+         {
+            attackData.isCritical = false;
+         }
+         if(attackData.isCritical)
+         {
+            attackData.damage.timesEqualsN(this.criticalDamageMultiplier);
+         }
+         attackData.monster = monsterAttacked;
+         this.buffs.onAttack(attackData);
+         if(attackData.monster)
+         {
+            attackData.monster.takeDamage(attackData);
+         }
+         this.playRandomHitSound(attackData);
+      }
+      
+      public function attackDefaultOld(attackData:AttackData) : void
+      {
          var i:int = 0;
          var attackRange:Number = NaN;
          var monstersAttacked:Array = [];
          var attackDatas:Array = [];
-         attackData.isPierce = CH2.roller.attackRoller.boolean(this.pierceChance);
+         attackData.isPierce = this.roller.attackRoller.boolean(this.pierceChance);
          if(attackData.isPierce)
          {
             attackRange = 250;
@@ -1740,7 +2036,14 @@ package models
             {
                attackDatas[i] = attackData.getCopy();
             }
-            attackDatas[i].isCritical = CH2.roller.attackRoller.boolean(this.criticalChance);
+            if(attackDatas[i].canCrit)
+            {
+               attackDatas[i].isCritical = this.roller.attackRoller.boolean(this.criticalChance);
+            }
+            else
+            {
+               attackDatas[i].isCritical = false;
+            }
             if(attackDatas[i].isCritical)
             {
                attackData.isCritical = true;
@@ -1748,10 +2051,10 @@ package models
             attackDatas[i].monster = monstersAttacked[i];
             if(attackDatas[i].isCritical)
             {
-               attackDatas[i].damage = attackDatas[i].damage.multiplyN(this.criticalDamageMultiplier);
+               attackDatas[i].damage.timesEqualsN(this.criticalDamageMultiplier);
             }
          }
-         this.buffs.onAttack(attackDatas);
+         this.buffs.onAttack(attackData);
          for(i = 0; i < attackDatas.length; i++)
          {
             if(attackDatas[i].monster)
@@ -1871,6 +2174,8 @@ package models
          attackData.damage = this.clickDamage;
          this.teleport();
          this.attack(attackData);
+         CH2.world.removeOldMonsters();
+         CH2.world.spawnMonsters();
       }
       
       public function teleport() : void
@@ -2096,6 +2401,7 @@ package models
       
       public function onWorldFinishedDefault() : void
       {
+         var slot:int = 0;
          this.didFinishWorld = true;
          this.highestMonstersKilled[this.currentWorldId] = 0;
          if(this.runsCompletedPerWorld.hasOwnProperty(this.currentWorldId))
@@ -2109,6 +2415,20 @@ package models
          if(this.currentWorldId > this.highestWorldCompleted)
          {
             this.highestWorldCompleted = this.currentWorldId;
+            this.highestEtherealItemAcquired = this.currentWorldId;
+            this.shouldShowNewEtherealItemPopup = true;
+            this.etherealItemIndiciesForPopup = [];
+            if(this.highestWorldCompleted <= 4)
+            {
+               slot = 7 - 2 * (this.highestWorldCompleted - 1);
+               this.etherealItemIndiciesForPopup.push(this.addEtherealItemToInventory(this.rollEtherealItem(this.gilds,slot)));
+               this.etherealItemIndiciesForPopup.push(this.addEtherealItemToInventory(this.rollEtherealItem(this.gilds,slot - 1)));
+            }
+            else
+            {
+               this.etherealItemIndiciesForPopup.push(this.addEtherealItemToInventory(this.rollEtherealItem(this.gilds)));
+               this.etherealItemIndiciesForPopup.push(this.addEtherealItemToInventory(this.rollEtherealItem(this.gilds)));
+            }
          }
          if(this.fastestWorldTimes.hasOwnProperty(this.currentWorldId))
          {
@@ -2181,6 +2501,20 @@ package models
       }
       
       public function get damage() : BigNumber
+      {
+         return this.damageValue();
+      }
+      
+      public function damageValue() : BigNumber
+      {
+         if(this.damageValueHandler)
+         {
+            return this.damageValueHandler.damageValueOverride();
+         }
+         return this.damageValueDefault();
+      }
+      
+      public function damageValueDefault() : BigNumber
       {
          var dmg:BigNumber = this.inventory.getEquippedDamage().add(this.unarmedDamage);
          dmg.timesEqualsN(this.ancientShardDamageMultiplier);
@@ -2323,7 +2657,11 @@ package models
       
       public function get walkSpeedMultiplier() : Number
       {
-         return this.getStat(CH2.STAT_MOVEMENT_SPEED);
+         if(!CH2.world.isBossZone(this.currentZone))
+         {
+            return this.getStat(CH2.STAT_MOVEMENT_SPEED);
+         }
+         return 1;
       }
       
       public function get damageMultiplier() : Number
@@ -2488,7 +2826,7 @@ package models
             {
                this.addSkill(_loc1_);
                this.initializeStaticValues(_loc1_.uid);
-               this.getSkill(_loc1_.uid).initialize();
+               this.getSkill(_loc1_.uid).initialize(this);
             }
             else
             {
@@ -2525,8 +2863,11 @@ package models
          if(this.skills[replaceUid] && this.skills[replaceUid].isActive)
          {
             slot = this.skills[replaceUid].slot;
-            CH2UI.instance.mainUI.hud.skillBar.skillSlots[slot].skillSlotUI.skill = null;
-            CH2UI.instance.mainUI.hud.skillBar.skillSlots[slot].skillSlotUI.removeItemIcon();
+            if(CH2UI.instance.mainUI.hud.skillBar.skillSlots[slot].skillSlotUI != null)
+            {
+               CH2UI.instance.mainUI.hud.skillBar.skillSlots[slot].skillSlotUI.skill = null;
+               CH2UI.instance.mainUI.hud.skillBar.skillSlots[slot].skillSlotUI.removeItemIcon();
+            }
             this.deactivateSkill(replaceUid);
          }
          this.activateSkill(newSkill.uid);
@@ -2578,10 +2919,10 @@ package models
          }
       }
       
-      public function cooldownSkills(dt:int) : void
+      public function cooldownSkills(dt:int, currentHaste:Number) : void
       {
          var skill:Skill = null;
-         var cooldownTime:Number = dt * CH2.currentCharacter.hasteRating;
+         var cooldownTime:Number = dt * currentHaste;
          for each(skill in this.activeSkills)
          {
             skill.cooldownRemaining = skill.cooldownRemaining - cooldownTime;
@@ -2861,6 +3202,7 @@ package models
       
       public function onUsedSkillDefault(skill:Skill) : void
       {
+         CH2.user.addUserInputActions("SPENT_GOLD");
          CH2.currentCharacter.buffs.onSkillUse(skill);
          this.totalSkillsUsed++;
       }
@@ -2879,10 +3221,11 @@ package models
       
       public function levelUpItemDefault(item:Item, amount:Number = 1) : void
       {
-         if(this.gold.gte(item.cost(amount)) && !this.isPurchasingLocked)
+         var itemCost:BigNumber = item.cost(amount);
+         if(this.gold.gte(itemCost) && !this.isPurchasingLocked)
          {
             this.inputLogger.recordInput(GameActions["LEVEL_UP_ITEM_" + this.inventory.getSlotFromItem(item.uid)],amount);
-            this.subtractGold(item.cost(amount));
+            this.subtractGold(itemCost);
             item.level = item.level + amount;
             this.inventory.cachedEquippedDamage.base = -1;
             if(IdleHeroMain.IS_RENDERING)
@@ -2893,7 +3236,10 @@ package models
             }
             this.totalUpgradesToItems++;
             this.timeOfLastItemUpgrade = CH2.user.totalMsecsPlayed;
-            item.updateNextPurchaseInfo(this.shouldLevelToNextMultiplier);
+            if(IdleHeroMain.IS_RENDERING)
+            {
+               item.updateNextPurchaseInfo(this.shouldLevelToNextMultiplier);
+            }
          }
          else
          {
@@ -3131,101 +3477,74 @@ package models
       public function getClassStat(statId:int) : Number
       {
          var i:int = 0;
+         var statLevel:Number = NaN;
+         var valueFunction:Function = null;
+         var baseValue:Number = NaN;
          if(!this.classStatsCached)
          {
-            for(i = 0; i < CH2.STATS.length; i++)
+            for(i = 0; i < CH2.STATS.length; )
             {
-               this.cachedClassStats[i] = this.getStatAtLevel(i,this.getStatLevel(i));
+               statLevel = 0;
+               if(this.statLevels[i])
+               {
+                  statLevel = this.statLevels[i];
+               }
+               valueFunction = this.statValueFunctions[i];
+               baseValue = this.statBaseValues[i];
+               if(valueFunction != null)
+               {
+                  if(CH2.STATS[i].calculationType == CH2.MULTIPLICATIVE)
+                  {
+                     this.cachedClassStats[i] = baseValue * valueFunction(statLevel + this.getTrait(CH2.STATS[i].etherealTraitKey));
+                  }
+                  else
+                  {
+                     this.cachedClassStats[i] = baseValue + valueFunction(statLevel + this.getTrait(CH2.STATS[i].etherealTraitKey));
+                  }
+                  i++;
+                  continue;
+               }
+               throw Error("Can\'t find value function or base value for stat: " + i);
             }
             this.classStatsCached = true;
          }
          return this.cachedClassStats[statId];
       }
       
-      public function setClassStatsCached(value:Boolean) : void
-      {
-         if(this.classStatsCached)
-         {
-            this.classStatsCached = value;
-         }
-      }
-      
-      public function resetStatLevels() : void
-      {
-         if(this.statLevels)
-         {
-            this.statLevels = {};
-         }
-      }
-      
-      public function getStatLevel(statId:int) : Number
-      {
-         if(this.statLevels[statId])
-         {
-            return this.statLevels[statId];
-         }
-         return 0;
-      }
-      
-      public function getStatAtLevel(statId:int, level:Number) : Number
-      {
-         var valueFunction:Function = this.statValueFunctions[statId];
-         var baseValue:Number = this.statBaseValues[statId];
-         if(valueFunction != null)
-         {
-            if(CH2.STATS[statId].calculationType == CH2.MULTIPLICATIVE)
-            {
-               return baseValue * valueFunction(level);
-            }
-            return baseValue + valueFunction(level);
-         }
-         throw Error("Can\'t find value function or base value for stat: " + statId);
-      }
-      
       public function getStatDisplayName(statId:int) : String
       {
          if(CH2.STATS[statId] == null)
          {
-            throw Error("Can\'t find display name for stat: " + statId);
+            return _("ERROR: UNKNOWN STAT");
          }
          return CH2.STATS[statId].displayName;
       }
       
+      public function getStatId(displayName:String) : int
+      {
+         var i:* = undefined;
+         if(displayName == null)
+         {
+            return -1;
+         }
+         for(i = 0; i < CH2.STATS.length; i++)
+         {
+            displayName = displayName.replace(/_/g," ");
+            if(displayName.toLowerCase() === CH2.STATS[i].displayName.toLowerCase())
+            {
+               return CH2.STATS[i].id;
+            }
+         }
+         return -1;
+      }
+      
       public function getStatDescription(statId:int) : String
-      {
-         return this.getStatDescriptionAtLevel(statId,this.getStatLevel(statId));
-      }
-      
-      public function getStatDescriptionAtNextLevel(statId:int) : String
-      {
-         return this.getStatDescriptionAtLevel(statId,this.getStatLevel(statId) + 1);
-      }
-      
-      public function getStatDescriptionAtLevel(statId:int, level:Number) : String
       {
          if(CH2.STATS[statId] == null)
          {
-            throw Error("Can\'t find description function for stat: " + statId);
+            return _("ERROR: UNKNOWN STAT");
          }
-         return _(CH2.STATS[statId].description,this.getStatAtLevel(statId,level));
-      }
-      
-      public function getStatLevelUpCost(statId:int) : BigNumber
-      {
-         if(this.statCostFunctions[statId] != null)
-         {
-            return new BigNumber(this.statCostFunctions[statId](this.getStatLevel(statId) + 1));
-         }
-         throw Error("Can\'t find cost function for stat: " + statId);
-      }
-      
-      public function getStatValueIncreaseAsMultiple(statId:int) : Number
-      {
-         var statLevel:Number = this.getStatLevel(statId);
-         var baseStatValue:Number = this.statBaseValues[statId];
-         var nextLevelValue:Number = baseStatValue + this.statValueFunctions[statId](statLevel + 1);
-         var currentLevelValue:Number = baseStatValue + this.statValueFunctions[statId](statLevel);
-         return nextLevelValue / currentLevelValue;
+         return _(CH2.STATS[statId].description,this.getClassStat(statId));
       }
       
       public function levelUpStat(statId:int, levelsToAdd:int = 1) : void
@@ -3238,21 +3557,25 @@ package models
          {
             this.statLevels[statId] = levelsToAdd;
          }
+         this.recalculateEtherealItemStats();
          this.classStatsCached = false;
          this.inventory.cachedEquippedDamage.base = -1;
       }
       
-      public function respecStats() : void
+      public function gainLevel() : void
       {
-         if(this.level > 1)
+         if(this.gainLevelHandler)
          {
-            this.level--;
-            this.statLevels = {};
-            this.spentStatPoints = new BigNumber(0);
+            this.gainLevelHandler.gainLevelOverride();
          }
+         else
+         {
+            this.gainLevelDefault();
+         }
+         this.recalculateEtherealItemStats();
       }
       
-      public function gainLevel() : void
+      public function gainLevelDefault() : void
       {
          this.level++;
          var whatever:BigNumber = this.totalStatPoints;
@@ -3283,9 +3606,9 @@ package models
          this.experienceForCurrentWorld.plusEquals(points);
          this.logXPEarned(points);
          var didLevel:Boolean = false;
-         while(this.levelUpCost.lte(this.experience))
+         if(this.levelUpCost.lte(this.experience))
          {
-            this.experience.minusEquals(this.levelUpCost);
+            this.experience.minusEquals(this.experience);
             this.gainLevel();
             didLevel = true;
          }
@@ -3390,7 +3713,7 @@ package models
                {
                   if(_loc5_.hasOwnProperty(this.levelGraph.nodes[_loc8_].id) && _loc5_[this.levelGraph.nodes[_loc8_].id] > param1)
                   {
-                     this.levelGraph.purchaseNode(this.levelGraph.nodes[_loc8_].id);
+                     this.levelGraph.purchaseNode(this.levelGraph.nodes[_loc8_].id,this);
                   }
                }
             }
@@ -3410,58 +3733,95 @@ package models
          return this.addGildDefault(worldId);
       }
       
-      public function addGildDefault(param1:Number) : void
+      public function addGildDefault(worldId:Number) : void
       {
-         var _loc4_:int = 0;
-         var _loc8_:Skill = null;
-         var _loc9_:Number = NaN;
+         this.timeSinceLastAncientShardPurchase = ANCIENT_SHARD_PURCHASE_COOLDOWN;
+         this.timeSinceLastEtherealItemPurchase = ETHEREAL_ITEM_PURCHASE_COOLDOWN;
+         this.gilds = Math.floor((worldId - 1) / this.worldsPerGild);
+         var firstWorldOfGild:Number = Math.floor((CH2.currentCharacter.highestWorldCompleted + 1) / CH2.currentCharacter.worldsPerGild) * CH2.currentCharacter.worldsPerGild + 1;
+         this.resetGild(firstWorldOfGild);
+         this.ancientShards = 0;
+         this.setGildBonus(firstWorldOfGild);
+         var previousGildedDamage:BigNumber = new BigNumber(0);
+         previousGildedDamage.base = this.gildedDamageMultiplier.base;
+         previousGildedDamage.power = this.gildedDamageMultiplier.power;
+         var gildedDamageChange:BigNumber = this.gildedDamageMultiplier.divide(previousGildedDamage);
+         this.showCongratsPopupWhenUIIsCreated(gildedDamageChange);
+      }
+      
+      public function setGildBonus(worldId:int) : void
+      {
+         this.gildedDamageMultiplier = Formulas.instance.getWorldDifficulty(worldId).multiplyN(100);
+      }
+      
+      public function resetGild(param1:Number) : void
+      {
+         var _loc5_:int = 0;
+         var _loc7_:Skill = null;
+         var _loc8_:Number = NaN;
+         var _loc9_:int = 0;
+         var _loc10_:EtherealItem = null;
          var _loc2_:Number = this.statLevels[CH2.STAT_AUTOMATOR_SPEED];
-         var _loc3_:Character = new Character();
-         _loc3_.name = this.name;
-         Characters.populateStaticFields(_loc3_);
+         var _loc3_:Number = this.ancientShards;
+         var _loc4_:Character = new Character();
+         _loc4_.name = this.name;
+         Characters.populateStaticFields(_loc4_);
          this.buffs.removeAllBuffs();
-         for(_loc4_ = 0; _loc4_ < this.activeSkills.length; _loc4_++)
+         for(_loc5_ = 0; _loc5_ < this.activeSkills.length; _loc5_++)
          {
-            _loc8_ = this.activeSkills[_loc4_];
-            _loc9_ = null;
-            if(_loc8_ && _loc8_.isActive)
+            _loc7_ = this.activeSkills[_loc5_];
+            _loc8_ = null;
+            if(_loc7_ && _loc7_.isActive)
             {
-               _loc9_ = _loc8_.slot;
-               if(_loc9_ >= 0 && CH2UI.instance.mainUI)
+               _loc8_ = _loc7_.slot;
+               if(_loc8_ >= 0 && CH2UI.instance.mainUI)
                {
-                  CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc9_].removeChild(CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc9_].skillSlotUI);
-                  CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc9_].onDropRemoved(CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc9_].skillSlotUI);
+                  CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc8_].removeChild(CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc8_].skillSlotUI);
+                  CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc8_].onDropRemoved(CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc8_].skillSlotUI);
                }
             }
          }
          this.deactivateAllSkills();
-         for(_loc4_ = 0; _loc4_ < this.lostOnGilding.length; _loc4_++)
+         for(_loc5_ = 0; _loc5_ < this.lostOnGilding.length; _loc5_++)
          {
-            this[this.lostOnGilding[_loc4_]] = _loc3_[this.lostOnGilding[_loc4_]];
+            this[this.lostOnGilding[_loc5_]] = _loc4_[this.lostOnGilding[_loc5_]];
+         }
+         if(this.extendedVariables)
+         {
+            this.extendedVariables.onGild();
          }
          this.setupSkills();
-         CH2.currentCharacter.setClassStatsCached(false);
-         CH2.currentCharacter.resetStatLevels();
-         this.timeSinceLastAncientShardPurchase = ANCIENT_SHARD_PURCHASE_COOLDOWN;
-         this.gilds = Math.floor((param1 - 1) / this.worldsPerGild);
-         this.level = param1 * 5 + 6 + (this.gilds - 1) * 5;
+         this.classStatsCached = false;
+         this.statLevels = {};
+         this.level = param1 * 5 + 6;
          this.experience = new BigNumber(0);
-         var _loc5_:BigNumber = this.getLevelUpCostToNextLevel(this.level);
-         _loc5_.timesEqualsN(0.8);
-         this.experience = _loc5_;
+         var _loc6_:BigNumber = this.getLevelUpCostToNextLevel(this.level);
+         _loc6_.timesEqualsN(0.8);
+         this.experience = _loc6_;
          this.statLevels[CH2.STAT_AUTOMATOR_SPEED] = _loc2_;
-         this.statLevels[CH2.STAT_DAMAGE] = this.level;
-         var _loc6_:BigNumber = new BigNumber(0);
-         _loc6_.base = this.gildedDamageMultiplier.base;
-         _loc6_.power = this.gildedDamageMultiplier.power;
-         this.gildedDamageMultiplier = Formulas.instance.getWorldDifficulty(param1).divideN(this.getClassStat(CH2.STAT_DAMAGE));
-         var _loc7_:BigNumber = this.gildedDamageMultiplier.divide(_loc6_);
+         this.setGildBonus(param1);
+         this.ancientShards = _loc3_;
          if(this.characterDisplay)
          {
             this.characterDisplay.characterUI.removeAll();
          }
-         this.showCongratsPopupWhenUIIsCreated(_loc7_);
          this.totalStatPointsV2 = 6;
+         for(_loc5_ = 0; _loc5_ < NUMBER_OF_ETHEREAL_ITEM_SLOTS; _loc5_++)
+         {
+            _loc9_ = this.equippedEtherealItems[_loc5_];
+            if(_loc9_ != -1)
+            {
+               _loc10_ = this.etherealItemInventory[_loc9_];
+               if(_loc10_ != null)
+               {
+                  _loc10_.grantStats(this);
+               }
+            }
+         }
+         for(_loc5_ = 0; _loc5_ < this.gildStartBuild.length; _loc5_++)
+         {
+            this.levelGraph.purchaseNode(this.gildStartBuild[_loc5_],this);
+         }
       }
       
       public function showCongratsPopupWhenUIIsCreated(gildedDamageChange:BigNumber) : void
@@ -3487,17 +3847,6 @@ package models
       public function isOnHighestZoneOfHighestWorld() : Boolean
       {
          return this.isOnHighestZone && this.highestWorldCompleted < this.currentWorldId;
-      }
-      
-      public function statTooltipDescription(statId:int) : Object
-      {
-         var header:String = this.getStatDisplayName(statId) + " - " + _("LVL %s",this.getStatLevel(statId));
-         var description:String = TextManager.textToColor(this.getStatDescription(statId),"#00F462");
-         description = description + ("\n\nNext Level: " + this.getStatDescriptionAtNextLevel(statId));
-         return {
-            "header":header,
-            "body":description
-         };
       }
       
       public function applyPurchasedNodes() : void
@@ -3535,36 +3884,46 @@ package models
          this.onAscension();
       }
       
-      public function shouldRubyShopActivate() : Boolean
+      public function isRubyShopAvailable() : Boolean
       {
-         if(this.shouldRubyShopActivateHandler)
+         if(this.isRubyShopAvailableHandler)
          {
-            return this.shouldRubyShopActivateHandler.shouldRubyShopActivateOverride();
+            return this.isRubyShopAvailableHandler.isRubyShopAvailableOverride() && !IdleHeroMain.IS_TIMELAPSE;
          }
-         return this.shouldRubyShopActivateDefault();
+         return this.isRubyShopAvailableDefault() && !IdleHeroMain.IS_TIMELAPSE;
       }
       
-      private function shouldRubyShopActivateDefault() : Boolean
+      public function isRubyShopAvailableDefault() : Boolean
       {
-         return this.timeSinceLastRubyShopAppearance > RUBY_SHOP_APPEARANCE_COOLDOWN && !CH2.world.isBossZone(this.currentZone) && !this.didFinishWorld && this.totalRubies >= 50 && !CH2.world.massiveOrangeFish.isActive;
-      }
-      
-      public function shouldRubyShopDeactivate() : Boolean
-      {
-         if(this.shouldRubyShopDeactivateHandler)
-         {
-            return this.shouldRubyShopDeactivateHandler.shouldRubyShopDeactivateOverride();
-         }
-         return this.shouldRubyShopDeactivateDefault();
-      }
-      
-      private function shouldRubyShopDeactivateDefault() : Boolean
-      {
-         return this.timeSinceLastRubyShopAppearance > RUBY_SHOP_APPEARANCE_DURATION || CH2.world.isBossZone(this.currentZone) || this.didFinishWorld;
+         return this.currentRubyShop && this.currentRubyShop.length > 0 && !CH2.world.isBossZone(this.currentZone) && !this.didFinishWorld && this.totalRubies >= 50 && !CH2.world.massiveOrangeFish.isActive;
       }
       
       public function populateRubyPurchaseOptions() : void
       {
+         this.ancientShardPurchase = new RubyPurchase();
+         this.ancientShardPurchase.id = "ancientShardPurchase";
+         this.ancientShardPurchase.priority = 0;
+         this.ancientShardPurchase.name = "Ancient Shard";
+         this.ancientShardPurchase.price = 50;
+         this.ancientShardPurchase.iconId = 1;
+         this.ancientShardPurchase.getDescription = this.getAncientShardDescription;
+         this.ancientShardPurchase.getSoldOutText = this.getDefaultSoldOutText;
+         this.ancientShardPurchase.onPurchase = this.onAncientShardPurchase;
+         this.ancientShardPurchase.canAppear = this.canAncientShardAppear;
+         this.ancientShardPurchase.canPurchase = this.canPurchaseAncientShard;
+         this.rubyPurchaseOptions.push(this.ancientShardPurchase);
+         this.etherealItemPurchase = new RubyPurchase();
+         this.etherealItemPurchase.id = "etherealItemPurchase";
+         this.etherealItemPurchase.priority = 0;
+         this.etherealItemPurchase.name = "Ethereal Item";
+         this.etherealItemPurchase.price = 200;
+         this.etherealItemPurchase.iconId = 9;
+         this.etherealItemPurchase.getDescription = this.getEtherealItemPurchaseDescription;
+         this.etherealItemPurchase.getSoldOutText = this.getDefaultSoldOutText;
+         this.etherealItemPurchase.onPurchase = this.onEtherealItemPurchase;
+         this.etherealItemPurchase.canAppear = this.canEtherealItemPurchaseAppear;
+         this.etherealItemPurchase.canPurchase = this.canPurchaseEtherealItem;
+         this.rubyPurchaseOptions.push(this.etherealItemPurchase);
          if(this.populateRubyPurchaseOptionsHandler)
          {
             this.populateRubyPurchaseOptionsHandler.populateRubyPurchaseOptionsOverride();
@@ -3577,18 +3936,8 @@ package models
       
       public function populateRubyPurchaseOptionsDefault() : void
       {
-         var ancientShardPurchase:RubyPurchase = new RubyPurchase();
-         ancientShardPurchase.priority = 1;
-         ancientShardPurchase.name = "Ancient Shard";
-         ancientShardPurchase.price = 50;
-         ancientShardPurchase.iconId = 1;
-         ancientShardPurchase.getDescription = this.getAncientShardDescription;
-         ancientShardPurchase.getSoldOutText = this.getDefaultSoldOutText;
-         ancientShardPurchase.onPurchase = this.onAncientShardPurchase;
-         ancientShardPurchase.canAppear = this.canAncientShardAppear;
-         ancientShardPurchase.canPurchase = this.canPurchaseAncientShard;
-         this.rubyPurchaseOptions.push(ancientShardPurchase);
          var powerRunePurchase:RubyPurchase = new RubyPurchase();
+         powerRunePurchase.id = "powerRunePurchase";
          powerRunePurchase.priority = 2;
          powerRunePurchase.name = "Power Rune";
          powerRunePurchase.getDescription = this.getPowerRuneDescription;
@@ -3600,6 +3949,7 @@ package models
          powerRunePurchase.canPurchase = this.canPurchasePowerRune;
          this.rubyPurchaseOptions.push(powerRunePurchase);
          var speedRunePurchase:RubyPurchase = new RubyPurchase();
+         speedRunePurchase.id = "speedRunePurchase";
          speedRunePurchase.priority = 2;
          speedRunePurchase.name = "Speed Rune";
          speedRunePurchase.getDescription = this.getSpeedRuneDescription;
@@ -3611,6 +3961,7 @@ package models
          speedRunePurchase.canPurchase = this.canPurchaseSpeedRune;
          this.rubyPurchaseOptions.push(speedRunePurchase);
          var luckRunePurchase:RubyPurchase = new RubyPurchase();
+         luckRunePurchase.id = "luckRunePurchase";
          luckRunePurchase.priority = 2;
          luckRunePurchase.name = "Luck Rune";
          luckRunePurchase.getDescription = this.getLuckRuneDescription;
@@ -3622,6 +3973,7 @@ package models
          luckRunePurchase.canPurchase = this.canPurchaseLuckRune;
          this.rubyPurchaseOptions.push(luckRunePurchase);
          var timeMetalDetector:RubyPurchase = new RubyPurchase();
+         timeMetalDetector.id = "timeMetalDetector";
          timeMetalDetector.priority = 2;
          timeMetalDetector.name = "Metal Detector (Time)";
          timeMetalDetector.getDescription = this.getTimeMetalDetectorDescription;
@@ -3633,6 +3985,7 @@ package models
          timeMetalDetector.canPurchase = this.canPurchaseTimeMetalDetector;
          this.rubyPurchaseOptions.push(timeMetalDetector);
          var zoneMetalDetector:RubyPurchase = new RubyPurchase();
+         zoneMetalDetector.id = "zoneMetalDetector";
          zoneMetalDetector.priority = 2;
          zoneMetalDetector.name = "Metal Detector (Zone)";
          zoneMetalDetector.getDescription = this.getZoneMetalDetectorDescription;
@@ -3644,6 +3997,7 @@ package models
          zoneMetalDetector.canPurchase = this.canPurchaseZoneMetalDetector;
          this.rubyPurchaseOptions.push(zoneMetalDetector);
          var bagOfGold:RubyPurchase = new RubyPurchase();
+         bagOfGold.id = "bagOfGold";
          bagOfGold.priority = 3;
          bagOfGold.name = "Bag of Gold";
          bagOfGold.getDescription = this.getBagOfGoldDescription;
@@ -3655,6 +4009,7 @@ package models
          bagOfGold.canPurchase = this.canPurchaseBagOfGold;
          this.rubyPurchaseOptions.push(bagOfGold);
          var magicalBrew:RubyPurchase = new RubyPurchase();
+         magicalBrew.id = "magicalBrew";
          magicalBrew.priority = 3;
          magicalBrew.name = "Magical Brew";
          magicalBrew.getDescription = this.getMagicalBrewDescription;
@@ -3670,11 +4025,22 @@ package models
       public function getRandomRubyPurchase(priority:int) : RubyPurchase
       {
          var rubyPurchase:RubyPurchase = null;
+         var isAlreadyInShop:Boolean = false;
+         var i:int = 0;
          var index:int = 0;
          var possiblePurchases:Array = [];
          for each(rubyPurchase in this.rubyPurchaseOptions)
          {
-            if(rubyPurchase.priority == priority && rubyPurchase.canAppear() && this.currentRubyShop.indexOf(rubyPurchase) == -1)
+            isAlreadyInShop = false;
+            for(i = 0; i < this.currentRubyShop.length; i++)
+            {
+               if(this.currentRubyShop[i].id == rubyPurchase.id)
+               {
+                  isAlreadyInShop = true;
+                  break;
+               }
+            }
+            if(rubyPurchase.priority == priority && rubyPurchase.canAppear() && !isAlreadyInShop)
             {
                possiblePurchases.push(rubyPurchase);
             }
@@ -3699,17 +4065,42 @@ package models
          }
       }
       
+      public function getRubyPurchaseInstance(id:String) : RubyPurchase
+      {
+         var rubyPurchase:RubyPurchase = null;
+         for each(rubyPurchase in this.rubyPurchaseOptions)
+         {
+            if(rubyPurchase.id == id)
+            {
+               return rubyPurchase;
+            }
+         }
+         return null;
+      }
+      
       public function generateRubyShopDefault() : void
       {
+         var option1:RubyPurchase = null;
          this.currentRubyShop = [];
-         var option1:RubyPurchase = this.getRandomRubyPurchase(1);
-         if(!option1)
+         if(this.ancientShardPurchase.canAppear())
          {
-            option1 = this.getRandomRubyPurchase(2);
+            this.currentRubyShop.push(this.ancientShardPurchase);
          }
-         if(option1)
+         else if(this.etherealItemPurchase.canAppear())
          {
-            this.currentRubyShop.push(option1);
+            this.currentRubyShop.push(this.etherealItemPurchase);
+         }
+         else
+         {
+            option1 = this.getRandomRubyPurchase(1);
+            if(!option1)
+            {
+               option1 = this.getRandomRubyPurchase(2);
+            }
+            if(option1)
+            {
+               this.currentRubyShop.push(option1);
+            }
          }
          var option2:RubyPurchase = this.getRandomRubyPurchase(2);
          if(!option2)
@@ -3741,8 +4132,16 @@ package models
       
       public function updateRubyShopFieldsDefault(dt:int) : void
       {
+         this.timeSinceLastRubyShopAppearance = this.timeSinceLastRubyShopAppearance + dt;
+         if(this.timeSinceLastRubyShopAppearance > RUBY_SHOP_APPEARANCE_COOLDOWN)
+         {
+            this.timeSinceLastRubyShopAppearance = 0;
+            this.generateRubyShop();
+            CH2UI.instance.rubyShopChanged = true;
+         }
          this.timeSinceLastAncientShardPurchase = this.timeSinceLastAncientShardPurchase + dt;
          this.timeSinceLastAutomatorPointPurchase = this.timeSinceLastAutomatorPointPurchase + dt;
+         this.timeSinceLastEtherealItemPurchase = this.timeSinceLastEtherealItemPurchase + dt;
          this.timeSinceTimeMetalDetectorActivated = this.timeSinceTimeMetalDetectorActivated + dt;
          if(this.timeMetalDetectorActive && this.timeSinceTimeMetalDetectorActivated > METAL_DETECTOR_TIME_DURATION)
          {
@@ -3852,14 +4251,37 @@ package models
          return this.timeSinceLastAncientShardPurchase > ANCIENT_SHARD_PURCHASE_COOLDOWN;
       }
       
+      public function getEtherealItemPurchaseDescription() : String
+      {
+         return _("Gives you a random Ethereal Item.");
+      }
+      
+      public function onEtherealItemPurchase() : void
+      {
+         this.timeSinceLastEtherealItemPurchase = 0;
+         CH2UI.instance.showEtherealItemRewardPopup([this.addEtherealItemToInventory(this.rollEtherealItem(this.gilds))]);
+      }
+      
+      public function canEtherealItemPurchaseAppear() : Boolean
+      {
+         return this.timeSinceLastEtherealItemPurchase > ETHEREAL_ITEM_PURCHASE_COOLDOWN;
+      }
+      
+      public function canPurchaseEtherealItem() : Boolean
+      {
+         return this.timeSinceLastEtherealItemPurchase > ETHEREAL_ITEM_PURCHASE_COOLDOWN;
+      }
+      
       public function getAutomatorPointDescription() : String
       {
-         return _("Gives you 1 automator point");
+         return _("Gives you 1 automator point.");
       }
       
       public function onAutomatorPointPurchase() : void
       {
          CH2.currentCharacter.automatorPoints++;
+         CH2UI.instance.mainUI.mainPanel.graphPanel.levelGraphDisplay.completeRedraw();
+         CH2UI.instance.mainUI.mainPanel.graphPanel.backgroundGraphDisplay.completeRedraw(true);
          this.timeSinceLastAutomatorPointPurchase = 0;
       }
       
@@ -4014,10 +4436,15 @@ package models
          {
             this.characterDisplay.characterUI.removeAll();
          }
+         if(this.energy > this.maxEnergy)
+         {
+            this.energy = this.maxEnergy;
+         }
+         if(this.mana > this.maxMana)
+         {
+            this.mana = this.maxMana;
+         }
          this.startWorld(worldNumber);
-         this.energy = this.maxEnergy;
-         this.mana = this.maxMana;
-         this.cooldownSkills(1000000000);
          CH2.game.doGameStateAction(IdleHeroMain.ACTION_PLAYER_CLICKED_START_RUN);
          this.eventLogger.logEvent(EventLog.ASCENDED);
       }
@@ -4040,9 +4467,12 @@ package models
       
       public function migrate(characterInstance:Character) : void
       {
-         trace("migrating version " + this.version + " to " + IdleHeroMain.SAVE_VERSION);
-         this.onMigration(characterInstance);
-         this.version = IdleHeroMain.SAVE_VERSION;
+         trace("migrating version " + characterInstance.version + " to " + IdleHeroMain.SAVE_VERSION);
+         if(characterInstance.version < IdleHeroMain.SAVE_VERSION)
+         {
+            characterInstance.onMigration(characterInstance);
+            characterInstance.version = IdleHeroMain.SAVE_VERSION;
+         }
       }
       
       public function onMigration(characterInstance:Character) : void
@@ -4114,34 +4544,422 @@ package models
          {
             return new BigNumber(0);
          }
-         var result:BigNumber = item.baseCost.divideN(30);
+         var result:BigNumber = item.baseCost.multiplyN(1 / 30);
+         var multiplier:Number = 1;
          if(CH2.currentAscensionWorld && CH2.currentAscensionWorld.worldNumber <= 2)
          {
-            result.timesEqualsN(Math.pow(0.86,item.rank - 1));
+            multiplier = multiplier * Math.pow(0.86,item.rank - 1);
          }
          else
          {
-            result.timesEqualsN(Math.pow(0.9,item.rank - 1));
+            multiplier = multiplier * Math.pow(0.9,item.rank - 1);
          }
-         result.timesEqualsN(1 + item.bonusDamage);
+         multiplier = multiplier * (1 + item.bonusDamage);
          if(item.rank < 4)
          {
-            result.timesEqualsN(5 - item.rank);
+            multiplier = multiplier * (5 - item.rank);
          }
+         result.timesEqualsN(multiplier);
          result.floorInPlace();
-         result.timesEqualsN(item.level);
-         result.timesEqualsN(Math.pow(this.item10LvlDmgMultiplier,Math.floor(item.level / 10)));
-         result.timesEqualsN(Math.pow(this.item20LvlDmgMultiplier,Math.floor(item.level / 20)));
+         multiplier = item.level;
+         multiplier = multiplier * Math.pow(this.item10LvlDmgMultiplier,Math.floor(item.level / 10));
+         multiplier = multiplier * Math.pow(this.item20LvlDmgMultiplier,Math.floor(item.level / 20));
          if(item.level >= 50)
          {
-            result.timesEqualsN(this.item50LvlDmgMultiplier);
+            multiplier = multiplier * this.item50LvlDmgMultiplier;
             if(item.level >= 100)
             {
-               result.timesEqualsN(this.item100LvlDmgMultiplier);
+               multiplier = multiplier * this.item100LvlDmgMultiplier;
             }
          }
-         result.timesEqualsN(this.getMultiplierForItemType(item.type));
+         multiplier = multiplier * this.getMultiplierForItemType(item.type);
+         result.timesEqualsN(multiplier);
          return result;
+      }
+      
+      public function getWorldTraitCount(worldNumber:int) : int
+      {
+         if(this.getWorldTraitCountHandler)
+         {
+            return this.getWorldTraitCountHandler.getWorldTraitCountOverride(worldNumber);
+         }
+         return this.getWorldTraitCountDefault(worldNumber);
+      }
+      
+      public function getWorldTraitCountDefault(worldNumber:int) : int
+      {
+         return 0;
+      }
+      
+      public function equipEtherealItem(index:int) : void
+      {
+         var etherealItem:EtherealItem = this.etherealItemInventory[index];
+         var slot:int = etherealItem.slot;
+         if(index != -1 && slot != -1)
+         {
+            if(this.equippedEtherealItems.hasOwnProperty(slot) && this.equippedEtherealItems[slot] != -1)
+            {
+               this.unequipEtherealItem(slot);
+            }
+            this.equippedEtherealItems[slot] = index;
+            etherealItem.grantStats(this);
+         }
+         this.classStatsCached = false;
+      }
+      
+      public function unequipEtherealItem(slot:int) : void
+      {
+         var etherealItem:EtherealItem = null;
+         if(slot != -1)
+         {
+            etherealItem = this.etherealItemInventory[this.equippedEtherealItems[slot]];
+            etherealItem.revokeStats(this);
+            this.equippedEtherealItems[slot] = -1;
+         }
+         this.classStatsCached = false;
+      }
+      
+      public function recalculateEtherealItemStats() : void
+      {
+         var slot:* = null;
+         var index:* = undefined;
+         for(slot in this.equippedEtherealItems)
+         {
+            index = this.equippedEtherealItems[slot];
+            if(index != -1)
+            {
+               this.etherealItemInventory[index].recalculateStats(this);
+            }
+         }
+         this.classStatsCached = false;
+      }
+      
+      public function sellEtherealItem(index:int) : void
+      {
+         this.removeEtherealItemFromInventory(index);
+         this.rubies = this.rubies + ETHEREAL_ITEM_RUBY_SELL_PRICE;
+         this.fillEmptyStorageSpaces();
+      }
+      
+      public function populateEtherealItemStats() : void
+      {
+         var etherealItemStatChoice:EtherealItemStatChoice = null;
+         this.etherealItemStats = {};
+         if(this.populateEtherealItemStatsHandler)
+         {
+            this.populateEtherealItemStatsHandler.populateEtherealItemStatsOverride(this);
+         }
+         else
+         {
+            this.populateEtherealItemStatsDefault(this);
+         }
+         this.etherealItemStatChoices = [];
+         this.etherealItemSpecialChoices = [];
+         for each(etherealItemStatChoice in this.etherealItemStats)
+         {
+            if(etherealItemStatChoice.isSpecial)
+            {
+               this.etherealItemSpecialChoices.push(etherealItemStatChoice);
+            }
+            else
+            {
+               this.etherealItemStatChoices.push(etherealItemStatChoice);
+            }
+         }
+      }
+      
+      public function populateEtherealItemStatsDefault(characterInstance:Character) : void
+      {
+      }
+      
+      public function getEtherealStatFunction(id:String) : Function
+      {
+         if(this.etherealItemStats[id])
+         {
+            return this.etherealItemStats[id].valueFunction;
+         }
+         return null;
+      }
+      
+      public function getEtherealSpecialStatus(id:String) : Boolean
+      {
+         if(this.etherealItemStats[id])
+         {
+            return this.etherealItemStats[id].isSpecial;
+         }
+         return false;
+      }
+      
+      public function getEtherealTooltipFormat(id:String) : String
+      {
+         if(this.etherealItemStats[id])
+         {
+            return this.etherealItemStats[id].tooltipDescriptionFormat;
+         }
+         return null;
+      }
+      
+      public function getEtherealNamePrefix(id:String) : String
+      {
+         if(this.etherealItemStats[id])
+         {
+            return this.etherealItemStats[id].namePrefix;
+         }
+         return null;
+      }
+      
+      public function getEtherealNameSuffix(id:String) : String
+      {
+         if(this.etherealItemStats[id])
+         {
+            return this.etherealItemStats[id].nameSuffix;
+         }
+         return null;
+      }
+      
+      public function getEtherealStatParams(id:String) : Object
+      {
+         if(this.etherealItemStats[id])
+         {
+            return this.etherealItemStats[id].params;
+         }
+         return null;
+      }
+      
+      public function getEtherealExchangeRateFunction(id:String) : Function
+      {
+         if(this.etherealItemStats[id])
+         {
+            return this.etherealItemStats[id].exchangeRateFunction;
+         }
+         return null;
+      }
+      
+      public function placeEtherealItemInFirstOpenSpace(index:int) : Boolean
+      {
+         var i:int = 0;
+         var etherealItem:EtherealItem = this.etherealItemInventory[index];
+         var slot:int = etherealItem.slot;
+         if(!this.equippedEtherealItems.hasOwnProperty(slot) || this.equippedEtherealItems[etherealItem.slot] == -1)
+         {
+            this.equipEtherealItem(index);
+            return true;
+         }
+         for(i = 0; i < MAX_ETHEREAL_STORAGE_SIZE; i++)
+         {
+            if(!this.etherealItemStorage.hasOwnProperty(i) || this.etherealItemStorage[i] == -1)
+            {
+               this.etherealItemStorage[i] = index;
+               return true;
+            }
+         }
+         return false;
+      }
+      
+      public function fixAnyDupedItems() : void
+      {
+         var foundIncidies:Array = [];
+         for(var i:int = 0; i < MAX_ETHEREAL_STORAGE_SIZE; i++)
+         {
+            if(foundIncidies.indexOf(this.etherealItemStorage[i]) == -1)
+            {
+               foundIncidies.push(this.etherealItemStorage[i]);
+            }
+            else
+            {
+               this.etherealItemStorage[i] = -1;
+            }
+         }
+      }
+      
+      public function wipeStorage() : void
+      {
+         for(var i:int = 0; i < MAX_ETHEREAL_STORAGE_SIZE; i++)
+         {
+            this.etherealItemStorage[i] = -1;
+         }
+      }
+      
+      public function fillEmptyStorageSpaces() : void
+      {
+         var _loc2_:int = 0;
+         var _loc1_:Array = [];
+         for(_loc2_ = 0; _loc2_ < NUMBER_OF_ETHEREAL_ITEM_SLOTS; _loc2_++)
+         {
+            if(this.equippedEtherealItems[_loc2_] != -1)
+            {
+               _loc1_.push(this.equippedEtherealItems[_loc2_]);
+            }
+         }
+         for(_loc2_ = 0; _loc2_ < MAX_ETHEREAL_STORAGE_SIZE; _loc2_++)
+         {
+            if(_loc1_.indexOf(this.etherealItemStorage[_loc2_]) == -1)
+            {
+               _loc1_.push(this.etherealItemStorage[_loc2_]);
+            }
+         }
+         for(_loc2_ = 0; _loc2_ < this.etherealItemInventory.length; _loc2_++)
+         {
+            if(_loc1_.indexOf(_loc2_) == -1)
+            {
+               this.placeEtherealItemInFirstOpenSpace(_loc2_);
+               _loc1_.push(_loc2_);
+            }
+         }
+      }
+      
+      public function addEtherealItemToInventory(etherealItem:EtherealItem) : int
+      {
+         var index:int = this.etherealItemInventory.push(etherealItem) - 1;
+         this.placeEtherealItemInFirstOpenSpace(index);
+         return index;
+      }
+      
+      public function removeEtherealItemFromInventory(param1:int) : void
+      {
+         var _loc2_:int = 0;
+         for(_loc2_ = 0; _loc2_ < NUMBER_OF_ETHEREAL_ITEM_SLOTS; _loc2_++)
+         {
+            if(this.equippedEtherealItems[_loc2_] == param1)
+            {
+               this.unequipEtherealItem(_loc2_);
+            }
+            if(this.pendingEtherealEquipmentChanges[_loc2_] == param1)
+            {
+               this.pendingEtherealEquipmentChanges[_loc2_] = -1;
+            }
+         }
+         for(_loc2_ = 0; _loc2_ < MAX_ETHEREAL_STORAGE_SIZE; _loc2_++)
+         {
+            if(this.etherealItemStorage[_loc2_] == param1)
+            {
+               this.etherealItemStorage[_loc2_] = -1;
+            }
+         }
+         for(_loc2_ = 0; _loc2_ < MAX_ETHEREAL_STORAGE_SIZE; _loc2_++)
+         {
+            if(this.etherealItemStorage[_loc2_] != -1 && this.etherealItemStorage[_loc2_] > param1)
+            {
+               this.etherealItemStorage[_loc2_]--;
+            }
+         }
+         for(_loc2_ = 0; _loc2_ < NUMBER_OF_ETHEREAL_ITEM_SLOTS; _loc2_++)
+         {
+            if(this.equippedEtherealItems[_loc2_] > param1)
+            {
+               this.equippedEtherealItems[_loc2_]--;
+            }
+            if(this.pendingEtherealEquipmentChanges[_loc2_] > param1)
+            {
+               this.pendingEtherealEquipmentChanges[_loc2_]--;
+            }
+         }
+         this.etherealItemInventory.splice(param1,1);
+      }
+      
+      public function rollEtherealItem(gildNumber:int, fixedSlot:int = -1) : EtherealItem
+      {
+         var isSpecial:Boolean = false;
+         var etherealItem:EtherealItem = null;
+         var chosenSpecialStat:EtherealItemStatChoice = null;
+         var slotIndex:int = 0;
+         var statsChosen:Array = [];
+         var slot:int = -1;
+         var chosenPrimaryStat:EtherealItemStatChoice = this.chooseEtherealItemStat(this.etherealItemStatChoices);
+         if(chosenPrimaryStat)
+         {
+            statsChosen.push(this.makeEtherealItemStat(chosenPrimaryStat,gildNumber));
+            isSpecial = this.roller.etherealItemsRoller.boolean(this.specialEtherealItemChance);
+            if(isSpecial)
+            {
+               chosenSpecialStat = this.chooseEtherealItemStat(this.etherealItemSpecialChoices);
+               if(chosenSpecialStat)
+               {
+                  statsChosen.push(this.makeEtherealItemStat(chosenSpecialStat,gildNumber));
+               }
+            }
+            if(fixedSlot != -1)
+            {
+               slot = fixedSlot;
+            }
+            else
+            {
+               slotIndex = this.roller.etherealItemsRoller.integer(0,chosenPrimaryStat.slots.length);
+               slot = chosenPrimaryStat.slots[slotIndex];
+            }
+            etherealItem = new EtherealItem();
+            etherealItem.create(slot,this.getEtherealItemRarity(gildNumber),statsChosen,slot + 1);
+            return etherealItem;
+         }
+         return null;
+      }
+      
+      public function makeEtherealItemStat(choice:EtherealItemStatChoice, gildNumber:int) : EtherealItemStat
+      {
+         var etherealItemStat:EtherealItemStat = new EtherealItemStat();
+         etherealItemStat.create(choice.id,choice.key,gildNumber);
+         etherealItemStat.calculateExchangeRate(this);
+         return etherealItemStat;
+      }
+      
+      public function chooseEtherealItemStat(param1:Array) : EtherealItemStatChoice
+      {
+         var _loc3_:int = 0;
+         var _loc7_:EtherealItemStatChoice = null;
+         var _loc8_:Number = NaN;
+         var _loc2_:Number = 0;
+         for(_loc3_ = 0; _loc3_ < param1.length; _loc3_++)
+         {
+            _loc7_ = param1[_loc3_];
+            _loc2_ = _loc2_ + _loc7_.weight;
+         }
+         var _loc4_:Number = this.roller.etherealItemsRoller.randFloat() * _loc2_;
+         var _loc5_:int = -1;
+         var _loc6_:Number = 0;
+         for(_loc3_ = 0; _loc3_ < param1.length; _loc3_++)
+         {
+            _loc7_ = param1[_loc3_];
+            _loc8_ = _loc7_.weight;
+            if(_loc4_ > _loc6_ && _loc4_ < _loc6_ + _loc8_)
+            {
+               _loc5_ = _loc3_;
+               break;
+            }
+            _loc6_ = _loc6_ + _loc8_;
+         }
+         if(_loc5_ != -1 && param1[_loc5_])
+         {
+            return param1[_loc5_];
+         }
+         return null;
+      }
+      
+      public function equipPendingEtherealItems() : void
+      {
+         var previousEquippedItem:int = 0;
+         var j:int = 0;
+         for(var i:int = 0; i < NUMBER_OF_ETHEREAL_ITEM_SLOTS; i++)
+         {
+            if(this.pendingEtherealEquipmentChanges[i] != -1)
+            {
+               previousEquippedItem = this.equippedEtherealItems[i];
+               this.equipEtherealItem(this.pendingEtherealEquipmentChanges[i]);
+               for(j = 0; j < MAX_ETHEREAL_STORAGE_SIZE; j++)
+               {
+                  if(this.etherealItemStorage[j] == this.pendingEtherealEquipmentChanges[i])
+                  {
+                     this.etherealItemStorage[j] = previousEquippedItem;
+                     break;
+                  }
+               }
+               this.pendingEtherealEquipmentChanges[i] = -1;
+            }
+         }
+      }
+      
+      public function getEtherealItemRarity(gildNumber:int) : int
+      {
+         return Math.min(Math.floor(gildNumber / 5) + 2,8);
       }
    }
 }
