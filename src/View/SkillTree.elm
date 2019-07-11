@@ -56,25 +56,25 @@ view header model graph =
 
 
 ver =
-    { live = "0.8.1-(early-access)"
-    , ptr = "0.9.0-(e)"
+    { live = "0.9.7"
+    , ptr = ""
     }
 
 
 viewVersionNav : G.GameVersionData -> Route.HomeParams -> H.Html msg
 viewVersionNav g q =
-    if ver.ptr == "" then
-        H.div [] []
-
-    else
-        H.div []
-            [ H.text <| "Your game version: " ++ g.versionSlug ++ ". "
-            , if g.versionSlug == ver.live then
+    H.div []
+        [ H.text <| "Your game version: " ++ g.versionSlug ++ ". "
+        , if g.versionSlug == ver.live then
+            if ver.ptr /= "" then
                 H.a [ Route.href <| Route.Home { q | version = ver.ptr } ] [ H.text <| "Use PTR: " ++ ver.ptr ]
 
-              else
-                H.a [ Route.href <| Route.Home { q | version = ver.live } ] [ H.text <| "Use live: " ++ ver.live ]
-            ]
+            else
+                H.text ""
+
+          else
+            H.a [ Route.href <| Route.Home { q | version = ver.live } ] [ H.text <| "Use live: " ++ ver.live ]
+        ]
 
 
 viewSelectSave : H.Html M.Msg
