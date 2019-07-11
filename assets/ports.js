@@ -36,20 +36,20 @@ Promise.all([
           var inflate = new Zlib.RawInflate(file);
           var plain = inflate.decompress();
           var json = AMF.deserialize(plain.buffer);
-          console.log('savefile', json)
+          console.log("savefile", json);
 
           app.ports.saveFileContentRead.send({
-            status: 'success',
+            status: "success",
             hero: json.name,
             build: Object.keys(json.nodesPurchased),
             equippedEtherealItems: json.equippedEtherealItems,
             etherealItemInventory: json.etherealItemInventory,
-            etherealItemStorage: json.etherealItemStorage,
+            etherealItemStorage: json.etherealItemStorage
           });
         } catch (error) {
           console.error("Error while reading savefile", error);
           app.ports.saveFileContentRead.send({
-            status: 'error',
+            status: "error",
             error: error.message
           });
         }
