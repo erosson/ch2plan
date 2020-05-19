@@ -23,12 +23,16 @@ import Set as Set exposing (Set)
 
 
 type Growth
-    = ExponentialMultiplier
+    = Noop
+    | ExponentialMultiplier
     | Linear
+    | LinearReciprocal
+    | LinearReciprocalComplement
+    | OnePlusLinearReciprocalComplement
 
 
 type alias StatValue =
-    { base : Float, growth : Growth, factor : Float }
+    { base : Float, growth : Growth, args : List Float }
 
 
 type alias Stats =
@@ -111,7 +115,14 @@ statValueDecoder =
     D.succeed StatValue
         |> P.custom (D.index 0 D.float)
         |> P.custom (D.index 1 growthDecoder)
-        |> P.custom (D.index 2 D.float)
+        |> P.custom
+            (D.index 2
+                (D.oneOf
+                    [ D.list D.float
+                    , D.float |> D.map List.singleton
+                    ]
+                )
+            )
 
 
 growthDecoder : D.Decoder Growth
@@ -120,11 +131,23 @@ growthDecoder =
         |> D.andThen
             (\str ->
                 case str of
+                    "noop" ->
+                        D.succeed Noop
+
                     "exponentialMultiplier" ->
                         D.succeed ExponentialMultiplier
 
                     "linear" ->
                         D.succeed Linear
+
+                    "linearReciprocal" ->
+                        D.succeed LinearReciprocal
+
+                    "linearReciprocalComplement" ->
+                        D.succeed LinearReciprocalComplement
+
+                    "onePlusLinearReciprocalComplement" ->
+                        D.succeed OnePlusLinearReciprocalComplement
 
                     _ ->
                         D.fail <| "unknown stat growth function: " ++ str
@@ -132,18 +155,87 @@ growthDecoder =
 
 
 calcStat : Stats -> Stat -> Int -> Float
-calcStat stats stat level =
+calcStat stats stat intlevel =
+    let
+        level =
+            toFloat intlevel
+    in
     case Dict.get (statToString stat) stats.statValueFunctions of
         Nothing ->
-            Debug.todo <| "Impossible. Perhaps the stats.json is incomplete. " ++ Debug.toString stat
+            -- trying to read a new stat from an old ch2 version!
+            -- Debug.todo <| "Impossible. Perhaps the stats.json is incomplete. " ++ Debug.toString stat
+            0
 
         Just statValue ->
+            -- original functions for this are in Character.as!
             case statValue.growth of
-                Linear ->
-                    statValue.base + (statValue.factor * toFloat level)
+                Noop ->
+                    0
 
                 ExponentialMultiplier ->
-                    statValue.base * (statValue.factor ^ toFloat level)
+                    -- no longer used in new versions, still needed for old versions
+                    let
+                        factor =
+                            statValue.args |> listAtDefault 0 1
+                    in
+                    statValue.base * (factor ^ level)
+
+                Linear ->
+                    let
+                        scale =
+                            statValue.args |> listAtDefault 0 0
+
+                        base =
+                            -- statvalue.base is for legacy; newer stats specify a base param
+                            statValue.args |> listAtDefault 1 statValue.base
+                    in
+                    level * scale + base
+
+                LinearReciprocal ->
+                    let
+                        scale =
+                            statValue.args |> listAtDefault 0 0
+
+                        base =
+                            statValue.args |> listAtDefault 1 0
+                    in
+                    1 / (level * scale + base)
+
+                LinearReciprocalComplement ->
+                    let
+                        scale =
+                            statValue.args |> listAtDefault 0 0
+
+                        base =
+                            statValue.args |> listAtDefault 1 0
+
+                        max =
+                            statValue.args |> listAtDefault 2 1
+                    in
+                    max * (1 - 1 / (level * scale + base))
+
+                OnePlusLinearReciprocalComplement ->
+                    let
+                        scale =
+                            statValue.args |> listAtDefault 0 0
+
+                        base =
+                            statValue.args |> listAtDefault 1 0
+
+                        max =
+                            statValue.args |> listAtDefault 2 1
+                    in
+                    1 + max * (1 - 1 / (level * scale + base))
+
+
+listAt : Int -> List a -> Maybe a
+listAt n =
+    List.drop n >> List.head
+
+
+listAtDefault : Int -> a -> List a -> a
+listAtDefault n default =
+    listAt n >> Maybe.withDefault default
 
 
 sumStatLevels : List ( Stat, Int ) -> List ( Stat, Int )
@@ -210,6 +302,7 @@ type Stat
     | STAT_ITEM_FEET_DAMAGE
     | STAT_ITEM_BACK_DAMAGE
     | STAT_AUTOMATOR_SPEED
+    | STAT_AUTOATTACK_DAMAGE
       -- everything below is not defined as stats in-game, but it's convenient to calculate them as stats
       -- skill-stats. Not actually stats in the ch2 code, but it's convenient for me to treat them as stats
     | MultiClick_stacks
@@ -263,6 +356,7 @@ statList =
     , STAT_ITEM_FEET_DAMAGE
     , STAT_ITEM_BACK_DAMAGE
     , STAT_AUTOMATOR_SPEED
+    , STAT_AUTOATTACK_DAMAGE
     , MultiClick_stacks
     , MultiClick_energyCost
     , BigClicks_stacks

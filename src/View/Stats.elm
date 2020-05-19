@@ -118,12 +118,13 @@ statEntrySpecs =
     -- autoattack damage
     -- click damage
     [ ( "Click Damage Multiplier", [ STAT_CLICK_DAMAGE ], entryPct ) -- not actually in the stats screen, only flat click damage
+    , ( "Autoattack Damage Multiplier", [ STAT_AUTOATTACK_DAMAGE ], entryPct )
     , ( "Attack Delay", [ STAT_HASTE ], entrySec 600 )
 
     -- damage multiplier from level
     -- energy from auto attacks - currently a constant, not useful here
     , ( "Global Cooldown Time", [ STAT_HASTE ], entrySec 2000 ) -- TODO that one keystone for <1 sec
-    , ( "Automator Speed", [ STAT_AUTOMATOR_SPEED, STAT_HASTE ], stat2 >> (\( auto, haste ) -> Just <| pct <| auto.val * haste.val) )
+    , ( "Automator Speed", [ STAT_AUTOMATOR_SPEED ], entryPct )
     , ( "Critical Chance", [ STAT_CRIT_CHANCE ], entryPct )
     , ( "Critical Damage Multiplier", [ STAT_CRIT_DAMAGE ], entryPct )
     , ( "Haste", [ STAT_HASTE ], entryPct )
