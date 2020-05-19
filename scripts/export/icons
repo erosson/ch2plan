@@ -1,7 +1,30 @@
 #!/bin/sh -eux
+
+# The icons we need are stored as serialized AS3 objects.
+# They're loaded by ClickerHeroes2.swf:heroclickerlib.managers.CH2AssetManager,
+# by a URLLoader with URLLoaderDataFormat.BINARY, and deserialized into AS3
+# objects in `CH2AssetManager.loadAssetsToRAM()`.
+# https://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/net/URLLoader.html
+#
+# This probably speeds up load times, but it's incredibly inconvenient for me!
+# Exporting icons will mean writing a custom AS3 exporter. Not more AS3...
+# We snagged *most* icons from an old version, where they were packed more
+# conveniently, with the script below. I'm not sure I can be bothered to fix
+# this anytime soon for the very few new icons.
+echo "this is broken! ch2 changed how it packs its icons, and I have not yet written a new unpacker :("
+exit 1
+
 # I expect the Clicker Heroes 2 game to be extracted to `./game`
 game=${1-game}
 mkdir -p build/extract
+# unzip -o "$game"/CH2Library.swc -d ./build/extract/CH2Library
+# ffdec -export sprite ./build/extract/CH2Library/sprites ./build/extract/CH2Library/library.swf
+
+# ffdec -export sprite ./build/extract/ClickerHeroes2/sprites "$game"/ClickerHeroes2.swf
+# ffdec -export sprite ./build/extract/HelpfulAdventurer/sprites "$game"/mods/active/HelpfulAdventurer.swf
+# find "$game" | grep -E "(swf|swc|bin)"
+# exit
+
 # don't re-extract unless the swc is newer, because it takes ages
 extract() {
   package=$1;shift
