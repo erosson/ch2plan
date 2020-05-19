@@ -1,6 +1,7 @@
 module View.Spreadsheet exposing (format, view)
 
 import Dict as Dict exposing (Dict)
+import GameData as G
 import Html as H
 import Html.Attributes as A
 import Html.Events as E
@@ -8,14 +9,14 @@ import Model as M
 import Route
 
 
-view : M.Model -> Route.HomeParams -> H.Html msg
-view model params =
+view : M.Model -> G.GameData -> Route.HomeParams -> H.Html msg
+view model gameData params =
     H.div [ A.class "spreadsheet" ]
         [ H.p [ A.class "help" ] [ H.text "Copy the text below (click the text box, ctrl+a, ctrl+c), and paste it into your favorite spreadsheet-based Clicker Heroes 2 calculator (ctrl+v)." ]
         , H.p [ A.class "help" ] [ H.a [ A.target "_blank", A.href "https://docs.google.com/spreadsheets/d/16oUAO0uxAChI0P9rUGNTxCIvlX9wM97ljOcUGf8DXCA" ] [ H.text "Writing your own spreadsheet? Here's an example showing how to use this." ] ]
         , H.textarea [ A.class "tsv" ]
             [ H.text
-                (case M.parseStatsSummary model params of
+                (case M.parseStatsSummary gameData params of
                     Err err ->
                         "error: " ++ err
 

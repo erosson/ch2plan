@@ -6,6 +6,7 @@ import GameData as G
 import Html as H
 import Html.Attributes as A
 import Html.Events as E
+import Json.Decode as D
 import Maybe.Extra
 import Model as M
 import Route as Route exposing (Route)
@@ -23,50 +24,55 @@ view model =
 
 viewBody : M.Model -> H.Html M.Msg
 viewBody model =
-    let
-        header =
-            [ H.h2 [] [ H.text "Clicker Heroes 2 Skill Tree Planner" ]
-            , H.nav []
-                (Maybe.Extra.unwrap [] viewCharacterNav (gameVersion model)
-                    ++ [ viewNavEntry "Changelog" Route.Changelog
-                       , H.a [ A.href "https://github.com/erosson/ch2plan", A.target "_blank" ] [ H.text "Source code" ]
-                       ]
-                )
-            ]
-    in
-    case model.route of
-        Nothing ->
-            H.div [] (header ++ [ H.text "404" ])
+    case model.gameData of
+        Err err ->
+            H.div [] [ H.text "error parsing gameData: ", H.pre [] [ H.text <| D.errorToString err ] ]
 
-        Just route ->
-            case route of
-                Route.Redirect _ ->
-                    H.div [] [ H.text "loading..." ]
+        Ok gameData ->
+            let
+                header =
+                    [ H.h2 [] [ H.text "Clicker Heroes 2 Skill Tree Planner" ]
+                    , H.nav []
+                        (Maybe.Extra.unwrap [] viewCharacterNav (gameVersion model gameData)
+                            ++ [ viewNavEntry "Changelog" Route.Changelog
+                               , H.a [ A.href "https://github.com/erosson/ch2plan", A.target "_blank" ] [ H.text "Source code" ]
+                               ]
+                        )
+                    ]
+            in
+            case model.route of
+                Nothing ->
+                    H.div [] (header ++ [ H.text "404" ])
 
-                Route.Home home ->
-                    case model.graph of
-                        Nothing ->
-                            H.div [] (header ++ [ H.text "404" ])
+                Just route ->
+                    case route of
+                        Route.Redirect _ ->
+                            H.div [] [ H.text "loading..." ]
 
-                        Just graph ->
-                            View.SkillTree.view header model graph home
+                        Route.Home home ->
+                            case model.graph of
+                                Nothing ->
+                                    H.div [] (header ++ [ H.text "404" ])
 
-                Route.Changelog ->
-                    H.div [] (header ++ [ View.Changelog.view model.changelog ])
+                                Just graph ->
+                                    View.SkillTree.view header model graph home
 
-                Route.Stats params ->
-                    H.div [] (header ++ [ View.Stats.view model params ])
+                        Route.Changelog ->
+                            H.div [] (header ++ [ View.Changelog.view model.changelog ])
 
-                Route.StatsTSV params ->
-                    View.Spreadsheet.view model params
+                        Route.Stats params ->
+                            H.div [] (header ++ [ View.Stats.view model gameData params ])
 
-                Route.EthItems ->
-                    H.div [] (header ++ [ View.EthItems.view model ])
+                        Route.StatsTSV params ->
+                            View.Spreadsheet.view model gameData params
+
+                        Route.EthItems ->
+                            H.div [] (header ++ [ View.EthItems.view model ])
 
 
-gameVersion : M.Model -> Maybe G.GameVersionData
-gameVersion model =
-    model.graph |> Maybe.map .game |> Maybe.Extra.orElse (G.latestVersion model.gameData)
+gameVersion : M.Model -> G.GameData -> Maybe G.GameVersionData
+gameVersion model gameData =
+    model.graph |> Maybe.map .game |> Maybe.Extra.orElse (G.latestVersion gameData)
 
 
 viewCharacterNav : G.GameVersionData -> List (H.Html msg)

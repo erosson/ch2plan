@@ -17,9 +17,9 @@ import View.Graph
 import View.Spreadsheet
 
 
-view : M.Model -> Route.HomeParams -> H.Html msg
-view model params =
-    case M.parseStatsSummary model params of
+view : M.Model -> G.GameData -> Route.HomeParams -> H.Html msg
+view model gameData params =
+    case M.parseStatsSummary gameData params of
         Err err ->
             H.div [] [ H.text <| "error: " ++ err ]
 

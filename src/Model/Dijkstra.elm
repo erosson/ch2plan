@@ -115,7 +115,9 @@ visitNode lastDistance startOrSelected graph unvisited target dp0 =
                         G.neighbors node graph |> Set.intersect unvisited |> Set.toList
 
                     d =
-                        Dict.get node dp0.distances |> Maybe.Extra.unpack (\_ -> Debug.todo "dijkstra: visitNeighbors: no prevNode distance?") identity
+                        -- the algorithm guarantees we've visited this node before, so the default should never be used.
+                        -- If it somehow is, large distance to avoid routing that way
+                        Dict.get node dp0.distances |> Maybe.withDefault (1 / 0 |> floor)
 
                     dp =
                         visitNeighbors startOrSelected { distances = dp0.distances, prevs = dp0.prevs } node d unvisitedNeighbors

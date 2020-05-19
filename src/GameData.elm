@@ -122,7 +122,7 @@ type alias Graph =
 
 
 type alias Node =
-    { id : Int, typeId : String, val : NodeType, x : Int, y : Int }
+    { id : Int, typeId : String, x : Int, y : Int, val : NodeType }
 
 
 type alias Edge =
@@ -215,8 +215,7 @@ dictKeyDecoder decoder_ =
                     D.succeed ( key, ok )
 
                 Err err ->
-                    -- TODO elm 0.19 upgrade mangled the typing here a bit; fix it
-                    D.fail (Debug.toString err)
+                    D.fail (D.errorToString err)
     in
     D.keyValuePairs D.value
         |> D.map (List.map (\( a, b ) -> decode a b))
@@ -234,9 +233,10 @@ characterDecoder skills stats =
         |> P.required "levelGraphNodeTypes" (nodeTypesDecoder stats)
         -- graph looks at two fields to construct one, so this looks a little weird
         |> P.custom
-            (D.succeed graph
-                |> P.required "levelGraphNodeTypes" (nodeTypesDecoder stats)
-                |> P.required "levelGraphObject" levelGraphObjectDecoder
+            (D.map2 graphDecoder
+                (D.field "levelGraphNodeTypes" (nodeTypesDecoder stats))
+                (D.field "levelGraphObject" levelGraphObjectDecoder)
+                |> D.andThen identity
             )
         |> P.custom (D.succeed skills)
 
@@ -329,38 +329,56 @@ nodeTypeDecoder stats key =
 -- |> P.optional "icon" (D.nullable D.string) Nothing
 
 
-graph : NodeTypes -> GraphSpec -> Graph
-graph nodeTypes graphSpec =
+graphDecoder : NodeTypes -> GraphSpec -> D.Decoder Graph
+graphDecoder nodeTypes graphSpec =
+    -- Construct nodes/edges by pairing with their nodeTypes
     let
         getNode id n =
-            -- TODO this should be a decoder or result
-            case Dict.get n.val nodeTypes of
-                Just val ->
-                    { id = id, typeId = n.val, x = n.x, y = n.y, val = val }
-
-                Nothing ->
-                    Debug.todo <| "no such nodetype: " ++ n.val
-
-        nodes =
-            Dict.map getNode graphSpec.nodes
-
-        getEdge ( a, b ) =
-            -- TODO this should be a decoder or result
-            case ( Dict.get a nodes, Dict.get b nodes ) of
-                ( Just aa, Just bb ) ->
-                    ( aa, bb )
-
-                _ ->
-                    Debug.todo <| "no such edge: " ++ Debug.toString ( a, b )
-
-        edges =
-            Dict.map (always getEdge) graphSpec.edges
+            Dict.get n.val nodeTypes
+                |> Maybe.map (Node id n.val n.x n.y)
+                |> Result.fromMaybe ("no such node: " ++ String.fromInt id)
     in
-    { nodes = nodes
-    , edges = edges
-    , neighbors = calcNeighbors <| Dict.values edges
-    , bounds = calcBounds <| Dict.values nodes
-    }
+    case graphSpec.nodes |> Dict.map getNode |> combineDict of
+        Err ( k, err ) ->
+            D.fail <| String.fromInt k ++ ": " ++ err
+
+        Ok nodes ->
+            let
+                getEdge _ ( a, b ) =
+                    case ( Dict.get a nodes, Dict.get b nodes ) of
+                        ( Just aa, Just bb ) ->
+                            Ok ( aa, bb )
+
+                        _ ->
+                            Err <| "no such edge: (" ++ String.fromInt a ++ ", " ++ String.fromInt b ++ ")"
+            in
+            case graphSpec.edges |> Dict.map getEdge |> combineDict of
+                Err ( k, err ) ->
+                    D.fail <| String.fromInt k ++ ": " ++ err
+
+                Ok edges ->
+                    D.succeed
+                        { nodes = nodes
+                        , edges = edges
+                        , neighbors = calcNeighbors <| Dict.values edges
+                        , bounds = calcBounds <| Dict.values nodes
+                        }
+
+
+combineDict : Dict comparable (Result e v) -> Result ( comparable, e ) (Dict comparable v)
+combineDict =
+    let
+        fold k rv =
+            Result.andThen
+                (case rv of
+                    Ok v ->
+                        Dict.insert k v >> Ok
+
+                    Err err ->
+                        always (Err ( k, err ))
+                )
+    in
+    Dict.foldl fold (Ok Dict.empty)
 
 
 startNodes : Graph -> Set NodeId
@@ -389,12 +407,7 @@ calcNeighbors =
 
 neighbors : NodeId -> Graph -> Set NodeId
 neighbors id g =
-    case Dict.get id g.neighbors of
-        Just ids ->
-            ids
-
-        Nothing ->
-            Debug.todo <| "neighbors for a nonexistant node: " ++ String.fromInt id
+    Dict.get id g.neighbors |> Maybe.withDefault Set.empty
 
 
 type alias GraphBounds =

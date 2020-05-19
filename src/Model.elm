@@ -66,7 +66,7 @@ type Msg
 type alias Model =
     { urlKey : Nav.Key
     , changelog : String
-    , gameData : G.GameData
+    , gameData : Result D.Error G.GameData
     , route : Maybe Route
     , graph : Maybe Graph.GraphModel
     , features : Features
@@ -111,55 +111,58 @@ type alias Flags =
 
 init : Flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags loc urlKey =
-    case D.decodeValue G.decoder flags.gameData of
-        Ok gameData ->
-            let
-                route =
-                    Route.parse loc
+    let
+        gameData =
+            D.decodeValue G.decoder flags.gameData
 
-                search =
-                    route |> Maybe.andThen Route.params |> Maybe.andThen .search
+        route =
+            Route.parse loc
 
-                ( graph, error ) =
-                    parseGraph gameData route
-            in
-            ( { urlKey = urlKey
-              , changelog = flags.changelog
-              , windowSize = flags.windowSize
-              , gameData = gameData
-              , features = Route.parseFeatures loc
-              , route = route
-              , graph = graph
-              , sidebarOpen = True
-              , tooltip = Nothing
-              , searchString = search
-              , searchPrev = search
-              , searchRegex = Just Regex.never
-              , searchHelp = False
-              , zoom =
-                    graph
-                        |> Maybe.Extra.unwrap 1
-                            (\{ char, selected } ->
-                                clampZoom flags.windowSize char.graph <|
-                                    if selected == Set.empty then
-                                        1
+        search =
+            route |> Maybe.andThen Route.params |> Maybe.andThen .search
 
-                                    else
-                                        0
-                            )
-              , center = V2.vec2 0 0
-              , drag = Draggable.init
-              , etherealItemInventory = Nothing
-              , error = error
-              }
-            , Cmd.batch
-                [ preprocessCmd
-                , redirectCmd urlKey gameData route
-                ]
-            )
+        ( graph, error ) =
+            case gameData of
+                Err err ->
+                    ( Nothing, Just <| GraphError "no graph without gamedata" )
 
-        Err err ->
-            Debug.todo (Debug.toString err)
+                Ok gd ->
+                    parseGraph gd route
+    in
+    ( { urlKey = urlKey
+      , changelog = flags.changelog
+      , windowSize = flags.windowSize
+      , gameData = gameData
+      , features = Route.parseFeatures loc
+      , route = route
+      , graph = graph
+      , sidebarOpen = True
+      , tooltip = Nothing
+      , searchString = search
+      , searchPrev = search
+      , searchRegex = Just Regex.never
+      , searchHelp = False
+      , zoom =
+            graph
+                |> Maybe.Extra.unwrap 1
+                    (\{ char, selected } ->
+                        clampZoom flags.windowSize char.graph <|
+                            if selected == Set.empty then
+                                1
+
+                            else
+                                0
+                    )
+      , center = V2.vec2 0 0
+      , drag = Draggable.init
+      , etherealItemInventory = Nothing
+      , error = error
+      }
+    , Cmd.batch
+        [ preprocessCmd
+        , redirectCmd urlKey route
+        ]
+    )
 
 
 parseGraph : G.GameData -> Maybe Route -> ( Maybe GraphModel, Maybe Error )
@@ -212,293 +215,291 @@ visibleTooltip { tooltip } =
             Nothing
 
 
+{-| Toggle a clicked node-id
+-}
 updateNode : G.NodeId -> Model -> ( Model, Cmd Msg )
 updateNode id model =
-    let
-        graph =
-            case model.graph of
-                Nothing ->
-                    Debug.todo "can't updateNode without model.graph"
+    Maybe.map2
+        (\graph params ->
+            let
+                selected =
+                    if Set.member id graph.selected then
+                        -- deselect a node: remove it, and any disconnected from the start by its removal
+                        graph.selected
+                            |> invert id
+                            |> Graph.reachableSelectedNodes graph.char.graph
 
-                Just graph_ ->
-                    graph_
+                    else
+                        -- select a node: add it, and any in between
+                        Dijkstra.selectPathToNode (Lazy.force graph.dijkstra) id
+                            |> Set.fromList
+                            |> Set.union graph.selected
 
-        params =
-            case model.route |> Maybe.andThen Route.params of
-                Nothing ->
-                    Debug.todo "can't updateNode without route params"
-
-                Just params_ ->
-                    params_
-
-        selected =
-            if Set.member id graph.selected then
-                -- remove the node, and any disconnected from the start by its removal
-                graph.selected
-                    |> invert id
-                    |> Graph.reachableSelectedNodes graph.char.graph
-
-            else
-                -- add the node and any in between
-                Dijkstra.selectPathToNode (Lazy.force graph.dijkstra) id
-                    |> Set.fromList
-                    |> Set.union graph.selected
-
-        route =
-            Route.Home
-                { params | build = Graph.nodesToBuild graph.char.graph selected }
-    in
-    ( { model | error = Nothing }, Nav.pushUrl model.urlKey <| Route.stringify route )
+                route =
+                    Route.Home
+                        { params | build = Graph.nodesToBuild graph.char.graph selected }
+            in
+            ( { model | error = Nothing }, Nav.pushUrl model.urlKey <| Route.stringify route )
+        )
+        model.graph
+        (model.route |> Maybe.andThen Route.params)
+        -- if we don't have a graph or a graph-url, how did the user even click?
+        |> Maybe.withDefault ( model, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        SearchHelp open ->
-            ( { model | searchHelp = open }, Cmd.none )
+    case model.gameData of
+        Err err ->
+            ( model, Cmd.none )
 
-        SearchInput search0 ->
-            -- Typing out a search in the search box. Do nothing while
-            -- they type; when they stop typing, perform the search.
-            let
-                search =
-                    if search0 == "" then
-                        Nothing
+        Ok gameData ->
+            case msg of
+                SearchHelp open ->
+                    ( { model | searchHelp = open }, Cmd.none )
 
-                    else
-                        Just search0
-            in
-            -- don't update searchRegex: wait, for performance.
-            -- (Safety's not an issue anymore; Elm 0.19 fixed #44's crashes)
-            -- https://github.com/erosson/ch2plan/issues/31
-            -- https://github.com/erosson/ch2plan/issues/36
-            -- https://github.com/erosson/ch2plan/issues/44
-            ( { model | searchPrev = model.searchString, searchString = search }
-            , Process.sleep 300 |> Task.perform (always <| SearchNav model.searchString search)
-            )
+                SearchInput search0 ->
+                    -- Typing out a search in the search box. Do nothing while
+                    -- they type; when they stop typing, perform the search.
+                    let
+                        search =
+                            if search0 == "" then
+                                Nothing
 
-        SearchNav from to ->
-            if model.searchPrev == from then
-                case model.route of
-                    Just (Route.Home params) ->
-                        let
-                            searchRegex =
-                                to
-                                    |> Maybe.andThen
-                                        (Regex.fromStringWith { caseInsensitive = True, multiline = True })
-
-                            error =
-                                case ( to, searchRegex ) of
-                                    ( Nothing, _ ) ->
-                                        Nothing
-
-                                    ( Just _, Just _ ) ->
-                                        Nothing
-
-                                    ( Just _, Nothing ) ->
-                                        Just SearchRegexError
-                        in
-                        ( { model | graph = model.graph |> Maybe.map (\g -> { g | search = searchRegex }), error = error }
-                        , { params | search = to } |> Route.Home |> Route.stringify |> Nav.replaceUrl model.urlKey
-                        )
-
-                    _ ->
-                        -- can't search from pages without a searchbox
-                        ( model, Cmd.none )
-
-            else
-                -- they typed something since the delay, do not update the url
-                ( model, Cmd.none )
-
-        NodeMouseOver id ->
-            ( { model | tooltip = Just ( id, Hovering ) }, Cmd.none )
-
-        NodeMouseOut id ->
-            ( { model | tooltip = Nothing }, Cmd.none )
-
-        NodeMouseDown id ->
-            case model.tooltip of
-                Nothing ->
-                    -- clicked without hovering - this could be mobile/longpress.
-                    -- (could also be a keyboard, but you want to tab through 700 nodes? sorry, not supported)
-                    ( { model | tooltip = Just ( id, Shortpressing ) }
-                    , Process.sleep 500 |> Task.perform (always <| NodeLongPress id)
+                            else
+                                Just search0
+                    in
+                    -- don't update searchRegex: wait, for performance.
+                    -- (Safety's not an issue anymore; Elm 0.19 fixed #44's crashes)
+                    -- https://github.com/erosson/ch2plan/issues/31
+                    -- https://github.com/erosson/ch2plan/issues/36
+                    -- https://github.com/erosson/ch2plan/issues/44
+                    ( { model | searchPrev = model.searchString, searchString = search }
+                    , Process.sleep 300 |> Task.perform (always <| SearchNav model.searchString search)
                     )
 
-                Just ( tid, state ) ->
-                    if id /= tid then
-                        -- multitouch...? I only support one tooltip at a time
-                        ( { model | tooltip = Just ( id, Shortpressing ) }
-                        , Process.sleep 500 |> Task.perform (always <| NodeLongPress id)
-                        )
+                SearchNav from to ->
+                    if model.searchPrev == from then
+                        case model.route of
+                            Just (Route.Home params) ->
+                                let
+                                    searchRegex =
+                                        to
+                                            |> Maybe.andThen
+                                                (Regex.fromStringWith { caseInsensitive = True, multiline = True })
 
-                    else
-                        case state of
-                            Hovering ->
-                                -- Mouse-user, clicked while hovering. Select this node, don't wait for mouseout
-                                updateNode id model
+                                    error =
+                                        case ( to, searchRegex ) of
+                                            ( Nothing, _ ) ->
+                                                Nothing
+
+                                            ( Just _, Just _ ) ->
+                                                Nothing
+
+                                            ( Just _, Nothing ) ->
+                                                Just SearchRegexError
+                                in
+                                ( { model | graph = model.graph |> Maybe.map (\g -> { g | search = searchRegex }), error = error }
+                                , { params | search = to } |> Route.Home |> Route.stringify |> Nav.replaceUrl model.urlKey
+                                )
 
                             _ ->
-                                -- Multitouch...? Ignore other mousedowns.
+                                -- can't search from pages without a searchbox
                                 ( model, Cmd.none )
-
-        NodeLongPress id ->
-            case model.tooltip of
-                -- waiting for the same longpress that sent this message?
-                Just ( tid, Shortpressing ) ->
-                    ( { model | tooltip = Just ( id, Longpressing ) }, Cmd.none )
-
-                _ ->
-                    ( model, Cmd.none )
-
-        NodeMouseUp id ->
-            case model.tooltip of
-                Nothing ->
-                    -- no idea how we got here, select the node I guess
-                    updateNode id model
-
-                Just ( tid, state ) ->
-                    if id /= tid then
-                        -- no idea how we got here, select the node I guess
-                        updateNode id model
 
                     else
-                        case state of
-                            Hovering ->
-                                -- mouse-user, clicked while hovering. Do nothing, mousedown already selected the node
-                                ( model, Cmd.none )
+                        -- they typed something since the delay, do not update the url
+                        ( model, Cmd.none )
 
-                            Shortpressing ->
-                                -- end of a quick tap - select the node and cancel the longpress
-                                updateNode id { model | tooltip = Nothing }
+                NodeMouseOver id ->
+                    ( { model | tooltip = Just ( id, Hovering ) }, Cmd.none )
 
-                            Longpressing ->
-                                -- end of a tooltip longpress - hide the tooltip
-                                ( { model | tooltip = Nothing }, Cmd.none )
+                NodeMouseOut id ->
+                    ( { model | tooltip = Nothing }, Cmd.none )
 
-        Preprocess ->
-            -- calculate dijkstra immediately after the view renders, so we have it ready later, when the user clicks.
-            -- It's not *that* slow - 200ms-ish - but that's slow enough to make a difference.
-            -- This makes things feel much more responsive.
-            ( { model | graph = model.graph |> Maybe.map (\g -> { g | dijkstra = Lazy.evaluate g.dijkstra }) }, Cmd.none )
-
-        OnDragBy rawDelta ->
-            let
-                delta =
-                    rawDelta |> V2.scale (-1 / model.zoom)
-            in
-            ( { model | center = model.center |> V2.add delta }, Cmd.none )
-
-        Zoom factor ->
-            let
-                newZoom =
-                    model.graph
-                        |> Maybe.map
-                            (\{ char } ->
-                                model.zoom
-                                    |> (+) (-factor * 0.01)
-                                    |> clampZoom model.windowSize char.graph
-                            )
-                        |> Maybe.withDefault model.zoom
-            in
-            ( { model | zoom = newZoom }, Cmd.none )
-
-        DragMsg dragMsg ->
-            Draggable.update dragConfig dragMsg model
-
-        ToggleSidebar ->
-            ( { model | sidebarOpen = not model.sidebarOpen }, Cmd.none )
-
-        SaveFileSelected elemId ->
-            ( model, Ports.saveFileSelected elemId )
-
-        SaveFileImport json ->
-            case D.decodeValue SaveFile.decoder json of
-                Err err ->
-                    ( { model
-                        | etherealItemInventory = Nothing
-                        , error = err |> D.errorToString |> SaveImportError |> Just
-                      }
-                    , Cmd.none
-                    )
-
-                Ok data ->
-                    case model.graph |> Maybe.map .game |> Maybe.Extra.orElse (G.latestVersion model.gameData) of
+                NodeMouseDown id ->
+                    case model.tooltip of
                         Nothing ->
+                            -- clicked without hovering - this could be mobile/longpress.
+                            -- (could also be a keyboard, but you want to tab through 700 nodes? sorry, not supported)
+                            ( { model | tooltip = Just ( id, Shortpressing ) }
+                            , Process.sleep 500 |> Task.perform (always <| NodeLongPress id)
+                            )
+
+                        Just ( tid, state ) ->
+                            if id /= tid then
+                                -- multitouch...? I only support one tooltip at a time
+                                ( { model | tooltip = Just ( id, Shortpressing ) }
+                                , Process.sleep 500 |> Task.perform (always <| NodeLongPress id)
+                                )
+
+                            else
+                                case state of
+                                    Hovering ->
+                                        -- Mouse-user, clicked while hovering. Select this node, don't wait for mouseout
+                                        updateNode id model
+
+                                    _ ->
+                                        -- Multitouch...? Ignore other mousedowns.
+                                        ( model, Cmd.none )
+
+                NodeLongPress id ->
+                    case model.tooltip of
+                        -- waiting for the same longpress that sent this message?
+                        Just ( tid, Shortpressing ) ->
+                            ( { model | tooltip = Just ( id, Longpressing ) }, Cmd.none )
+
+                        _ ->
+                            ( model, Cmd.none )
+
+                NodeMouseUp id ->
+                    case model.tooltip of
+                        Nothing ->
+                            -- no idea how we got here, select the node I guess
+                            updateNode id model
+
+                        Just ( tid, state ) ->
+                            if id /= tid then
+                                -- no idea how we got here, select the node I guess
+                                updateNode id model
+
+                            else
+                                case state of
+                                    Hovering ->
+                                        -- mouse-user, clicked while hovering. Do nothing, mousedown already selected the node
+                                        ( model, Cmd.none )
+
+                                    Shortpressing ->
+                                        -- end of a quick tap - select the node and cancel the longpress
+                                        updateNode id { model | tooltip = Nothing }
+
+                                    Longpressing ->
+                                        -- end of a tooltip longpress - hide the tooltip
+                                        ( { model | tooltip = Nothing }, Cmd.none )
+
+                Preprocess ->
+                    -- calculate dijkstra immediately after the view renders, so we have it ready later, when the user clicks.
+                    -- It's not *that* slow - 200ms-ish - but that's slow enough to make a difference.
+                    -- This makes things feel much more responsive.
+                    ( { model | graph = model.graph |> Maybe.map (\g -> { g | dijkstra = Lazy.evaluate g.dijkstra }) }, Cmd.none )
+
+                OnDragBy rawDelta ->
+                    let
+                        delta =
+                            rawDelta |> V2.scale (-1 / model.zoom)
+                    in
+                    ( { model | center = model.center |> V2.add delta }, Cmd.none )
+
+                Zoom factor ->
+                    let
+                        newZoom =
+                            model.graph
+                                |> Maybe.map
+                                    (\{ char } ->
+                                        model.zoom
+                                            |> (+) (-factor * 0.01)
+                                            |> clampZoom model.windowSize char.graph
+                                    )
+                                |> Maybe.withDefault model.zoom
+                    in
+                    ( { model | zoom = newZoom }, Cmd.none )
+
+                DragMsg dragMsg ->
+                    Draggable.update dragConfig dragMsg model
+
+                ToggleSidebar ->
+                    ( { model | sidebarOpen = not model.sidebarOpen }, Cmd.none )
+
+                SaveFileSelected elemId ->
+                    ( model, Ports.saveFileSelected elemId )
+
+                SaveFileImport json ->
+                    case D.decodeValue SaveFile.decoder json of
+                        Err err ->
                             ( { model
                                 | etherealItemInventory = Nothing
-                                , error = "unknown saved game version" |> SaveImportError |> Just
+                                , error = err |> D.errorToString |> SaveImportError |> Just
                               }
                             , Cmd.none
                             )
 
-                        Just game ->
-                            let
-                                saveHero =
-                                    Dict.Extra.find (\k v -> v.name == data.hero) game.heroes
+                        Ok data ->
+                            case model.graph |> Maybe.map .game |> Maybe.Extra.orElse (G.latestVersion gameData) of
+                                Nothing ->
+                                    ( { model
+                                        | etherealItemInventory = Nothing
+                                        , error = "unknown saved game version" |> SaveImportError |> Just
+                                      }
+                                    , Cmd.none
+                                    )
 
-                                saveBuild =
-                                    String.join "&" data.build
+                                Just game ->
+                                    let
+                                        saveHero =
+                                            Dict.Extra.find (\k v -> v.name == data.hero) game.heroes
 
-                                cmd =
-                                    case saveHero of
-                                        Just hero ->
-                                            Route.Home
-                                                { version = game.versionSlug
-                                                , search = model.searchString
-                                                , hero = Tuple.first hero
-                                                , build = Just saveBuild
-                                                }
-                                                |> Route.stringify
-                                                |> Nav.pushUrl model.urlKey
+                                        saveBuild =
+                                            String.join "&" data.build
 
-                                        _ ->
-                                            Cmd.none
-                            in
-                            ( { model
-                                | etherealItemInventory = Just data.etherealItemInventory
-                                , error = Nothing
-                              }
-                            , cmd
-                            )
+                                        cmd =
+                                            case saveHero of
+                                                Just hero ->
+                                                    Route.Home
+                                                        { version = game.versionSlug
+                                                        , search = model.searchString
+                                                        , hero = Tuple.first hero
+                                                        , build = Just saveBuild
+                                                        }
+                                                        |> Route.stringify
+                                                        |> Nav.pushUrl model.urlKey
 
-        NavRequest req ->
-            -- https://package.elm-lang.org/packages/elm/browser/latest/Browser#UrlRequest
-            case req of
-                Browser.Internal url ->
-                    ( model, Nav.pushUrl model.urlKey (Url.toString url) )
+                                                _ ->
+                                                    Cmd.none
+                                    in
+                                    ( { model
+                                        | etherealItemInventory = Just data.etherealItemInventory
+                                        , error = Nothing
+                                      }
+                                    , cmd
+                                    )
 
-                Browser.External url ->
-                    ( model, Nav.load url )
+                NavRequest req ->
+                    -- https://package.elm-lang.org/packages/elm/browser/latest/Browser#UrlRequest
+                    case req of
+                        Browser.Internal url ->
+                            ( model, Nav.pushUrl model.urlKey (Url.toString url) )
 
-        NavLocation loc ->
-            let
-                route =
-                    Route.parse loc
+                        Browser.External url ->
+                            ( model, Nav.load url )
 
-                ( graph, error ) =
-                    parseGraph model.gameData route
-            in
-            ( { model
-                | route = route
-                , features = Route.parseFeatures loc
-                , error = error
-                , graph =
-                    case ( graph, model.graph ) of
-                        ( Just new, Just old ) ->
-                            Just <| Graph.updateOnChange new old
+                NavLocation loc ->
+                    let
+                        route =
+                            Route.parse loc
 
-                        ( Just new, Nothing ) ->
-                            Just new
+                        ( graph, error ) =
+                            parseGraph gameData route
+                    in
+                    ( { model
+                        | route = route
+                        , features = Route.parseFeatures loc
+                        , error = error
+                        , graph =
+                            case ( graph, model.graph ) of
+                                ( Just new, Just old ) ->
+                                    Just <| Graph.updateOnChange new old
 
-                        _ ->
-                            Nothing
-              }
-            , Cmd.batch [ preprocessCmd, redirectCmd model.urlKey model.gameData route ]
-            )
+                                ( Just new, Nothing ) ->
+                                    Just new
 
-        Resize windowSize ->
-            ( { model | windowSize = windowSize }, Cmd.none )
+                                _ ->
+                                    Nothing
+                      }
+                    , Cmd.batch [ preprocessCmd, redirectCmd model.urlKey route ]
+                    )
+
+                Resize windowSize ->
+                    ( { model | windowSize = windowSize }, Cmd.none )
 
 
 nodeIconSize =
@@ -525,19 +526,19 @@ clampZoom window graph =
     clamp minZoom 3
 
 
-redirectRoute : G.GameData -> Route -> Maybe Route
-redirectRoute gameData route =
+redirectRoute : Route -> Maybe Route
+redirectRoute route =
     case route of
         Route.Redirect r ->
-            redirectRoute gameData r |> Maybe.withDefault r |> Just
+            redirectRoute r |> Maybe.withDefault r |> Just
 
         _ ->
             Nothing
 
 
-redirectCmd : Nav.Key -> G.GameData -> Maybe Route -> Cmd Msg
-redirectCmd urlKey gameData route =
-    case route |> Maybe.andThen (redirectRoute gameData) of
+redirectCmd : Nav.Key -> Maybe Route -> Cmd Msg
+redirectCmd urlKey route =
+    case route |> Maybe.andThen redirectRoute of
         Nothing ->
             Cmd.none
 
@@ -629,9 +630,9 @@ type alias StatsSummary =
     }
 
 
-parseStatsSummary : Model -> Route.HomeParams -> Result String StatsSummary
-parseStatsSummary model params =
-    Graph.parse model.gameData params
+parseStatsSummary : G.GameData -> Route.HomeParams -> Result String StatsSummary
+parseStatsSummary gd params =
+    Graph.parse gd params
         |> Result.map
             (Tuple.first
                 >> (\m ->
