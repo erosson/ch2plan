@@ -9,12 +9,15 @@
 rm -rf build/chars
 mkdir -p build/chars
 
-for f in `pwd`/game/mods/active/*.swf; do
-  ln -s $f build/chars
+game=${1-game}
+mxmlc="/d/Downloads/apache-flex-sdk-4.16.1-bin/bin/mxmlc"
+for f in "$game"/ClickerHeroes2.swf "$game"/mods/active/*.swf; do
+  #ln -s $f build/chars
+  cp "$f" build/chars
+  #echo ": $f"
 done
-ln -s `pwd`/game/ClickerHeroes2.swf build/chars
 ls build/chars
-mxmlc src/CharToJson.as -output build/chars/CharToJson.swf
+$mxmlc src/CharToJson.as -output build/chars/CharToJson.swf
 cp src/CharToJson.html build/chars/index.html
 
 rm -f assets/ch2data/chars/latest.json

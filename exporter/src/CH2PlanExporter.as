@@ -19,20 +19,51 @@ package
 		    "version": 1,
 		    "author": "erosson"
 		};
-		
+
+		private var game: IdleHeroMain = null;
 		private var json: Object = {heroes: {}, skills: {}};
 		private var slugs: Object = {
 			"Helpful Adventurer": "helpfulAdventurer",
 			"Wizard": "wizard"
 		};
 		public function onStartup(game:IdleHeroMain):void {
+			this.game = game;
+		}
+		public function onStaticDataLoaded(staticData: Object):void {
+			try {
+				this._onStartup(this.game);
+			}
+			catch (e: Error) {
+				this.writeFile(File.desktopDirectory.resolvePath("error.txt"), e.getStackTrace());
+			}
+		}
+		private function _onStartup(game:IdleHeroMain):void {
 			json.ch2 = pick(IdleHeroMain, ['GAME_VERSION']);
 			for (var ckey:String in Characters.startingDefaultInstances) {
-				var char:Object = Characters.startingDefaultInstances[ckey];
+				var char:* = Characters.startingDefaultInstances[ckey];
 				var slug:String = slugs[ckey];
-				json.heroes[slug] = pick(char, ['name', 'flavorName', 'flavorClass', 'flavor', 'levelGraphNodeTypes', 'levelGraphObject']);
-				json.heroes[slug].levelGraphObject = json.heroes[slug].levelGraphObject || {nodes:[], edges:[]};
-				json.heroes[slug].levelGraphNodeTypes = json.heroes[slug].levelGraphNodeTypes || {};
+				json.heroes[slug] = pick(char, ['name', 'flavorName', 'flavorClass', 'flavor']);
+				json.heroes[slug].levelGraphObject = char.levelGraphObject || {nodes:[], edges:[]};
+				json.heroes[slug].levelGraphNodeTypes = {};
+				for (var nodekey:String in char.levelGraphNodeTypes || {}) {
+					var node:Object = char.levelGraphNodeTypes[nodekey] || {};
+					json.heroes[slug].levelGraphNodeTypes[nodekey] = {};
+					for (var fieldkey:String in node) {
+						json.heroes[slug].levelGraphNodeTypes[nodekey][fieldkey] = node[fieldkey];
+					}
+					if (node['tooltipFunction']) {
+						try {
+							var cc:* = CH2.currentCharacter;
+							CH2.currentCharacter = char;
+							json.heroes[slug].levelGraphNodeTypes[nodekey]['__ch2plan_tooltip'] = node['tooltipFunction'](1);
+							CH2.currentCharacter = cc;
+						}
+						catch (e:Error) {
+							//json.heroes[slug].levelGraphNodeTypes[nodekey]['__ch2plan_tooltip_error'] = e.getStackTrace();
+							throw e;
+						}
+					}
+				}
 			}
 			for (var skey:String in Character.staticSkillInstances) {
 				var skill:Object = Character.staticSkillInstances[skey];
@@ -50,7 +81,7 @@ package
 				config._nativePath = file.nativePath;
 				//this.writeFile(File.desktopDirectory.resolvePath("config.json"), JSON.stringify(config, null, 2));
 			}
-			var outDir:File = config["ch2plan-path"] ? new File(config["ch2plan-path"]).resolvePath("assets\\ch2data\\chars") : File.desktopDirectory;
+			var outDir:File = config["dest"] ? new File(config["dest"]) : File.desktopDirectory;
 			this.writeFile(outDir.resolvePath("latest.json"), JSON.stringify(json, null, 2));
 		}
 		private function writeFile(file: File, content: String):void {
@@ -66,7 +97,6 @@ package
 			stream.close();
 			return content;
 		}
-		public function onStaticDataLoaded(staticData:Object):void {}
 		public function onUserDataLoaded():void {}
 		public function onCharacterCreated(characterInstance:Character):void {}
 		

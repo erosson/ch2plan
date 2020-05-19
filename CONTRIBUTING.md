@@ -34,12 +34,15 @@ All code pushed to the master branch is released immediately, automatically, aft
 
 ## Updating the planner for a new CH2 version
 
-Here's the procedure. An Ubuntu Linux machine and ffdec are required. (TODO add urls)
+**Below is wildly out of date, sorry! Hoping to update it soon**
+
+Here's the procedure. An Ubuntu Linux machine and ffdec are required. https://github.com/jindrapetrik/jpexs-decompiler/releases
+mxmlc: https://flex.apache.org/installer.html
 
 - Extract the updated Clicker Heroes 2 game to `./game`. A symlink works too - I dual-boot, and symlink `./game` to CH2 on my Windows partition.
 - Run `yarn export:as3`. It'll generate some changes in git.
 - Run `git diff ./ch2data`. Manually examine the differences, and update `./assets/stats.json`
-- Do one of the following: 
+- Do one of the following:
   - Use the new and experimental ch2plan-exporter mod.
     - Add ./exporter/bin/ch2plan-exporter.swf to your [Clicker Heroes 2 mods](https://www.clickerheroes2.com/installing_mods.php).
     - Open Clicker Heroes 2.
@@ -52,3 +55,22 @@ Here's the procedure. An Ubuntu Linux machine and ffdec are required. (TODO add 
 - Add links to the new version in ViewSkillTree.elm, if necessary.
 - You're done, hopefully! Run `yarn dev` to test things.
   - If you change stats.json after this point, run `yarn export:postchars` to update it.
+
+# updating: v2
+
+**Below is wildly out of date, sorry! Hoping to update it soon**
+
+there is a ch2 mod automatically extracts most data when ch2 is updated
+
+to install mods: https://www.clickerheroes2.com/installing_mods.php
+my pre-built mod's location: TODO
+
+- install using steps above. it outputs "latest.json" to your desktop. copy that to TODO
+- or, use a config file on your desktop to auto-copy it to the ch2plan directory
+
+developing the mod:
+
+- get flashdevelop, follow directions: https://www.clickerheroes2.com/creating_mods.php
+  - might need to jump through some hoops to get it working: https://www.flashdevelop.org/community/viewtopic.php?p=55977
+- open my as3 project
+  - project > properties > build > post-build steps: set your ch2 path, so mod is copied to your mod folder automatically on build

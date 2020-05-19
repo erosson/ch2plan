@@ -144,8 +144,15 @@ viewTooltip model graph node =
     in
     H.div ([ HA.class "tooltip" ] ++ style)
         [ H.b [] [ H.text node.val.name ]
-        , H.p [] [ H.text <| Maybe.withDefault "" node.val.tooltip ]
+        , H.p [] [ H.text <| G.tooltip node.val "" ]
         , H.p [ A.class "flavor" ] [ H.text <| Maybe.withDefault "" node.val.flavorText ]
+        , H.p [ A.class "flammable" ]
+            (if node.val.flammable then
+                [ H.text "Flammable: The effects of this node will be lost when you choose to Ascend or Transcend" ]
+
+             else
+                []
+            )
         ]
 
 
@@ -153,7 +160,7 @@ viewTooltip model graph node =
 -}
 nodeSearchText : G.NodeType -> String
 nodeSearchText val =
-    val.name ++ appendSearch val.tooltip ++ appendSearch val.flavorText
+    val.name ++ appendSearch (G.tooltip val "" |> Just) ++ appendSearch val.flavorText
 
 
 appendSearch =
@@ -312,7 +319,7 @@ nodeBGSize =
 
 iconUrl : G.NodeType -> String
 iconUrl node =
-    "./ch2data/img/" ++ node.icon ++ ".png"
+    "./ch2data/img/" ++ Maybe.withDefault "404" node.icon ++ ".png"
 
 
 viewNodeBackground : MG.GraphModel -> G.Node -> S.Svg msg

@@ -4,7 +4,7 @@
   <output>
     <movie outputType="Application" />
     <movie input="" />
-    <movie path="bin\ch2plan-exporter.swf" />
+    <movie path="D:\Steam\steamapps\common\Clicker Heroes 2\mods\active\ch2plan-exporter.swf" />
     <movie fps="30" />
     <movie width="800" />
     <movie height="600" />
@@ -52,7 +52,7 @@
   </includeLibraries>
   <!-- SWC Libraries -->
   <libraryPaths>
-    <element path="C:\Program Files (x86)\Steam\steamapps\common\Clicker Heroes 2\CH2Library.swc" />
+    <element path="D:\Steam\steamapps\common\Clicker Heroes 2\CH2Library.swc" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>
@@ -81,7 +81,7 @@
   <!-- Executed before build -->
   <preBuildCommand />
   <!-- Executed after build -->
-  <postBuildCommand alwaysRun="True">cp "bin\ch2plan-exporter.swf" "C:\Program Files (x86)\Steam\steamapps\common\Clicker Heroes 2\mods\active\ch2plan-exporter.swf"</postBuildCommand>
+  <postBuildCommand alwaysRun="True" />
   <!-- Other project options -->
   <options>
     <option showHiddenPaths="False" />

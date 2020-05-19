@@ -267,7 +267,7 @@ viewNodeSummaryLine showTooltips count nodeType =
     let
         tooltip =
             if showTooltips then
-                nodeType.tooltip
+                G.tooltip nodeType "" |> Just
 
             else
                 Nothing

@@ -22,6 +22,7 @@ module GameData exposing
     , nodeTypeToString
     , qualityToString
     , startNodes
+    , tooltip
     )
 
 import Dict as Dict exposing (Dict)
@@ -85,13 +86,20 @@ type alias NodeSpec =
 type alias NodeType =
     { key : String
     , name : String
-    , icon : String
-    , tooltip : Maybe String
+    , icon : Maybe String
+    , newTooltip : Maybe String
+    , oldTooltip : Maybe String
     , flavorText : Maybe String
     , alwaysAvailable : Bool
+    , flammable : Bool
     , stats : List ( GS.Stat, Int )
     , quality : NodeQuality
     }
+
+
+tooltip : NodeType -> String -> String
+tooltip node default =
+    node.newTooltip |> Maybe.withDefault (node.oldTooltip |> Maybe.withDefault default)
 
 
 type NodeQuality
@@ -316,10 +324,12 @@ nodeTypeDecoder stats key =
     D.succeed NodeType
         |> P.custom (D.succeed key)
         |> P.required "name" D.string
-        |> P.required "icon" D.string
+        |> P.optional "icon" (D.nullable D.string) Nothing
+        |> P.optional "__ch2plan_tooltip" (D.nullable D.string) Nothing
         |> P.optional "tooltip" (D.nullable D.string) Nothing
         |> P.optional "flavorText" (D.nullable D.string) Nothing
         |> P.optional "alwaysAvailable" D.bool False
+        |> P.optional "flammable" D.bool False
         |> P.custom (Maybe.andThen (.stats >> Dict.get key) stats |> Maybe.withDefault [] |> D.succeed)
 
 

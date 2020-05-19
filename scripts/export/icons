@@ -1,11 +1,12 @@
 #!/bin/sh -eux
-# I expect the Clicker Heroes 2 game to be extracted to `./game`. I'm not going to autodownload the 2gb thing in this script.
+# I expect the Clicker Heroes 2 game to be extracted to `./game`
+game=${1-game}
 mkdir -p build/extract
 # don't re-extract unless the swc is newer, because it takes ages
 extract() {
   package=$1;shift
-  if [ ! ./build/extract/$package -nt ./game/packer/src/exports/$package.swc ]; then
-    unzip -o ./game/packer/src/exports/$package.swc -d ./build/extract/$package
+  if [ ! ./build/extract/$package -nt "$game"/packer/src/exports/$package.swc ]; then
+    unzip -o "$game"/packer/src/exports/$package.swc -d ./build/extract/$package
     ffdec -export sprite ./build/extract/$package/sprites ./build/extract/$package/library.swf
   fi
 }
@@ -16,13 +17,18 @@ extract HelpfulAdventurer_MEDIUM_ATF_OG_CID
 
 mkdir -p ./assets/ch2data/img
 for icon in starBG; do
-  cp -p ./build/extract/Essentials_MEDIUM_ATF/sprites/*_${icon}_*/*.png ./assets/ch2data/img/$icon.png
+  #cp -p ./build/extract/Essentials_MEDIUM_ATF/sprites/*_${icon}_*/*.png ./assets/ch2data/img/$icon.png
+  echo cp -p ./build/extract/Essentials_MEDIUM_ATF/sprites/*_${icon}_*/*.png ./assets/ch2data/img/$icon.png
 done
-for icon in generalNode specialNode deluxeNode; do
-  convert ./build/extract/Essentials_MEDIUM_ATF/sprites/*_${icon}_*/1.png -transparent black ./assets/ch2data/img/$icon.png
-done
-for icon in `./scripts/export/list-icons ./assets/ch2data/chars/latest.json`; do
-  convert ./build/extract/*/sprites/*_${icon}_*/*.png -transparent black ./assets/ch2data/img/$icon.png
-done
+#for icon in generalNode specialNode deluxeNode; do
+#  #convert ./build/extract/Essentials_MEDIUM_ATF/sprites/*_${icon}_*/1.png -transparent black ./assets/ch2data/img/$icon.png
+#  echo $icon
+#  echo convert ./build/extract/Essentials_MEDIUM_ATF/sprites/*_${icon}_*/1.png -transparent black ./assets/ch2data/img/$icon.png
+#done
+#for icon in `./scripts/export/list-icons ./assets/ch2data/chars/latest.json`; do
+#  #convert ./build/extract/*/sprites/*_${icon}_*/*.png -transparent black ./assets/ch2data/img/$icon.png
+#  echo $icon
+#  echo convert ./build/extract/*/sprites/*_${icon}_*/*.png -transparent black ./assets/ch2data/img/$icon.png
+#done
 mkdir -p ./assets/ch2data/img/skills
 cp -rp build/extract/BitmapHUD_HIGH_PNG/sprites/*1147_UpgradeIcons*/* ./assets/ch2data/img/skills/
