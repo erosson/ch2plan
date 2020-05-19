@@ -34441,7 +34441,7 @@
         "linear",
         [
           10,
-          0
+          100
         ]
       ],
       "STAT_TOTAL_MANA": [
@@ -34449,7 +34449,7 @@
         "linear",
         [
           10,
-          0
+          100
         ]
       ],
       "STAT_BONUS_GOLD_CHANCE": [

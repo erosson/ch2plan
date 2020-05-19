@@ -56,7 +56,7 @@ view header model graph =
 
 
 ver =
-    { live = "0.9.7"
+    { live = "0.12.0-r457"
     , ptr = ""
     }
 

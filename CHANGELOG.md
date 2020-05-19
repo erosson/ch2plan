@@ -29,6 +29,10 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 ---
 
+## 2020-05-19
+
+- Update to live version 0.12.0. (This one took some effort)
+
 ## 2019-07-10
 
 - Update to live version 0.9.7.
