@@ -20,6 +20,7 @@
             "elm-community/dict-extra": "2.3.1",
             "elm-community/list-extra": "8.0.0",
             "elm-community/maybe-extra": "5.0.0",
+            "elm-community/result-extra": "2.4.0",
             "elm-explorations/linear-algebra": "1.0.3",
             "elm-explorations/markdown": "1.0.0",
             "zaboco/elm-draggable": "4.0.1"

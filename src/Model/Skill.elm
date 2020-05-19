@@ -13,66 +13,87 @@ import GameData as G
 import GameData.Stats as GS exposing (Stat(..))
 
 
-skillVal : (GS.Stat -> GS.StatTotal) -> G.Skill -> String -> Maybe Float
+skillVal : (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> String -> Result String Float
 skillVal getStat skill name =
     -- fetch a skill-stat, if the stat exists. Skill-stats are specially named stats, for example "BigClicks_damage".
-    skill.id ++ "_" ++ name |> GS.getStat |> Maybe.map (getStat >> .val)
+    let
+        sname =
+            skill.id ++ "_" ++ name
+    in
+    GS.getStat sname
+        |> Result.fromMaybe ("no such skill-stat: " ++ sname)
+        |> Result.andThen getStat
+        |> Result.map .val
 
 
-skillValOr : (GS.Stat -> GS.StatTotal) -> G.Skill -> Float -> String -> Float
+skillValOr : (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Float -> String -> Float
 skillValOr getStat skill default =
     -- fetch a skill-stat or a default value.
-    skillVal getStat skill >> Maybe.withDefault default
+    skillVal getStat skill >> Result.withDefault default
 
 
-energyCost : (GS.Stat -> GS.StatTotal) -> G.Skill -> Maybe Float
+energyCost : (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Result String Float
 energyCost g s =
-    s.energyCost |> Maybe.map (toFloat >> (+) (skillValOr g s 0 "energyCost"))
+    s.energyCost |> Result.fromMaybe "no energycost" |> Result.map (toFloat >> (+) (skillValOr g s 0 "energyCost"))
 
 
-manaCost : (GS.Stat -> GS.StatTotal) -> G.Skill -> Maybe Float
+manaCost : (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Result String Float
 manaCost g s =
-    s.manaCost |> Maybe.map (toFloat >> (*) (skillValOr g s 1 "manaCost"))
+    s.manaCost |> Result.fromMaybe "no manacost" |> Result.map (toFloat >> (*) (skillValOr g s 1 "manaCost"))
 
 
-cooldown : (GS.Stat -> GS.StatTotal) -> G.Skill -> Maybe Float
+cooldown : (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Result String Float
 cooldown g s =
-    s.cooldown |> Maybe.map (toFloat >> (*) (skillValOr g s 1 "cooldown" / 1000 / (g STAT_HASTE).val))
+    let
+        haste =
+            case g STAT_HASTE of
+                Err _ ->
+                    1
+
+                Ok h ->
+                    h.val
+    in
+    s.cooldown |> Result.fromMaybe "no cooldown" |> Result.map (toFloat >> (*) (skillValOr g s 1 "cooldown" / 1000 / haste))
 
 
-duration : GS.Rules -> (GS.Stat -> GS.StatTotal) -> G.Skill -> Maybe Float
+duration : GS.Rules -> (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Result String Float
 duration rules g s =
     let
         haste =
             -- since 0.07, haste reduces skill duration
             -- https://www.reddit.com/r/ClickerHeroes/comments/9587av/clicker_heroes_2_007_can_now_be_tested/
             if rules.hasteAffectsDuration then
-                (g STAT_HASTE).val
+                case g STAT_HASTE of
+                    Ok h ->
+                        h.val
+
+                    Err _ ->
+                        1
 
             else
                 1
     in
-    skillVal g s "duration" |> Maybe.map ((*) (1 / 1000 / haste))
+    skillVal g s "duration" |> Result.map ((*) (1 / 1000 / haste))
 
 
-uptime : GS.Rules -> (GS.Stat -> GS.StatTotal) -> G.Skill -> Maybe Float
+uptime : GS.Rules -> (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Result String Float
 uptime rules g s =
-    Maybe.map2 (/)
+    Result.map2 (/)
         (duration rules g s)
         (cooldown g s)
-        |> Maybe.map (clamp 0 1)
+        |> Result.map (clamp 0 1)
 
 
-damage : (GS.Stat -> GS.StatTotal) -> G.Skill -> Maybe Float
+damage : (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Result String Float
 damage g s =
     skillVal g s "damage"
 
 
-stacks : (GS.Stat -> GS.StatTotal) -> G.Skill -> Maybe Float
+stacks : (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Result String Float
 stacks g s =
     skillVal g s "stacks"
 
 
-effect : (GS.Stat -> GS.StatTotal) -> G.Skill -> Maybe Float
+effect : (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Result String Float
 effect g s =
     skillVal g s "effect"

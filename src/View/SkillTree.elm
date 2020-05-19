@@ -16,17 +16,9 @@ import View.Graph
 import View.Stats
 
 
-view : List (H.Html M.Msg) -> M.Model -> MG.GraphModel -> H.Html M.Msg
-view header model graph =
+view : List (H.Html M.Msg) -> M.Model -> MG.GraphModel -> Route.HomeParams -> H.Html M.Msg
+view header model graph params =
     let
-        params =
-            case model.route |> Maybe.andThen Route.params of
-                Nothing ->
-                    Debug.todo "viewing skilltree without a skilltree url?"
-
-                Just params_ ->
-                    params_
-
         ethItemCount =
             model.etherealItemInventory |> Maybe.Extra.unwrap 0 Dict.size
     in
@@ -155,8 +147,3 @@ viewSearch model version =
                 []
             )
         ]
-
-
-dumpModel : M.Model -> H.Html msg
-dumpModel =
-    H.text << Debug.toString

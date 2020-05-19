@@ -56,10 +56,10 @@ create game char selected =
 
 
 runDijkstra graph selected =
-    let
-        _ =
-            Debug.log "running dijkstra" ()
-    in
+    -- let
+    -- _ =
+    -- Debug.log "running dijkstra" ()
+    -- in
     Dijkstra.dijkstra graph selected Nothing
 
 
@@ -153,7 +153,6 @@ search str model =
     { model
         | search =
             str
-                |> Debug.log "search"
                 |> Regex.fromStringWith { caseInsensitive = True, multiline = True }
     }
 

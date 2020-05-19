@@ -561,7 +561,6 @@ clampCenter model { char } =
         ( minXY, maxXY ) =
             centerBounds (model.windowSize |> zoomedGraphSize model) char.graph
     in
-    -- >> Debug.log "clampCenter"
     v2Clamp minXY maxXY
 
 

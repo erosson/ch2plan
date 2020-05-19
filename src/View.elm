@@ -49,7 +49,7 @@ viewBody model =
                             H.div [] (header ++ [ H.text "404" ])
 
                         Just graph ->
-                            View.SkillTree.view header model graph
+                            View.SkillTree.view header model graph home
 
                 Route.Changelog ->
                     H.div [] (header ++ [ View.Changelog.view model.changelog ])

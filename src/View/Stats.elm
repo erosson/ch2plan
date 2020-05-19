@@ -9,6 +9,7 @@ import Html.Events as E
 import Maybe.Extra
 import Model as M
 import Model.Skill as Skill
+import Result.Extra
 import Route
 import Set as Set exposing (Set)
 import Time
@@ -64,21 +65,21 @@ skillBlacklist =
     Set.fromList [ "Clickdrizzle", "EnergizeExtend", "EnergizeRush" ]
 
 
-viewSkillSummary : GS.Rules -> (GS.Stat -> GS.StatTotal) -> G.Skill -> H.Html msg
+viewSkillSummary : GS.Rules -> (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> H.Html msg
 viewSkillSummary rules getStat skill =
     let
         lines =
             -- all of these lines are conditional: displayed if and only if the far-left skill-field or stat exists (ie. is not Nothing).
-            [ Skill.energyCost getStat skill |> Maybe.map (int >> (\c -> ( "Energy Cost", "", c )))
-            , Skill.manaCost getStat skill |> Maybe.map (int >> (\c -> ( "Mana Cost", "", c )))
-            , Skill.cooldown getStat skill |> Maybe.map (sec 1 >> (\c -> ( "Cooldown", "", c )))
-            , Skill.duration rules getStat skill |> Maybe.map (sec 1 >> (\c -> ( "Duration", "", c )))
-            , Skill.uptime rules getStat skill |> Maybe.map (pct >> (\c -> ( "Uptime", "Duration / cooldown. The amount of time this buff can be active. 100% means it's always active, if you can pay its mana cost.", c )))
-            , Skill.damage getStat skill |> Maybe.map (pct >> (\c -> ( "Damage", "", c )))
-            , Skill.stacks getStat skill |> Maybe.map (int >> (\c -> ( "Stacks", "", c )))
-            , Skill.effect getStat skill |> Maybe.map (pct >> (\c -> ( "Effect", "", c )))
+            [ Skill.energyCost getStat skill |> Result.map (int >> (\c -> ( "Energy Cost", "", c )))
+            , Skill.manaCost getStat skill |> Result.map (int >> (\c -> ( "Mana Cost", "", c )))
+            , Skill.cooldown getStat skill |> Result.map (sec 1 >> (\c -> ( "Cooldown", "", c )))
+            , Skill.duration rules getStat skill |> Result.map (sec 1 >> (\c -> ( "Duration", "", c )))
+            , Skill.uptime rules getStat skill |> Result.map (pct >> (\c -> ( "Uptime", "Duration / cooldown. The amount of time this buff can be active. 100% means it's always active, if you can pay its mana cost.", c )))
+            , Skill.damage getStat skill |> Result.map (pct >> (\c -> ( "Damage", "", c )))
+            , Skill.stacks getStat skill |> Result.map (int >> (\c -> ( "Stacks", "", c )))
+            , Skill.effect getStat skill |> Result.map (pct >> (\c -> ( "Effect", "", c )))
             ]
-                |> Maybe.Extra.values
+                |> List.filterMap Result.toMaybe
                 |> List.map
                     (\( label, tooltip, value ) ->
                         H.li [ A.class "stat-line", A.title tooltip ]
@@ -91,17 +92,19 @@ viewSkillSummary rules getStat skill =
         [ H.img [ A.class "skill-icon", A.src <| "./ch2data/img/skills/" ++ String.fromInt skill.iconId ++ ".png" ] [], H.b [] [ H.text skill.name ], H.ul [] lines ]
 
 
-viewStatsSummary : (GS.Stat -> GS.StatTotal) -> H.Html msg
+viewStatsSummary : (GS.Stat -> Result String GS.StatTotal) -> H.Html msg
 viewStatsSummary getStat =
     let
         toEntry ( label, statId, format ) =
-            let
-                stat =
-                    getStat statId
-            in
-            { label = label, level = stat.level, value = format stat }
+            getStat statId
+                |> Result.map (\stat -> { label = label, level = stat.level, value = format stat })
     in
-    H.table [ A.class "stats-summary" ] (statEntrySpecs |> List.map (toEntry >> viewStatEntry) |> Maybe.Extra.values)
+    H.table [ A.class "stats-summary" ]
+        (statEntrySpecs
+            |> List.map toEntry
+            |> List.filterMap Result.toMaybe
+            |> List.filterMap viewStatEntry
+        )
 
 
 type alias StatsEntrySpec =
