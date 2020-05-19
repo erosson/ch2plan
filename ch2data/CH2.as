@@ -84,6 +84,8 @@ package heroclickerlib
       
       public static const STAT_AUTOMATOR_SPEED:int = 30;
       
+      public static const STAT_AUTOATTACK_DAMAGE:int = 31;
+      
       public static var STATS:Array = new Array();
       
       public static const COMPARISON_LT:int = 0;
@@ -154,7 +156,7 @@ package heroclickerlib
             "description":"Increases your chance to score a critical hit by %s%.",
             "amountOnItems":0.02,
             "itemDamageBoost":0.2,
-            "appearsInAllItemSlots":true,
+            "appearsInAllItemSlots":false,
             "iconId":70,
             "calculationType":ADDITIVE,
             "formattingFunction":percentFormat,
@@ -274,6 +276,24 @@ package heroclickerlib
             "etherealSourceWeight":8,
             "etherealDestinationWeight":8
          };
+         STATS[STAT_AUTOATTACK_DAMAGE] = {
+            "id":STAT_AUTOATTACK_DAMAGE,
+            "displayName":"Auto Attack Damage",
+            "description":"Multiplies your auto attack damage by x%s.",
+            "amountOnItems":0.1,
+            "itemDamageBoost":0,
+            "appearsInAllItemSlots":true,
+            "iconId":8,
+            "calculationType":MULTIPLICATIVE,
+            "formattingFunction":percentFormat,
+            "canBeSourceOfEtherealStat":true,
+            "canBeDestinationOfEtherealStat":true,
+            "etherealSlots":[0,1,2,3,4,5,6,7],
+            "etherealTraitKey":"etherealAutoAttackDamage",
+            "sourceExchangeRateScaler":1,
+            "etherealSourceWeight":8,
+            "etherealDestinationWeight":8
+         };
          STATS[STAT_MONSTER_GOLD] = {
             "id":STAT_MONSTER_GOLD,
             "displayName":"Monster Gold",
@@ -366,11 +386,11 @@ package heroclickerlib
          };
          STATS[STAT_CLICKABLE_CHANCE] = {
             "id":STAT_CLICKABLE_CHANCE,
-            "displayName":"Gold Piles",
-            "description":"Increases number of gold piles found by %s.",
+            "displayName":"Clickable Chance",
+            "description":"Increases the chance of gaining extra floating gold clickables by %s",
             "amountOnItems":0.1,
             "itemDamageBoost":0.1,
-            "appearsInAllItemSlots":true,
+            "appearsInAllItemSlots":false,
             "iconId":1,
             "calculationType":ADDITIVE,
             "formattingFunction":percentFormat,
@@ -388,7 +408,7 @@ package heroclickerlib
             "description":"Increases your chance of finding bonus gold by %s.",
             "amountOnItems":0.01,
             "itemDamageBoost":0.2,
-            "appearsInAllItemSlots":true,
+            "appearsInAllItemSlots":false,
             "iconId":1,
             "calculationType":ADDITIVE,
             "formattingFunction":percentFormat,
@@ -737,6 +757,7 @@ package heroclickerlib
             }
             currentCharacter.onCharacterUnloaded();
             CH2AssetManager.instance.disposeCharacter();
+            game.doGameStateAction(IdleHeroMain.ACTION_PLAYER_SWITCHED_CHARACTERS);
          }
          if(world)
          {
@@ -762,10 +783,9 @@ package heroclickerlib
          if(currentCharacter.hasNeverStartedWorld)
          {
             currentCharacter.startWorld(DEFAULT_WORLD_ID);
-            currentCharacter.energy = currentCharacter.maxEnergy;
-            currentCharacter.mana = currentCharacter.maxMana;
+            currentCharacter.energy = currentCharacter.maxEnergy.numberValue();
+            currentCharacter.mana = currentCharacter.maxMana.numberValue();
          }
-         game.doGameStateAction(IdleHeroMain.ACTION_PLAYER_SWITCHED_CHARACTERS);
          currentCharacter.applyPurchasedNodes();
          if(currentCharacter != null)
          {

@@ -129,6 +129,8 @@ package heroclickerlib.managers
       
       public function getWorld1MonsterHealth(monster:Monster) : BigNumber
       {
+         var character:Character = null;
+         var excessKuma:Number = NaN;
          var monsterHealth:BigNumber = this.getCurvedMonsterHealth(monster.zoneSpawned);
          if(monster.isBoss)
          {
@@ -138,13 +140,19 @@ package heroclickerlib.managers
             }
             else
             {
-               monsterHealth.timesEqualsN(150);
+               monsterHealth.timesEqualsN(300);
             }
             monsterHealth = monsterHealth.divideN(CH2.currentCharacter.monsterHealthMultiplier);
          }
          else if(monster.isMiniBoss)
          {
-            monsterHealth.timesEqualsN(CH2.currentCharacter.monstersPerZone / 3);
+            character = CH2.currentCharacter;
+            monsterHealth.timesEqualsN(character.preKumaMonstersPerZone / 3);
+            if(character.consecutiveEasyBossesKilled > character.preKumaMonstersPerZone)
+            {
+               excessKuma = character.consecutiveEasyBossesKilled - character.preKumaMonstersPerZone;
+               monsterHealth.timesEqualsN(1 / (1 + 0.1 * excessKuma));
+            }
          }
          return monsterHealth;
       }
@@ -156,40 +164,58 @@ package heroclickerlib.managers
       
       public function monsterGoldFormula(monster:Monster) : BigNumber
       {
+         var excessKuma:Number = NaN;
+         var character:Character = CH2.currentCharacter;
          var totalGold:BigNumber = this.getWorld1MonsterHealth(monster);
-         totalGold = totalGold.multiplyN(CH2.currentCharacter.monsterGoldMultiplier);
-         if(CH2.currentCharacter.isIdle)
+         totalGold = totalGold.multiply(character.monsterGoldMultiplier);
+         if(character.isIdle)
          {
-            totalGold = totalGold.multiplyN(CH2.currentCharacter.idleMonsterGoldMultiplier);
+            totalGold = totalGold.multiply(character.idleMonsterGoldMultiplier);
          }
          if(monster.zoneSpawned < 5)
          {
             totalGold.timesEqualsN(0.3);
          }
          totalGold.timesEqualsN(0.1);
+         if(monster.isMiniBoss)
+         {
+            if(character.consecutiveEasyBossesKilled > character.preKumaMonstersPerZone)
+            {
+               excessKuma = character.consecutiveEasyBossesKilled - character.preKumaMonstersPerZone;
+               totalGold.timesEqualsN(1 + 0.1 * excessKuma);
+            }
+         }
          totalGold = totalGold.ceil();
          if(monster.isTreasureChest)
          {
             totalGold.timesEqualsN(5);
-            totalGold.timesEqualsN(CH2.currentCharacter.treasureChestGold);
+            totalGold.timesEquals(character.treasureChestGold);
+            if(character.treasureChestsAreMonsters)
+            {
+               totalGold.timesEquals(character.monsterGold);
+            }
+            if(character.treasureChestsHaveClickableGold)
+            {
+               totalGold.timesEquals(character.clickableGold);
+            }
          }
          else
          {
-            totalGold.timesEqualsN(CH2.currentCharacter.monsterGold);
+            totalGold.timesEquals(character.monsterGold);
          }
          if(monster.isBoss)
          {
             totalGold.timesEqualsN(0.1);
          }
-         if(CH2.currentCharacter.zoneMetalDetectorActive)
+         if(character.zoneMetalDetectorActive)
          {
             totalGold.timesEqualsN(Character.METAL_DETECTOR_GOLD_BONUS);
          }
-         if(CH2.currentCharacter.timeMetalDetectorActive)
+         if(character.timeMetalDetectorActive)
          {
             totalGold.timesEqualsN(Character.METAL_DETECTOR_GOLD_BONUS);
          }
-         if(CH2.roller.miscRoller.boolean(CH2.currentCharacter.bonusGoldChance))
+         if(monster.bonusGoldRandomThresholdValue < character.bonusGoldChance.numberValue())
          {
             totalGold = totalGold.multiplyN(BONUS_GOLD_MULTIPLIER);
          }
@@ -337,7 +363,7 @@ package heroclickerlib.managers
       
       public function getMonsterExperienceForWorld(worldId:int) : BigNumber
       {
-         var result:BigNumber = CH2.currentCharacter.worlds.getWorld(worldId).experienceMultiplier.multiplyN(150).divideN(CH2.currentCharacter.monstersPerZone).multiplyN(Math.pow(0.984274,CH2.currentCharacter.runsCompletedPerWorld[worldId]));
+         var result:BigNumber = CH2.currentCharacter.worlds.getWorld(worldId).experienceMultiplier.multiplyN(150).divideN(CH2.currentCharacter.preKumaMonstersPerZone).multiplyN(Math.pow(0.984274,CH2.currentCharacter.runsCompletedPerWorld[worldId]));
          if(CH2.currentCharacter.runsCompletedPerWorld[worldId] >= 7)
          {
             result.timesEqualsN(0.05);
@@ -357,20 +383,20 @@ package heroclickerlib.managers
          {
             if(_loc3_ <= param1.level)
             {
-               _loc6_ = this.getGildDifficulty(CH2.currentCharacter.gilds);
+               _loc6_ = _loc2_.getStarSystem(_loc2_.worlds.getWorld(_loc4_).starSystemId).getDifficulty();
                _loc7_ = 1 / Math.pow(_loc6_,0.2);
                _loc5_.timesEqualsN(Math.pow(_loc7_,_loc3_ - param1.level));
                if(param1.level > _loc3_)
                {
-                  _loc5_.timesEqualsN(param1.level + 1 - _loc3_);
+                  _loc5_.timesEqualsN(1 + (param1.level + 1 - _loc3_) * 0.05);
                }
             }
             else
             {
-               _loc6_ = this.getGildDifficulty(CH2.currentCharacter.gilds);
+               _loc6_ = _loc2_.getStarSystem(_loc2_.worlds.getWorld(_loc4_).starSystemId).getDifficulty();
                _loc7_ = 1 / Math.pow(_loc6_,0.2);
                _loc5_.timesEqualsN(Math.pow(_loc7_,_loc3_ - param1.level));
-               _loc5_.timesEqualsN(1 / (_loc3_ + 1 - param1.level));
+               _loc5_.timesEqualsN(1 / (1 + (_loc3_ + 1 - param1.level) * 0.05));
             }
          }
          if(param1.isBoss)
@@ -379,7 +405,7 @@ package heroclickerlib.managers
          }
          else
          {
-            _loc5_.timesEqualsN(50 / _loc2_.monstersPerZone);
+            _loc5_.timesEqualsN(50 / _loc2_.preKumaMonstersPerZone);
          }
          return _loc5_;
       }
@@ -399,37 +425,42 @@ package heroclickerlib.managers
          return points;
       }
       
-      public function getGildDifficulty(gildNumber:Number) : Number
-      {
-         return Math.pow(1.1,gildNumber) * 13;
-      }
-      
       public function getWorldDifficulty(worldNumber:Number) : BigNumber
       {
-         var currentGild:Number = NaN;
+         var currentSystem:Number = NaN;
          var currentGrowthRate:Number = NaN;
          var i:int = 0;
+         var character:Character = CH2.currentCharacter;
          if(worldNumber == 1)
          {
             return new BigNumber(1);
          }
-         var gildNumber:Number = Math.floor(worldNumber / CH2.currentCharacter.worldsPerGild);
-         var difficultyScale:BigNumber = new BigNumber(150);
+         var gildNumber:Number = Math.floor(worldNumber / CH2.currentCharacter.worldsPerSystem);
+         var difficultyScale:BigNumber = new BigNumber(1.2);
          if(worldNumber > 2)
          {
-            currentGild = 0;
-            currentGrowthRate = this.getGildDifficulty(0);
+            currentSystem = 1;
+            currentGrowthRate = character.getStarSystem(currentSystem).getDifficulty();
             for(i = 3; i <= worldNumber; i++)
             {
-               if(i % CH2.currentCharacter.worldsPerGild == 1)
+               if(i % character.worldsPerSystem == 1)
                {
-                  currentGild++;
-                  currentGrowthRate = this.getGildDifficulty(currentGild);
+                  currentSystem++;
+                  currentGrowthRate = character.getStarSystem(currentSystem).getDifficulty();
                }
                difficultyScale.timesEqualsN(currentGrowthRate);
             }
          }
          return difficultyScale;
+      }
+      
+      public function getHeroSoulsForSystem(systemId:int) : BigNumber
+      {
+         var result:BigNumber = new BigNumber(1.15);
+         result = result.pow(systemId);
+         result.timesEqualsN(5 * systemId);
+         result = result.ceil();
+         return result;
       }
       
       public function getStatPointsEarnedAtLevel(level:Number) : BigNumber
