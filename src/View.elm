@@ -6,6 +6,7 @@ import GameData as G
 import Html as H
 import Html.Attributes as A
 import Html.Events as E
+import Maybe.Extra
 import Model as M
 import Route as Route exposing (Route)
 import View.Changelog
@@ -26,7 +27,7 @@ viewBody model =
         header =
             [ H.h2 [] [ H.text "Clicker Heroes 2 Skill Tree Planner" ]
             , H.nav []
-                (viewCharacterNav (gameVersion model)
+                (Maybe.Extra.unwrap [] viewCharacterNav (gameVersion model)
                     ++ [ viewNavEntry "Changelog" Route.Changelog
                        , H.a [ A.href "https://github.com/erosson/ch2plan", A.target "_blank" ] [ H.text "Source code" ]
                        ]
@@ -34,39 +35,38 @@ viewBody model =
             ]
     in
     case model.route of
-        Route.Home home ->
-            case model.graph of
-                Nothing ->
-                    H.div [] (header ++ [ H.text "404" ])
-
-                Just graph ->
-                    View.SkillTree.view header model graph
-
-        Route.NotFound ->
+        Nothing ->
             H.div [] (header ++ [ H.text "404" ])
 
-        Route.Changelog ->
-            H.div [] (header ++ [ View.Changelog.view model.changelog ])
+        Just route ->
+            case route of
+                Route.Redirect _ ->
+                    H.div [] [ H.text "loading..." ]
 
-        Route.LegacyHome _ ->
-            H.div [] [ H.text "loading..." ]
+                Route.Home home ->
+                    case model.graph of
+                        Nothing ->
+                            H.div [] (header ++ [ H.text "404" ])
 
-        Route.Root _ ->
-            H.div [] [ H.text "loading..." ]
+                        Just graph ->
+                            View.SkillTree.view header model graph
 
-        Route.Stats params ->
-            H.div [] (header ++ [ View.Stats.view model params ])
+                Route.Changelog ->
+                    H.div [] (header ++ [ View.Changelog.view model.changelog ])
 
-        Route.StatsTSV params ->
-            View.Spreadsheet.view model params
+                Route.Stats params ->
+                    H.div [] (header ++ [ View.Stats.view model params ])
 
-        Route.EthItems ->
-            H.div [] (header ++ [ View.EthItems.view model ])
+                Route.StatsTSV params ->
+                    View.Spreadsheet.view model params
+
+                Route.EthItems ->
+                    H.div [] (header ++ [ View.EthItems.view model ])
 
 
-gameVersion : M.Model -> G.GameVersionData
+gameVersion : M.Model -> Maybe G.GameVersionData
 gameVersion model =
-    model.graph |> Maybe.map .game |> Maybe.withDefault (G.latestVersion model.gameData)
+    model.graph |> Maybe.map .game |> Maybe.Extra.orElse (G.latestVersion model.gameData)
 
 
 viewCharacterNav : G.GameVersionData -> List (H.Html msg)

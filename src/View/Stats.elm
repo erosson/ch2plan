@@ -94,21 +94,18 @@ viewSkillSummary rules getStat skill =
 viewStatsSummary : (GS.Stat -> GS.StatTotal) -> H.Html msg
 viewStatsSummary getStat =
     let
-        toEntry ( label, statIds, format ) =
+        toEntry ( label, statId, format ) =
             let
-                stats =
-                    statIds |> List.map getStat
-
-                level =
-                    (stats |> List.map .level |> List.sum) // max 1 (List.length stats)
+                stat =
+                    getStat statId
             in
-            { label = label, level = level, value = format stats }
+            { label = label, level = stat.level, value = format stat }
     in
     H.table [ A.class "stats-summary" ] (statEntrySpecs |> List.map (toEntry >> viewStatEntry) |> Maybe.Extra.values)
 
 
 type alias StatsEntrySpec =
-    ( String, List GS.Stat, List GS.StatTotal -> Maybe String )
+    ( String, GS.Stat, GS.StatTotal -> Maybe String )
 
 
 statEntrySpecs : List StatsEntrySpec
@@ -117,76 +114,56 @@ statEntrySpecs =
     --
     -- autoattack damage
     -- click damage
-    [ ( "Click Damage Multiplier", [ STAT_CLICK_DAMAGE ], entryPct ) -- not actually in the stats screen, only flat click damage
-    , ( "Autoattack Damage Multiplier", [ STAT_AUTOATTACK_DAMAGE ], entryPct )
-    , ( "Attack Delay", [ STAT_HASTE ], entrySec 600 )
+    [ ( "Click Damage Multiplier", STAT_CLICK_DAMAGE, entryPct ) -- not actually in the stats screen, only flat click damage
+    , ( "Autoattack Damage Multiplier", STAT_AUTOATTACK_DAMAGE, entryPct )
+    , ( "Attack Delay", STAT_HASTE, entrySec 600 )
 
     -- damage multiplier from level
     -- energy from auto attacks - currently a constant, not useful here
-    , ( "Global Cooldown Time", [ STAT_HASTE ], entrySec 2000 ) -- TODO that one keystone for <1 sec
-    , ( "Automator Speed", [ STAT_AUTOMATOR_SPEED ], entryPct )
-    , ( "Critical Chance", [ STAT_CRIT_CHANCE ], entryPct )
-    , ( "Critical Damage Multiplier", [ STAT_CRIT_DAMAGE ], entryPct )
-    , ( "Haste", [ STAT_HASTE ], entryPct )
-    , ( "Maximum Energy", [ STAT_TOTAL_ENERGY ], entryInt )
-    , ( "Maximum Mana", [ STAT_TOTAL_MANA ], entryInt )
-    , ( "Mana Regeneration", [ GS.STAT_MANA_REGEN ], entryPct )
-    , ( "Run Speed", [ GS.STAT_MOVEMENT_SPEED ], entryPct ) -- currently a constant
-    , ( "Gold from All Sources", [ STAT_GOLD ], entryPct )
-    , ( "Bonus Gold Chance (×10)", [ STAT_BONUS_GOLD_CHANCE ], entryPct ) -- the multiplier is datamined from heroclickerlib/managers/Formulas.as
-    , ( "Boss Gold", [ STAT_BOSS_GOLD ], entryPct )
-    , ( "Clickable Find Chance", [ STAT_CLICKABLE_CHANCE ], entryPct ) -- not in total stats; skill-tree-stats only
-    , ( "Clickable Gold Multiplier", [ STAT_CLICKABLE_GOLD ], entryPct ) -- not in total stats; skill-tree-stats only
-    , ( "Treasure Chest Chance", [ STAT_TREASURE_CHEST_CHANCE ], entryPct )
-    , ( "Treasure Chest Gold", [ STAT_TREASURE_CHEST_GOLD ], entryPct )
-    , ( "Item Cost Reduction", [ STAT_ITEM_COST_REDUCTION ], entryPct )
+    , ( "Global Cooldown Time", STAT_HASTE, entrySec 2000 ) -- TODO that one keystone for <1 sec
+    , ( "Automator Speed", STAT_AUTOMATOR_SPEED, entryPct )
+    , ( "Critical Chance", STAT_CRIT_CHANCE, entryPct )
+    , ( "Critical Damage Multiplier", STAT_CRIT_DAMAGE, entryPct )
+    , ( "Haste", STAT_HASTE, entryPct )
+    , ( "Maximum Energy", STAT_TOTAL_ENERGY, entryInt )
+    , ( "Maximum Mana", STAT_TOTAL_MANA, entryInt )
+    , ( "Mana Regeneration", GS.STAT_MANA_REGEN, entryPct )
+    , ( "Run Speed", GS.STAT_MOVEMENT_SPEED, entryPct ) -- currently a constant
+    , ( "Gold from All Sources", STAT_GOLD, entryPct )
+    , ( "Bonus Gold Chance (×10)", STAT_BONUS_GOLD_CHANCE, entryPct ) -- the multiplier is datamined from heroclickerlib/managers/Formulas.as
+    , ( "Boss Gold", STAT_BOSS_GOLD, entryPct )
+    , ( "Clickable Find Chance", STAT_CLICKABLE_CHANCE, entryPct ) -- not in total stats; skill-tree-stats only
+    , ( "Clickable Gold Multiplier", STAT_CLICKABLE_GOLD, entryPct ) -- not in total stats; skill-tree-stats only
+    , ( "Treasure Chest Chance", STAT_TREASURE_CHEST_CHANCE, entryPct )
+    , ( "Treasure Chest Gold", STAT_TREASURE_CHEST_GOLD, entryPct )
+    , ( "Item Cost Reduction", STAT_ITEM_COST_REDUCTION, entryPct )
 
     -- ancient shards (not in tree-stats; total-stats only)
-    , ( "Weapon Damage", [ STAT_ITEM_WEAPON_DAMAGE ], entryPct )
-    , ( "Helm Damage", [ STAT_ITEM_HEAD_DAMAGE ], entryPct )
-    , ( "Chest Damage", [ STAT_ITEM_CHEST_DAMAGE ], entryPct )
-    , ( "Ring Damage", [ STAT_ITEM_RING_DAMAGE ], entryPct )
-    , ( "Legging Damage", [ STAT_ITEM_LEGS_DAMAGE ], entryPct )
-    , ( "Gloves Damage", [ STAT_ITEM_HANDS_DAMAGE ], entryPct )
-    , ( "Boots Damage", [ STAT_ITEM_FEET_DAMAGE ], entryPct )
-    , ( "Cape Damage", [ STAT_ITEM_BACK_DAMAGE ], entryPct )
+    , ( "Weapon Damage", STAT_ITEM_WEAPON_DAMAGE, entryPct )
+    , ( "Helm Damage", STAT_ITEM_HEAD_DAMAGE, entryPct )
+    , ( "Chest Damage", STAT_ITEM_CHEST_DAMAGE, entryPct )
+    , ( "Ring Damage", STAT_ITEM_RING_DAMAGE, entryPct )
+    , ( "Legging Damage", STAT_ITEM_LEGS_DAMAGE, entryPct )
+    , ( "Gloves Damage", STAT_ITEM_HANDS_DAMAGE, entryPct )
+    , ( "Boots Damage", STAT_ITEM_FEET_DAMAGE, entryPct )
+    , ( "Cape Damage", STAT_ITEM_BACK_DAMAGE, entryPct )
     ]
 
 
-stat1 : List GS.StatTotal -> GS.StatTotal
-stat1 stats =
-    case stats of
-        [ a ] ->
-            a
-
-        _ ->
-            Debug.todo "expected 1 stat" stats
+entryPct stat =
+    Just <| pct stat.val
 
 
-stat2 : List GS.StatTotal -> ( GS.StatTotal, GS.StatTotal )
-stat2 stats =
-    case stats of
-        [ a, b ] ->
-            ( a, b )
-
-        _ ->
-            Debug.todo "expected 2 stats" stats
+entryFloat stat =
+    Just <| float 3 stat.val
 
 
-entryPct =
-    stat1 >> (\stat -> Just <| pct stat.val)
+entrySec base stat =
+    Just <| sec 1 <| base / 1000 / stat.val
 
 
-entryFloat =
-    stat1 >> (\stat -> Just <| float 3 stat.val)
-
-
-entrySec base =
-    stat1 >> (\stat -> Just <| sec 1 <| base / 1000 / stat.val)
-
-
-entryInt =
-    stat1 >> (\stat -> Just <| int stat.val)
+entryInt stat =
+    Just <| int stat.val
 
 
 viewStatEntry : { label : String, level : Int, value : Maybe String } -> Maybe (H.Html msg)

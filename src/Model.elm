@@ -67,7 +67,7 @@ type alias Model =
     { urlKey : Nav.Key
     , changelog : String
     , gameData : G.GameData
-    , route : Route
+    , route : Maybe Route
     , graph : Maybe Graph.GraphModel
     , features : Features
     , windowSize : WindowSize
@@ -118,7 +118,7 @@ init flags loc urlKey =
                     Route.parse loc
 
                 search =
-                    Route.params route |> Maybe.Extra.unwrap Nothing .search
+                    route |> Maybe.andThen Route.params |> Maybe.andThen .search
 
                 ( graph, error ) =
                     parseGraph gameData route
@@ -162,11 +162,12 @@ init flags loc urlKey =
             Debug.todo (Debug.toString err)
 
 
-parseGraph : G.GameData -> Route -> ( Maybe GraphModel, Maybe Error )
+parseGraph : G.GameData -> Maybe Route -> ( Maybe GraphModel, Maybe Error )
 parseGraph gameData route =
     let
         graphResult =
-            Route.params route
+            route
+                |> Maybe.andThen Route.params
                 |> Result.fromMaybe "cannot graph this url"
                 |> Result.andThen (Graph.parse gameData)
     in
@@ -223,7 +224,7 @@ updateNode id model =
                     graph_
 
         params =
-            case Route.params model.route of
+            case model.route |> Maybe.andThen Route.params of
                 Nothing ->
                     Debug.todo "can't updateNode without route params"
 
@@ -279,14 +280,12 @@ update msg model =
         SearchNav from to ->
             if model.searchPrev == from then
                 case model.route of
-                    Route.Home params ->
+                    Just (Route.Home params) ->
                         let
                             searchRegex =
                                 to
                                     |> Maybe.andThen
-                                        (Debug.log "search"
-                                            >> Regex.fromStringWith { caseInsensitive = True, multiline = True }
-                                        )
+                                        (Regex.fromStringWith { caseInsensitive = True, multiline = True })
 
                             error =
                                 case ( to, searchRegex ) of
@@ -424,40 +423,44 @@ update msg model =
                     )
 
                 Ok data ->
-                    let
-                        _ =
-                            Debug.log "SaveFileImport" data
+                    case model.graph |> Maybe.map .game |> Maybe.Extra.orElse (G.latestVersion model.gameData) of
+                        Nothing ->
+                            ( { model
+                                | etherealItemInventory = Nothing
+                                , error = "unknown saved game version" |> SaveImportError |> Just
+                              }
+                            , Cmd.none
+                            )
 
-                        game =
-                            model.graph |> Maybe.map .game |> Maybe.withDefault (G.latestVersion model.gameData)
+                        Just game ->
+                            let
+                                saveHero =
+                                    Dict.Extra.find (\k v -> v.name == data.hero) game.heroes
 
-                        saveHero =
-                            Dict.Extra.find (\k v -> v.name == data.hero) game.heroes
+                                saveBuild =
+                                    String.join "&" data.build
 
-                        saveBuild =
-                            String.join "&" data.build
+                                cmd =
+                                    case saveHero of
+                                        Just hero ->
+                                            Route.Home
+                                                { version = game.versionSlug
+                                                , search = model.searchString
+                                                , hero = Tuple.first hero
+                                                , build = Just saveBuild
+                                                }
+                                                |> Route.stringify
+                                                |> Nav.pushUrl model.urlKey
 
-                        cmd =
-                            case saveHero of
-                                Just hero ->
-                                    Route.Home
-                                        { version = game.versionSlug
-                                        , search = model.searchString
-                                        , hero = Tuple.first hero
-                                        , build = Just saveBuild
-                                        }
-                                        |> Route.stringify
-                                        |> Nav.pushUrl model.urlKey
-
-                                _ ->
-                                    Cmd.none
-                    in
-                    ( { model
-                        | etherealItemInventory = Just data.etherealItemInventory
-                        , error = Nothing
-                      }
-                    , cmd
-                    )
+                                        _ ->
+                                            Cmd.none
+                            in
+                            ( { model
+                                | etherealItemInventory = Just data.etherealItemInventory
+                                , error = Nothing
+                              }
+                            , cmd
+                            )
 
         NavRequest req ->
             -- https://package.elm-lang.org/packages/elm/browser/latest/Browser#UrlRequest
@@ -522,24 +525,24 @@ clampZoom window graph =
     clamp minZoom 3
 
 
-redirect : G.GameData -> Route -> Maybe Route
-redirect gameData route =
+redirectRoute : G.GameData -> Route -> Maybe Route
+redirectRoute gameData route =
     case route of
-        Route.Root params ->
-            Just <| Route.Home <| Route.fromLegacyParams (G.latestVersionId gameData) params
-
-        Route.LegacyHome params ->
-            -- legacy urls are assigned a legacy version
-            Just <| Route.Home <| Route.fromLegacyParams "0.052-beta" params
+        Route.Redirect r ->
+            redirectRoute gameData r |> Maybe.withDefault r |> Just
 
         _ ->
             Nothing
 
 
-redirectCmd : Nav.Key -> G.GameData -> Route -> Cmd Msg
+redirectCmd : Nav.Key -> G.GameData -> Maybe Route -> Cmd Msg
 redirectCmd urlKey gameData route =
-    redirect gameData route
-        |> Maybe.Extra.unwrap Cmd.none (Route.stringify >> Nav.replaceUrl urlKey)
+    case route |> Maybe.andThen (redirectRoute gameData) of
+        Nothing ->
+            Cmd.none
+
+        Just r ->
+            r |> Route.stringify |> Nav.replaceUrl urlKey
 
 
 zoom : Model -> GraphModel -> Float

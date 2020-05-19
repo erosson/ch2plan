@@ -20,7 +20,7 @@ view : List (H.Html M.Msg) -> M.Model -> MG.GraphModel -> H.Html M.Msg
 view header model graph =
     let
         params =
-            case Route.params model.route of
+            case model.route |> Maybe.andThen Route.params of
                 Nothing ->
                     Debug.todo "viewing skilltree without a skilltree url?"
 
@@ -56,7 +56,7 @@ view header model graph =
 
 
 ver =
-    { live = "0.12.0-r457"
+    { live = Route.liveVersion
     , ptr = ""
     }
 
@@ -155,11 +155,6 @@ viewSearch model version =
                 []
             )
         ]
-
-
-viewNodeType : String -> G.NodeType -> H.Html msg
-viewNodeType key nodetype =
-    H.text <| key ++ ": " ++ G.nodeTypeToString nodetype
 
 
 dumpModel : M.Model -> H.Html msg

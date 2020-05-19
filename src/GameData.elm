@@ -19,7 +19,6 @@ module GameData exposing
     , latestVersion
     , latestVersionId
     , neighbors
-    , nodeTypeToString
     , qualityToString
     , startNodes
     , tooltip
@@ -130,24 +129,17 @@ type alias Edge =
     ( Node, Node )
 
 
-latestVersionId : GameData -> String
+latestVersionId : GameData -> Maybe String
 latestVersionId g =
-    case g.versionList |> List.filter (Regex.contains (Regex.fromString "PTR|\\(e\\)" |> Maybe.withDefault Regex.never) >> not) |> List.reverse |> List.head of
-        Nothing ->
-            Debug.todo "no game version data, no tree-planner"
-
-        Just v ->
-            v
+    g.versionList
+        |> List.filter (Regex.contains (Regex.fromString "PTR|\\(e\\)" |> Maybe.withDefault Regex.never) >> not)
+        |> List.reverse
+        |> List.head
 
 
-latestVersion : GameData -> GameVersionData
+latestVersion : GameData -> Maybe GameVersionData
 latestVersion g =
-    case Dict.get (latestVersionId g) g.byVersion of
-        Nothing ->
-            Debug.todo "game version in versionList not in byVersion"
-
-        Just s ->
-            s
+    latestVersionId g |> Maybe.andThen (\v -> Dict.get v g.byVersion)
 
 
 decoder : D.Decoder GameData
@@ -448,10 +440,13 @@ graphWidth g =
 
 
 qualityToString : NodeQuality -> String
-qualityToString =
-    Debug.toString
+qualityToString q =
+    case q of
+        Plain ->
+            "Plain"
 
+        Notable ->
+            "Notable"
 
-nodeTypeToString : NodeType -> String
-nodeTypeToString =
-    Debug.toString
+        Keystone ->
+            "Keystone"

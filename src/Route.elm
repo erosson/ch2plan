@@ -1,13 +1,13 @@
 module Route exposing
     ( Features
     , HomeParams
-    , LegacyHomeParams
     , Route(..)
     , defaultParams
     , flagParam
-    , fromLegacyParams
     , href
     , ifFeature
+    , legacyVersion
+    , liveVersion
     , params
     , parse
     , parseFeatures
@@ -33,25 +33,27 @@ type alias HomeParams =
     }
 
 
-type alias LegacyHomeParams =
-    { hero : String
-    , build : Maybe String
-    , search : Maybe String
-    }
+legacyVersion : String
+legacyVersion =
+    "0.052-beta"
 
 
-fromLegacyParams : String -> LegacyHomeParams -> HomeParams
-fromLegacyParams version args =
-    { version = version
-    , hero = args.hero
-    , build = args.build
-    , search = args.search
-    }
+liveVersion : String
+liveVersion =
+    "0.12.0-r457"
+
+
+defaultHero =
+    "helpfulAdventurer"
 
 
 defaultParams : String -> HomeParams
 defaultParams version =
-    fromLegacyParams version homeParams0
+    { version = version
+    , hero = defaultHero
+    , build = Nothing
+    , search = Nothing
+    }
 
 
 params : Route -> Maybe HomeParams
@@ -70,23 +72,13 @@ params route =
             Nothing
 
 
-homeParams0 : LegacyHomeParams
-homeParams0 =
-    { hero = "helpfulAdventurer"
-    , build = Nothing
-    , search = Nothing
-    }
-
-
 type Route
     = Home HomeParams
     | Stats HomeParams
     | StatsTSV HomeParams
     | EthItems
     | Changelog
-    | NotFound
-    | Root LegacyHomeParams
-    | LegacyHome LegacyHomeParams
+    | Redirect Route
 
 
 type alias Features =
@@ -100,12 +92,9 @@ features0 =
     {}
 
 
-parse : Url -> Route
+parse : Url -> Maybe Route
 parse =
-    hashUrl
-        >> P.parse parser
-        >> Maybe.withDefault NotFound
-        >> Debug.log "navigate to"
+    hashUrl >> P.parse parser
 
 
 hashUrl : Url -> Url
@@ -150,19 +139,21 @@ parser : P.Parser (Route -> a) a
 parser =
     P.oneOf
         -- the skilltree has a few different urls. Root, "/"...
-        [ P.map Root <| P.map (LegacyHomeParams homeParams0.hero Nothing) <| homeQS <| P.top
+        [ P.map Redirect <| P.map Home <| P.map (HomeParams liveVersion defaultHero Nothing) <| homeQS <| P.top
 
         -- an old legacy build, back when we only supported Cid: "/b/1&2&3&4&5"
-        , P.map LegacyHome <| P.map (LegacyHomeParams homeParams0.hero) <| homeQS <| P.s "b" </> maybeString
+        , P.map Redirect <| P.map Home <| P.map (HomeParams legacyVersion defaultHero) <| homeQS <| P.s "b" </> maybeString
 
         -- an old/legacy empty versionless build: "/h/helpfulAdventurer"...
-        , P.map LegacyHome <| P.map (\h -> LegacyHomeParams h Nothing) <| homeQS <| P.s "h" </> P.string
+        , P.map Redirect <| P.map Home <| P.map (\h -> HomeParams legacyVersion h Nothing) <| homeQS <| P.s "h" </> P.string
 
-        -- a non-empty versionless build: "/h/helpfulAdventurer/1&2&3&4&5"...
-        , P.map LegacyHome <| P.map LegacyHomeParams <| homeQS <| P.s "h" </> P.string </> maybeString
+        -- a legacy non-empty versionless build: "/h/helpfulAdventurer/1&2&3&4&5"...
+        , P.map Redirect <| P.map Home <| P.map (HomeParams legacyVersion) <| homeQS <| P.s "h" </> P.string </> maybeString
+
+        -- convenience redirect from a heroless url: "/g/0.12.0"
+        , P.map Redirect <| P.map Home <| P.map (\v -> HomeParams v defaultHero Nothing) <| homeQS <| P.s "g" </> encodedString
 
         -- a modern versioned url, no build
-        , P.map Home <| P.map (\v -> HomeParams v homeParams0.hero Nothing) <| homeQS <| P.s "g" </> encodedString
         , P.map Home <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "g" </> encodedString </> P.string
 
         -- a modern versioned url, with build
@@ -210,7 +201,6 @@ parseFeatures =
         >> (\url -> { url | path = "", fragment = Nothing })
         >> P.parse featuresParser
         >> Maybe.withDefault features0
-        >> Debug.log "feature-flags: "
 
 
 featuresParser : P.Parser (Features -> a) a
@@ -272,11 +262,8 @@ stringify route =
         EthItems ->
             "#/ethitems"
 
-        NotFound ->
-            Debug.todo "why are you stringifying Route.NotFound?"
-
-        _ ->
-            Debug.todo "I refuse to stringify legacy urls" route
+        Redirect r ->
+            stringify r
 
 
 href : Route -> H.Attribute msg

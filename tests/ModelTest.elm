@@ -19,24 +19,24 @@ suite =
                 Expect.equal (Just "foo")
                     ({ loc | fragment = Just "/g/vTest/helpfulAdventurer?q=foo" }
                         |> Route.parse
-                        |> Route.params
-                        |> Maybe.Extra.unwrap Nothing .search
+                        |> Maybe.andThen Route.params
+                        |> Maybe.andThen .search
                     )
         , test "no search" <|
             \_ ->
                 Expect.equal Nothing
                     ({ loc | fragment = Just "/g/vTest/helpfulAdventurer" }
                         |> Route.parse
-                        |> Route.params
-                        |> Maybe.Extra.unwrap Nothing .search
+                        |> Maybe.andThen Route.params
+                        |> Maybe.andThen .search
                     )
         , test "invalid search" <|
             \_ ->
                 Expect.equal (Just "(")
                     ({ loc | fragment = Just "/g/vTest/helpfulAdventurer?q=(" }
                         |> Route.parse
-                        |> Route.params
-                        |> Maybe.Extra.unwrap Nothing .search
+                        |> Maybe.andThen Route.params
+                        |> Maybe.andThen .search
                     )
         ]
 

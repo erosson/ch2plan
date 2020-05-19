@@ -61,11 +61,18 @@ view model graph =
         )
 
 
+debug : String -> ()
+debug s =
+    -- Uncomment this to diagnose redraw/lag problems
+    -- Debug.log s ()
+    ()
+
+
 viewNodeBackgrounds : MG.GraphModel -> S.Svg msg
 viewNodeBackgrounds home =
     let
         _ =
-            Debug.log "redraw backgrounds" ()
+            debug "redraw backgrounds"
     in
     home.char.graph.nodes |> Dict.toList |> List.map (viewNodeBackground home << Tuple.second) |> S.g []
 
@@ -74,7 +81,7 @@ viewNodes : Route.Features -> MG.GraphModel -> S.Svg M.Msg
 viewNodes features home =
     let
         _ =
-            Debug.log "redraw nodes" ()
+            debug "redraw nodes"
     in
     home.char.graph.nodes |> Dict.toList |> List.map (viewNode features home << Tuple.second) |> S.g []
 
@@ -83,7 +90,7 @@ viewEdges : Bool -> MG.GraphModel -> S.Svg msg
 viewEdges selected home =
     let
         _ =
-            Debug.log "redraw edges" ()
+            debug "redraw edges"
 
         ( edges, classes ) =
             if selected then
