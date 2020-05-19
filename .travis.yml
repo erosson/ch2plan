@@ -15,7 +15,7 @@ addons:
 # https://8thlight.com/blog/rob-looby/2016/04/07/caching-elm-builds-on-travis-ci.html
 cache:
   directories:
-    - elm-stuff/build-artifacts
+    - www/elm-stuff/build-artifacts
     - node_modules/
     - sysconfcpus/
 
@@ -50,7 +50,7 @@ deploy:
     secret_access_key: $AWS_SECRET_ACCESS_KEY
     bucket: ch2.erosson.org
     region: us-east-1
-    local_dir: dist/
+    local_dir: www/dist/
     on:
       branch: master
 after_deploy:
