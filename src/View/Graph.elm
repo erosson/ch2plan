@@ -326,7 +326,40 @@ nodeBGSize =
 
 iconUrl : G.NodeType -> String
 iconUrl node =
-    "./ch2data/img/" ++ Maybe.withDefault "404" node.icon ++ ".png"
+    let
+        notfound =
+            "./ch2data/404.png"
+    in
+    case node.icon of
+        Nothing ->
+            notfound
+
+        Just icon ->
+            if Set.member icon missingIcons then
+                notfound
+
+            else
+                "./ch2data/img/" ++ icon ++ ".png"
+
+
+missingIcons : Set String
+missingIcons =
+    -- We can't easily export new skill tree icons anymore: for an explanation,
+    -- see `./scripts/export/icons`. New icons are simply missing.
+    -- As a crude workaround, list known new-icons and replace them with a
+    -- better not-found image.
+    -- (I wish I could write an `alt` tag with html instead of text instead)
+    Set.fromList
+        [ ""
+        , "autoAttack"
+        , "playIcon"
+        , "pauseIcon"
+        , "MgtEIcon"
+        , "EgtMIcon"
+        , "firstMonsterIcon"
+        , "NMgt90Icon"
+        , "NMlt90Icon"
+        ]
 
 
 viewNodeBackground : MG.GraphModel -> G.Node -> S.Svg msg
