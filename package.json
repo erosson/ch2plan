@@ -10,7 +10,6 @@
     "tf:plan": "terraform plan",
     "tf:apply": "terraform apply -auto-approve",
     "export:icons": "scripty",
-    "export:chars": "scripty",
     "export:postchars": "scripty assets/ch2data/chars/latest.json",
     "export:as3": "scripty",
     "//dev": "All this `bash -xc '... && true '` boilerplate makes things work on windows, with git-for-windows bash installed. I'm not a real windows dev, sorry - happy to take nicer pull requests here",
