@@ -24,13 +24,13 @@ module GameData exposing
     , tooltip
     )
 
-import Dict as Dict exposing (Dict)
-import GameData.Stats as GS
+import Dict exposing (Dict)
+import GameData.Stats as Stats exposing (Stat, StatTotal, Stats)
 import Json.Decode as D
 import Json.Decode.Pipeline as P
 import Maybe.Extra
-import Regex as Regex exposing (Regex)
-import Set as Set exposing (Set)
+import Regex exposing (Regex)
+import Set exposing (Set)
 
 
 type alias GameData =
@@ -41,7 +41,7 @@ type alias GameData =
 
 type alias GameVersionData =
     { versionSlug : String
-    , stats : GS.Stats
+    , stats : Stats
     , heroes : Dict String Character
     }
 
@@ -91,7 +91,7 @@ type alias NodeType =
     , flavorText : Maybe String
     , alwaysAvailable : Bool
     , flammable : Bool
-    , stats : List ( GS.Stat, Int )
+    , stats : List ( Stat, Int )
     , quality : NodeQuality
     }
 
@@ -152,7 +152,7 @@ decoder =
 gameVersionDecoder : D.Decoder GameVersionData
 gameVersionDecoder =
     let
-        decoder_ : ( GS.Stats, Dict String Skill ) -> D.Decoder GameVersionData
+        decoder_ : ( Stats, Dict String Skill ) -> D.Decoder GameVersionData
         decoder_ ( stats, skills ) =
             D.succeed GameVersionData
                 |> P.required "versionSlug" D.string
@@ -160,7 +160,7 @@ gameVersionDecoder =
                 |> P.required "heroes" (heroesDecoder stats skills)
     in
     D.map2 (\a b -> ( a, b ))
-        (D.field "stats" GS.decoder)
+        (D.field "stats" Stats.decoder)
         (D.field "skills" (D.dict skillDecoder)
             -- when 0.052 was exported, I hadn't yet implemented skills, so they're missing
             |> D.maybe
@@ -199,7 +199,7 @@ skillDecoder =
         |> P.required "cooldown" nonzeroIntDecoder
 
 
-heroesDecoder : GS.Stats -> Dict String Skill -> D.Decoder (Dict String Character)
+heroesDecoder : Stats -> Dict String Skill -> D.Decoder (Dict String Character)
 heroesDecoder stats skills =
     --D.dict characterDecoder
     dictKeyDecoder (\name -> Dict.get name stats.characters |> characterDecoder (Dict.filter (\k v -> v.char == name) skills))
@@ -223,7 +223,7 @@ dictKeyDecoder decoder_ =
         |> D.map Dict.fromList
 
 
-characterDecoder : Dict String Skill -> Maybe GS.Character -> D.Decoder Character
+characterDecoder : Dict String Skill -> Maybe Stats.Character -> D.Decoder Character
 characterDecoder skills stats =
     D.succeed Character
         |> P.required "name" D.string
@@ -254,7 +254,7 @@ parseNodeQuality id =
         Plain
 
 
-nodeTypesDecoder : Maybe GS.Character -> D.Decoder NodeTypes
+nodeTypesDecoder : Maybe Stats.Character -> D.Decoder NodeTypes
 nodeTypesDecoder stats =
     nodeTypeDecoder stats |> dictKeyDecoder |> D.map (Dict.map (\k -> \v -> v <| parseNodeQuality k))
 
@@ -311,7 +311,7 @@ nodeDecoder =
         |> P.required "y" D.int
 
 
-nodeTypeDecoder : Maybe GS.Character -> String -> D.Decoder (NodeQuality -> NodeType)
+nodeTypeDecoder : Maybe Stats.Character -> String -> D.Decoder (NodeQuality -> NodeType)
 nodeTypeDecoder stats key =
     D.succeed NodeType
         |> P.custom (D.succeed key)

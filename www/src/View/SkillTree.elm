@@ -1,50 +1,25 @@
 module View.SkillTree exposing (view)
 
-import Dict as Dict exposing (Dict)
-import GameData as G
-import GameData.Stats as GS exposing (Stat(..))
-import Html as H
-import Html.Attributes as A
-import Html.Events as E
+{-| Html parts of the SkillTree page
+
+Don't import Svg!
+
+-}
+
+import Dict exposing (Dict)
+import GameData exposing (GameData)
+import GameData.Stats as Stats exposing (Stat(..))
+import Html as H exposing (..)
+import Html.Attributes as A exposing (..)
+import Html.Events as E exposing (..)
 import Json.Decode as Decode
 import Maybe.Extra
-import Model as M
-import Model.Graph as MG
+import Model exposing (Model, Msg)
+import Model.Graph as Graph exposing (GraphModel)
 import Route
-import Set as Set exposing (Set)
-import View.Graph
+import Set exposing (Set)
+import View.SkillTreeGraph
 import View.Stats
-
-
-view : List (H.Html M.Msg) -> M.Model -> MG.GraphModel -> Route.HomeParams -> H.Html M.Msg
-view header model graph params =
-    let
-        ethItemCount =
-            model.etherealItemInventory |> Maybe.Extra.unwrap 0 Dict.size
-    in
-    H.div [ A.class "skill-tree-main" ]
-        [ View.Graph.view model graph
-        , if model.sidebarOpen then
-            H.div [ A.class "sidebar" ]
-                ([ H.button [ A.class "sidebar-hide", A.title "hide", E.onClick M.ToggleSidebar ] [ H.text "<<" ] ]
-                    ++ header
-                    ++ [ viewSelectSave ]
-                    ++ viewError model.error
-                    ++ [ H.h4 [] [ H.text <| graph.char.flavorName ++ ", " ++ graph.char.flavorClass ]
-                       , H.p [] [ H.text <| graph.char.flavor ]
-                       , viewVersionNav graph.game params
-                       , viewSearch model params.version
-                       , H.p [] [ H.a [ Route.href <| Route.EthItems ] [ H.text <| String.fromInt ethItemCount, H.text " ethereal items" ] ]
-                       , H.p [] [ H.a [ Route.href <| Route.Stats params ] [ H.text "Statistics:" ] ]
-                       , View.Stats.viewStatsSummary <| GS.statTable <| M.statsSummary graph
-                       , H.p [] [ H.a [ Route.href <| Route.Stats params ] [ H.text <| String.fromInt (Set.size graph.selected) ++ " skill points" ] ]
-                       , H.p [] [ H.a [ Route.href <| Route.StatsTSV params ] [ H.text "Spreadsheet format" ] ]
-                       ]
-                )
-
-          else
-            H.button [ A.class "sidebar-show", A.title "show", E.onClick M.ToggleSidebar ] [ H.text ">>" ]
-        ]
 
 
 ver =
@@ -53,37 +28,79 @@ ver =
     }
 
 
-viewVersionNav : G.GameVersionData -> Route.HomeParams -> H.Html msg
-viewVersionNav g q =
-    H.div []
-        [ H.text <| "Your game version: " ++ g.versionSlug ++ ". "
-        , if g.versionSlug == ver.live then
-            if ver.ptr /= "" then
-                H.a [ Route.href <| Route.Home { q | version = ver.ptr } ] [ H.text <| "Use PTR: " ++ ver.ptr ]
-
-            else
-                H.text ""
+view : List (Html Msg) -> Model -> GraphModel -> Route.HomeParams -> Html Msg
+view header model graph params =
+    let
+        ethItemCount =
+            model.etherealItemInventory |> Maybe.Extra.unwrap 0 Dict.size
+    in
+    div [ A.class "skill-tree-main" ]
+        [ viewGraph model graph
+        , if model.sidebarOpen then
+            div [ A.class "sidebar" ]
+                ([ button [ A.class "sidebar-hide", A.title "hide", E.onClick Model.ToggleSidebar ] [ text "<<" ] ]
+                    ++ header
+                    ++ [ viewSelectSave ]
+                    ++ viewError model.error
+                    ++ [ h4 [] [ text <| graph.char.flavorName ++ ", " ++ graph.char.flavorClass ]
+                       , p [] [ text <| graph.char.flavor ]
+                       , viewVersionNav graph.game params
+                       , viewSearch model params.version
+                       , p [] [ a [ Route.href <| Route.EthItems ] [ text <| String.fromInt ethItemCount, text " ethereal items" ] ]
+                       , p [] [ a [ Route.href <| Route.Stats params ] [ text "Statistics:" ] ]
+                       , View.Stats.viewStatsSummary <| Stats.statTable <| Model.statsSummary graph
+                       , p [] [ a [ Route.href <| Route.Stats params ] [ text <| String.fromInt (Set.size graph.selected) ++ " skill points" ] ]
+                       , p [] [ a [ Route.href <| Route.StatsTSV params ] [ text "Spreadsheet format" ] ]
+                       ]
+                )
 
           else
-            H.a [ Route.href <| Route.Home { q | version = ver.live } ] [ H.text <| "Use live: " ++ ver.live ]
+            button [ A.class "sidebar-show", A.title "show", E.onClick Model.ToggleSidebar ] [ text ">>" ]
         ]
 
 
-viewSelectSave : H.Html M.Msg
+viewGraph : Model -> GraphModel -> Html Msg
+viewGraph model graph =
+    -- svg-container is for tooltip positioning. It must be exactly the same size as the svg itself.
+    div [ class "svg-container" ]
+        (View.SkillTreeGraph.view model graph
+            :: Maybe.Extra.unwrap []
+                (List.singleton << viewTooltip model graph)
+                (Model.visibleTooltip model |> Maybe.andThen ((\b a -> Dict.get a b) graph.char.graph.nodes))
+        )
+
+
+viewVersionNav : GameData.GameVersionData -> Route.HomeParams -> Html msg
+viewVersionNav g q =
+    div []
+        [ text <| "Your game version: " ++ g.versionSlug ++ ". "
+        , if g.versionSlug == ver.live then
+            if ver.ptr /= "" then
+                a [ Route.href <| Route.Home { q | version = ver.ptr } ] [ text <| "Use PTR: " ++ ver.ptr ]
+
+            else
+                text ""
+
+          else
+            a [ Route.href <| Route.Home { q | version = ver.live } ] [ text <| "Use live: " ++ ver.live ]
+        ]
+
+
+viewSelectSave : Html Msg
 viewSelectSave =
-    H.div []
-        [ H.text "Import build from game save : "
-        , H.input
+    div []
+        [ text "Import build from game save : "
+        , input
             [ A.type_ "file"
             , A.id inputSaveSelectId
             , E.on "change"
-                (Decode.succeed <| M.SaveFileSelected inputSaveSelectId)
+                (Decode.succeed <| Model.SaveFileSelected inputSaveSelectId)
             ]
             []
-        , H.p [ A.class "saveSelectHint" ]
-            [ H.text "Hint: your save files are probably located in"
-            , H.br [] []
-            , H.text "C:\\Users\\$USERNAME\\AppData\\Roaming\\ClickerHeroes2\\Local Store\\saves"
+        , p [ A.class "saveSelectHint" ]
+            [ text "Hint: your save files are probably located in"
+            , br [] []
+            , text "C:\\Users\\$USERNAME\\AppData\\Roaming\\ClickerHeroes2\\Local Store\\saves"
             ]
         ]
 
@@ -92,23 +109,23 @@ inputSaveSelectId =
     "inputSaveSelect"
 
 
-viewError : Maybe M.Error -> List (H.Html M.Msg)
+viewError : Maybe Model.Error -> List (Html Msg)
 viewError error =
-    [ H.p [ A.class "error" ]
+    [ p [ A.class "error" ]
         (case error of
             Just error_ ->
-                [ H.text <|
+                [ text <|
                     case error_ of
-                        M.SearchRegexError ->
+                        Model.SearchRegexError ->
                             "Search error"
 
-                        M.SaveImportError err ->
+                        Model.SaveImportError err ->
                             "Couldn't load that saved game: " ++ err
 
-                        M.BuildNodesError err ->
+                        Model.BuildNodesError err ->
                             "Invalid build: " ++ err
 
-                        M.GraphError err ->
+                        Model.GraphError err ->
                             "Can't graph that: " ++ err
                 ]
 
@@ -118,30 +135,86 @@ viewError error =
     ]
 
 
-viewSearch : M.Model -> String -> H.Html M.Msg
+viewSearch : Model -> String -> Html Msg
 viewSearch model version =
-    H.div []
-        [ H.a [ A.href "javascript:void", E.onClick <| M.SearchHelp <| not model.searchHelp ] [ H.text "Search" ]
-        , H.text ": "
-        , H.input [ A.type_ "text", A.value <| Maybe.withDefault "" model.searchString, E.onInput M.SearchInput ] []
-        , H.div []
+    div []
+        [ a [ A.href "javascript:void", E.onClick <| Model.SearchHelp <| not model.searchHelp ] [ text "Search" ]
+        , text ": "
+        , input [ A.type_ "text", A.value <| Maybe.withDefault "" model.searchString, E.onInput Model.SearchInput ] []
+        , div []
             (if model.searchHelp then
-                [ H.p []
-                    [ H.text "Use "
-                    , H.a [ A.href "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Writing_a_regular_expression_pattern" ]
-                        [ H.text "regular expressions" ]
-                    , H.text " for advanced searches."
+                [ p []
+                    [ text "Use "
+                    , a [ A.href "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Writing_a_regular_expression_pattern" ]
+                        [ text "regular expressions" ]
+                    , text " for advanced searches."
                     ]
-                , H.p []
-                    [ H.text "To highlight searches with different colors, (parenthesize) up to 6 groups, separated by |vertical bars|. For example, try a search for:"
-                    , H.div []
-                        [ H.code []
-                            [ H.a [ A.target "_blank", A.href <| "#/g/" ++ version ++ "/helpfulAdventurer?q=(big)|(huge)|(multiclick)|(energize)" ]
-                                [ H.text "(big)|(huge)|(multiclick)|(energize)" ]
+                , p []
+                    [ text "To highlight searches with different colors, (parenthesize) up to 6 groups, separated by |vertical bars|. For example, try a search for:"
+                    , div []
+                        [ code []
+                            [ a [ A.target "_blank", A.href <| "#/g/" ++ version ++ "/helpfulAdventurer?q=(big)|(huge)|(multiclick)|(energize)" ]
+                                [ text "(big)|(huge)|(multiclick)|(energize)" ]
                             ]
                         ]
                     ]
                 ]
+
+             else
+                []
+            )
+        ]
+
+
+viewTooltip : Model -> GraphModel -> GameData.Node -> Html msg
+viewTooltip model graph node =
+    -- no css-scaling here - tooltips don't scale with zoom.
+    -- no svg here - svg can't word-wrap, and <foreignObject> has screwy browser support.
+    --
+    -- svg has no viewbox and the html container size == the svg size,
+    -- so coordinates in both should match.
+    let
+        ( win, panX, panY ) =
+            View.SkillTreeGraph.panOffsets model graph
+
+        ( w, h ) =
+            ( toFloat win.width, toFloat win.height )
+
+        zoom =
+            Model.zoom { model | windowSize = win } graph
+
+        ( x, y ) =
+            ( (toFloat node.x + panX) * zoom, (toFloat node.y + panY) * zoom )
+
+        sidebarOffset =
+            if model.sidebarOpen then
+                View.SkillTreeGraph.sidebarWidth
+
+            else
+                0
+
+        style_ =
+            [ if x > sidebarOffset + w / 2 then
+                ( "right", sidebarOffset + w - x )
+
+              else
+                ( "left", x )
+            , if y > h / 2 then
+                ( "bottom", h - y )
+
+              else
+                ( "top", y )
+            ]
+                |> List.map (Tuple.mapSecond <| \n -> String.fromFloat n ++ "px")
+                |> List.map (\( k, v ) -> style k v)
+    in
+    div ([ class "tooltip" ] ++ style_)
+        [ b [] [ text node.val.name ]
+        , p [] [ text <| GameData.tooltip node.val "" ]
+        , p [ class "flavor" ] [ text <| Maybe.withDefault "" node.val.flavorText ]
+        , p [ class "flammable" ]
+            (if node.val.flammable then
+                [ text "Flammable: The effects of this node will be lost when you choose to Ascend or Transcend" ]
 
              else
                 []

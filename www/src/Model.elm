@@ -19,13 +19,13 @@ module Model exposing
 import Browser
 import Browser.Events
 import Browser.Navigation as Nav
-import Dict as Dict exposing (Dict)
+import Dict exposing (Dict)
 import Dict.Extra
 import Draggable
-import GameData as G
-import GameData.Stats as GS
+import GameData exposing (GameData, Graph, NodeId, NodeType)
+import GameData.Stats as Stats exposing (Stat, StatTotal)
 import Json.Decode as D
-import Lazy as Lazy exposing (Lazy)
+import Lazy exposing (Lazy)
 import List.Extra
 import Math.Vector2 as V2
 import Maybe.Extra
@@ -33,24 +33,24 @@ import Model.Dijkstra as Dijkstra
 import Model.Graph as Graph exposing (GraphModel)
 import Ports
 import Process
-import Regex as Regex exposing (Regex)
-import Route as Route exposing (Features, Route)
+import Regex exposing (Regex)
+import Route exposing (Features, Route)
 import SaveFile exposing (SaveFile)
-import Set as Set exposing (Set)
+import Set exposing (Set)
 import Task
 import Time
-import Url as Url exposing (Url)
+import Url exposing (Url)
 
 
 type Msg
     = SearchInput String
     | SearchNav (Maybe String) (Maybe String)
     | SearchHelp Bool
-    | NodeMouseDown G.NodeId
-    | NodeMouseUp G.NodeId
-    | NodeMouseOver G.NodeId
-    | NodeMouseOut G.NodeId
-    | NodeLongPress G.NodeId
+    | NodeMouseDown NodeId
+    | NodeMouseUp NodeId
+    | NodeMouseOver NodeId
+    | NodeMouseOut NodeId
+    | NodeLongPress NodeId
     | NavRequest Browser.UrlRequest
     | NavLocation Url
     | Preprocess
@@ -66,12 +66,12 @@ type Msg
 type alias Model =
     { urlKey : Nav.Key
     , changelog : String
-    , gameData : Result D.Error G.GameData
+    , gameData : Result D.Error GameData
     , route : Maybe Route
-    , graph : Maybe Graph.GraphModel
+    , graph : Maybe GraphModel
     , features : Features
     , windowSize : WindowSize
-    , tooltip : Maybe ( G.NodeId, TooltipState )
+    , tooltip : Maybe ( NodeId, TooltipState )
     , sidebarOpen : Bool
     , searchString : Maybe String
     , searchPrev : Maybe String
@@ -113,7 +113,7 @@ init : Flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags loc urlKey =
     let
         gameData =
-            D.decodeValue G.decoder flags.gameData
+            D.decodeValue GameData.decoder flags.gameData
 
         route =
             Route.parse loc
@@ -165,7 +165,7 @@ init flags loc urlKey =
     )
 
 
-parseGraph : G.GameData -> Maybe Route -> ( Maybe GraphModel, Maybe Error )
+parseGraph : GameData -> Maybe Route -> ( Maybe GraphModel, Maybe Error )
 parseGraph gameData route =
     let
         graphResult =
@@ -202,7 +202,7 @@ invert id set =
         Set.insert id set
 
 
-visibleTooltip : Model -> Maybe G.NodeId
+visibleTooltip : Model -> Maybe NodeId
 visibleTooltip { tooltip } =
     case tooltip of
         Just ( id, Hovering ) ->
@@ -217,7 +217,7 @@ visibleTooltip { tooltip } =
 
 {-| Toggle a clicked node-id
 -}
-updateNode : G.NodeId -> Model -> ( Model, Cmd Msg )
+updateNode : NodeId -> Model -> ( Model, Cmd Msg )
 updateNode id model =
     Maybe.map2
         (\graph params ->
@@ -424,7 +424,7 @@ update msg model =
                             )
 
                         Ok data ->
-                            case model.graph |> Maybe.map .game |> Maybe.Extra.orElse (G.latestVersion gameData) of
+                            case model.graph |> Maybe.map .game |> Maybe.Extra.orElse (GameData.latestVersion gameData) of
                                 Nothing ->
                                     ( { model
                                         | etherealItemInventory = Nothing
@@ -513,14 +513,14 @@ zoomedGraphSize model window =
     }
 
 
-clampZoom : WindowSize -> G.Graph -> Float -> Float
+clampZoom : WindowSize -> Graph -> Float -> Float
 clampZoom window graph =
     -- Small windows can zoom out farther, so they can fit the entire graph on screen
     let
         minZoom =
             min
-                (toFloat window.width / toFloat (G.graphWidth graph + nodeIconSize * 4))
-                (toFloat window.height / toFloat (G.graphHeight graph + nodeIconSize * 4))
+                (toFloat window.width / toFloat (GameData.graphWidth graph + nodeIconSize * 4))
+                (toFloat window.height / toFloat (GameData.graphHeight graph + nodeIconSize * 4))
                 |> min 0.5
     in
     clamp minZoom 3
@@ -570,11 +570,11 @@ centerBounds w g =
     -- edge of the graph, where empty space begins. That means the center is
     -- clamped to a smaller area as zoom gets more distant.
     ( V2.vec2
-        ((G.graphMinX g |> toFloat) + w.width / 2 - nodeIconSize |> min 0)
-        ((G.graphMinY g |> toFloat) + w.height / 2 - nodeIconSize |> min 0)
+        ((GameData.graphMinX g |> toFloat) + w.width / 2 - nodeIconSize |> min 0)
+        ((GameData.graphMinY g |> toFloat) + w.height / 2 - nodeIconSize |> min 0)
     , V2.vec2
-        ((G.graphMaxX g |> toFloat) - w.width / 2 + nodeIconSize |> max 0)
-        ((G.graphMaxY g |> toFloat) - w.height / 2 + nodeIconSize |> max 0)
+        ((GameData.graphMaxX g |> toFloat) - w.width / 2 + nodeIconSize |> max 0)
+        ((GameData.graphMaxY g |> toFloat) - w.height / 2 + nodeIconSize |> max 0)
     )
 
 
@@ -585,7 +585,7 @@ v2Clamp minV maxV v =
         (clamp (V2.getY minV) (V2.getY maxV) (V2.getY v))
 
 
-nodeSummary : { a | selected : Set G.NodeId, char : G.Character } -> List ( Int, G.NodeType )
+nodeSummary : { a | selected : Set NodeId, char : GameData.Character } -> List ( Int, NodeType )
 nodeSummary { selected, char } =
     char.graph.nodes
         |> Dict.filter (\id nodeType -> Set.member id selected)
@@ -600,37 +600,37 @@ nodeSummary { selected, char } =
                     * (count
                         -- I really can't sort on a tuple, Elm? Sigh.
                         + (case nodeType.quality of
-                            G.Keystone ->
+                            GameData.Keystone ->
                                 1000000
 
-                            G.Notable ->
+                            GameData.Notable ->
                                 1000
 
-                            G.Plain ->
+                            GameData.Plain ->
                                 0
                           )
                       )
             )
 
 
-statsSummary : { a | selected : Set G.NodeId, char : G.Character, game : G.GameVersionData } -> List GS.StatTotal
+statsSummary : { a | selected : Set NodeId, char : GameData.Character, game : GameData.GameVersionData } -> List StatTotal
 statsSummary g =
     nodeSummary g
         |> List.concatMap (\( count, node ) -> node.stats |> List.map (\( stat, level ) -> ( stat, count * level )))
-        |> GS.calcStats g.game.stats
+        |> Stats.calcStats g.game.stats
 
 
 type alias StatsSummary =
-    { selected : Set G.NodeId
-    , char : G.Character
-    , game : G.GameVersionData
-    , nodes : List ( Int, G.NodeType )
-    , stats : List GS.StatTotal
+    { selected : Set NodeId
+    , char : GameData.Character
+    , game : GameData.GameVersionData
+    , nodes : List ( Int, NodeType )
+    , stats : List StatTotal
     , params : Route.HomeParams
     }
 
 
-parseStatsSummary : G.GameData -> Route.HomeParams -> Result String StatsSummary
+parseStatsSummary : GameData -> Route.HomeParams -> Result String StatsSummary
 parseStatsSummary gd params =
     Graph.parse gd params
         |> Result.map

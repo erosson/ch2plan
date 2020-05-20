@@ -9,40 +9,40 @@ module Model.Skill exposing
     , uptime
     )
 
-import GameData as G
-import GameData.Stats as GS exposing (Stat(..))
+import GameData exposing (GameData)
+import GameData.Stats as Stats exposing (Stat(..), StatTotal)
 
 
-skillVal : (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> String -> Result String Float
+skillVal : (Stats.Stat -> Result String StatTotal) -> GameData.Skill -> String -> Result String Float
 skillVal getStat skill name =
     -- fetch a skill-stat, if the stat exists. Skill-stats are specially named stats, for example "BigClicks_damage".
     let
         sname =
             skill.id ++ "_" ++ name
     in
-    GS.getStat sname
+    Stats.getStat sname
         |> Result.fromMaybe ("no such skill-stat: " ++ sname)
         |> Result.andThen getStat
         |> Result.map .val
 
 
-skillValOr : (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Float -> String -> Float
+skillValOr : (Stat -> Result String StatTotal) -> GameData.Skill -> Float -> String -> Float
 skillValOr getStat skill default =
     -- fetch a skill-stat or a default value.
     skillVal getStat skill >> Result.withDefault default
 
 
-energyCost : (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Result String Float
+energyCost : (Stat -> Result String StatTotal) -> GameData.Skill -> Result String Float
 energyCost g s =
     s.energyCost |> Result.fromMaybe "no energycost" |> Result.map (toFloat >> (+) (skillValOr g s 0 "energyCost"))
 
 
-manaCost : (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Result String Float
+manaCost : (Stat -> Result String StatTotal) -> GameData.Skill -> Result String Float
 manaCost g s =
     s.manaCost |> Result.fromMaybe "no manacost" |> Result.map (toFloat >> (*) (skillValOr g s 1 "manaCost"))
 
 
-cooldown : (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Result String Float
+cooldown : (Stat -> Result String StatTotal) -> GameData.Skill -> Result String Float
 cooldown g s =
     let
         haste =
@@ -56,7 +56,7 @@ cooldown g s =
     s.cooldown |> Result.fromMaybe "no cooldown" |> Result.map (toFloat >> (*) (skillValOr g s 1 "cooldown" / 1000 / haste))
 
 
-duration : GS.Rules -> (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Result String Float
+duration : Stats.Rules -> (Stat -> Result String StatTotal) -> GameData.Skill -> Result String Float
 duration rules g s =
     let
         haste =
@@ -76,7 +76,7 @@ duration rules g s =
     skillVal g s "duration" |> Result.map ((*) (1 / 1000 / haste))
 
 
-uptime : GS.Rules -> (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Result String Float
+uptime : Stats.Rules -> (Stat -> Result String StatTotal) -> GameData.Skill -> Result String Float
 uptime rules g s =
     Result.map2 (/)
         (duration rules g s)
@@ -84,16 +84,16 @@ uptime rules g s =
         |> Result.map (clamp 0 1)
 
 
-damage : (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Result String Float
+damage : (Stat -> Result String StatTotal) -> GameData.Skill -> Result String Float
 damage g s =
     skillVal g s "damage"
 
 
-stacks : (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Result String Float
+stacks : (Stat -> Result String StatTotal) -> GameData.Skill -> Result String Float
 stacks g s =
     skillVal g s "stacks"
 
 
-effect : (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> Result String Float
+effect : (Stat -> Result String StatTotal) -> GameData.Skill -> Result String Float
 effect g s =
     skillVal g s "effect"

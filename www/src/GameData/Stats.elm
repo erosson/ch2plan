@@ -13,13 +13,13 @@ module GameData.Stats exposing
     , statTable
     )
 
-import Dict as Dict exposing (Dict)
+import Dict exposing (Dict)
 import Dict.Extra
 import Json.Decode as D
 import Json.Decode.Pipeline as P
 import List.Extra
 import Maybe.Extra
-import Set as Set exposing (Set)
+import Set exposing (Set)
 
 
 type Growth

@@ -1,20 +1,21 @@
 module Main exposing (main)
 
 import Browser
-import Model as M
-import View as V
+import Model exposing (Flags, Model, Msg)
+import View
 
 
+main : Program Flags Model Msg
 main =
     Browser.application
-        { init = M.init
-        , view = V.view
-        , update = M.update
-        , subscriptions = M.subscriptions
+        { init = Model.init
+        , view = View.view
+        , update = Model.update
+        , subscriptions = Model.subscriptions
 
         -- clicking a link
-        , onUrlRequest = M.NavRequest
+        , onUrlRequest = Model.NavRequest
 
         -- other url changes, like altering the address bar
-        , onUrlChange = M.NavLocation
+        , onUrlChange = Model.NavLocation
         }

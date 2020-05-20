@@ -1,16 +1,16 @@
 module Model.Dijkstra exposing (Result, dijkstra, empty, selectPathToNode)
 
-import Dict as Dict exposing (Dict)
-import GameData as G
+import Dict exposing (Dict)
+import GameData exposing (GameData, Graph, NodeId)
 import List.Extra
 import Maybe.Extra
-import Set as Set exposing (Set)
+import Set exposing (Set)
 
 
 {-| Shortest path of nodes that connect this to the current build - that is, to a start-location-connected selected node.
 -}
 type alias Result =
-    { distances : Dict G.NodeId Int, prevs : Dict G.NodeId G.NodeId }
+    { distances : Dict NodeId Int, prevs : Dict NodeId NodeId }
 
 
 empty : Result
@@ -24,20 +24,20 @@ infinity =
     1 / 0 |> floor
 
 
-dijkstra : G.Graph -> Set G.NodeId -> Maybe G.NodeId -> Result
+dijkstra : Graph -> Set NodeId -> Maybe NodeId -> Result
 dijkstra graph selected0 target =
     let
         allNodes =
             Dict.keys graph.nodes
 
         startOrSelected =
-            Set.union (G.startNodes graph) selected0
+            Set.union (GameData.startNodes graph) selected0
 
-        distances0 : Dict G.NodeId Int
+        distances0 : Dict NodeId Int
         distances0 =
             -- missing = infinity distance
             graph
-                |> G.startNodes
+                |> GameData.startNodes
                 |> Set.toList
                 |> List.map (\id -> ( id, 0 ))
                 |> Dict.fromList
@@ -90,7 +90,7 @@ terminatingMinimumBy terminateAt fn items0 =
                     loop tail headIn headOut
 
 
-visitNode : Int -> Set G.NodeId -> G.Graph -> Set G.NodeId -> Maybe G.NodeId -> Result -> Result
+visitNode : Int -> Set NodeId -> Graph -> Set NodeId -> Maybe NodeId -> Result -> Result
 visitNode lastDistance startOrSelected graph unvisited target dp0 =
     -- the unvisited node with the minimum distance.
     -- A priority queue would be faster here, but it's dependant on distance -
@@ -112,7 +112,9 @@ visitNode lastDistance startOrSelected graph unvisited target dp0 =
             else
                 let
                     unvisitedNeighbors =
-                        G.neighbors node graph |> Set.intersect unvisited |> Set.toList
+                        GameData.neighbors node graph
+                            |> Set.intersect unvisited
+                            |> Set.toList
 
                     d =
                         -- the algorithm guarantees we've visited this node before, so the default should never be used.
@@ -125,7 +127,7 @@ visitNode lastDistance startOrSelected graph unvisited target dp0 =
                 visitNode d startOrSelected graph (Set.remove node unvisited) target dp
 
 
-visitNeighbors : Set G.NodeId -> Result -> G.NodeId -> Int -> List G.NodeId -> Result
+visitNeighbors : Set NodeId -> Result -> NodeId -> Int -> List NodeId -> Result
 visitNeighbors startOrSelected dp prevNode prevDist neighbors =
     case List.head neighbors of
         Nothing ->
@@ -162,7 +164,7 @@ visitNeighbors startOrSelected dp prevNode prevDist neighbors =
 -- All nodes that will be selected to select this one, including this one.
 
 
-selectPathToNode : Result -> G.NodeId -> List G.NodeId
+selectPathToNode : Result -> NodeId -> List NodeId
 selectPathToNode { prevs } =
     let
         loop path first =

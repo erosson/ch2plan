@@ -5,12 +5,12 @@
   "author": "Evan <github@erosson.org>",
   "license": "GPL-3.0",
   "scripts": {
-    "format": "elm-format --yes src && prettier --write assets/ports.js assets/stats.json",
     "start": "parcel src/index.html",
     "start:prod": "yarn build && serve dist",
     "build": "parcel build src/index.html",
     "test": "yarn lint && elm-test",
-    "lint": "elm-format --validate src && prettier --list-different assets/ports.js assets/stats.json"
+    "format": "elm-format --yes src && prettier --write src",
+    "lint": "elm-format --validate src && prettier --list-different src"
   },
   "//staticFiles": "https://www.npmjs.com/package/parcel-plugin-static-files-copy",
   "staticFiles": {

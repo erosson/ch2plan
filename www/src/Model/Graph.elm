@@ -11,15 +11,15 @@ module Model.Graph exposing
     , updateOnChange
     )
 
-import Dict as Dict exposing (Dict)
-import GameData as G
-import Lazy as Lazy exposing (Lazy)
+import Dict exposing (Dict)
+import GameData exposing (GameData)
+import Lazy exposing (Lazy)
 import Maybe.Extra
 import Model.Dijkstra as Dijkstra
 import Ports
-import Regex as Regex exposing (Regex)
-import Route as Route exposing (Route)
-import Set as Set exposing (Set)
+import Regex exposing (Regex)
+import Route exposing (Route)
+import Set exposing (Set)
 
 
 {-| All information needed to efficiently render the skill tree graph.
@@ -35,16 +35,16 @@ trouble.
 
 -}
 type alias GraphModel =
-    { game : G.GameVersionData
-    , char : G.Character
+    { game : GameData.GameVersionData
+    , char : GameData.Character
     , search : Maybe Regex
-    , selected : Set G.NodeId
-    , neighbors : Set G.NodeId
+    , selected : Set GameData.NodeId
+    , neighbors : Set GameData.NodeId
     , dijkstra : Lazy Dijkstra.Result
     }
 
 
-create : G.GameVersionData -> G.Character -> Set G.NodeId -> GraphModel
+create : GameData.GameVersionData -> GameData.Character -> Set GameData.NodeId -> GraphModel
 create game char selected =
     { game = game
     , char = char
@@ -63,13 +63,13 @@ runDijkstra graph selected =
     Dijkstra.dijkstra graph selected Nothing
 
 
-neighborNodes : G.Graph -> Set G.NodeId -> Set G.NodeId
+neighborNodes : GameData.Graph -> Set GameData.NodeId -> Set GameData.NodeId
 neighborNodes graph selected =
-    Set.foldr (\id res -> G.neighbors id graph |> Set.union res) (G.startNodes graph) selected
+    Set.foldr (\id res -> GameData.neighbors id graph |> Set.union res) (GameData.startNodes graph) selected
         |> (\res -> Set.diff res selected)
 
 
-nodesToBuild : G.Graph -> Set G.NodeId -> Maybe String
+nodesToBuild : GameData.Graph -> Set GameData.NodeId -> Maybe String
 nodesToBuild graph =
     Set.toList
         >> List.map String.fromInt
@@ -83,7 +83,7 @@ nodesToBuild graph =
            )
 
 
-buildToNodes : G.Graph -> Maybe String -> Result String (Set G.NodeId)
+buildToNodes : GameData.Graph -> Maybe String -> Result String (Set GameData.NodeId)
 buildToNodes graph build =
     let
         strList =
@@ -112,10 +112,13 @@ buildToNodes graph build =
 
 {-| Remove any selected nodes that can't be reached from the start location.
 -}
-reachableSelectedNodes : G.Graph -> Set G.NodeId -> Set G.NodeId
+reachableSelectedNodes : GameData.Graph -> Set GameData.NodeId -> Set GameData.NodeId
 reachableSelectedNodes graph selected =
     let
-        loop : G.NodeId -> { reachable : Set G.NodeId, tried : Set G.NodeId } -> { reachable : Set G.NodeId, tried : Set G.NodeId }
+        loop :
+            GameData.NodeId
+            -> { reachable : Set GameData.NodeId, tried : Set GameData.NodeId }
+            -> { reachable : Set GameData.NodeId, tried : Set GameData.NodeId }
         loop id res =
             if Set.member id res.tried then
                 res
@@ -124,18 +127,18 @@ reachableSelectedNodes graph selected =
                 let
                     -- loop with all selected immediate neighbors
                     nextIds =
-                        G.neighbors id graph |> Set.intersect selected
+                        GameData.neighbors id graph |> Set.intersect selected
                 in
                 Set.foldr loop { tried = Set.insert id res.tried, reachable = Set.union res.reachable nextIds } nextIds
 
         startReachable =
-            graph |> G.startNodes |> Set.intersect selected
+            graph |> GameData.startNodes |> Set.intersect selected
     in
     Set.foldr loop { tried = Set.empty, reachable = startReachable } startReachable
         |> .reachable
 
 
-allSelectableNodes : G.Graph -> Set G.NodeId
+allSelectableNodes : GameData.Graph -> Set GameData.NodeId
 allSelectableNodes graph =
     graph.nodes
         |> Dict.keys
@@ -143,7 +146,7 @@ allSelectableNodes graph =
         |> reachableSelectedNodes graph
 
 
-isValidSelection : G.Graph -> Set G.NodeId -> Bool
+isValidSelection : GameData.Graph -> Set GameData.NodeId -> Bool
 isValidSelection graph selected =
     reachableSelectedNodes graph selected == selected
 
@@ -165,7 +168,7 @@ Return type here is a bit weird. We can have two kinds of errors:
   - partial failure: the skill tree _can_ be rendered, but there's a problem. Bad search, bad node selections.
 
 -}
-parse : G.GameData -> Route.HomeParams -> Result String ( GraphModel, Maybe String )
+parse : GameData -> Route.HomeParams -> Result String ( GraphModel, Maybe String )
 parse gameData q =
     case Dict.get q.version gameData.byVersion of
         Nothing ->

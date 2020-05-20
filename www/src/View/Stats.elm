@@ -1,58 +1,58 @@
 module View.Stats exposing (view, viewNodeSummary, viewStatsSummary)
 
-import Dict as Dict exposing (Dict)
-import GameData as G
-import GameData.Stats as GS exposing (Stat(..))
-import Html as H
-import Html.Attributes as A
-import Html.Events as E
+import Dict exposing (Dict)
+import GameData exposing (GameData)
+import GameData.Stats as Stats exposing (Stat(..))
+import Html as H exposing (..)
+import Html.Attributes as A exposing (..)
+import Html.Events as E exposing (..)
 import Maybe.Extra
-import Model as M
+import Model exposing (Model)
 import Model.Skill as Skill
 import Result.Extra
 import Route
-import Set as Set exposing (Set)
+import Set exposing (Set)
 import Time
-import View.Graph
 import View.Spreadsheet
+import View.Util
 
 
-view : M.Model -> G.GameData -> Route.HomeParams -> H.Html msg
+view : Model -> GameData -> Route.HomeParams -> Html msg
 view model gameData params =
-    case M.parseStatsSummary gameData params of
+    case Model.parseStatsSummary gameData params of
         Err err ->
-            H.div [] [ H.text <| "error: " ++ err ]
+            div [] [ text <| "error: " ++ err ]
 
         Ok ({ game, char, selected, stats, nodes } as summary) ->
             let
                 getStat =
-                    GS.statTable stats
+                    Stats.statTable stats
             in
-            H.div []
-                [ H.p []
-                    [ H.a [ Route.href <| Route.Home params ] [ H.text "View Skill Tree" ] ]
-                , H.p [ A.title "I haven't seen an official name for those blue nodes in CH2, so I stole Path of Exile's name for nodes like that." ]
-                    [ H.text "⚠ Warning: most of the blue "
-                    , H.span [ A.class "node-Keystone" ] [ H.text "Keystone Nodes" ]
-                    , H.text " have no effect on these stat calculations yet. Work is in progress. Please be patient. (All other nodes should work.)"
+            div []
+                [ p []
+                    [ a [ Route.href <| Route.Home params ] [ text "View Skill Tree" ] ]
+                , p [ title "I haven't seen an official name for those blue nodes in CH2, so I stole Path of Exile's name for nodes like that." ]
+                    [ text "⚠ Warning: most of the blue "
+                    , span [ class "node-Keystone" ] [ text "Keystone Nodes" ]
+                    , text " have no effect on these stat calculations yet. Work is in progress. Please be patient. (All other nodes should work.)"
                     ]
-                , H.div [ A.class "stats-flex" ]
-                    [ H.div [ A.class "stats-box skills-summary" ]
-                        [ H.p [] [ H.text "Skills:" ]
-                        , H.ul [] (List.map (viewSkillSummary game.stats.rules getStat) <| List.filter (\s -> not <| Set.member s.id skillBlacklist) <| Dict.values char.skills)
+                , div [ class "stats-flex" ]
+                    [ div [ class "stats-box skills-summary" ]
+                        [ p [] [ text "Skills:" ]
+                        , ul [] (List.map (viewSkillSummary game.stats.rules getStat) <| List.filter (\s -> not <| Set.member s.id skillBlacklist) <| Dict.values char.skills)
                         ]
-                    , H.div [ A.class "stats-box" ]
-                        [ H.p [] [ H.text "Statistics:" ]
+                    , div [ class "stats-box" ]
+                        [ p [] [ text "Statistics:" ]
                         , viewStatsSummary getStat
                         ]
-                    , H.div [ A.class "stats-box" ]
-                        [ H.p []
-                            [ H.a [ Route.href <| Route.Home params ] [ H.text <| String.fromInt (Set.size selected) ++ " skill points:" ]
-                            , H.text " ("
-                            , H.a [ Route.href <| Route.StatsTSV params ] [ H.text "spreadsheet format" ]
+                    , div [ class "stats-box" ]
+                        [ p []
+                            [ a [ Route.href <| Route.Home params ] [ text <| String.fromInt (Set.size selected) ++ " skill points:" ]
+                            , text " ("
+                            , a [ Route.href <| Route.StatsTSV params ] [ text "spreadsheet format" ]
 
-                            -- , H.textarea [ A.rows 1, A.cols 5, A.readonly True ] [ H.text <| View.Spreadsheet.format model summary ]
-                            , H.text ")"
+                            -- , textarea [ rows 1, cols 5, readonly True ] [ text <| View.Spreadsheet.format model summary ]
+                            , text ")"
                             ]
                         , viewNodeSummary True nodes
                         ]
@@ -65,7 +65,7 @@ skillBlacklist =
     Set.fromList [ "Clickdrizzle", "EnergizeExtend", "EnergizeRush" ]
 
 
-viewSkillSummary : GS.Rules -> (GS.Stat -> Result String GS.StatTotal) -> G.Skill -> H.Html msg
+viewSkillSummary : Stats.Rules -> (Stat -> Result String Stats.StatTotal) -> GameData.Skill -> Html msg
 viewSkillSummary rules getStat skill =
     let
         lines =
@@ -82,24 +82,24 @@ viewSkillSummary rules getStat skill =
                 |> List.filterMap Result.toMaybe
                 |> List.map
                     (\( label, tooltip, value ) ->
-                        H.li [ A.class "stat-line", A.title tooltip ]
-                            [ H.span [ A.class "stat-label" ] [ H.text <| label ++ ": " ]
-                            , H.span [ A.class "stat-value" ] [ H.text value ]
+                        li [ class "stat-line", title tooltip ]
+                            [ span [ class "stat-label" ] [ text <| label ++ ": " ]
+                            , span [ class "stat-value" ] [ text value ]
                             ]
                     )
     in
-    H.li []
-        [ H.img [ A.class "skill-icon", A.src <| "./ch2data/img/skills/" ++ String.fromInt skill.iconId ++ ".png" ] [], H.b [] [ H.text skill.name ], H.ul [] lines ]
+    li []
+        [ img [ class "skill-icon", src <| "./ch2data/img/skills/" ++ String.fromInt skill.iconId ++ ".png" ] [], b [] [ text skill.name ], ul [] lines ]
 
 
-viewStatsSummary : (GS.Stat -> Result String GS.StatTotal) -> H.Html msg
+viewStatsSummary : (Stats.Stat -> Result String Stats.StatTotal) -> Html msg
 viewStatsSummary getStat =
     let
         toEntry ( label, statId, format ) =
             getStat statId
                 |> Result.map (\stat -> { label = label, level = stat.level, value = format stat })
     in
-    H.table [ A.class "stats-summary" ]
+    table [ class "stats-summary" ]
         (statEntrySpecs
             |> List.map toEntry
             |> List.filterMap Result.toMaybe
@@ -108,7 +108,7 @@ viewStatsSummary getStat =
 
 
 type alias StatsEntrySpec =
-    ( String, GS.Stat, GS.StatTotal -> Maybe String )
+    ( String, Stat, Stats.StatTotal -> Maybe String )
 
 
 statEntrySpecs : List StatsEntrySpec
@@ -130,8 +130,8 @@ statEntrySpecs =
     , ( "Haste", STAT_HASTE, entryPct )
     , ( "Maximum Energy", STAT_TOTAL_ENERGY, entryInt )
     , ( "Maximum Mana", STAT_TOTAL_MANA, entryInt )
-    , ( "Mana Regeneration", GS.STAT_MANA_REGEN, entryPct )
-    , ( "Run Speed", GS.STAT_MOVEMENT_SPEED, entryPct ) -- currently a constant
+    , ( "Mana Regeneration", STAT_MANA_REGEN, entryPct )
+    , ( "Run Speed", STAT_MOVEMENT_SPEED, entryPct ) -- currently a constant
     , ( "Gold from All Sources", STAT_GOLD, entryPct )
     , ( "Bonus Gold Chance (×10)", STAT_BONUS_GOLD_CHANCE, entryPct ) -- the multiplier is datamined from heroclickerlib/managers/Formulas.as
     , ( "Boss Gold", STAT_BOSS_GOLD, entryPct )
@@ -169,18 +169,18 @@ entryInt stat =
     Just <| int stat.val
 
 
-viewStatEntry : { label : String, level : Int, value : Maybe String } -> Maybe (H.Html msg)
+viewStatEntry : { label : String, level : Int, value : Maybe String } -> Maybe (Html msg)
 viewStatEntry { label, level, value } =
     Maybe.map
         (\val ->
-            H.tr
-                [ A.class <| "level-" ++ statLevelTier level
-                , A.title <| "Level " ++ String.fromInt level
+            tr
+                [ class <| "level-" ++ statLevelTier level
+                , title <| "Level " ++ String.fromInt level
                 ]
-                [ H.td [] [ H.text <| label ++ ": " ]
-                , H.td [ A.class "stat-value" ] [ H.text val ]
+                [ td [] [ text <| label ++ ": " ]
+                , td [ class "stat-value" ] [ text val ]
 
-                -- , H.td [ A.class "stat-level" ] [ H.text <| "Level " ++ toString level ]
+                -- , td [ class "stat-level" ] [ text <| "Level " ++ toString level ]
                 ]
         )
         value
@@ -233,9 +233,9 @@ statLevelTier level =
         "low"
 
 
-viewNodeSummary : Bool -> List ( Int, G.NodeType ) -> H.Html msg
+viewNodeSummary : Bool -> List ( Int, GameData.NodeType ) -> Html msg
 viewNodeSummary showTooltips ns =
-    H.ul [ A.class "node-summary" ] <|
+    ul [ class "node-summary" ] <|
         if List.length ns == 0 then
             []
 
@@ -243,23 +243,23 @@ viewNodeSummary showTooltips ns =
             List.map ((\f ( a, b ) -> f a b) <| viewNodeSummaryLine showTooltips) ns
 
 
-viewNodeSummaryLine : Bool -> Int -> G.NodeType -> H.Html msg
+viewNodeSummaryLine : Bool -> Int -> GameData.NodeType -> Html msg
 viewNodeSummaryLine showTooltips count nodeType =
     let
         tooltip =
             if showTooltips then
-                G.tooltip nodeType "" |> Just
+                GameData.tooltip nodeType "" |> Just
 
             else
                 Nothing
     in
-    H.li [ A.class <| View.Graph.nodeQualityClass nodeType.quality ]
-        [ H.div [ A.class "icon" ]
-            [ H.img [ A.class "icon-background", A.src <| View.Graph.nodeBackgroundImage nodeType False False False ] []
-            , H.img [ A.class "icon-main", A.src <| View.Graph.iconUrl nodeType ] []
+    li [ class <| View.Util.nodeQualityClass nodeType.quality ]
+        [ div [ class "icon" ]
+            [ img [ class "icon-background", src <| View.Util.nodeBackgroundImage nodeType { isHighlighted = False, isSelected = False, isNeighbor = False } ] []
+            , img [ class "icon-main", src <| View.Util.nodeIconUrl nodeType ] []
             ]
-        , H.div []
-            [ H.text <|
+        , div []
+            [ text <|
                 " "
                     ++ (if count /= 1 then
                             String.fromInt count ++ "× "
@@ -267,12 +267,12 @@ viewNodeSummaryLine showTooltips count nodeType =
                         else
                             ""
                        )
-            , H.b [] [ H.text nodeType.name ]
-            , H.span [] [ H.text <| Maybe.Extra.unwrap "" ((++) ": ") tooltip ]
+            , b [] [ text nodeType.name ]
+            , span [] [ text <| Maybe.Extra.unwrap "" ((++) ": ") tooltip ]
             ]
 
-        -- , H.div [] [ H.text <| Maybe.withDefault "" nodeType.tooltip ]
-        , H.div [ A.class "clear" ] []
+        -- , div [] [ text <| Maybe.withDefault "" nodeType.tooltip ]
+        , div [ class "clear" ] []
 
-        -- , H.text <| toString nodeType
+        -- , text <| toString nodeType
         ]

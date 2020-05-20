@@ -19,8 +19,8 @@ import Html.Attributes as A
 import Http
 import Maybe.Extra
 import Regex
-import Set as Set exposing (Set)
-import Url as Url exposing (Url)
+import Set exposing (Set)
+import Url exposing (Url)
 import Url.Parser as P exposing ((</>), (<?>))
 import Url.Parser.Query as Q
 
