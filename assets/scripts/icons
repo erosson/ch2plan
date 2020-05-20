@@ -48,7 +48,7 @@ done
 #  echo $icon
 #  echo convert ./build/extract/Essentials_MEDIUM_ATF/sprites/*_${icon}_*/1.png -transparent black ./assets/ch2data/img/$icon.png
 #done
-#for icon in `./scripts/export/list-icons ./assets/ch2data/chars/latest.json`; do
+#for icon in `./scripts/list-icons ./assets/ch2data/chars/latest.json`; do
 #  #convert ./build/extract/*/sprites/*_${icon}_*/*.png -transparent black ./assets/ch2data/img/$icon.png
 #  echo $icon
 #  echo convert ./build/extract/*/sprites/*_${icon}_*/*.png -transparent black ./assets/ch2data/img/$icon.png

@@ -1,5 +1,4 @@
 body {
-  /* background-image: url("./ch2data/img/starBG.png"); */
   background: #080010;
   color: #fff;
 }
@@ -7,7 +6,7 @@ h2 {
   white-space: nowrap;
 }
 svg {
-  background: url("./ch2data/img/starBG.png");
+  background: url("../../assets/public/ch2data/img/starBG.png");
   margin: 0;
   padding: 0;
 }

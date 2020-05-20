@@ -4,20 +4,22 @@
   "main": "index.js",
   "author": "Evan <github@erosson.org>",
   "license": "GPL-3.0",
-  "private": true,
   "scripts": {
-    "export:icons": "scripty",
-    "export:postchars": "scripty assets/ch2data/chars/latest.json",
-    "export:as3": "scripty",
-    "copyDeps": "bash -c \"mkdir -p assets/lib && cp ../node_modules/amf-js/src/amf.js assets/lib && cp ../node_modules/zlibjs/bin/rawinflate.min.js assets/lib\"",
-    "dev": "yarn copyDeps && cp ../CHANGELOG.md ./assets && elm-live src/Main.elm --open --dir=assets -- --output assets/elm.js",
-    "build": "rm -rf dist && mkdir dist && yarn copyDeps && cp ../CHANGELOG.md dist/ && cp -rp assets/* dist/ && elm make src/Main.elm --optimize --output dist/elm.js",
     "format": "elm-format --yes src && prettier --write assets/ports.js assets/stats.json",
-    "lint": "elm-format --validate src && prettier --list-different assets/ports.js assets/stats.json",
+    "start": "parcel src/index.html",
+    "build": "parcel build src/index.html",
     "test": "yarn lint && elm-test",
-    "start": "yarn build && serve dist"
+    "lint": "elm-format --validate src && prettier --list-different assets/ports.js assets/stats.json"
+  },
+  "//staticFiles": "https://www.npmjs.com/package/parcel-plugin-static-files-copy",
+  "staticFiles": {
+    "watcherGlob": "**",
+    "staticPath": [
+      "../assets/public"
+    ]
   },
   "dependencies": {
+    "@ch2plan/assets": "^1.0.0",
     "amf-js": "^1.0.4",
     "zlibjs": "^0.3.1"
   },
@@ -26,9 +28,12 @@
     "elm-format": "^0.8.3",
     "elm-live": "^4.0.2",
     "elm-test": "^0.19.1-revision2",
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-static-files-copy": "^2.3.1",
     "prettier": "^2.0.5",
     "scripty": "^2.0.0",
     "serve": "^11.3.0",
     "sort-json": "^2.0.0"
-  }
+  },
+  "private": true
 }
