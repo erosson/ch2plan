@@ -1,2 +1,0 @@
-#!/bin/sh -eu
-node scripts/export/__postchars.js "$@"

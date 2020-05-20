@@ -1,7 +1,8 @@
 /**
  * Compile all data for one version of Clicker Heroes 2.
  *
- * Input:
+ * We need two input files:
+ *
  * - /assets/stats.json: links passive tree nodes to stats for stat-calculations.
  *   Maintained by hand, based on diffs of CH2's exported actionscript:
  *   run `yarn as3` to export this actionscript into `./ch2data`, then `git diff`.
@@ -34,9 +35,7 @@ async function main() {
     // the dir already exists, that's fine
   }
 
-  const json = sortJson(
-    JSON.parse(await fs.readFile("public/ch2data/chars/latest.json"))
-  );
+  const json = sortJson(JSON.parse(await fs.readFile("./latest.json")));
 
   const rawSortedJson = Object.assign({}, json);
   json.versionSlug = json.ch2.GAME_VERSION.replace(/\s/g, "-");

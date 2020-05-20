@@ -2,8 +2,8 @@
   "name": "@ch2plan/assets",
   "version": "1.0.0",
   "scripts": {
+    "build": "scripty",
     "icons": "scripty",
-    "postchars": "scripty",
     "as3": "scripty"
   },
   "private": true
