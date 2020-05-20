@@ -9,6 +9,7 @@ module GameData exposing
     , NodeQuality(..)
     , NodeType
     , Skill
+    , Spell
     , decoder
     , graphHeight
     , graphMaxX
@@ -54,6 +55,7 @@ type alias Character =
     , nodeTypes : NodeTypes
     , graph : Graph
     , skills : Dict String Skill
+    , spells : List Spell
     }
 
 
@@ -65,6 +67,23 @@ type alias Skill =
     , manaCost : Maybe Int
     , energyCost : Maybe Int
     , cooldown : Maybe Int
+    }
+
+
+type alias Spell =
+    { id : String
+    , rank : Int
+    , types : List Int
+    , runeCombination : List Int
+    , spellRings : List String
+    , damageMultiplier : Float
+    , costMultiplier : Float
+    , msecsPerRune : Int
+    , spellPanelIcon : String
+    , displayName : String
+    , description : String
+    , tier : Int
+    , manaCost : Int
     }
 
 
@@ -239,6 +258,32 @@ characterDecoder skills stats =
                 |> D.andThen identity
             )
         |> P.custom (D.succeed skills)
+        -- spells are for wizards - `spells=null` for cid
+        -- spells weren't exported pre-0.12.0 - the field may be missing
+        |> P.optional "spells"
+            (D.list spellDecoder
+                |> D.nullable
+                |> D.map (Maybe.withDefault [])
+            )
+            []
+
+
+spellDecoder : D.Decoder Spell
+spellDecoder =
+    D.succeed Spell
+        |> P.required "id" D.string
+        |> P.required "rank" D.int
+        |> P.required "types" (D.list D.int)
+        |> P.required "runeCombination" (D.list D.int)
+        |> P.required "spellRings" (D.list D.string)
+        |> P.required "damageMultiplier" D.float
+        |> P.required "costMultiplier" D.float
+        |> P.required "msecsPerRune" D.int
+        |> P.required "spellPanelIcon" D.string
+        |> P.required "displayName" D.string
+        |> P.required "description" D.string
+        |> P.required "tier" D.int
+        |> P.required "manaCost" D.int
 
 
 parseNodeQuality : String -> NodeQuality

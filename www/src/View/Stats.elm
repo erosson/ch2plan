@@ -37,10 +37,17 @@ view model gameData params =
                     , text " have no effect on these stat calculations yet. Work is in progress. Please be patient. (All other nodes should work.)"
                     ]
                 , div [ class "stats-flex" ]
-                    [ div [ class "stats-box skills-summary" ]
-                        [ p [] [ text "Skills:" ]
-                        , ul [] (List.map (viewSkillSummary game.stats.rules getStat) <| List.filter (\s -> not <| Set.member s.id skillBlacklist) <| Dict.values char.skills)
-                        ]
+                    [ if char.spells == [] then
+                        div [ class "stats-box skills-summary" ]
+                            [ p [] [ text "Skills:" ]
+                            , ul [] (List.map (viewSkillSummary game.stats.rules getStat) <| List.filter (\s -> not <| Set.member s.id skillBlacklist) <| Dict.values char.skills)
+                            ]
+
+                      else
+                        div [ class "stats-box spells-summary" ]
+                            [ p [] [ text "Spells:" ]
+                            , ul [] (List.map viewSpellSummary char.spells)
+                            ]
                     , div [ class "stats-box" ]
                         [ p [] [ text "Statistics:" ]
                         , viewStatsSummary getStat
@@ -63,6 +70,43 @@ view model gameData params =
 skillBlacklist =
     -- quick-and-dirty way to avoid rendering unused skills
     Set.fromList [ "Clickdrizzle", "EnergizeExtend", "EnergizeRush" ]
+
+
+viewSpellSummary : GameData.Spell -> Html msg
+viewSpellSummary s =
+    let
+        lineIf : Bool -> List (Html msg) -> List (Html msg)
+        lineIf b l =
+            if b then
+                l
+
+            else
+                []
+
+        energy =
+            toFloat (List.length s.runeCombination) * s.costMultiplier * 5 |> round
+
+        damage =
+            (2 ^ List.length s.runeCombination |> toFloat) * (25.0 / 4) * s.damageMultiplier
+
+        durationSecs =
+            (List.length s.runeCombination * s.msecsPerRune |> toFloat) * 0.5 / 1000
+
+        lines : List (List (Html msg))
+        lines =
+            [ [ text "Runes: ", kbd [] [ s.runeCombination |> List.map String.fromInt |> String.join " " |> text ] ]
+
+            -- , lineIf (s.description /= "") [ text s.description ]
+            , lineIf (s.manaCost > 0) [ text <| "Mana cost: " ++ String.fromInt s.manaCost ]
+            , lineIf (energy > 0) [ text <| "Energy cost: " ++ String.fromInt energy ]
+            , lineIf (s.damageMultiplier > 0) [ text <| "Damage: ×" ++ String.fromFloat damage ]
+            , lineIf (durationSecs > 0) [ text <| "Cast speed: " ++ String.fromFloat durationSecs ]
+            ]
+    in
+    li []
+        [ b [] [ text s.displayName ]
+        , ul [] (lines |> List.filter ((/=) []) |> List.map (li []))
+        ]
 
 
 viewSkillSummary : Stats.Rules -> (Stat -> Result String Stats.StatTotal) -> GameData.Skill -> Html msg
@@ -89,7 +133,10 @@ viewSkillSummary rules getStat skill =
                     )
     in
     li []
-        [ img [ class "skill-icon", src <| "./ch2data/img/skills/" ++ String.fromInt skill.iconId ++ ".png" ] [], b [] [ text skill.name ], ul [] lines ]
+        [ img [ class "skill-icon", src <| "./ch2data/img/skills/" ++ String.fromInt skill.iconId ++ ".png" ] []
+        , b [] [ text skill.name ]
+        , ul [] lines
+        ]
 
 
 viewStatsSummary : (Stats.Stat -> Result String Stats.StatTotal) -> Html msg
