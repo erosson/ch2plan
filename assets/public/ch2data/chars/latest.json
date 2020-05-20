@@ -1,6 +1,6 @@
 {
   "ch2": {
-    "GAME_VERSION": "0.12.0 r457"
+    "GAME_VERSION": "0.12.0 r464"
   },
   "heroes": {
     "helpfulAdventurer": {
@@ -11868,7 +11868,8 @@
           }
         ]
       },
-      "name": "Helpful Adventurer"
+      "name": "Helpful Adventurer",
+      "spells": null
     },
     "wizard": {
       "flavor": "A character who spells doom to those around him.",
@@ -34096,9 +34097,1148 @@
           }
         ]
       },
-      "name": "Wizard"
+      "name": "Wizard",
+      "spells": [
+        {
+          "costMultiplier": 0.6,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Ice: Magic Rank 1",
+          "id": "ice1",
+          "manaCost": 0,
+          "msecsPerRune": 1400,
+          "rank": 1,
+          "runeCombination": [
+            2,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_iceRank1",
+          "spellRings": [
+            "Ice1"
+          ],
+          "tier": 1,
+          "types": [
+            2
+          ]
+        },
+        {
+          "costMultiplier": 0.6,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Ice: Magic Rank 2",
+          "id": "ice2",
+          "manaCost": 0,
+          "msecsPerRune": 1400,
+          "rank": 2,
+          "runeCombination": [
+            2,
+            5,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_iceRank1",
+          "spellRings": [
+            "Ice1"
+          ],
+          "tier": 1,
+          "types": [
+            2
+          ]
+        },
+        {
+          "costMultiplier": 0.6,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Ice: Magic Rank 3",
+          "id": "ice3",
+          "manaCost": 0,
+          "msecsPerRune": 1400,
+          "rank": 3,
+          "runeCombination": [
+            2,
+            5,
+            3,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_iceRank1",
+          "spellRings": [
+            "Ice1"
+          ],
+          "tier": 1,
+          "types": [
+            2
+          ]
+        },
+        {
+          "costMultiplier": 0.6,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Ice: Magic Rank 4",
+          "id": "ice4",
+          "manaCost": 0,
+          "msecsPerRune": 1400,
+          "rank": 4,
+          "runeCombination": [
+            2,
+            5,
+            3,
+            2,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_iceRank1",
+          "spellRings": [
+            "Ice1",
+            "Ice2"
+          ],
+          "tier": 2,
+          "types": [
+            2
+          ]
+        },
+        {
+          "costMultiplier": 0.6,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Ice: Magic Rank 5",
+          "id": "ice5",
+          "manaCost": 0,
+          "msecsPerRune": 1400,
+          "rank": 5,
+          "runeCombination": [
+            2,
+            5,
+            3,
+            2,
+            4,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_iceRank1",
+          "spellRings": [
+            "Ice1",
+            "Ice2"
+          ],
+          "tier": 2,
+          "types": [
+            2
+          ]
+        },
+        {
+          "costMultiplier": 0.6,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Ice: Magic Rank 6",
+          "id": "ice6",
+          "manaCost": 0,
+          "msecsPerRune": 1400,
+          "rank": 6,
+          "runeCombination": [
+            2,
+            5,
+            3,
+            2,
+            4,
+            7,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_iceRank1",
+          "spellRings": [
+            "Ice1",
+            "Ice2"
+          ],
+          "tier": 2,
+          "types": [
+            2
+          ]
+        },
+        {
+          "costMultiplier": 0.6,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Ice: Magic Rank 7",
+          "id": "ice7",
+          "manaCost": 0,
+          "msecsPerRune": 1400,
+          "rank": 7,
+          "runeCombination": [
+            2,
+            5,
+            3,
+            2,
+            4,
+            7,
+            2,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_iceRank1",
+          "spellRings": [
+            "Ice1",
+            "Ice2",
+            "Ice3"
+          ],
+          "tier": 3,
+          "types": [
+            2
+          ]
+        },
+        {
+          "costMultiplier": 0.6,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Ice: Magic Rank 8",
+          "id": "ice8",
+          "manaCost": 0,
+          "msecsPerRune": 1400,
+          "rank": 8,
+          "runeCombination": [
+            2,
+            5,
+            3,
+            2,
+            4,
+            7,
+            2,
+            3,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_iceRank1",
+          "spellRings": [
+            "Ice1",
+            "Ice2",
+            "Ice3"
+          ],
+          "tier": 3,
+          "types": [
+            2
+          ]
+        },
+        {
+          "costMultiplier": 0.6,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Ice: Magic Rank 9",
+          "id": "ice9",
+          "manaCost": 0,
+          "msecsPerRune": 1400,
+          "rank": 9,
+          "runeCombination": [
+            2,
+            5,
+            3,
+            2,
+            4,
+            7,
+            2,
+            3,
+            5,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_iceRank1",
+          "spellRings": [
+            "Ice1",
+            "Ice2",
+            "Ice3"
+          ],
+          "tier": 3,
+          "types": [
+            2
+          ]
+        },
+        {
+          "costMultiplier": 1.2,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Fire: Magic Rank 1",
+          "id": "fire1",
+          "manaCost": 0,
+          "msecsPerRune": 1260,
+          "rank": 1,
+          "runeCombination": [
+            1,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_fireRank1",
+          "spellRings": [
+            "Fire1"
+          ],
+          "tier": 1,
+          "types": [
+            1
+          ]
+        },
+        {
+          "costMultiplier": 1.2,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Fire: Magic Rank 2",
+          "id": "fire2",
+          "manaCost": 0,
+          "msecsPerRune": 1260,
+          "rank": 2,
+          "runeCombination": [
+            1,
+            4,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_fireRank1",
+          "spellRings": [
+            "Fire1"
+          ],
+          "tier": 1,
+          "types": [
+            1
+          ]
+        },
+        {
+          "costMultiplier": 1.2,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Fire: Magic Rank 3",
+          "id": "fire3",
+          "manaCost": 0,
+          "msecsPerRune": 1260,
+          "rank": 3,
+          "runeCombination": [
+            1,
+            4,
+            2,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_fireRank1",
+          "spellRings": [
+            "Fire1"
+          ],
+          "tier": 1,
+          "types": [
+            1
+          ]
+        },
+        {
+          "costMultiplier": 1.2,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Fire: Magic Rank 4",
+          "id": "fire4",
+          "manaCost": 0,
+          "msecsPerRune": 1260,
+          "rank": 4,
+          "runeCombination": [
+            1,
+            4,
+            2,
+            1,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_fireRank1",
+          "spellRings": [
+            "Fire1",
+            "Fire2"
+          ],
+          "tier": 2,
+          "types": [
+            1
+          ]
+        },
+        {
+          "costMultiplier": 1.2,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Fire: Magic Rank 5",
+          "id": "fire5",
+          "manaCost": 0,
+          "msecsPerRune": 1260,
+          "rank": 5,
+          "runeCombination": [
+            1,
+            4,
+            2,
+            1,
+            6,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_fireRank1",
+          "spellRings": [
+            "Fire1",
+            "Fire2"
+          ],
+          "tier": 2,
+          "types": [
+            1
+          ]
+        },
+        {
+          "costMultiplier": 1.2,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Fire: Magic Rank 6",
+          "id": "fire6",
+          "manaCost": 0,
+          "msecsPerRune": 1260,
+          "rank": 6,
+          "runeCombination": [
+            1,
+            4,
+            2,
+            1,
+            6,
+            7,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_fireRank1",
+          "spellRings": [
+            "Fire1",
+            "Fire2"
+          ],
+          "tier": 2,
+          "types": [
+            1
+          ]
+        },
+        {
+          "costMultiplier": 1.2,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Fire: Magic Rank 7",
+          "id": "fire7",
+          "manaCost": 0,
+          "msecsPerRune": 1260,
+          "rank": 7,
+          "runeCombination": [
+            1,
+            4,
+            2,
+            1,
+            6,
+            7,
+            1,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_fireRank1",
+          "spellRings": [
+            "Fire1",
+            "Fire2",
+            "Fire3"
+          ],
+          "tier": 3,
+          "types": [
+            1
+          ]
+        },
+        {
+          "costMultiplier": 1.2,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Fire: Magic Rank 8",
+          "id": "fire8",
+          "manaCost": 0,
+          "msecsPerRune": 1260,
+          "rank": 8,
+          "runeCombination": [
+            1,
+            4,
+            2,
+            1,
+            6,
+            7,
+            1,
+            2,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_fireRank1",
+          "spellRings": [
+            "Fire1",
+            "Fire2",
+            "Fire3"
+          ],
+          "tier": 3,
+          "types": [
+            1
+          ]
+        },
+        {
+          "costMultiplier": 1.2,
+          "damageMultiplier": 1,
+          "description": "",
+          "displayName": "Fire: Magic Rank 9",
+          "id": "fire9",
+          "manaCost": 0,
+          "msecsPerRune": 1260,
+          "rank": 9,
+          "runeCombination": [
+            1,
+            4,
+            2,
+            1,
+            6,
+            7,
+            1,
+            2,
+            4,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_fireRank1",
+          "spellRings": [
+            "Fire1",
+            "Fire2",
+            "Fire3"
+          ],
+          "tier": 3,
+          "types": [
+            1
+          ]
+        },
+        {
+          "costMultiplier": 1,
+          "damageMultiplier": 0.6,
+          "description": "",
+          "displayName": "Lightning: Magic Rank 1",
+          "id": "lightning1",
+          "manaCost": 0,
+          "msecsPerRune": 1120,
+          "rank": 1,
+          "runeCombination": [
+            3,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_lightningRank1",
+          "spellRings": [
+            "Lightning1"
+          ],
+          "tier": 1,
+          "types": [
+            3
+          ]
+        },
+        {
+          "costMultiplier": 1,
+          "damageMultiplier": 0.6,
+          "description": "",
+          "displayName": "Lightning: Magic Rank 2",
+          "id": "lightning2",
+          "manaCost": 0,
+          "msecsPerRune": 1120,
+          "rank": 2,
+          "runeCombination": [
+            3,
+            6,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_lightningRank1",
+          "spellRings": [
+            "Lightning1"
+          ],
+          "tier": 1,
+          "types": [
+            3
+          ]
+        },
+        {
+          "costMultiplier": 1,
+          "damageMultiplier": 0.6,
+          "description": "",
+          "displayName": "Lightning: Magic Rank 3",
+          "id": "lightning3",
+          "manaCost": 0,
+          "msecsPerRune": 1120,
+          "rank": 3,
+          "runeCombination": [
+            3,
+            6,
+            1,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_lightningRank1",
+          "spellRings": [
+            "Lightning1"
+          ],
+          "tier": 1,
+          "types": [
+            3
+          ]
+        },
+        {
+          "costMultiplier": 1,
+          "damageMultiplier": 0.6,
+          "description": "",
+          "displayName": "Lightning: Magic Rank 4",
+          "id": "lightning4",
+          "manaCost": 0,
+          "msecsPerRune": 1120,
+          "rank": 4,
+          "runeCombination": [
+            3,
+            6,
+            1,
+            3,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_lightningRank1",
+          "spellRings": [
+            "Lightning1",
+            "Lightning2"
+          ],
+          "tier": 2,
+          "types": [
+            3
+          ]
+        },
+        {
+          "costMultiplier": 1,
+          "damageMultiplier": 0.6,
+          "description": "",
+          "displayName": "Lightning: Magic Rank 5",
+          "id": "lightning5",
+          "manaCost": 0,
+          "msecsPerRune": 1120,
+          "rank": 5,
+          "runeCombination": [
+            3,
+            6,
+            1,
+            3,
+            5,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_lightningRank1",
+          "spellRings": [
+            "Lightning1",
+            "Lightning2"
+          ],
+          "tier": 2,
+          "types": [
+            3
+          ]
+        },
+        {
+          "costMultiplier": 1,
+          "damageMultiplier": 0.6,
+          "description": "",
+          "displayName": "Lightning: Magic Rank 6",
+          "id": "lightning6",
+          "manaCost": 0,
+          "msecsPerRune": 1120,
+          "rank": 6,
+          "runeCombination": [
+            3,
+            6,
+            1,
+            3,
+            5,
+            7,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_lightningRank1",
+          "spellRings": [
+            "Lightning1",
+            "Lightning2"
+          ],
+          "tier": 2,
+          "types": [
+            3
+          ]
+        },
+        {
+          "costMultiplier": 1,
+          "damageMultiplier": 0.6,
+          "description": "",
+          "displayName": "Lightning: Magic Rank 7",
+          "id": "lightning7",
+          "manaCost": 0,
+          "msecsPerRune": 1120,
+          "rank": 7,
+          "runeCombination": [
+            3,
+            6,
+            1,
+            3,
+            5,
+            7,
+            3,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_lightningRank1",
+          "spellRings": [
+            "Lightning1",
+            "Lightning2",
+            "Lightning3"
+          ],
+          "tier": 3,
+          "types": [
+            3
+          ]
+        },
+        {
+          "costMultiplier": 1,
+          "damageMultiplier": 0.6,
+          "description": "",
+          "displayName": "Lightning: Magic Rank 8",
+          "id": "lightning8",
+          "manaCost": 0,
+          "msecsPerRune": 1120,
+          "rank": 8,
+          "runeCombination": [
+            3,
+            6,
+            1,
+            3,
+            5,
+            7,
+            3,
+            1,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_lightningRank1",
+          "spellRings": [
+            "Lightning1",
+            "Lightning2",
+            "Lightning3"
+          ],
+          "tier": 3,
+          "types": [
+            3
+          ]
+        },
+        {
+          "costMultiplier": 1,
+          "damageMultiplier": 0.6,
+          "description": "",
+          "displayName": "Lightning: Magic Rank 9",
+          "id": "lightning9",
+          "manaCost": 0,
+          "msecsPerRune": 1120,
+          "rank": 9,
+          "runeCombination": [
+            3,
+            6,
+            1,
+            3,
+            5,
+            7,
+            3,
+            1,
+            6,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_lightningRank1",
+          "spellRings": [
+            "Lightning1",
+            "Lightning2",
+            "Lightning3"
+          ],
+          "tier": 3,
+          "types": [
+            3
+          ]
+        },
+        {
+          "costMultiplier": 0,
+          "damageMultiplier": 0,
+          "description": "Cuts and saves the next incantation you invoke.",
+          "displayName": "Cut",
+          "id": "cut",
+          "manaCost": 20,
+          "msecsPerRune": 1000,
+          "rank": 1,
+          "runeCombination": [
+            7,
+            6,
+            3,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_utilityCutAndPaste",
+          "spellRings": [
+            "Neutral1"
+          ],
+          "tier": 0,
+          "types": [
+            7
+          ]
+        },
+        {
+          "costMultiplier": 0,
+          "damageMultiplier": 0,
+          "description": "Casts the last incantation you Cut.",
+          "displayName": "Paste",
+          "id": "paste",
+          "manaCost": 5,
+          "msecsPerRune": 1000,
+          "rank": 1,
+          "runeCombination": [
+            8,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_utilityCutAndPaste",
+          "spellRings": [
+            "Neutral1"
+          ],
+          "tier": 0,
+          "types": [
+            7
+          ]
+        },
+        {
+          "costMultiplier": 0,
+          "damageMultiplier": 0,
+          "description": "Restores 2.5% energy with a 20% chance to reduce all Fatigue by 1 every 3 seconds for 18 seconds. Stacks.",
+          "displayName": "Energon Cube",
+          "id": "Energon Cube",
+          "manaCost": 25,
+          "msecsPerRune": 1000,
+          "rank": 1,
+          "runeCombination": [
+            7,
+            5,
+            2,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_energizeSpell",
+          "spellRings": [
+            "Neutral1"
+          ],
+          "tier": 0,
+          "types": [
+            7
+          ]
+        },
+        {
+          "costMultiplier": 0,
+          "damageMultiplier": 0,
+          "description": "Multiply your current DPS by 1.05 for 60 seconds.",
+          "displayName": "Dark Ritual",
+          "id": "iceFireDarkRitual",
+          "manaCost": 10,
+          "msecsPerRune": 1000,
+          "rank": 1,
+          "runeCombination": [
+            7,
+            4,
+            1,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_darkRitual",
+          "spellRings": [
+            "Neutral1"
+          ],
+          "tier": 0,
+          "types": [
+            7
+          ]
+        },
+        {
+          "costMultiplier": 0,
+          "damageMultiplier": 0,
+          "description": "Ice and Fire Spells gain the benefit of all stats that affect either Ice or Fire Magic.",
+          "displayName": "Ice & Fire Synergy",
+          "id": "synergyIceFire",
+          "manaCost": 50,
+          "msecsPerRune": 1330,
+          "rank": 6,
+          "runeCombination": [
+            4,
+            1,
+            2,
+            2,
+            1,
+            4,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_synergyIceFire1",
+          "spellRings": [
+            "Ice1",
+            "Fire2"
+          ],
+          "tier": 0,
+          "types": [
+            2,
+            1
+          ]
+        },
+        {
+          "costMultiplier": 0,
+          "damageMultiplier": 0,
+          "description": "Ice and Lightning Spells gain the benefit of all stats that affect either Ice or Lightning Magic.",
+          "displayName": "Ice & Lightning Synergy",
+          "id": "synergyIceLightning",
+          "manaCost": 50,
+          "msecsPerRune": 1260,
+          "rank": 6,
+          "runeCombination": [
+            5,
+            2,
+            3,
+            3,
+            2,
+            5,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_synergyIceLightning1",
+          "spellRings": [
+            "Ice1",
+            "Lightning2"
+          ],
+          "tier": 0,
+          "types": [
+            2,
+            3
+          ]
+        },
+        {
+          "costMultiplier": 0,
+          "damageMultiplier": 0,
+          "description": "Fire and Lightning Spells gain the benefit of all stats that affect either Fire or Lightning Magic.",
+          "displayName": "Fire & Lightning Synergy",
+          "id": "synergyFireLightning",
+          "manaCost": 50,
+          "msecsPerRune": 1190,
+          "rank": 6,
+          "runeCombination": [
+            6,
+            3,
+            1,
+            1,
+            3,
+            6,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_synergyLightningFire1",
+          "spellRings": [
+            "Fire1",
+            "Lightning2"
+          ],
+          "tier": 0,
+          "types": [
+            1,
+            3
+          ]
+        },
+        {
+          "costMultiplier": 0,
+          "damageMultiplier": 2,
+          "description": "Deal damage equivalent to Rank 9 Ice and Fire spells. Benefits from all Ice and Fire stats. Gains 50% damage per charge, up to 5 charges.",
+          "displayName": "Ice and Fire: Damage Spell",
+          "id": "iceFireDamage",
+          "manaCost": 100,
+          "msecsPerRune": 1330,
+          "rank": 9,
+          "runeCombination": [
+            4,
+            2,
+            1,
+            7,
+            4,
+            7,
+            2,
+            1,
+            4,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_dualIceFireDamageExtreme",
+          "spellRings": [
+            "Ice1",
+            "Fire2",
+            "Ice3"
+          ],
+          "tier": 0,
+          "types": [
+            2,
+            1
+          ]
+        },
+        {
+          "costMultiplier": 0,
+          "damageMultiplier": 0.8,
+          "description": "Deal damage equivalent to Rank 9 Ice and Lightning spells. Benefits from all Ice and Lightning stats. Gains 50% damage per charge, up to 5 charges.",
+          "displayName": "Ice and Lightning: Damage Spell",
+          "id": "iceLightningDamage",
+          "manaCost": 100,
+          "msecsPerRune": 1260,
+          "rank": 9,
+          "runeCombination": [
+            5,
+            3,
+            2,
+            7,
+            5,
+            7,
+            3,
+            2,
+            5,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_dualIceLightningDamageExtreme",
+          "spellRings": [
+            "Ice1",
+            "Lightning2",
+            "Ice3"
+          ],
+          "tier": 0,
+          "types": [
+            2,
+            3
+          ]
+        },
+        {
+          "costMultiplier": 0,
+          "damageMultiplier": 0.8,
+          "description": "Deal damage equivalent to Rank 9 Lightning and Fire spells. Benefits from all Lightning and Fire stats. Gains 50% damage per charge, up to 5 charges.",
+          "displayName": "Lightning and Fire: Damage Spell",
+          "id": "lightningFireDamage",
+          "manaCost": 100,
+          "msecsPerRune": 1190,
+          "rank": 9,
+          "runeCombination": [
+            6,
+            1,
+            3,
+            7,
+            6,
+            7,
+            1,
+            3,
+            6,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_dualLightningFireDamageExtreme",
+          "spellRings": [
+            "Fire1",
+            "Lightning2",
+            "Fire3"
+          ],
+          "tier": 0,
+          "types": [
+            1,
+            3
+          ]
+        },
+        {
+          "costMultiplier": 0,
+          "damageMultiplier": 0,
+          "description": "Summons a thunderstorm, which strikes the monster with ice or lightning whenever a spell is cast. Affects two spells per charge, up to 10 charges.",
+          "displayName": "Thundersnow",
+          "id": "iceLightningThundersnow",
+          "manaCost": 100,
+          "msecsPerRune": 1260,
+          "rank": 9,
+          "runeCombination": [
+            5,
+            2,
+            2,
+            7,
+            5,
+            7,
+            3,
+            3,
+            5,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_dualUltimaIceLightning",
+          "spellRings": [
+            "Ice1",
+            "Lightning2",
+            "Ice3"
+          ],
+          "tier": 0,
+          "types": [
+            2,
+            3
+          ]
+        },
+        {
+          "costMultiplier": 0,
+          "damageMultiplier": 0,
+          "description": "A solar flare manifests. All monsters lose 1% of their current health per charge, up to 10 charges. You lose all energy and gain 100 Hyperthermia.",
+          "displayName": "Solar Storm",
+          "id": "fireLightningSolarStorm",
+          "manaCost": 100,
+          "msecsPerRune": 1190,
+          "rank": 9,
+          "runeCombination": [
+            6,
+            3,
+            3,
+            7,
+            6,
+            7,
+            1,
+            1,
+            6,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_dualUltimaLightningFire",
+          "spellRings": [
+            "Fire1",
+            "Lightning2",
+            "Fire3"
+          ],
+          "tier": 0,
+          "types": [
+            1,
+            3
+          ]
+        },
+        {
+          "costMultiplier": 0,
+          "damageMultiplier": 0,
+          "description": "Comets rain from the heavens, striking the monster at random intervals. Occurs three times per charge, up to 10 charges.",
+          "displayName": "Comet Shower",
+          "id": "iceFireCometShower",
+          "manaCost": 100,
+          "msecsPerRune": 1330,
+          "rank": 9,
+          "runeCombination": [
+            4,
+            1,
+            1,
+            7,
+            4,
+            7,
+            2,
+            2,
+            4,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_dualUltimaIceFire",
+          "spellRings": [
+            "Ice1",
+            "Fire2",
+            "Ice3"
+          ],
+          "tier": 0,
+          "types": [
+            2,
+            1
+          ]
+        },
+        {
+          "costMultiplier": 0,
+          "damageMultiplier": 0,
+          "description": "Purchases a random catalog item.",
+          "displayName": "Exchange",
+          "id": "buyRandomCatalogItem",
+          "manaCost": 0,
+          "msecsPerRune": 1000,
+          "rank": 1,
+          "runeCombination": [
+            7,
+            8
+          ],
+          "spellPanelIcon": "BitmapHUD_exchange",
+          "spellRings": [],
+          "tier": 0,
+          "types": [
+            7
+          ]
+        }
+      ]
     }
   },
+  "loadedModNames": [
+    "Helpful Adventurer",
+    "Wizard",
+    "ch2plan-exporter"
+  ],
+  "modsHaveLoaded": [
+    3,
+    3
+  ],
   "skills": {
     "Autoattackstorm": {
       "char": "helpfulAdventurer",

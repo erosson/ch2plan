@@ -63,6 +63,7 @@ async function main() {
   }
   allJson.byVersion[json.versionSlug] = json;
   await Promise.all([
+    fs.writeFile("./latest.json", JSON.stringify(rawSortedJson, null, 2)),
     fs.writeFile(
       "./public/ch2data/chars/latest.json",
       JSON.stringify(rawSortedJson, null, 2)

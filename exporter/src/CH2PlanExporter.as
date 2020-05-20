@@ -9,6 +9,7 @@ package
 	import heroclickerlib.managers.Trace;
 	import models.Character;
 	import models.Characters;
+	import ModLoader;
 
 	public class CH2PlanExporter extends Sprite 
 	{
@@ -39,6 +40,8 @@ package
 		}
 		private function _onStartup(game:IdleHeroMain):void {
 			json.ch2 = pick(IdleHeroMain, ['GAME_VERSION']);
+			json.loadedModNames = ModLoader.instance.loadedModNames;
+			json.modsHaveLoaded = [ModLoader.instance.modsLoaded, ModLoader.instance.modsStartedLoading];
 			for (var ckey:String in Characters.startingDefaultInstances) {
 				var char:* = Characters.startingDefaultInstances[ckey];
 				var slug:String = slugs[ckey];
@@ -63,6 +66,20 @@ package
 							throw e;
 						}
 					}
+				}
+
+				var empty:Character = new Character();
+				empty.name = char.name;
+				ModLoader.instance.onCharacterCreated(empty);
+				if (empty.extendedVariables && empty.extendedVariables["spells"]) {
+					json.heroes[slug].spells = [];
+					for (var spellKey:String in empty.extendedVariables["spells"]) {
+						var spell:Object = empty.extendedVariables["spells"][spellKey];
+						json.heroes[slug].spells[spellKey] = pick(spell, ["id", "rank", "types", "runeCombination", "spellRings", "damageMultiplier", "costMultiplier", "msecsPerRune", "spellPanelIcon", "displayName", "description", "tier", "manaCost"]);
+					}
+				}
+				else {
+					json.heroes[slug].spells = null;
 				}
 			}
 			for (var skey:String in Character.staticSkillInstances) {
