@@ -8,9 +8,9 @@ Want to add something/fix something in the skill tree planner? I take pull reque
 
 ### The `ch2plan-exporter` mod
 
-**[The Clicker Heroes 2 planner-exporter mod: `ch2plan-exporter.swf`](/exporter/bin/ch2plan-exporter.swf)**
+**[`ch2plan-exporter.swf`](/exporter/bin/ch2plan-exporter.swf)**
 
-- [Install the above mod using these directions from Playsaurus](https://www.clickerheroes2.com/installing_mods.php).
+- [Install the above `swf` mod using these directions from Playsaurus](https://www.clickerheroes2.com/installing_mods.php).
 - Run Clicker Heroes 2. This mod won't affect your gameplay, but instead writes a file to your desktop, `latest.json`.
   - If something goes wrong, you'll see `error.txt` on your desktop instead.
   - If neither file is on your desktop after running the game, the mod isn't correctly installed!
