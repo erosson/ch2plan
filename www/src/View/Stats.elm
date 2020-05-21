@@ -92,15 +92,26 @@ viewSpellSummary s =
         durationSecs =
             (List.length s.runeCombination * s.msecsPerRune |> toFloat) * 0.5 / 1000
 
+        fats =
+            GameData.spellFatigue s
+
         lines : List (List (Html msg))
         lines =
-            [ [ text "Runes: ", kbd [] [ s.runeCombination |> List.map String.fromInt |> String.join " " |> text ] ]
+            [ []
 
             -- , lineIf (s.description /= "") [ text s.description ]
+            , [ text "Runes: ", kbd [] [ s.runeCombination |> List.map String.fromInt |> String.join " " |> text ] ]
+            , lineIf (s.damageMultiplier > 0) [ text <| "Damage: ×" ++ String.fromFloat damage ]
+            , lineIf (durationSecs > 0) [ text <| "Cast time: " ++ String.fromFloat durationSecs ++ "s" ]
             , lineIf (s.manaCost > 0) [ text <| "Mana cost: " ++ String.fromInt s.manaCost ]
             , lineIf (energy > 0) [ text <| "Energy cost: " ++ String.fromInt energy ]
-            , lineIf (s.damageMultiplier > 0) [ text <| "Damage: ×" ++ String.fromFloat damage ]
-            , lineIf (durationSecs > 0) [ text <| "Cast speed: " ++ String.fromFloat durationSecs ]
+            , lineIf (fats /= [])
+                [ text <| "Fatigue: "
+                , fats
+                    |> List.map (\( fat, val ) -> String.fromInt val ++ "× " ++ fat.label)
+                    |> String.join ", "
+                    |> text
+                ]
             ]
     in
     li []

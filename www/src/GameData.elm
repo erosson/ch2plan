@@ -1,6 +1,8 @@
 module GameData exposing
     ( Character
     , Edge
+    , Fatigue
+    , FatigueId(..)
     , GameData
     , GameVersionData
     , Graph
@@ -11,6 +13,8 @@ module GameData exposing
     , Skill
     , Spell
     , decoder
+    , fatigue
+    , fatigues
     , graphHeight
     , graphMaxX
     , graphMaxY
@@ -21,6 +25,7 @@ module GameData exposing
     , latestVersionId
     , neighbors
     , qualityToString
+    , spellFatigue
     , startNodes
     , tooltip
     )
@@ -73,7 +78,7 @@ type alias Skill =
 type alias Spell =
     { id : String
     , rank : Int
-    , types : List Int
+    , types : Set Int
     , runeCombination : List Int
     , spellRings : List String
     , damageMultiplier : Float
@@ -146,6 +151,50 @@ type alias Node =
 
 type alias Edge =
     ( Node, Node )
+
+
+type FatigueId
+    = Fire
+    | Ice
+    | Lit
+
+
+type alias Fatigue =
+    { id : FatigueId, label : String, ord : Int }
+
+
+fatigueIds : List FatigueId
+fatigueIds =
+    [ Fire, Ice, Lit ]
+
+
+fatigue : FatigueId -> Fatigue
+fatigue f =
+    case f of
+        Fire ->
+            Fatigue f "Fire" 1
+
+        Ice ->
+            Fatigue f "Ice" 2
+
+        Lit ->
+            Fatigue f "Lit" 3
+
+
+fatigues : List Fatigue
+fatigues =
+    fatigueIds |> List.map fatigue
+
+
+spellFatigue : Spell -> List ( Fatigue, Int )
+spellFatigue s =
+    if s.rank <= 0 then
+        []
+
+    else
+        fatigues
+            |> List.filter (\f -> Set.member f.ord s.types)
+            |> List.map (\f -> ( f, s.rank ))
 
 
 latestVersionId : GameData -> Maybe String
@@ -273,7 +322,7 @@ spellDecoder =
     D.succeed Spell
         |> P.required "id" D.string
         |> P.required "rank" D.int
-        |> P.required "types" (D.list D.int)
+        |> P.required "types" (D.list D.int |> D.map Set.fromList)
         |> P.required "runeCombination" (D.list D.int)
         |> P.required "spellRings" (D.list D.string)
         |> P.required "damageMultiplier" D.float

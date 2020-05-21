@@ -73,12 +73,13 @@ params route =
 
 
 type Route
-    = Home HomeParams
+    = Redirect Route
+    | Home HomeParams
     | Stats HomeParams
     | StatsTSV HomeParams
     | EthItems
     | Changelog
-    | Redirect Route
+    | Runecorder
 
 
 type alias Features =
@@ -166,6 +167,7 @@ parser =
         , P.map StatsTSV <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "tsv" </> encodedString </> P.string
         , P.map EthItems <| P.s "ethitems"
         , P.map Changelog <| P.s "changelog"
+        , P.map Runecorder <| P.s "runecorder"
         ]
 
 
@@ -247,6 +249,9 @@ stringifyHomePath { version, hero, build, search } =
 stringify : Route -> String
 stringify route =
     case route of
+        Redirect r ->
+            stringify r
+
         Home args ->
             "#/g" ++ stringifyHomePath args
 
@@ -262,8 +267,8 @@ stringify route =
         EthItems ->
             "#/ethitems"
 
-        Redirect r ->
-            stringify r
+        Runecorder ->
+            "#/runecorder"
 
 
 href : Route -> H.Attribute msg

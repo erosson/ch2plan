@@ -12,6 +12,7 @@ import Model exposing (Model, Msg)
 import Route exposing (Route)
 import View.Changelog
 import View.EthItems
+import View.Runecorder
 import View.SkillTree
 import View.Spreadsheet
 import View.Stats
@@ -68,6 +69,9 @@ viewBody model =
 
                         Route.EthItems ->
                             div [] (header ++ [ View.EthItems.view model ])
+
+                        Route.Runecorder ->
+                            div [] (header ++ [ View.Runecorder.view model gameData ])
 
 
 gameVersion : Model -> GameData -> Maybe GameData.GameVersionData

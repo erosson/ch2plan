@@ -61,6 +61,8 @@ type Msg
     | ToggleSidebar
     | SaveFileSelected String
     | SaveFileImport D.Value
+    | RunecorderAppend String
+    | RunecorderInput String
 
 
 type alias Model =
@@ -81,6 +83,7 @@ type alias Model =
     , center : V2.Vec2
     , drag : Draggable.State ()
     , etherealItemInventory : Maybe SaveFile.EtherealItemInventory
+    , runecorder : String
     , error : Maybe Error
     }
 
@@ -156,6 +159,7 @@ init flags loc urlKey =
       , center = V2.vec2 0 0
       , drag = Draggable.init
       , etherealItemInventory = Nothing
+      , runecorder = ""
       , error = error
       }
     , Cmd.batch
@@ -462,6 +466,21 @@ update msg model =
                                       }
                                     , cmd
                                     )
+
+                RunecorderAppend line ->
+                    ( { model
+                        | runecorder =
+                            if model.runecorder == "" then
+                                line
+
+                            else
+                                model.runecorder ++ "\n" ++ line
+                      }
+                    , Cmd.none
+                    )
+
+                RunecorderInput input ->
+                    ( { model | runecorder = input }, Cmd.none )
 
                 NavRequest req ->
                     -- https://package.elm-lang.org/packages/elm/browser/latest/Browser#UrlRequest
