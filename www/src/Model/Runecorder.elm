@@ -1,13 +1,17 @@
 module Model.Runecorder exposing
     ( Action(..)
+    , Duration
+    , Event(..)
     , Simulation
     , SpellAction
+    , Timestamp
     , buffDarkRitual
     , buffEnergon
     , fatigueStacks
     , ignoreParseErrors
     , parse
     , run
+    , unrollStatements
     )
 
 import Dict exposing (Dict)
@@ -16,8 +20,20 @@ import GameData exposing (Fatigue, Spell)
 import List.Extra
 import Maybe.Extra
 import Parser as P exposing ((|.), (|=), Parser)
-import Scheduler exposing (Duration, Scheduler, Timestamp)
+import Scheduler exposing (Scheduler)
 import Set exposing (Set)
+
+
+
+-- re-exports
+
+
+type alias Timestamp =
+    Scheduler.Timestamp
+
+
+type alias Duration =
+    Scheduler.Duration
 
 
 
@@ -30,70 +46,215 @@ type Action s
     | SpellAction s
 
 
+type Statement s
+    = ActionStatement (Result String (Action s))
+    | LoopStatement Int (List (Statement s))
+
+
 type alias SpellAction =
     Action Spell
 
 
-parse : Dict String a -> String -> Result String (List (Result String (Action a)))
+parse : Dict String s -> String -> Result String (List (Statement s))
 parse spells =
     P.run (parser spells)
         -- >> Result.mapError Debug.toString
-        >> Result.mapError P.deadEndsToString
+        -- >> Result.mapError P.deadEndsToString
+        >> Result.mapError deadEndsToString
         >> identity
 
 
-ignoreParseErrors : Result String (List (Result String (Action a))) -> List (Action a)
+deadEndsToString : List P.DeadEnd -> String
+deadEndsToString deadEnds =
+    -- stolen from https://github.com/elm/parser/pull/38
+    let
+        deadEndToString : P.DeadEnd -> String
+        deadEndToString deadEnd =
+            let
+                position : String
+                position =
+                    "row:" ++ String.fromInt deadEnd.row ++ " col:" ++ String.fromInt deadEnd.col ++ "\n"
+            in
+            case deadEnd.problem of
+                P.Expecting str ->
+                    "Expecting " ++ str ++ "at " ++ position
+
+                P.ExpectingInt ->
+                    "ExpectingInt at " ++ position
+
+                P.ExpectingHex ->
+                    "ExpectingHex at " ++ position
+
+                P.ExpectingOctal ->
+                    "ExpectingOctal at " ++ position
+
+                P.ExpectingBinary ->
+                    "ExpectingBinary at " ++ position
+
+                P.ExpectingFloat ->
+                    "ExpectingFloat at " ++ position
+
+                P.ExpectingNumber ->
+                    "ExpectingNumber at " ++ position
+
+                P.ExpectingVariable ->
+                    "ExpectingVariable at " ++ position
+
+                P.ExpectingSymbol str ->
+                    "ExpectingSymbol " ++ str ++ " at " ++ position
+
+                P.ExpectingKeyword str ->
+                    "ExpectingKeyword " ++ str ++ "at " ++ position
+
+                P.ExpectingEnd ->
+                    "ExpectingEnd at " ++ position
+
+                P.UnexpectedChar ->
+                    "UnexpectedChar at " ++ position
+
+                P.Problem str ->
+                    str ++ " at " ++ position
+
+                P.BadRepeat ->
+                    "BadRepeat at " ++ position
+    in
+    List.foldl (++) "" (List.map deadEndToString deadEnds)
+
+
+unrollStatements : List (Statement s) -> List (Result String (Action s))
+unrollStatements =
+    List.concatMap
+        (\statement ->
+            case statement of
+                ActionStatement act ->
+                    [ act ]
+
+                LoopStatement n sts ->
+                    List.range 1 n
+                        |> List.concatMap (always sts)
+                        |> unrollStatements
+        )
+
+
+ignoreParseErrors : Result String (List (Result String (Action s))) -> List (Action s)
 ignoreParseErrors =
     Result.withDefault [] >> List.filterMap Result.toMaybe
 
 
-parser : Dict String a -> Parser (List (Result String (Action a)))
+parser : Dict String s -> Parser (List (Statement s))
 parser spells =
+    P.succeed identity
+        |. spaces
+        |= statementsParser spells
+        |. spaces
+        |. P.end
+
+
+statementsParser : Dict String s -> Parser (List (Statement s))
+statementsParser spells =
     let
-        loop : List (Result String (Action a)) -> Parser (P.Step (List (Result String (Action a))) (List (Result String (Action a))))
-        loop actions =
+        loop : List (Statement s) -> Parser (P.Step (List (Statement s)) (List (Statement s)))
+        loop stmts =
             P.oneOf
-                [ P.succeed (\a -> P.Loop (a :: actions))
-                    |= actionParser spells
-                    |. P.spaces
+                [ P.succeed (\s -> P.Loop (s :: stmts))
+                    |= statementParser spells
+                    |. spaces
                 , P.succeed ()
-                    |> P.map (\_ -> P.Done <| List.reverse actions)
+                    |> P.map (\_ -> P.Done <| List.reverse stmts)
                 ]
     in
-    P.succeed identity
-        |. P.spaces
-        |= P.loop [] loop
+    P.loop [] loop
 
 
 reserved : Set String
 reserved =
-    Set.fromList [ "wait", "click" ]
+    Set.fromList [ "wait", "click", "loop" ]
+
+
+statementParser : Dict String s -> Parser (Statement s)
+statementParser spells =
+    P.succeed identity
+        |= P.oneOf
+            [ P.succeed LoopStatement
+                |. P.keyword "loop"
+                |. spaces
+                |= (P.int
+                        |> P.andThen
+                            (\n ->
+                                if n <= 0 then
+                                    P.problem "loop minimum: 1"
+
+                                else if n > 20 then
+                                    P.problem "loop maximum: 20"
+
+                                else
+                                    P.succeed n
+                            )
+                   )
+                |. spaces
+                |. P.symbol "{"
+                |. spaces
+                |= statementsParser spells
+                |. spaces
+                |. P.symbol "}"
+            , actionParser spells
+                |> P.map ActionStatement
+            ]
+        |. spaces
+        |. P.symbol ";"
 
 
 actionParser : Dict String a -> Parser (Result String (Action a))
 actionParser spells =
-    P.succeed identity
-        |= P.oneOf
-            [ P.succeed (Ok << WaitAction)
-                |. P.keyword "wait"
-                |. P.spaces
-                |= P.int
-            , P.succeed (Ok ClickAction)
-                |. P.keyword "click"
-            , P.succeed identity
-                |= P.variable { start = Char.isAlpha, inner = \c -> c /= ';', reserved = reserved }
-                |> P.andThen
-                    (\name ->
-                        case Dict.get (name |> String.toLower |> String.trim) spells of
-                            Nothing ->
-                                P.succeed <| Err <| "no such spell: " ++ name
+    P.oneOf
+        [ P.succeed (Ok << WaitAction)
+            |. P.keyword "wait"
+            |. spaces
+            |= P.int
+        , P.succeed (Ok ClickAction)
+            |. P.keyword "click"
+        , P.succeed identity
+            |= P.variable { start = Char.isAlpha, inner = \c -> Char.isAlpha c || Char.isDigit c || c == ' ', reserved = reserved }
+            |> P.andThen
+                (\name ->
+                    case Dict.get (name |> String.toLower |> String.trim) spells of
+                        Nothing ->
+                            -- P.succeed <| Err <| "no such spell: " ++ name
+                            P.problem <| "no such spell: " ++ name
 
-                            Just a ->
-                                P.succeed <| Ok <| SpellAction a
-                    )
-            ]
-        |. P.spaces
-        |. P.symbol ";"
+                        Just a ->
+                            P.succeed <| Ok <| SpellAction a
+                )
+        ]
+
+
+spaces : Parser ()
+spaces =
+    P.loop 0 <|
+        ifProgress <|
+            P.oneOf
+                [ P.lineComment "//"
+                , P.multiComment "/*" "*/" P.Nestable
+
+                --, P.spaces
+                -- no soft-tabs in the browser, so we should accept hard tabs
+                , P.chompWhile (\c -> c == ' ' || c == '\n' || c == '\u{000D}' || c == '\t')
+                ]
+
+
+ifProgress : Parser a -> Int -> Parser (P.Step Int ())
+ifProgress parser_ offset =
+    P.succeed identity
+        |. parser_
+        |= P.getOffset
+        |> P.map
+            (\newOffset ->
+                if offset == newOffset then
+                    P.Done ()
+
+                else
+                    P.Loop newOffset
+            )
 
 
 
@@ -142,6 +303,7 @@ type alias Simulation =
     , mana : Float
     , buffTimelines : Dict String (List BuffSnapshot)
     , fatigueTimelines : Dict String (List FatigueSnapshot)
+    , log : List ( Timestamp, Event )
     }
 
 
@@ -220,6 +382,7 @@ run acts =
             , energy = energyRegen * (toFloat dur / 1000)
             , buffTimelines = Dict.empty
             , fatigueTimelines = Dict.empty
+            , log = []
             }
 
         sim : Simulation
@@ -231,54 +394,56 @@ run acts =
       -- timelines are constructed newest :: oldest (because linked lists), but we want to display oldest :: newest
         | buffTimelines = sim.buffTimelines |> Dict.map (always List.reverse)
         , fatigueTimelines = sim.fatigueTimelines |> Dict.map (always List.reverse)
+        , log = sim.log |> List.reverse
     }
 
 
 simStep : Timestamp -> Event -> ( Simulation, Scheduler Event ) -> ( Simulation, Scheduler Event )
 simStep time event ( sim, sched ) =
-    case event of
-        ActionCompleted (SpellAction spell) ->
-            ( sim |> paySpellEnergy spell, sched )
-                |> refreshSpellBuff time spell
-                |> applySpellFatigue time spell
+    Tuple.mapFirst (\sim_ -> { sim_ | log = ( time, event ) :: sim_.log }) <|
+        case event of
+            ActionCompleted (SpellAction spell) ->
+                ( sim |> paySpellEnergy spell, sched )
+                    |> refreshSpellBuff time spell
+                    |> applySpellFatigue time spell
 
-        ActionCompleted _ ->
-            -- TODO click energy, lightning free-click buffs
-            ( sim, sched )
+            ActionCompleted _ ->
+                -- TODO click energy, lightning free-click buffs
+                ( sim, sched )
 
-        BuffExpires buff ->
-            ( { sim
-                | buffTimelines =
-                    sim.buffTimelines
-                        |> Dict.update buff.id (Maybe.map ((::) { buff = buff, updated = time, stacks = Nothing }))
-              }
-                |> applyBuffTick time buff
-            , sched
-            )
+            BuffExpires buff ->
+                ( { sim
+                    | buffTimelines =
+                        sim.buffTimelines
+                            |> Dict.update buff.id (Maybe.map ((::) { buff = buff, updated = time, stacks = Nothing }))
+                  }
+                    |> applyBuffTick time buff
+                , sched
+                )
 
-        BuffTicks buff ->
-            ( sim |> applyBuffTick time buff
-            , sched
-            )
+            BuffTicks buff ->
+                ( sim |> applyBuffTick time buff
+                , sched
+                )
 
-        FatigueExpires fat ->
-            let
-                sim1 =
-                    { sim
-                        | fatigueTimelines =
-                            sim.fatigueTimelines
-                                |> Dict.update fat.label (Maybe.withDefault [] >> expireFatigue time fat >> Just)
-                    }
-            in
-            ( sim1
-            , case Dict.get fat.label sim1.fatigueTimelines |> Maybe.andThen List.head |> Maybe.andThen .stacks of
-                Nothing ->
-                    sched
+            FatigueExpires fat ->
+                let
+                    sim1 =
+                        { sim
+                            | fatigueTimelines =
+                                sim.fatigueTimelines
+                                    |> Dict.update fat.label (Maybe.withDefault [] >> expireFatigue time fat >> Just)
+                        }
+                in
+                ( sim1
+                , case Dict.get fat.label sim1.fatigueTimelines |> Maybe.andThen List.head |> Maybe.andThen .stacks of
+                    Nothing ->
+                        sched
 
-                Just _ ->
-                    -- there are still fatigue stacks left - schedule another expiration
-                    sched |> Scheduler.setTimeout 8000 (FatigueExpires fat)
-            )
+                    Just _ ->
+                        -- there are still fatigue stacks left - schedule another expiration
+                        sched |> Scheduler.setTimeout 8000 (FatigueExpires fat)
+                )
 
 
 paySpellEnergy : Spell -> Simulation -> Simulation

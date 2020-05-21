@@ -7,7 +7,7 @@ import Html as H exposing (..)
 import Html.Attributes as A exposing (..)
 import Html.Events as E exposing (..)
 import Model exposing (Model, Msg)
-import Model.Runecorder as Runecorder
+import Model.Runecorder as Runecorder exposing (Duration, Timestamp)
 import Route exposing (Route)
 
 
@@ -34,7 +34,10 @@ viewBody model gameData version char =
 
         sim : Runecorder.Simulation
         sim =
-            parsed |> Runecorder.ignoreParseErrors |> Runecorder.run
+            parsed
+                |> Result.map Runecorder.unrollStatements
+                |> Runecorder.ignoreParseErrors
+                |> Runecorder.run
     in
     div []
         [ h1 [] [ text "Runecorder" ]
@@ -48,6 +51,9 @@ viewBody model gameData version char =
                     ]
                  , li []
                     [ button [ onClick <| Model.RunecorderAppend "wait 3000;" ] [ text "Wait 3 seconds (3000 millis)" ]
+                    ]
+                 , li []
+                    [ button [ onClick <| Model.RunecorderAppend "loop 3 {\n  // Add some looped actions below:\n  \n};" ] [ text "Loop actions 3 times" ]
                     ]
                  ]
                     ++ List.map viewSpellEntry char.spells
@@ -63,23 +69,21 @@ viewBody model gameData version char =
 
                 Ok lines ->
                     [ div [] (viewSimulation sim)
-                    , ul []
-                        (lines
-                            |> List.map viewParsedLine
-                            |> List.map (li [])
-                        )
+
+                    --, ul []
+                    --    (lines
+                    --        |> List.map viewParsedLine
+                    --        |> List.map (li [])
+                    --    )
                     ]
             )
-        , div [] [ textarea [ rows 40, cols 80, onInput Model.RunecorderInput ] [ text model.runecorder ] ]
+        , div [] [ textarea [ rows 40, cols 80, onInput Model.RunecorderInput, value model.runecorder ] [] ]
         ]
 
 
 viewSimulation : Runecorder.Simulation -> List (Html msg)
 viewSimulation sim =
-    [ div []
-        [ text <| String.fromFloat <| toFloat sim.durationMillis / 1000
-        , text " sec"
-        ]
+    [ div [] [ text "Duration: ", viewTimestamp sim.durationMillis ]
     , div [] (viewResource " mana" sim.mana)
     , div [] (viewResource " energy" sim.energy)
 
@@ -97,34 +101,78 @@ viewSimulation sim =
                         |> div []
                 )
         )
+    , ul []
+        (sim.log
+            |> List.map viewLogEntry
+            |> List.filter ((/=) [])
+            |> List.map (li [])
+        )
     ]
 
 
 viewResource : String -> Float -> List (Html msg)
 viewResource label n =
     if n >= 0 then
-        [ div [ style "color" "green" ] [ text "+", text <| String.fromFloat n, text label ] ]
+        [ div [] [ text "+", text <| String.fromFloat n, text label ] ]
 
     else
         [ div [ style "color" "red" ] [ text <| String.fromFloat n, text label ] ]
 
 
-viewParsedLine : Result String Runecorder.SpellAction -> List (Html msg)
-viewParsedLine res =
-    case res of
-        Err err ->
-            [ code [] [ text "error: ", text err ] ]
-
-        Ok act ->
+viewLogEntry : ( Timestamp, Runecorder.Event ) -> List (Html msg)
+viewLogEntry ( time, event ) =
+    case event of
+        -- Err err ->
+        -- [ code [] [ text "error: ", text err ] ]
+        Runecorder.ActionCompleted act ->
             case act of
                 Runecorder.WaitAction ms ->
-                    [ text "Wait ", text <| String.fromFloat (toFloat ms / 1000), text " sec" ]
+                    [ viewTimestamp time, text ": Waited ", text <| String.fromFloat (toFloat ms / 1000), text " sec" ]
 
                 Runecorder.ClickAction ->
-                    [ text "Click" ]
+                    [ viewTimestamp time, text ": Clicked" ]
 
                 Runecorder.SpellAction spell ->
-                    [ text "Spell: ", code [] [ text spell.displayName ] ]
+                    [ viewTimestamp time, text ": Cast ", code [] [ text spell.displayName ] ]
+
+        Runecorder.BuffExpires buff ->
+            [ viewTimestamp time, text ": Expired buff: ", code [] [ text buff.id ] ]
+
+        Runecorder.BuffTicks buff ->
+            if buff.id == "buff:energon" then
+                [ viewTimestamp time, text ": Ticked ", code [] [ text "Energon Cube" ] ]
+
+            else
+                [ viewTimestamp time, text ": Ticked buff: ", code [] [ text buff.id ] ]
+
+        _ ->
+            []
+
+
+viewTimestamp : Timestamp -> Html msg
+viewTimestamp time =
+    let
+        ms =
+            time |> modBy 1000
+
+        s =
+            time // 1000 |> modBy 60
+
+        m =
+            -- time // (1000 * 60) |> modBy 60
+            time // (1000 * 60)
+
+        -- h =
+        -- time // (1000 * 60 * 60)
+    in
+    -- [ ( 2, h )
+    [ ( 2, m )
+    , ( 2, s )
+    , ( 4, ms )
+    ]
+        |> List.map (\( digits, val ) -> val |> String.fromInt |> String.padLeft digits '0')
+        |> String.join ":"
+        |> (\str -> code [] [ text str ])
 
 
 viewSpellEntry : GameData.Spell -> Html Msg
