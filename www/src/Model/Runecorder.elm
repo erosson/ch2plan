@@ -7,6 +7,9 @@ module Model.Runecorder exposing
     , Timestamp
     , buffDarkRitual
     , buffEnergon
+    , deadEndToSourceLine
+    , deadEndToString
+    , deadEndsToString
     , fatigueStacks
     , ignoreParseErrors
     , parse
@@ -55,70 +58,83 @@ type alias SpellAction =
     Action Spell
 
 
-parse : Dict String s -> String -> Result String (List (Statement s))
-parse spells =
-    P.run (parser spells)
-        -- >> Result.mapError Debug.toString
-        -- >> Result.mapError P.deadEndsToString
-        >> Result.mapError deadEndsToString
-        >> identity
+type alias ParseError =
+    { error : String, line : String }
+
+
+parse : Dict String s -> String -> Result (List P.DeadEnd) (List (Statement s))
+parse spells source =
+    source
+        |> P.run (parser spells)
+        -- |> Result.mapError Debug.toString
+        -- |> Result.mapError P.deadEndsToString
+        |> identity
+
+
+deadEndToSourceLine : String -> P.DeadEnd -> String
+deadEndToSourceLine src deadEnd =
+    String.lines src
+        |> List.drop (deadEnd.row - 1)
+        |> List.head
+        |> Maybe.withDefault ""
 
 
 deadEndsToString : List P.DeadEnd -> String
 deadEndsToString deadEnds =
     -- stolen from https://github.com/elm/parser/pull/38
-    let
-        deadEndToString : P.DeadEnd -> String
-        deadEndToString deadEnd =
-            let
-                position : String
-                position =
-                    "row:" ++ String.fromInt deadEnd.row ++ " col:" ++ String.fromInt deadEnd.col ++ "\n"
-            in
-            case deadEnd.problem of
-                P.Expecting str ->
-                    "Expecting " ++ str ++ "at " ++ position
-
-                P.ExpectingInt ->
-                    "ExpectingInt at " ++ position
-
-                P.ExpectingHex ->
-                    "ExpectingHex at " ++ position
-
-                P.ExpectingOctal ->
-                    "ExpectingOctal at " ++ position
-
-                P.ExpectingBinary ->
-                    "ExpectingBinary at " ++ position
-
-                P.ExpectingFloat ->
-                    "ExpectingFloat at " ++ position
-
-                P.ExpectingNumber ->
-                    "ExpectingNumber at " ++ position
-
-                P.ExpectingVariable ->
-                    "ExpectingVariable at " ++ position
-
-                P.ExpectingSymbol str ->
-                    "ExpectingSymbol " ++ str ++ " at " ++ position
-
-                P.ExpectingKeyword str ->
-                    "ExpectingKeyword " ++ str ++ "at " ++ position
-
-                P.ExpectingEnd ->
-                    "ExpectingEnd at " ++ position
-
-                P.UnexpectedChar ->
-                    "UnexpectedChar at " ++ position
-
-                P.Problem str ->
-                    str ++ " at " ++ position
-
-                P.BadRepeat ->
-                    "BadRepeat at " ++ position
-    in
     List.foldl (++) "" (List.map deadEndToString deadEnds)
+
+
+deadEndToString : P.DeadEnd -> String
+deadEndToString deadEnd =
+    -- stolen from https://github.com/elm/parser/pull/38
+    let
+        position : String
+        position =
+            "row:" ++ String.fromInt deadEnd.row ++ " col:" ++ String.fromInt deadEnd.col ++ "\n"
+    in
+    case deadEnd.problem of
+        P.Expecting str ->
+            "Expecting " ++ str ++ "at " ++ position
+
+        P.ExpectingInt ->
+            "ExpectingInt at " ++ position
+
+        P.ExpectingHex ->
+            "ExpectingHex at " ++ position
+
+        P.ExpectingOctal ->
+            "ExpectingOctal at " ++ position
+
+        P.ExpectingBinary ->
+            "ExpectingBinary at " ++ position
+
+        P.ExpectingFloat ->
+            "ExpectingFloat at " ++ position
+
+        P.ExpectingNumber ->
+            "ExpectingNumber at " ++ position
+
+        P.ExpectingVariable ->
+            "ExpectingVariable at " ++ position
+
+        P.ExpectingSymbol str ->
+            "ExpectingSymbol " ++ str ++ " at " ++ position
+
+        P.ExpectingKeyword str ->
+            "ExpectingKeyword " ++ str ++ "at " ++ position
+
+        P.ExpectingEnd ->
+            "ExpectingEnd at " ++ position
+
+        P.UnexpectedChar ->
+            "UnexpectedChar at " ++ position
+
+        P.Problem str ->
+            str ++ " at " ++ position
+
+        P.BadRepeat ->
+            "BadRepeat at " ++ position
 
 
 unrollStatements : List (Statement s) -> List (Result String (Action s))
@@ -136,7 +152,7 @@ unrollStatements =
         )
 
 
-ignoreParseErrors : Result String (List (Result String (Action s))) -> List (Action s)
+ignoreParseErrors : Result e (List (Result String (Action s))) -> List (Action s)
 ignoreParseErrors =
     Result.withDefault [] >> List.filterMap Result.toMaybe
 
@@ -233,7 +249,9 @@ spaces =
     P.loop 0 <|
         ifProgress <|
             P.oneOf
-                [ P.lineComment "//"
+                -- [ P.lineComment "//"
+                -- lineComment breaks error messages, https://github.com/elm/parser/issues/46
+                [ P.succeed () |. P.symbol "//" |. P.chompWhile (\c -> c /= '\n')
                 , P.multiComment "/*" "*/" P.Nestable
 
                 --, P.spaces

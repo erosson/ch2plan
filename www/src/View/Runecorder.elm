@@ -61,10 +61,18 @@ viewBody model gameData version char =
             ]
         , div [ style "float" "right" ]
             (case parsed of
-                Err err ->
-                    [ pre [] [ text err ]
-
-                    -- , div [] (viewSimulation sim)
+                Err deadEnds ->
+                    [ div [] [ text "Error" ]
+                    , ul [ style "list-style-type" "none" ]
+                        (deadEnds
+                            |> List.map
+                                (\deadEnd ->
+                                    li []
+                                        [ blockquote [] [ code [] [ text <| Runecorder.deadEndToSourceLine model.runecorder deadEnd ] ]
+                                        , text <| Runecorder.deadEndToString deadEnd
+                                        ]
+                                )
+                        )
                     ]
 
                 Ok lines ->
