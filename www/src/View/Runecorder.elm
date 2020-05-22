@@ -141,7 +141,12 @@ viewLogEntry ( time, event ) =
                     [ viewTimestamp time, text ": Clicked" ]
 
                 Runecorder.SpellAction spell ->
-                    [ viewTimestamp time, text ": Cast ", code [] [ text spell.displayName ] ]
+                    [ viewTimestamp time
+                    , text ": Cast "
+                    , code [] [ text spell.displayName ]
+                    , text ": "
+                    , div [] [ kbd [ style "color" "green" ] [ spell.runeCombination |> List.map String.fromInt |> String.join " " |> text ] ]
+                    ]
 
         Runecorder.BuffExpires buff ->
             [ viewTimestamp time, text ": Expired buff: ", code [] [ text buff.id ] ]

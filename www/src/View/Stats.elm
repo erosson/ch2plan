@@ -90,7 +90,7 @@ viewSpellSummary s =
             (2 ^ List.length s.runeCombination |> toFloat) * (25.0 / 4) * s.damageMultiplier
 
         durationSecs =
-            (List.length s.runeCombination * s.msecsPerRune |> toFloat) * 0.5 / 1000
+            ((List.length s.runeCombination - 1) * s.msecsPerRune |> toFloat) / 1000
 
         fats =
             GameData.spellFatigue s

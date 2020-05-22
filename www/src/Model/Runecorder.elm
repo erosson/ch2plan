@@ -500,7 +500,7 @@ applyBuffTick time buff sim =
                         | fatigueTimelines =
                             sim.fatigueTimelines
                                 |> Dict.map (\_ -> addFatigueEnergonStack time stacks)
-                        , energy = sim.energy + 0.025 * energyMax
+                        , energy = sim.energy + 0.025 * energyMax * toFloat stacks
                     }
 
         _ ->
