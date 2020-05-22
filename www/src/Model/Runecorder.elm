@@ -10,6 +10,7 @@ module Model.Runecorder exposing
     , deadEndToSourceLine
     , deadEndToString
     , deadEndsToString
+    , duration
     , fatigueStacks
     , ignoreParseErrors
     , parse
@@ -282,8 +283,8 @@ ifProgress parser_ offset =
 type alias Buff =
     { id : String
     , spell : String
-    , durationMillis : Int
-    , ticksMillis : List Int
+    , duration : Duration
+    , ticksMillis : List Duration
     , maxStacks : Maybe Int
     }
 
@@ -316,7 +317,7 @@ buffsBySpell =
 
 
 type alias Simulation =
-    { durationMillis : Int
+    { duration : Duration
     , energy : Float
     , mana : Float
     , buffTimelines : Dict String (List BuffSnapshot)
@@ -376,13 +377,13 @@ run : List SpellAction -> Simulation
 run acts =
     let
         dur =
-            acts |> List.map durationMillis |> List.sum
+            acts |> List.map actionDuration |> List.sum
 
         foldScheduler : SpellAction -> ( Duration, Scheduler Event ) -> ( Duration, Scheduler Event )
         foldScheduler act ( now0, sched ) =
             let
                 now =
-                    now0 + durationMillis act
+                    now0 + actionDuration act
             in
             ( now, Scheduler.setTimeout now (ActionCompleted act) sched )
 
@@ -393,7 +394,7 @@ run acts =
         sim0 : Simulation
         sim0 =
             -- simple; easy to compute without simulation
-            { durationMillis = dur
+            { duration = dur
             , mana = manaRegen * (toFloat dur / 1000) - (acts |> List.map (manaCost >> toFloat) |> List.sum)
 
             -- complex; simulation required
@@ -624,7 +625,7 @@ refreshSpellBuff time spell ( sim, sched ) =
               -- delay buff expiration/ticks
             , sched
                 |> removeBuffEvents buff.id
-                |> Scheduler.setTimeout buff.durationMillis (BuffExpires buff)
+                |> Scheduler.setTimeout buff.duration (BuffExpires buff)
                 |> (\s -> List.foldl (\d -> Scheduler.setTimeout d (BuffTicks buff)) s buff.ticksMillis)
             )
 
@@ -672,8 +673,8 @@ manaCost act =
             0
 
 
-durationMillis : SpellAction -> Int
-durationMillis act =
+actionDuration : SpellAction -> Duration
+actionDuration act =
     case act of
         WaitAction millis ->
             millis
@@ -682,7 +683,12 @@ durationMillis act =
             0
 
         SpellAction s ->
-            (List.length s.runeCombination * s.msecsPerRune) // 2
+            duration s
+
+
+duration : Spell -> Duration
+duration s =
+    (List.length s.runeCombination - 1) * s.msecsPerRune
 
 
 fatigueStacks : FatigueSnapshot -> Maybe Float

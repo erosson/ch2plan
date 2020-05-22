@@ -91,7 +91,7 @@ viewBody model gameData version char =
 
 viewSimulation : Runecorder.Simulation -> List (Html msg)
 viewSimulation sim =
-    [ div [] [ text "Duration: ", viewTimestamp sim.durationMillis ]
+    [ div [] [ text "Duration: ", viewTimestamp sim.duration ]
     , div [] (viewResource " mana" sim.mana)
     , div [] (viewResource " energy" sim.energy)
 
@@ -206,7 +206,7 @@ viewSpellEntry s =
             (2 ^ List.length s.runeCombination |> toFloat) * (25.0 / 4) * s.damageMultiplier
 
         durationSecs =
-            (List.length s.runeCombination * s.msecsPerRune |> toFloat) * 0.5 / 1000
+            toFloat (Runecorder.duration s) / 1000
 
         fats =
             GameData.spellFatigue s
