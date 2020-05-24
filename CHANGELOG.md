@@ -29,6 +29,10 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 ---
 
+## 2020-05-24
+
+- Wizard stats are now calculated.
+
 ## 2020-05-20
 
 - Fixed wizard spell cast times.

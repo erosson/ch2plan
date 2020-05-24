@@ -48,7 +48,7 @@ view header model graph params =
                        , viewSearch model params.version
                        , p [] [ a [ Route.href <| Route.EthItems ] [ text <| String.fromInt ethItemCount, text " ethereal items" ] ]
                        , p [] [ a [ Route.href <| Route.Stats params ] [ text "Statistics:" ] ]
-                       , View.Stats.viewStatsSummary <| Stats.statTable <| Model.statsSummary graph
+                       , View.Stats.viewStatsSummary graph.char <| Stats.statTable <| Model.statsSummary graph
                        , p [] [ a [ Route.href <| Route.Stats params ] [ text <| String.fromInt (Set.size graph.selected) ++ " skill points" ] ]
                        , p [] [ a [ Route.href <| Route.StatsTSV params ] [ text "Spreadsheet format" ] ]
                        ]

@@ -50,7 +50,7 @@ view model gameData params =
                             ]
                     , div [ class "stats-box" ]
                         [ p [] [ text "Statistics:" ]
-                        , viewStatsSummary getStat
+                        , viewStatsSummary char getStat
                         ]
                     , div [ class "stats-box" ]
                         [ p []
@@ -150,38 +150,120 @@ viewSkillSummary rules getStat skill =
         ]
 
 
-viewStatsSummary : (Stats.Stat -> Result String Stats.StatTotal) -> Html msg
-viewStatsSummary getStat =
+viewStatsSummary : GameData.Character -> (Stats.Stat -> Result String Stats.StatTotal) -> Html msg
+viewStatsSummary char getStat =
     let
         toEntry ( label, statId, format ) =
             getStat statId
                 |> Result.map (\stat -> { label = label, level = stat.level, value = format stat })
     in
-    table [ class "stats-summary" ]
-        (statEntrySpecs
-            |> List.map toEntry
-            |> List.filterMap Result.toMaybe
-            |> List.filterMap viewStatEntry
-        )
+    case String.toLower char.name of
+        "wizard" ->
+            div []
+                (cursorStatEntrySpecs
+                    |> List.map
+                        (\( label, group ) ->
+                            details [ A.attribute "open" "open" ]
+                                [ summary [] [ text label ]
+                                , table [ class "stats-summary" ]
+                                    (group
+                                        |> List.map toEntry
+                                        |> List.filterMap Result.toMaybe
+                                        |> List.filterMap viewStatEntry
+                                    )
+                                ]
+                        )
+                )
+
+        _ ->
+            table [ class "stats-summary" ]
+                (cidStatEntrySpecs
+                    |> List.map toEntry
+                    |> List.filterMap Result.toMaybe
+                    |> List.filterMap viewStatEntry
+                )
 
 
 type alias StatsEntrySpec =
     ( String, Stat, Stats.StatTotal -> Maybe String )
 
 
-statEntrySpecs : List StatsEntrySpec
-statEntrySpecs =
+cursorStatEntrySpecs : List ( String, List StatsEntrySpec )
+cursorStatEntrySpecs =
+    [ ( "Ice"
+      , [ ( "Ice Spell Cost Reduction", ICE_COST_REDUCTION_PERCENT_PER_LEVEL, entryPct )
+        , ( "Ice Damage from Crits", ICE_CRIT_DAMAGE_PERCENT, entryPct )
+        , ( "Ice Damage", ICE_ADDITIONAL_PERCENT_DAMAGE, entryPct )
+        , ( "Cool Crits Chance of Critical Hit", ICE_COOL_CRITICALS_CRIT_CHANCE_PERCENT, entryPct )
+        , ( "Shatter Damage", SHATTER_DAMAGE_PERCENT, entryPct )
+        , ( "Monsters Effected by Shatter", SHATTER_NUM_MONSTERS, entryInt )
+        , ( "Ice Chance of Crit", ICE_CRIT_PERCENT_CHANCE, entryPct )
+        , ( "Cool Criticals Duration", ICE_COOL_CRITICALS_DURATION_SECONDS, entrySecAdd )
+        , ( "Ice Corrosion Damage", ICE_CORROSION_PERCENT_DAMAGE_INCREASE, entryPct )
+        , ( "Ice Chain Chance", ICE_CHAIN_CHANCE_PERCENT, entryPct )
+
+        -- TODO not yet represented by our stats
+        -- , ( "Synergy Ice Lighting Duration", STAT_CLICK_DAMAGE, entrySecAdd )
+        -- , ( "Synergy Ice Fire Duration", STAT_CLICK_DAMAGE, entrySecAdd )
+        , ( "Cold Front Duration", COLD_FRONT_DURATION_TRAIT, entrySecAdd )
+        , ( "Cold Front Damage", COLD_FRONT_DAMAGE_TRAIT, entryPct )
+        , ( "Cold Front Chance Per Rank", COLD_FRONT_ACTIVATION_CHANCE_PER_RANK, entryPct )
+        ]
+      )
+    , ( "Fire"
+      , [ ( "Fire Spell Cost Reduction", FIRE_COST_REDUCTION_PERCENT_PER_LEVEL, entryPct )
+        , ( "Fire Damage from Crits", FIRE_CRIT_DAMAGE_PERCENT, entryPct )
+        , ( "Fire Damage", FIRE_ADDITIONAL_PERCENT_DAMAGE, entryPct )
+        , ( "Chance of Combustion", FIRE_COMBUSTION_CHANCE_PERCENT, entryPct )
+        , ( "Combustion Duration", FIRE_COMBUSTION_DURATION_SECONDS, entrySecAdd )
+        , ( "Explosion Damage", FIRE_EXPLOSION_DAMAGE_PERCENT, entryPct )
+        , ( "Explosion Damage Dealt to Next Monster", FIRE_EXPLOSION_DAMAGE_PERCENT, entryPct )
+        , ( "Fire Additional Damage from Corrosion", FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, entryPct )
+        , ( "Fire Zap Percent Damage", FIRE_ZAP_PERCENT_DAMAGE, entryPct )
+        , ( "Fire Burn Damage", FIRE_BURN_PERCENT_DAMAGE_INCREASE, entryPct )
+
+        -- TODO not yet represented by our stats
+        -- , ( "Synergy Lightning Fire Duration", STAT_CLICK_DAMAGE, entrySecAdd)
+        -- , ( "Synergy Ice Fire Duration", STAT_CLICK_DAMAGE, entrySecAdd)
+        , ( "Heat Burst Duration", HEAT_BURST_DURATION_TRAIT, entrySecAdd )
+        , ( "Heat Burst Damage", HEAT_BURST_DAMAGE_TRAIT, entryPct )
+        , ( "Heat Burst Chance Per Rank", HEAT_BURST_ACTIVATION_CHANCE_PER_RANK, entryPct )
+        ]
+      )
+    , ( "Lightning"
+      , [ ( "Lightning Spell Cost Reduction", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL, entryPct )
+        , ( "Lightning Chance of Crit", LIGHTNING_CRIT_PERCENT_CHANCE, entryPct )
+        , ( "Lightning Damage", LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, entryPct )
+        , ( "Flash % Chance of Striking Adtl. Times", LIGHTNING_FLASH_SPEED_INCREASE_PERCENT, entryPct )
+        , ( "Lightning Circuit Damage", LIGHTNING_CIRCUIT_DAMAGE_PERCENT, entryPct )
+        , ( "Lightning Chain Chance", LIGHTNING_CHAIN_PERCENT, entryPct )
+        , ( "Lightning Zap Percent Damage", LIGHTNING_ZAP_PERCENT_DAMAGE, entryPct )
+        , ( "Lightning Burn Damage", LIGHTNING_BURN_PERCENT_DAMAGE_INCREASE, entryPct )
+
+        -- TODO not yet represented by our stats
+        -- , ( "Synergy Ice Lighting Duration", STAT_CLICK_DAMAGE, entrySecAdd )
+        -- , ( "Synergy Lightning Fire Duration", STAT_CLICK_DAMAGE, entrySecAdd )
+        , ( "Thunderstorm Duration ", THUNDERSTORM_DURATION_TRAIT, entrySecAdd )
+        , ( "Thunderstorm Damage", THUNDERSTORM_DAMAGE_TRAIT, entryPct )
+        , ( "Thunderstorm Chance Per Rank", THUNDERSTORM_ACTIVATION_CHANCE_PER_RANK, entryPct )
+        ]
+      )
+    ]
+
+
+cidStatEntrySpecs : List StatsEntrySpec
+cidStatEntrySpecs =
     -- try to match the order of the in-game stats screen here. See scripts/ui/StatsSubtab.as
     --
     -- autoattack damage
     -- click damage
     [ ( "Click Damage Multiplier", STAT_CLICK_DAMAGE, entryPct ) -- not actually in the stats screen, only flat click damage
     , ( "Autoattack Damage Multiplier", STAT_AUTOATTACK_DAMAGE, entryPct )
-    , ( "Attack Delay", STAT_HASTE, entrySec 600 )
+    , ( "Attack Delay", STAT_HASTE, entrySecDiv 600 )
 
     -- damage multiplier from level
     -- energy from auto attacks - currently a constant, not useful here
-    , ( "Global Cooldown Time", STAT_HASTE, entrySec 2000 ) -- TODO that one keystone for <1 sec
+    , ( "Global Cooldown Time", STAT_HASTE, entrySecDiv 2000 ) -- TODO that one keystone for <1 sec
     , ( "Automator Speed", STAT_AUTOMATOR_SPEED, entryPct )
     , ( "Critical Chance", STAT_CRIT_CHANCE, entryPct )
     , ( "Critical Damage Multiplier", STAT_CRIT_DAMAGE, entryPct )
@@ -219,7 +301,11 @@ entryFloat stat =
     Just <| float 3 stat.val
 
 
-entrySec base stat =
+entrySecAdd stat =
+    Just <| int stat.val ++ "sec"
+
+
+entrySecDiv base stat =
     Just <| sec 1 <| base / 1000 / stat.val
 
 

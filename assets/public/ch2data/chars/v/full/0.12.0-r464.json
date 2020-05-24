@@ -35863,6 +35863,355 @@
           10
         ]
       ],
+      "// Wizard": [
+        0,
+        "noop",
+        []
+      ],
+      "ICE_CRIT_PERCENT_CHANCE": [
+        0,
+        "linear",
+        [
+          0.04,
+          0
+        ]
+      ],
+      "ICE_CRIT_DAMAGE_PERCENT": [
+        0,
+        "linear",
+        [
+          0.08,
+          0
+        ]
+      ],
+      "ICE_ADDITIONAL_PERCENT_DAMAGE": [
+        0,
+        "linear",
+        [
+          0.05,
+          0
+        ]
+      ],
+      "LIGHTNING_ZAP_PERCENT_DAMAGE": [
+        0.5,
+        "linear",
+        [
+          0.05,
+          0.5
+        ]
+      ],
+      "LIGHTNING_CHAIN_PERCENT": [
+        0,
+        "linear",
+        [
+          0.1,
+          0
+        ]
+      ],
+      "LIGHTNING_ADDITIONAL_PERCENT_DAMAGE": [
+        0,
+        "linear",
+        [
+          0.05,
+          0
+        ]
+      ],
+      "FIRE_CORROSION_PERCENT_DAMAGE_INCREASE": [
+        0,
+        "linear",
+        [
+          0.1,
+          0
+        ]
+      ],
+      "FIRE_BURN_PERCENT_DAMAGE_INCREASE": [
+        0,
+        "linear",
+        [
+          0.1,
+          0
+        ]
+      ],
+      "FIRE_ADDITIONAL_PERCENT_DAMAGE": [
+        0,
+        "linear",
+        [
+          0.05,
+          0
+        ]
+      ],
+      "LIGHTNING_CRIT_PERCENT_CHANCE": [
+        0,
+        "linear",
+        [
+          0.04,
+          0
+        ]
+      ],
+      "ICE_CHAIN_CHANCE_PERCENT": [
+        0,
+        "linear",
+        [
+          0.1,
+          0
+        ]
+      ],
+      "FIRE_ZAP_PERCENT_DAMAGE": [
+        0,
+        "linear",
+        [
+          0.05,
+          0
+        ]
+      ],
+      "LIGHTNING_BURN_PERCENT_DAMAGE_INCREASE": [
+        0,
+        "linear",
+        [
+          0.1,
+          0
+        ]
+      ],
+      "ICE_CORROSION_PERCENT_DAMAGE_INCREASE": [
+        0,
+        "linear",
+        [
+          0.1,
+          0
+        ]
+      ],
+      "FIRE_CRIT_DAMAGE_PERCENT": [
+        0,
+        "linear",
+        [
+          0.08,
+          0
+        ]
+      ],
+      "ICE_COOL_CRITICALS_CRIT_CHANCE_PERCENT": [
+        0,
+        "linear",
+        [
+          0.04,
+          0
+        ]
+      ],
+      "ICE_COOL_CRITICALS_DURATION_SECONDS": [
+        0,
+        "linear",
+        [
+          5,
+          0
+        ]
+      ],
+      "//ICE_CHILLY_COOL_CRITICALS_CRIT_CHANCE_PERCENT": [
+        0,
+        "linear",
+        [
+          0.04,
+          0
+        ]
+      ],
+      "//ICE_COLD_COOL_CRITICALS_DURATION_SECONDS": [
+        0,
+        "linear",
+        [
+          5,
+          0
+        ]
+      ],
+      "LIGHTNING_FLASH_SPEED_INCREASE_PERCENT": [
+        0,
+        "linear",
+        [
+          10,
+          0
+        ]
+      ],
+      "LIGHTNING_FLASH_NUM_SPELLS": [
+        0,
+        "linear",
+        [
+          3,
+          0
+        ]
+      ],
+      "//LIGHTNING_FLASHIER_FLASH_HASTE_PERCENT": [
+        0,
+        "linear",
+        [
+          5,
+          0
+        ]
+      ],
+      "//LIGHTNING_LINGERING_FLASH_NUM_SPELLS": [
+        0,
+        "linear",
+        [
+          1,
+          0
+        ]
+      ],
+      "FIRE_COMBUSTION_CHANCE_PERCENT": [
+        0,
+        "linear",
+        [
+          20,
+          0
+        ]
+      ],
+      "FIRE_COMBUSTION_DURATION_SECONDS": [
+        0,
+        "linear",
+        [
+          8,
+          0
+        ]
+      ],
+      "//FIRE_INCENDIARY_COMBUSTION_CHANCE_PERCENT": [
+        0,
+        "linear",
+        [
+          10,
+          0
+        ]
+      ],
+      "//FIRE_SEETHING_COMBUSTION_DURATION_SECONDS": [
+        0,
+        "linear",
+        [
+          4,
+          0
+        ]
+      ],
+      "FIRE_EXPLOSION_DAMAGE_PERCENT": [
+        0,
+        "linear",
+        [
+          0.5,
+          0
+        ]
+      ],
+      "LIGHTNING_CIRCUIT_DAMAGE_PERCENT": [
+        0,
+        "linear",
+        [
+          0.5,
+          0
+        ]
+      ],
+      "SHATTER_DAMAGE_PERCENT": [
+        0,
+        "linear",
+        [
+          0.2,
+          0
+        ]
+      ],
+      "SHATTER_NUM_MONSTERS": [
+        0,
+        "linear",
+        [
+          3,
+          0
+        ]
+      ],
+      "ICE_COST_REDUCTION_PERCENT_PER_LEVEL": [
+        0,
+        "linear",
+        [
+          0.025,
+          0
+        ]
+      ],
+      "LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL": [
+        0,
+        "linear",
+        [
+          0.025,
+          0
+        ]
+      ],
+      "FIRE_COST_REDUCTION_PERCENT_PER_LEVEL": [
+        0,
+        "linear",
+        [
+          0.025,
+          0
+        ]
+      ],
+      "THUNDERSTORM_ACTIVATION_CHANCE_PER_RANK": [
+        0.1,
+        "linear",
+        [
+          0,
+          0.1
+        ]
+      ],
+      "THUNDERSTORM_DAMAGE_TRAIT": [
+        0,
+        "linear",
+        [
+          0.05,
+          0
+        ]
+      ],
+      "THUNDERSTORM_DURATION_TRAIT": [
+        0,
+        "linear",
+        [
+          5,
+          0
+        ]
+      ],
+      "HEAT_BURST_ACTIVATION_CHANCE_PER_RANK": [
+        0.1,
+        "linear",
+        [
+          0,
+          0.1
+        ]
+      ],
+      "HEAT_BURST_DAMAGE_TRAIT": [
+        0,
+        "linear",
+        [
+          0.05,
+          0
+        ]
+      ],
+      "HEAT_BURST_DURATION_TRAIT": [
+        0,
+        "linear",
+        [
+          5,
+          0
+        ]
+      ],
+      "COLD_FRONT_ACTIVATION_CHANCE_PER_RANK": [
+        0.1,
+        "linear",
+        [
+          0,
+          0.1
+        ]
+      ],
+      "COLD_FRONT_DAMAGE_TRAIT": [
+        0,
+        "linear",
+        [
+          0.05,
+          0
+        ]
+      ],
+      "COLD_FRONT_DURATION_TRAIT": [
+        0,
+        "linear",
+        [
+          5,
+          0
+        ]
+      ],
       "//LEGACY STUFF BELOW": [
         0,
         "noop",
@@ -36195,7 +36544,539 @@
         }
       },
       "wizard": {
-        "stats": {}
+        "stats": {
+          "ICE_CRIT_PERCENT_CHANCE": [
+            {
+              "prefix": "Ia",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Ma",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "ICE_CRIT_DAMAGE_PERCENT": [
+            {
+              "prefix": "Ib",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Ob",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "ICE_ADDITIONAL_PERCENT_DAMAGE": [
+            {
+              "prefix": "Ic",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Mc",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Oc",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "LIGHTNING_ZAP_PERCENT_DAMAGE": [
+            {
+              "prefix": "La",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Na",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "LIGHTNING_CHAIN_PERCENT": [
+            {
+              "prefix": "Lb",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Mb",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "LIGHTNING_ADDITIONAL_PERCENT_DAMAGE": [
+            {
+              "prefix": "Lc",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Mc",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Nc",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "FIRE_CORROSION_PERCENT_DAMAGE_INCREASE": [
+            {
+              "prefix": "Fa",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Oa",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "FIRE_BURN_PERCENT_DAMAGE_INCREASE": [
+            {
+              "prefix": "Fb",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Nb",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "FIRE_ADDITIONAL_PERCENT_DAMAGE": [
+            {
+              "prefix": "Fc",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Nc",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Oc",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "ICE_COST_REDUCTION_PERCENT_PER_LEVEL": [
+            {
+              "prefix": "Id",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Md",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Od",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL": [
+            {
+              "prefix": "Ld",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Md",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Nd",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "FIRE_COST_REDUCTION_PERCENT_PER_LEVEL": [
+            {
+              "prefix": "Fd",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Nd",
+              "range": [
+                1,
+                9
+              ]
+            },
+            {
+              "prefix": "Od",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "LIGHTNING_CRIT_PERCENT_CHANCE": [
+            {
+              "prefix": "Ma",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "ICE_CHAIN_CHANCE_PERCENT": [
+            {
+              "prefix": "Mb",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "FIRE_ZAP_PERCENT_DAMAGE": [
+            {
+              "prefix": "Na",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "LIGHTNING_BURN_PERCENT_DAMAGE_INCREASE": [
+            {
+              "prefix": "Nb",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "ICE_CORROSION_PERCENT_DAMAGE_INCREASE": [
+            {
+              "prefix": "Oa",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "FIRE_CRIT_DAMAGE_PERCENT": [
+            {
+              "prefix": "Ob",
+              "range": [
+                1,
+                9
+              ]
+            }
+          ],
+          "ICE_COOL_CRITICALS_CRIT_CHANCE_PERCENT": [
+            {
+              "prefix": "It",
+              "range": [
+                3,
+                5
+              ],
+              "level": 2
+            },
+            {
+              "prefix": "Iz",
+              "range": [
+                3,
+                9
+              ]
+            }
+          ],
+          "ICE_COOL_CRITICALS_DURATION_SECONDS": [
+            {
+              "prefix": "It",
+              "range": [
+                3,
+                5
+              ],
+              "level": 2
+            },
+            {
+              "prefix": "Iy",
+              "range": [
+                3,
+                9
+              ]
+            }
+          ],
+          "LIGHTNING_FLASH_SPEED_INCREASE_PERCENT": [
+            {
+              "prefix": "Lt",
+              "range": [
+                3,
+                5
+              ],
+              "level": 2
+            },
+            {
+              "prefix": "Lz",
+              "range": [
+                3,
+                9
+              ]
+            }
+          ],
+          "LIGHTNING_FLASH_NUM_SPELLS": [
+            {
+              "prefix": "Lt",
+              "range": [
+                3,
+                5
+              ],
+              "level": 3
+            },
+            {
+              "prefix": "Ly",
+              "range": [
+                3,
+                9
+              ]
+            }
+          ],
+          "FIRE_COMBUSTION_CHANCE_PERCENT": [
+            {
+              "prefix": "Ft",
+              "range": [
+                3,
+                5
+              ],
+              "level": 2
+            },
+            {
+              "prefix": "Fz",
+              "range": [
+                3,
+                9
+              ]
+            }
+          ],
+          "FIRE_COMBUSTION_DURATION_SECONDS": [
+            {
+              "prefix": "Ft",
+              "range": [
+                3,
+                5
+              ],
+              "level": 2
+            },
+            {
+              "prefix": "Fy",
+              "range": [
+                3,
+                9
+              ]
+            }
+          ],
+          "FIRE_EXPLOSION_DAMAGE_PERCENT": [
+            {
+              "prefix": "Ft",
+              "range": [
+                8,
+                9
+              ]
+            }
+          ],
+          "LIGHTNING_CIRCUIT_DAMAGE_PERCENT": [
+            {
+              "prefix": "Lt",
+              "range": [
+                8,
+                9
+              ]
+            }
+          ],
+          "SHATTER_DAMAGE_PERCENT": [
+            {
+              "prefix": "It",
+              "range": [
+                8,
+                9
+              ]
+            }
+          ],
+          "SHATTER_NUM_MONSTERS": [
+            {
+              "prefix": "It",
+              "range": [
+                8,
+                9
+              ]
+            }
+          ],
+          "THUNDERSTORM_ACTIVATION_CHANCE_PER_RANK": [],
+          "THUNDERSTORM_DAMAGE_TRAIT": [
+            {
+              "prefix": "Lt",
+              "range": [
+                6,
+                7
+              ],
+              "level": 2
+            },
+            {
+              "prefix": "Lw",
+              "range": [
+                6,
+                9
+              ]
+            }
+          ],
+          "THUNDERSTORM_DURATION_TRAIT": [
+            {
+              "prefix": "Lt",
+              "range": [
+                6,
+                7
+              ],
+              "level": 2
+            },
+            {
+              "prefix": "Lx",
+              "range": [
+                6,
+                9
+              ]
+            }
+          ],
+          "HEAT_BURST_ACTIVATION_CHANCE_PER_RANK": [],
+          "HEAT_BURST_DAMAGE_TRAIT": [
+            {
+              "prefix": "Ft",
+              "range": [
+                6,
+                7
+              ],
+              "level": 2
+            },
+            {
+              "prefix": "Fw",
+              "range": [
+                6,
+                9
+              ]
+            }
+          ],
+          "HEAT_BURST_DURATION_TRAIT": [
+            {
+              "prefix": "Ft",
+              "range": [
+                6,
+                7
+              ],
+              "level": 2
+            },
+            {
+              "prefix": "Fx",
+              "range": [
+                6,
+                9
+              ]
+            }
+          ],
+          "COLD_FRONT_ACTIVATION_CHANCE_PER_RANK": [],
+          "COLD_FRONT_DAMAGE_TRAIT": [
+            {
+              "prefix": "It",
+              "range": [
+                6,
+                7
+              ],
+              "level": 2
+            },
+            {
+              "prefix": "Iw",
+              "range": [
+                6,
+                9
+              ]
+            }
+          ],
+          "COLD_FRONT_DURATION_TRAIT": [
+            {
+              "prefix": "It",
+              "range": [
+                6,
+                7
+              ],
+              "level": 2
+            },
+            {
+              "prefix": "Ix",
+              "range": [
+                6,
+                9
+              ]
+            }
+          ]
+        }
       }
     }
   }
