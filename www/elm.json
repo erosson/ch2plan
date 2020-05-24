@@ -24,9 +24,11 @@
             "elm-community/result-extra": "2.4.0",
             "elm-explorations/linear-algebra": "1.0.3",
             "elm-explorations/markdown": "1.0.0",
+            "mgold/elm-nonempty-list": "4.1.0",
             "zaboco/elm-draggable": "4.0.1"
         },
         "indirect": {
+            "elm/random": "1.0.0",
             "mpizenberg/elm-pointer-events": "3.0.0"
         }
     },
@@ -34,8 +36,6 @@
         "direct": {
             "elm-explorations/test": "1.1.0"
         },
-        "indirect": {
-            "elm/random": "1.0.0"
-        }
+        "indirect": {}
     }
 }

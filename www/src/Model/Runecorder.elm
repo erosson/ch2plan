@@ -1,9 +1,12 @@
 module Model.Runecorder exposing
     ( Action(..)
+    , DeadEnd
     , Duration
     , Event(..)
-    , Simulation
+    , SimSnapshot
+    , SimTimeline
     , SpellAction
+    , Statement(..)
     , Timestamp
     , buffDarkRitual
     , buffEnergon
@@ -11,9 +14,10 @@ module Model.Runecorder exposing
     , deadEndToString
     , deadEndsToString
     , duration
+    , emptySim
     , fatigueStacks
-    , ignoreParseErrors
     , parse
+    , parseStatements
     , run
     , unrollStatements
     )
@@ -22,6 +26,7 @@ import Dict exposing (Dict)
 import Dict.Extra
 import GameData exposing (Fatigue, Spell)
 import List.Extra
+import List.Nonempty as Nonempty exposing (Nonempty)
 import Maybe.Extra
 import Parser as P exposing ((|.), (|=), Parser)
 import Scheduler exposing (Scheduler)
@@ -40,6 +45,10 @@ type alias Duration =
     Scheduler.Duration
 
 
+type alias DeadEnd =
+    P.DeadEnd
+
+
 
 -- Action parsing
 
@@ -51,7 +60,7 @@ type Action s
 
 
 type Statement s
-    = ActionStatement (Result String (Action s))
+    = ActionStatement (Action s)
     | LoopStatement Int (List (Statement s))
 
 
@@ -63,8 +72,13 @@ type alias ParseError =
     { error : String, line : String }
 
 
-parse : Dict String s -> String -> Result (List P.DeadEnd) (List (Statement s))
-parse spells source =
+parse : Dict String s -> String -> Result (List DeadEnd) (List (Action s))
+parse spells =
+    parseStatements spells >> Result.map unrollStatements
+
+
+parseStatements : Dict String s -> String -> Result (List DeadEnd) (List (Statement s))
+parseStatements spells source =
     source
         |> P.run (parser spells)
         -- |> Result.mapError Debug.toString
@@ -72,7 +86,7 @@ parse spells source =
         |> identity
 
 
-deadEndToSourceLine : String -> P.DeadEnd -> String
+deadEndToSourceLine : String -> DeadEnd -> String
 deadEndToSourceLine src deadEnd =
     String.lines src
         |> List.drop (deadEnd.row - 1)
@@ -80,13 +94,13 @@ deadEndToSourceLine src deadEnd =
         |> Maybe.withDefault ""
 
 
-deadEndsToString : List P.DeadEnd -> String
+deadEndsToString : List DeadEnd -> String
 deadEndsToString deadEnds =
     -- stolen from https://github.com/elm/parser/pull/38
     List.foldl (++) "" (List.map deadEndToString deadEnds)
 
 
-deadEndToString : P.DeadEnd -> String
+deadEndToString : DeadEnd -> String
 deadEndToString deadEnd =
     -- stolen from https://github.com/elm/parser/pull/38
     let
@@ -138,7 +152,7 @@ deadEndToString deadEnd =
             "BadRepeat at " ++ position
 
 
-unrollStatements : List (Statement s) -> List (Result String (Action s))
+unrollStatements : List (Statement s) -> List (Action s)
 unrollStatements =
     List.concatMap
         (\statement ->
@@ -151,11 +165,6 @@ unrollStatements =
                         |> List.concatMap (always sts)
                         |> unrollStatements
         )
-
-
-ignoreParseErrors : Result e (List (Result String (Action s))) -> List (Action s)
-ignoreParseErrors =
-    Result.withDefault [] >> List.filterMap Result.toMaybe
 
 
 parser : Dict String s -> Parser (List (Statement s))
@@ -221,14 +230,14 @@ statementParser spells =
         |. P.symbol ";"
 
 
-actionParser : Dict String a -> Parser (Result String (Action a))
+actionParser : Dict String a -> Parser (Action a)
 actionParser spells =
     P.oneOf
-        [ P.succeed (Ok << WaitAction)
+        [ P.succeed WaitAction
             |. P.keyword "wait"
             |. spaces
             |= P.int
-        , P.succeed (Ok ClickAction)
+        , P.succeed ClickAction
             |. P.keyword "click"
         , P.succeed identity
             |= P.variable { start = Char.isAlpha, inner = \c -> Char.isAlpha c || Char.isDigit c || c == ' ', reserved = reserved }
@@ -240,7 +249,7 @@ actionParser spells =
                             P.problem <| "no such spell: " ++ name
 
                         Just a ->
-                            P.succeed <| Ok <| SpellAction a
+                            P.succeed <| SpellAction a
                 )
         ]
 
@@ -316,27 +325,36 @@ buffsBySpell =
 -- Simulation
 
 
-type alias Simulation =
-    { duration : Duration
+type alias SimTimeline =
+    { start : SimSnapshot
+    , end : SimSnapshot
+    , timeline : List ( Scheduler.Event Event, SimSnapshot )
+    }
+
+
+type alias SimSnapshot =
+    { now : Timestamp
     , energy : Float
+    , energySpent : Float
+    , energyEnergonTicks : Int
     , mana : Float
-    , buffTimelines : Dict String (List BuffSnapshot)
-    , fatigueTimelines : Dict String (List FatigueSnapshot)
-    , log : List ( Timestamp, Event )
+    , manaSpent : Int
+    , buffs : Dict String BuffSnapshot
+    , fatigue : Dict String FatigueSnapshot
     }
 
 
 type alias BuffSnapshot =
     { buff : Buff
     , updated : Timestamp
-    , stacks : Maybe Int
+    , stacks : Int
     }
 
 
 type alias FatigueSnapshot =
     { fatigue : Fatigue
     , updated : Timestamp
-    , stacks : Maybe Int
+    , stacks : Int
 
     -- 1 energon stack has a 20% chance to remove one fatigue stack.
     -- Random simulations are hard, so instead, we treat energon stacks as fractional stacks.
@@ -366,6 +384,27 @@ energyCostPerFatigueStack =
     0.04
 
 
+energonPerFatigue =
+    5
+
+
+energyPerEnergonTick =
+    0.025 * energyMax
+
+
+emptySim : SimSnapshot
+emptySim =
+    { now = 0
+    , energy = 0
+    , energySpent = 0
+    , energyEnergonTicks = 0
+    , mana = 0
+    , manaSpent = 0
+    , buffs = Dict.empty
+    , fatigue = Dict.empty
+    }
+
+
 type Event
     = ActionCompleted SpellAction
     | BuffExpires Buff
@@ -373,9 +412,10 @@ type Event
     | FatigueExpires Fatigue
 
 
-run : List SpellAction -> Simulation
+run : List SpellAction -> SimTimeline
 run acts =
     let
+        dur : Duration
         dur =
             acts |> List.map actionDuration |> List.sum
 
@@ -387,42 +427,46 @@ run acts =
             in
             ( now, Scheduler.setTimeout now (ActionCompleted act) sched )
 
-        scheduler0 : Scheduler Event
-        scheduler0 =
+        scheduler : Scheduler Event
+        scheduler =
             List.foldl foldScheduler ( 0, Scheduler.empty 0 ) acts |> Tuple.second
 
-        sim0 : Simulation
-        sim0 =
-            -- simple; easy to compute without simulation
-            { duration = dur
-            , mana = manaRegen * (toFloat dur / 1000) - (acts |> List.map (manaCost >> toFloat) |> List.sum)
-
-            -- complex; simulation required
-            , energy = energyRegen * (toFloat dur / 1000)
-            , buffTimelines = Dict.empty
-            , fatigueTimelines = Dict.empty
-            , log = []
-            }
-
-        sim : Simulation
-        sim =
-            Scheduler.runUntil dur simStep ( sim0, scheduler0 )
-                |> Tuple.first
+        timeline =
+            Scheduler.runTimelineUntil dur simStep ( emptySim, scheduler ) |> Tuple.first
     in
-    { sim
-      -- timelines are constructed newest :: oldest (because linked lists), but we want to display oldest :: newest
-        | buffTimelines = sim.buffTimelines |> Dict.map (always List.reverse)
-        , fatigueTimelines = sim.fatigueTimelines |> Dict.map (always List.reverse)
-        , log = sim.log |> List.reverse
+    { start = emptySim
+    , timeline = timeline
+    , end = timeline |> List.Extra.last |> Maybe.Extra.unwrap emptySim Tuple.second
     }
 
 
-simStep : Timestamp -> Event -> ( Simulation, Scheduler Event ) -> ( Simulation, Scheduler Event )
-simStep time event ( sim, sched ) =
-    Tuple.mapFirst (\sim_ -> { sim_ | log = ( time, event ) :: sim_.log }) <|
+simTimestep : Timestamp -> SimSnapshot -> SimSnapshot
+simTimestep time sim =
+    { sim
+        | now = time
+        , mana = toFloat time / 1000 * manaRegen - toFloat sim.manaSpent
+        , energy =
+            (energyRegen * toFloat time / 1000)
+                + (energyPerEnergonTick * toFloat sim.energyEnergonTicks)
+                - sim.energySpent
+    }
+
+
+simStep : Scheduler.Event Event -> ( SimSnapshot, Scheduler Event ) -> ( SimSnapshot, Scheduler Event )
+simStep simevent ( sim, sched ) =
+    let
+        time =
+            simevent.at
+
+        event =
+            simevent.payload
+    in
+    Tuple.mapFirst (simTimestep time) <|
         case event of
             ActionCompleted (SpellAction spell) ->
-                ( sim |> paySpellEnergy spell, sched )
+                ( sim |> paySpellCosts spell
+                , sched
+                )
                     |> refreshSpellBuff time spell
                     |> applySpellFatigue time spell
 
@@ -431,12 +475,9 @@ simStep time event ( sim, sched ) =
                 ( sim, sched )
 
             BuffExpires buff ->
-                ( { sim
-                    | buffTimelines =
-                        sim.buffTimelines
-                            |> Dict.update buff.id (Maybe.map ((::) { buff = buff, updated = time, stacks = Nothing }))
-                  }
+                ( sim
                     |> applyBuffTick time buff
+                    |> (\s -> { s | buffs = sim.buffs |> Dict.remove buff.id })
                 , sched
                 )
 
@@ -448,14 +489,10 @@ simStep time event ( sim, sched ) =
             FatigueExpires fat ->
                 let
                     sim1 =
-                        { sim
-                            | fatigueTimelines =
-                                sim.fatigueTimelines
-                                    |> Dict.update fat.label (Maybe.withDefault [] >> expireFatigue time fat >> Just)
-                        }
+                        { sim | fatigue = sim.fatigue |> Dict.update fat.label (Maybe.andThen (expireFatigue time fat)) }
                 in
                 ( sim1
-                , case Dict.get fat.label sim1.fatigueTimelines |> Maybe.andThen List.head |> Maybe.andThen .stacks of
+                , case Dict.get fat.label sim1.fatigue |> Maybe.map .stacks of
                     Nothing ->
                         sched
 
@@ -465,16 +502,15 @@ simStep time event ( sim, sched ) =
                 )
 
 
-paySpellEnergy : Spell -> Simulation -> Simulation
-paySpellEnergy spell sim =
+paySpellCosts : Spell -> SimSnapshot -> SimSnapshot
+paySpellCosts spell sim =
     let
         stacks : Float
         stacks =
             GameData.spellFatigue spell
                 |> List.map Tuple.first
-                |> List.filterMap (\fat -> Dict.get fat.label sim.fatigueTimelines)
-                |> List.filterMap List.head
-                |> List.filterMap fatigueStacks
+                |> List.filterMap (\fat -> Dict.get fat.label sim.fatigue)
+                |> List.map fatigueStacks
                 |> List.sum
 
         baseCost : Int
@@ -485,66 +521,52 @@ paySpellEnergy spell sim =
         cost =
             (1 + stacks * energyCostPerFatigueStack) * toFloat baseCost
     in
-    { sim | energy = sim.energy - cost }
+    { sim | energySpent = sim.energySpent + cost, manaSpent = sim.manaSpent + spell.manaCost }
 
 
-applyBuffTick : Timestamp -> Buff -> Simulation -> Simulation
+applyBuffTick : Timestamp -> Buff -> SimSnapshot -> SimSnapshot
 applyBuffTick time buff sim =
     case buff.id of
         "buff:energon" ->
-            case Dict.get buff.id sim.buffTimelines |> Maybe.andThen List.head |> Maybe.andThen .stacks of
+            case Dict.get buff.id sim.buffs of
                 Nothing ->
                     sim
 
-                Just stacks ->
+                Just { stacks } ->
                     { sim
-                        | fatigueTimelines =
-                            sim.fatigueTimelines
-                                |> Dict.map (\_ -> addFatigueEnergonStack time stacks)
-                        , energy = sim.energy + 0.025 * energyMax * toFloat stacks
+                        | fatigue =
+                            sim.fatigue
+                                |> Dict.Extra.filterMap (\_ -> addFatigueEnergonStack stacks)
+                        , energyEnergonTicks = sim.energyEnergonTicks + stacks
                     }
 
         _ ->
             sim
 
 
-expireFatigue : Timestamp -> Fatigue -> List FatigueSnapshot -> List FatigueSnapshot
-expireFatigue time fat timeline =
-    case List.head timeline of
-        Nothing ->
-            { fatigue = fat, updated = time, stacks = Nothing, energonStacks = 0 } :: timeline
+expireFatigue : Timestamp -> Fatigue -> FatigueSnapshot -> Maybe FatigueSnapshot
+expireFatigue time fat snapshot =
+    let
+        stacks =
+            snapshot.stacks - 1
+    in
+    if stacks <= 0 then
+        Nothing
 
-        Just snapshot ->
-            let
-                stacks =
-                    -- subtract one stack, and assign Nothing if out of stacks
-                    snapshot.stacks
-                        |> Maybe.map (\s -> s - 1)
-                        |> Maybe.Extra.filter (\s -> s > 0)
-            in
-            { snapshot
-                | updated = time
-                , stacks = stacks
-                , energonStacks =
-                    if stacks == Nothing then
-                        0
-
-                    else
-                        snapshot.energonStacks
-            }
-                :: timeline
+    else
+        Just { snapshot | updated = time, stacks = stacks }
 
 
-applySpellFatigue : Timestamp -> Spell -> ( Simulation, Scheduler Event ) -> ( Simulation, Scheduler Event )
+applySpellFatigue : Timestamp -> Spell -> ( SimSnapshot, Scheduler Event ) -> ( SimSnapshot, Scheduler Event )
 applySpellFatigue time spell state0 =
     let
-        applyFatigue : ( Fatigue, Int ) -> ( Simulation, Scheduler Event ) -> ( Simulation, Scheduler Event )
+        applyFatigue : ( Fatigue, Int ) -> ( SimSnapshot, Scheduler Event ) -> ( SimSnapshot, Scheduler Event )
         applyFatigue ( fat, stacks ) ( sim, sched ) =
             -- add fatigue stacks
             ( { sim
-                | fatigueTimelines =
-                    sim.fatigueTimelines
-                        |> Dict.update fat.label (Maybe.withDefault [] >> addFatigueStack time fat stacks >> Just)
+                | fatigue =
+                    sim.fatigue
+                        |> Dict.update fat.label (addFatigueStack time fat stacks >> Just)
               }
               -- add fatigue expiration, if it's not already there
             , if Scheduler.any (\e -> e.payload == FatigueExpires fat) sched then
@@ -558,69 +580,50 @@ applySpellFatigue time spell state0 =
         |> List.foldl applyFatigue state0
 
 
-addFatigueStack : Timestamp -> Fatigue -> Int -> List FatigueSnapshot -> List FatigueSnapshot
-addFatigueStack time {- $$$ -} fat stacks {- $$$ -} timeline =
-    case timeline of
-        [] ->
-            [ { updated = time, fatigue = fat, stacks = Just stacks, energonStacks = 0 } ]
-
-        snapshot :: tail ->
-            { snapshot
-                | updated = time
-                , stacks = Just <| stacks + Maybe.withDefault 0 snapshot.stacks
-            }
-                :: timeline
-
-
-addFatigueEnergonStack : Timestamp -> Int -> List FatigueSnapshot -> List FatigueSnapshot
-addFatigueEnergonStack time enstacks timeline =
-    case timeline of
-        [] ->
-            []
-
-        snapshot0 :: tail ->
-            let
-                snapshot =
-                    { snapshot0
-                        | updated = time
-                        , energonStacks = snapshot0.energonStacks + enstacks
-                    }
-                        |> normalizeEnergonStacks
-            in
-            if snapshot.stacks == snapshot0.stacks && snapshot.energonStacks == snapshot0.energonStacks then
-                timeline
-
-            else
-                snapshot :: timeline
-
-
-normalizeEnergonStacks : FatigueSnapshot -> FatigueSnapshot
-normalizeEnergonStacks snapshot =
-    case snapshot.stacks of
+addFatigueStack : Timestamp -> Fatigue -> Int -> Maybe FatigueSnapshot -> FatigueSnapshot
+addFatigueStack time {- $$$ -} fat stacks {- $$$ -} msnapshot =
+    case msnapshot of
         Nothing ->
-            { snapshot | energonStacks = 0 }
+            { updated = time, fatigue = fat, stacks = stacks, energonStacks = 0 }
 
-        Just stacks0 ->
-            let
-                stacks =
-                    stacks0 - snapshot.energonStacks // 5
-            in
-            if stacks <= 0 then
-                { snapshot | stacks = Nothing, energonStacks = 0 }
-
-            else
-                { snapshot | stacks = Just stacks, energonStacks = snapshot.energonStacks |> modBy 5 }
+        Just snapshot ->
+            { snapshot | stacks = snapshot.stacks + stacks }
 
 
-refreshSpellBuff : Timestamp -> Spell -> ( Simulation, Scheduler Event ) -> ( Simulation, Scheduler Event )
+addFatigueEnergonStack : Int -> FatigueSnapshot -> Maybe FatigueSnapshot
+addFatigueEnergonStack enstacks snapshot =
+    { snapshot | energonStacks = snapshot.energonStacks + enstacks }
+        |> normalizeEnergonStacks
+
+
+normalizeEnergonStacks : FatigueSnapshot -> Maybe FatigueSnapshot
+normalizeEnergonStacks snapshot =
+    let
+        stacks =
+            snapshot.stacks - snapshot.energonStacks // energonPerFatigue
+
+        energonStacks =
+            snapshot.energonStacks |> modBy energonPerFatigue
+    in
+    if stacks == snapshot.stacks && energonStacks == snapshot.energonStacks then
+        Just snapshot
+
+    else if stacks <= 0 then
+        Nothing
+
+    else
+        Just { snapshot | stacks = stacks, energonStacks = energonStacks }
+
+
+refreshSpellBuff : Timestamp -> Spell -> ( SimSnapshot, Scheduler Event ) -> ( SimSnapshot, Scheduler Event )
 refreshSpellBuff time spell ( sim, sched ) =
     case Dict.get (String.toLower spell.id) buffsBySpell of
         Just buff ->
             -- add a buff stack
             ( { sim
-                | buffTimelines =
-                    sim.buffTimelines
-                        |> Dict.update buff.id (Maybe.withDefault [] >> addBuffStack time buff >> Just)
+                | buffs =
+                    sim.buffs
+                        |> Dict.update buff.id (addBuffStack time buff >> Just)
               }
               -- delay buff expiration/ticks
             , sched
@@ -633,18 +636,23 @@ refreshSpellBuff time spell ( sim, sched ) =
             ( sim, sched )
 
 
-addBuffStack : Timestamp -> Buff -> List BuffSnapshot -> List BuffSnapshot
-addBuffStack time buff timeline =
-    case timeline of
-        [] ->
-            [ { updated = time, buff = buff, stacks = Just 1 } ]
+addBuffStack : Timestamp -> Buff -> Maybe BuffSnapshot -> BuffSnapshot
+addBuffStack time buff msnapshot =
+    case msnapshot of
+        Nothing ->
+            { updated = time, buff = buff, stacks = 1 }
 
-        snapshot :: tail ->
+        Just snapshot ->
             { snapshot
                 | updated = time
-                , stacks = Just <| 1 + Maybe.withDefault 0 snapshot.stacks
+                , stacks =
+                    case buff.maxStacks of
+                        Nothing ->
+                            snapshot.stacks + 1
+
+                        Just cap ->
+                            snapshot.stacks + 1 |> min cap
             }
-                :: timeline
 
 
 removeBuffEvents : String -> Scheduler Event -> Scheduler Event
@@ -691,6 +699,6 @@ duration s =
     (List.length s.runeCombination - 1) * s.msecsPerRune
 
 
-fatigueStacks : FatigueSnapshot -> Maybe Float
+fatigueStacks : FatigueSnapshot -> Float
 fatigueStacks s =
-    s.stacks |> Maybe.map (\stacks -> toFloat stacks - toFloat s.energonStacks / 5)
+    toFloat s.stacks - toFloat s.energonStacks / energonPerFatigue

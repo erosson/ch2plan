@@ -6,9 +6,11 @@ import GameData exposing (GameData)
 import Html as H exposing (..)
 import Html.Attributes as A exposing (..)
 import Html.Events as E exposing (..)
+import Maybe.Extra
 import Model exposing (Model, Msg)
 import Model.Runecorder as Runecorder exposing (Duration, Timestamp)
 import Route exposing (Route)
+import Scheduler exposing (Scheduler)
 
 
 view : Model -> GameData -> Html Msg
@@ -29,15 +31,14 @@ view model gameData =
 viewBody : Model -> GameData -> GameData.GameVersionData -> GameData.Character -> Html Msg
 viewBody model gameData version char =
     let
-        parsed =
-            Runecorder.parse (char.spells |> Dict.Extra.fromListBy (.id >> String.toLower)) model.runecorder
+        spells =
+            char.spells |> Dict.Extra.fromListBy (.id >> String.toLower)
 
-        sim : Runecorder.Simulation
-        sim =
-            parsed
-                |> Result.map Runecorder.unrollStatements
-                |> Runecorder.ignoreParseErrors
-                |> Runecorder.run
+        simRes : Result (List Runecorder.DeadEnd) Runecorder.SimTimeline
+        simRes =
+            model.runecorder
+                |> Runecorder.parse spells
+                |> Result.map Runecorder.run
     in
     div []
         [ h1 [] [ text "Runecorder" ]
@@ -60,7 +61,7 @@ viewBody model gameData version char =
                 )
             ]
         , div [ style "float" "right" ]
-            (case parsed of
+            (case simRes of
                 Err deadEnds ->
                     [ div [] [ text "Error" ]
                     , ul [ style "list-style-type" "none" ]
@@ -75,7 +76,7 @@ viewBody model gameData version char =
                         )
                     ]
 
-                Ok lines ->
+                Ok sim ->
                     [ div [] (viewSimulation sim)
 
                     --, ul []
@@ -89,28 +90,26 @@ viewBody model gameData version char =
         ]
 
 
-viewSimulation : Runecorder.Simulation -> List (Html msg)
+viewSimulation : Runecorder.SimTimeline -> List (Html msg)
 viewSimulation sim =
-    [ div [] [ text "Duration: ", viewTimestamp sim.duration ]
-    , div [] (viewResource " mana" sim.mana)
-    , div [] (viewResource " energy" sim.energy)
+    [ div [] [ text "Duration: ", viewTimestamp sim.end.now ]
+    , div [] (viewResource " mana" sim.end.mana)
+    , div [] (viewResource " energy" sim.end.energy)
 
-    -- TODO this is wrong; we want to know the difference when looping!
+    -- TODO this doesn't correctly represent fatigue when looping - we might recover some fatigue at the start of the loop!
     , div []
-        (GameData.fatigues
-            |> List.map
-                (\fat ->
-                    Dict.get fat.label sim.fatigueTimelines
-                        |> Maybe.andThen (List.reverse >> List.head)
-                        |> Maybe.andThen Runecorder.fatigueStacks
-                        |> Maybe.withDefault 0
-                        |> (*) -1
-                        |> viewResource (" " ++ fat.label ++ " fatigue")
-                        |> div []
-                )
+        (List.map
+            (\fat ->
+                Dict.get fat.label sim.end.fatigue
+                    |> Maybe.Extra.unwrap 0 Runecorder.fatigueStacks
+                    |> (*) -1
+                    |> viewResource (" " ++ fat.label ++ " fatigue")
+                    |> div []
+            )
+            GameData.fatigues
         )
     , ul []
-        (sim.log
+        (sim.timeline
             |> List.map viewLogEntry
             |> List.filter ((/=) [])
             |> List.map (li [])
@@ -127,21 +126,21 @@ viewResource label n =
         [ div [ style "color" "red" ] [ text <| String.fromFloat n, text label ] ]
 
 
-viewLogEntry : ( Timestamp, Runecorder.Event ) -> List (Html msg)
-viewLogEntry ( time, event ) =
-    case event of
+viewLogEntry : ( Scheduler.Event Runecorder.Event, Runecorder.SimSnapshot ) -> List (Html msg)
+viewLogEntry ( { at, payload }, snapshot ) =
+    case payload of
         -- Err err ->
         -- [ code [] [ text "error: ", text err ] ]
         Runecorder.ActionCompleted act ->
             case act of
                 Runecorder.WaitAction ms ->
-                    [ viewTimestamp time, text ": Waited ", text <| String.fromFloat (toFloat ms / 1000), text " sec" ]
+                    [ viewTimestamp at, text ": Waited ", text <| String.fromFloat (toFloat ms / 1000), text " sec" ]
 
                 Runecorder.ClickAction ->
-                    [ viewTimestamp time, text ": Clicked" ]
+                    [ viewTimestamp at, text ": Clicked" ]
 
                 Runecorder.SpellAction spell ->
-                    [ viewTimestamp time
+                    [ viewTimestamp at
                     , text ": Cast "
                     , code [] [ text spell.displayName ]
                     , text ": "
@@ -149,14 +148,14 @@ viewLogEntry ( time, event ) =
                     ]
 
         Runecorder.BuffExpires buff ->
-            [ viewTimestamp time, text ": Expired buff: ", code [] [ text buff.id ] ]
+            [ viewTimestamp at, text ": Expired buff: ", code [] [ text buff.id ] ]
 
         Runecorder.BuffTicks buff ->
             if buff.id == "buff:energon" then
-                [ viewTimestamp time, text ": Ticked ", code [] [ text "Energon Cube" ] ]
+                [ viewTimestamp at, text ": Ticked ", code [] [ text "Energon Cube" ] ]
 
             else
-                [ viewTimestamp time, text ": Ticked buff: ", code [] [ text buff.id ] ]
+                [ viewTimestamp at, text ": Ticked buff: ", code [] [ text buff.id ] ]
 
         _ ->
             []
