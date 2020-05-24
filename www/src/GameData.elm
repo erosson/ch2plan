@@ -28,9 +28,11 @@ module GameData exposing
     , spellFatigue
     , startNodes
     , tooltip
+    , wizardSpells
     )
 
 import Dict exposing (Dict)
+import Dict.Extra
 import GameData.Stats as Stats exposing (Stat, StatTotal, Stats)
 import Json.Decode as D
 import Json.Decode.Pipeline as P
@@ -557,3 +559,19 @@ qualityToString q =
 
         Keystone ->
             "Keystone"
+
+
+characterByName : String -> GameData -> Maybe Character
+characterByName char =
+    latestVersion
+        >> Maybe.andThen (\version -> Dict.get char version.heroes)
+
+
+spells : Character -> Dict String Spell
+spells =
+    .spells >> Dict.Extra.fromListBy (.id >> String.toLower)
+
+
+wizardSpells : GameData -> Maybe ( Character, Dict String Spell )
+wizardSpells gameData =
+    characterByName "wizard" gameData |> Maybe.map (\char -> ( char, spells char ))

@@ -31,6 +31,7 @@ import Math.Vector2 as V2
 import Maybe.Extra
 import Model.Dijkstra as Dijkstra
 import Model.Graph as Graph exposing (GraphModel)
+import Model.Runecorder as Runecorder
 import Ports
 import Process
 import Regex exposing (Regex)
@@ -63,6 +64,8 @@ type Msg
     | SaveFileImport D.Value
     | RunecorderAppend String
     | RunecorderInput String
+    | RunecorderSelect (Maybe Int)
+    | RunecorderRun
 
 
 type alias Model =
@@ -83,7 +86,9 @@ type alias Model =
     , center : V2.Vec2
     , drag : Draggable.State ()
     , etherealItemInventory : Maybe SaveFile.EtherealItemInventory
-    , runecorder : String
+    , runecorderSource : String
+    , runecorderSim : ( String, Result (List Runecorder.DeadEnd) Runecorder.SimTimeline )
+    , runecorderSelection : Maybe Int
     , error : Maybe Error
     }
 
@@ -159,7 +164,9 @@ init flags loc urlKey =
       , center = V2.vec2 0 0
       , drag = Draggable.init
       , etherealItemInventory = Nothing
-      , runecorder = ""
+      , runecorderSource = ""
+      , runecorderSim = ( "", Err [] )
+      , runecorderSelection = Nothing
       , error = error
       }
     , Cmd.batch
@@ -469,18 +476,36 @@ update msg model =
 
                 RunecorderAppend line ->
                     ( { model
-                        | runecorder =
-                            if model.runecorder == "" then
+                        | runecorderSource =
+                            if model.runecorderSource == "" then
                                 line
 
                             else
-                                model.runecorder ++ "\n" ++ line
+                                model.runecorderSource ++ "\n" ++ line
                       }
                     , Cmd.none
                     )
 
                 RunecorderInput input ->
-                    ( { model | runecorder = input }, Cmd.none )
+                    ( { model | runecorderSource = input }, Cmd.none )
+
+                RunecorderSelect val ->
+                    ( { model | runecorderSelection = val }, Cmd.none )
+
+                RunecorderRun ->
+                    ( { model
+                        | runecorderSim =
+                            ( model.runecorderSource
+                            , case GameData.wizardSpells gameData of
+                                Nothing ->
+                                    Err []
+
+                                Just ( char, spells ) ->
+                                    Runecorder.parseAndRun spells model.runecorderSource
+                            )
+                      }
+                    , Cmd.none
+                    )
 
                 NavRequest req ->
                     -- https://package.elm-lang.org/packages/elm/browser/latest/Browser#UrlRequest

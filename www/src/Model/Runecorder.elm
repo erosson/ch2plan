@@ -17,6 +17,7 @@ module Model.Runecorder exposing
     , emptySim
     , fatigueStacks
     , parse
+    , parseAndRun
     , parseStatements
     , run
     , unrollStatements
@@ -410,6 +411,11 @@ type Event
     | BuffExpires Buff
     | BuffTicks Buff
     | FatigueExpires Fatigue
+
+
+parseAndRun : Dict String Spell -> String -> Result (List DeadEnd) SimTimeline
+parseAndRun spells =
+    parse spells >> Result.map run
 
 
 run : List SpellAction -> SimTimeline

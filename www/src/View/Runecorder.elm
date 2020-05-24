@@ -1,7 +1,6 @@
 module View.Runecorder exposing (view)
 
 import Dict exposing (Dict)
-import Dict.Extra
 import GameData exposing (GameData)
 import Html as H exposing (..)
 import Html.Attributes as A exposing (..)
@@ -15,31 +14,16 @@ import Scheduler exposing (Scheduler)
 
 view : Model -> GameData -> Html Msg
 view model gameData =
-    case GameData.latestVersion gameData of
+    case GameData.wizardSpells gameData of
         Nothing ->
-            div [] [ text "no such version" ]
+            div [] [ text "no such hero" ]
 
-        Just version ->
-            case Dict.get "wizard" version.heroes of
-                Nothing ->
-                    div [] [ text "no such hero" ]
-
-                Just hero ->
-                    viewBody model gameData version hero
+        Just ( char, spells ) ->
+            viewBody model char spells
 
 
-viewBody : Model -> GameData -> GameData.GameVersionData -> GameData.Character -> Html Msg
-viewBody model gameData version char =
-    let
-        spells =
-            char.spells |> Dict.Extra.fromListBy (.id >> String.toLower)
-
-        simRes : Result (List Runecorder.DeadEnd) Runecorder.SimTimeline
-        simRes =
-            model.runecorder
-                |> Runecorder.parse spells
-                |> Result.map Runecorder.run
-    in
+viewBody : Model -> GameData.Character -> Dict String GameData.Spell -> Html Msg
+viewBody model char spells =
     div []
         [ h1 [] [ text "Runecorder" ]
 
@@ -61,22 +45,26 @@ viewBody model gameData version char =
                 )
             ]
         , div [ style "float" "right" ]
-            (case simRes of
-                Err deadEnds ->
+            (case model.runecorderSim of
+                ( _, Err [] ) ->
+                    -- initial state, or invalid gamedata/couldn't find spells
+                    []
+
+                ( source, Err deadEnds ) ->
                     [ div [] [ text "Error" ]
                     , ul [ style "list-style-type" "none" ]
                         (deadEnds
                             |> List.map
                                 (\deadEnd ->
                                     li []
-                                        [ blockquote [] [ code [] [ text <| Runecorder.deadEndToSourceLine model.runecorder deadEnd ] ]
+                                        [ blockquote [] [ code [] [ text <| Runecorder.deadEndToSourceLine source deadEnd ] ]
                                         , text <| Runecorder.deadEndToString deadEnd
                                         ]
                                 )
                         )
                     ]
 
-                Ok sim ->
+                ( _, Ok sim ) ->
                     [ div [] (viewSimulation sim)
 
                     --, ul []
@@ -86,7 +74,17 @@ viewBody model gameData version char =
                     --    )
                     ]
             )
-        , div [] [ textarea [ rows 40, cols 80, onInput Model.RunecorderInput, value model.runecorder ] [] ]
+        , div []
+            [ textarea
+                [ rows 40
+                , cols 80
+                , onInput Model.RunecorderInput
+                , onBlur Model.RunecorderRun
+                , value model.runecorderSource
+                ]
+                []
+            ]
+        , div [] [ button [ onClick Model.RunecorderRun ] [ text "Run" ] ]
         ]
 
 
