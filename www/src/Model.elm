@@ -136,6 +136,14 @@ init flags loc urlKey =
 
                 Ok gd ->
                     parseGraph gd route
+
+        src =
+            case route of
+                Just (Route.Runecorder (Just source)) ->
+                    source |> Debug.log "runesrc"
+
+                _ ->
+                    Runecorder.example1
     in
     ( { urlKey = urlKey
       , changelog = flags.changelog
@@ -164,11 +172,18 @@ init flags loc urlKey =
       , center = V2.vec2 0 0
       , drag = Draggable.init
       , etherealItemInventory = Nothing
-      , runecorderSource = Runecorder.example1
-      , runecorderSim = ( Runecorder.example1, Err [] )
+      , runecorderSource = src
+      , runecorderSim = ( src, Err [] )
       , runecorderSelection = Nothing
       , error = error
       }
+        |> (case gameData of
+                Ok gd ->
+                    runecorderRun gd
+
+                _ ->
+                    identity
+           )
     , Cmd.batch
         [ preprocessCmd
         , redirectCmd urlKey route
@@ -494,7 +509,8 @@ update msg model =
                     ( { model | runecorderSelection = val }, Cmd.none )
 
                 RunecorderRun ->
-                    ( runecorderRun gameData model, Cmd.none )
+                    -- ( runecorderRun gameData model, Cmd.none )
+                    ( model, Nav.pushUrl model.urlKey <| Route.stringify <| Route.Runecorder <| Just model.runecorderSource )
 
                 NavRequest req ->
                     -- https://package.elm-lang.org/packages/elm/browser/latest/Browser#UrlRequest
@@ -507,11 +523,20 @@ update msg model =
 
                 NavLocation loc ->
                     let
+                        route : Maybe Route
                         route =
                             Route.parse loc
 
                         ( graph, error ) =
                             parseGraph gameData route
+
+                        src =
+                            case route of
+                                Just (Route.Runecorder (Just source)) ->
+                                    source
+
+                                _ ->
+                                    ""
                     in
                     ( { model
                         | route = route
@@ -527,7 +552,9 @@ update msg model =
 
                                 _ ->
                                     Nothing
+                        , runecorderSource = src
                       }
+                        |> runecorderRun gameData
                     , Cmd.batch [ preprocessCmd, redirectCmd model.urlKey route ]
                     )
 

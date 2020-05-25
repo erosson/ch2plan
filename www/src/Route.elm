@@ -21,6 +21,7 @@ import Maybe.Extra
 import Regex
 import Set exposing (Set)
 import Url exposing (Url)
+import Url.Builder as B
 import Url.Parser as P exposing ((</>), (<?>))
 import Url.Parser.Query as Q
 
@@ -79,7 +80,7 @@ type Route
     | StatsTSV HomeParams
     | EthItems
     | Changelog
-    | Runecorder
+    | Runecorder (Maybe String)
 
 
 type alias Features =
@@ -167,7 +168,7 @@ parser =
         , P.map StatsTSV <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "tsv" </> encodedString </> P.string
         , P.map EthItems <| P.s "ethitems"
         , P.map Changelog <| P.s "changelog"
-        , P.map Runecorder <| P.s "runecorder"
+        , P.map Runecorder <| P.s "runecorder" <?> Q.string "body"
         ]
 
 
@@ -267,8 +268,8 @@ stringify route =
         EthItems ->
             "#/ethitems"
 
-        Runecorder ->
-            "#/runecorder"
+        Runecorder body ->
+            "#/runecorder" ++ B.toQuery (List.filterMap identity [ Maybe.map (B.string "body") body ])
 
 
 href : Route -> H.Attribute msg

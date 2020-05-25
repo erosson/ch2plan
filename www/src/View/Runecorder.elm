@@ -122,7 +122,19 @@ viewSimulation sim =
         div [] [ span [ style "color" "lightgreen" ] [ text "🗹" ], text " Resource-neutral, yay! You can safely loop this forever." ]
 
       else
-        div [ style "color" "red" ] [ text "🗷", text " Not resource-neutral! Be careful looping this for a long time." ]
+        case Runecorder.outOfManaDurationEstimate sim.end of
+            Just { duration, cycles } ->
+                div [ style "color" "red" ]
+                    [ text "🗷"
+                    , text " Not resource-neutral! Out of mana in "
+                    , viewDuration duration
+                    , text ", or about "
+                    , text <| String.fromInt <| floor cycles
+                    , text " cycles. Try to win before that."
+                    ]
+
+            Nothing ->
+                div [ style "color" "red" ] [ text "🗷", text " Not resource-neutral! Be careful looping this for a long time." ]
     , table [ class "runecorder-timeline" ]
         (sim.timeline
             |> List.map viewLogEntry
@@ -211,6 +223,11 @@ viewTimestamp time =
         |> List.map (\( digits, val ) -> val |> String.fromInt |> String.padLeft digits '0')
         |> String.join ":"
         |> (\str -> code [] [ text str ])
+
+
+viewDuration : Duration -> Html msg
+viewDuration =
+    viewTimestamp
 
 
 viewSpellButtons : GameData.Character -> List (Html Msg)

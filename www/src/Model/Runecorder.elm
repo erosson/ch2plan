@@ -18,6 +18,7 @@ module Model.Runecorder exposing
     , example1
     , fatigueStacks
     , isResourceNeutral
+    , outOfManaDurationEstimate
     , parse
     , parseAndRun
     , parseStatements
@@ -715,6 +716,19 @@ fatigueStacks s =
 isResourceNeutral : SimSnapshot -> Bool
 isResourceNeutral sim =
     sim.mana >= 0 && sim.energy >= 0 && (sim.fatigue |> Dict.values |> List.all (\f -> f.stacks <= 0))
+
+
+outOfManaDurationEstimate : SimSnapshot -> Maybe { duration : Duration, cycles : Float }
+outOfManaDurationEstimate sim =
+    if sim.mana >= 0 then
+        Nothing
+
+    else
+        let
+            cycles =
+                manaMax / -sim.mana
+        in
+        Just { cycles = cycles, duration = ceiling <| cycles * toFloat sim.now }
 
 
 example1 : String

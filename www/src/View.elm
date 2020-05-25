@@ -70,7 +70,7 @@ viewBody model =
                         Route.EthItems ->
                             div [] (header ++ [ View.EthItems.view model ])
 
-                        Route.Runecorder ->
+                        Route.Runecorder _ ->
                             div [] (header ++ [ View.Runecorder.view model gameData ])
 
 
