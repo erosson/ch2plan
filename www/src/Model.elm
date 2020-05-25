@@ -140,7 +140,7 @@ init flags loc urlKey =
         src =
             case route of
                 Just (Route.Runecorder (Just source)) ->
-                    source |> Debug.log "runesrc"
+                    source
 
                 _ ->
                     Runecorder.example1
