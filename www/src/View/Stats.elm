@@ -235,6 +235,7 @@ cursorStatEntrySpecs =
         , ( "Lightning Chance of Crit", LIGHTNING_CRIT_PERCENT_CHANCE, entryPct )
         , ( "Lightning Damage", LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, entryPct )
         , ( "Flash % Chance of Striking Adtl. Times", LIGHTNING_FLASH_SPEED_INCREASE_PERCENT, entryPct )
+        , ( "Flash Spell Count", LIGHTNING_FLASH_NUM_SPELLS, entryInt )
         , ( "Lightning Circuit Damage", LIGHTNING_CIRCUIT_DAMAGE_PERCENT, entryPct )
         , ( "Lightning Chain Chance", LIGHTNING_CHAIN_PERCENT, entryPct )
         , ( "Lightning Zap Percent Damage", LIGHTNING_ZAP_PERCENT_DAMAGE, entryPct )
