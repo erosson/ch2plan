@@ -15,7 +15,9 @@ module Model.Runecorder exposing
     , deadEndsToString
     , duration
     , emptySim
+    , example1
     , fatigueStacks
+    , isResourceNeutral
     , parse
     , parseAndRun
     , parseStatements
@@ -708,3 +710,13 @@ duration s =
 fatigueStacks : FatigueSnapshot -> Float
 fatigueStacks s =
     toFloat s.stacks - toFloat s.energonStacks / energonPerFatigue
+
+
+isResourceNeutral : SimSnapshot -> Bool
+isResourceNeutral sim =
+    sim.mana >= 0 && sim.energy >= 0 && (sim.fatigue |> Dict.values |> List.all (\f -> f.stacks <= 0))
+
+
+example1 : String
+example1 =
+    "/* Resource-neutral ice1 spam */\nloop 14 {\n    // First recording: maintain energon cube stacks, then start blasting\n    energon cube;\n    loop 9 {\n        ice1;\n    };\n    // Theoretically you could fit 10 `ice1`s in your recording.\n    // Realistically, a human needs some breathing room between casts.\n    // (Or maybe you're faster than me!)\n    wait 2300;\n};\nloop 3 {\n    // Second recording: drop energon, wait for mana to regen, and buy a few items while we wait.\n    // You could run the first recording longer if you rest longer here too.\n    // Too short, and we won't stack enough energon to be fatigue- and energy-neutral. \n    // Too long, and we'll lose when this rest cycle starts during a boss fight.\n    // Try out different numbers!\n    buyRandomCatalogItem;\n    buyRandomCatalogItem;\n    buyRandomCatalogItem;\n    wait 7000;\n};"

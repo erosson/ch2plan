@@ -164,8 +164,8 @@ init flags loc urlKey =
       , center = V2.vec2 0 0
       , drag = Draggable.init
       , etherealItemInventory = Nothing
-      , runecorderSource = ""
-      , runecorderSim = ( "", Err [] )
+      , runecorderSource = Runecorder.example1
+      , runecorderSim = ( Runecorder.example1, Err [] )
       , runecorderSelection = Nothing
       , error = error
       }
@@ -483,6 +483,7 @@ update msg model =
                             else
                                 model.runecorderSource ++ "\n" ++ line
                       }
+                        |> runecorderRun gameData
                     , Cmd.none
                     )
 
@@ -493,19 +494,7 @@ update msg model =
                     ( { model | runecorderSelection = val }, Cmd.none )
 
                 RunecorderRun ->
-                    ( { model
-                        | runecorderSim =
-                            ( model.runecorderSource
-                            , case GameData.wizardSpells gameData of
-                                Nothing ->
-                                    Err []
-
-                                Just ( char, spells ) ->
-                                    Runecorder.parseAndRun spells model.runecorderSource
-                            )
-                      }
-                    , Cmd.none
-                    )
+                    ( runecorderRun gameData model, Cmd.none )
 
                 NavRequest req ->
                     -- https://package.elm-lang.org/packages/elm/browser/latest/Browser#UrlRequest
@@ -544,6 +533,21 @@ update msg model =
 
                 Resize windowSize ->
                     ( { model | windowSize = windowSize }, Cmd.none )
+
+
+runecorderRun : GameData -> Model -> Model
+runecorderRun gameData model =
+    { model
+        | runecorderSim =
+            ( model.runecorderSource
+            , case GameData.wizardSpells gameData of
+                Nothing ->
+                    Err []
+
+                Just ( char, spells ) ->
+                    Runecorder.parseAndRun spells model.runecorderSource
+            )
+    }
 
 
 nodeIconSize =

@@ -10,6 +10,7 @@ import Model exposing (Model, Msg)
 import Model.Runecorder as Runecorder exposing (Duration, Timestamp)
 import Route exposing (Route)
 import Scheduler exposing (Scheduler)
+import Set exposing (Set)
 
 
 view : Model -> GameData -> Html Msg
@@ -25,67 +26,77 @@ view model gameData =
 viewBody : Model -> GameData.Character -> Dict String GameData.Spell -> Html Msg
 viewBody model char spells =
     div []
-        [ h1 [] [ text "Runecorder" ]
+        [ h1 [] [ text "Runecorder planner" ]
+        , p [] [ text "Describe your runecorder plan below. I'll output a timeline showing the resources you'll spend, what will happen when, and the buttons you'll press to record it." ]
+        , p [] [ text "Use the \"insert an action\" buttons below to get started!" ]
+        , div
+            [ style "width" "45%"
 
-        -- , div [ class "spells-summary" ]
-        , div [ style "float" "left" ]
-            [ text "Actions:"
-            , ul []
-                ([ li []
-                    [ button [ onClick <| Model.RunecorderAppend "click;" ] [ text "Click" ]
-                    ]
-                 , li []
-                    [ button [ onClick <| Model.RunecorderAppend "wait 3000;" ] [ text "Wait 3 seconds (3000 millis)" ]
-                    ]
-                 , li []
-                    [ button [ onClick <| Model.RunecorderAppend "loop 3 {\n  // Add some looped actions below:\n  \n};" ] [ text "Loop actions 3 times" ]
-                    ]
-                 ]
-                    ++ List.map viewSpellEntry char.spells
+            -- , style "display" "inline-block"
+            , style "float" "left"
+            , style "padding" "0.5em"
+            ]
+            (viewEditor model.runecorderSource ++ viewSpellButtons char)
+        , div
+            [ style "width" "45%"
+
+            -- , style "display" "inline-block"
+            , style "float" "left"
+            , style "padding" "0.5em"
+            ]
+            (viewSimulationResult model.runecorderSim)
+        ]
+
+
+viewEditor : String -> List (Html Msg)
+viewEditor source =
+    [ div []
+        [ textarea
+            [ rows 40
+            , style "padding" "0"
+            , style "margin" "0"
+            , style "border" "0"
+            , style "width" "100%"
+            , onInput Model.RunecorderInput
+            , onBlur Model.RunecorderRun
+            , value source
+            ]
+            []
+        ]
+    , div [] [ button [ onClick Model.RunecorderRun ] [ text "Run" ] ]
+    ]
+
+
+viewSimulationResult : ( String, Result (List Runecorder.DeadEnd) Runecorder.SimTimeline ) -> List (Html msg)
+viewSimulationResult ( source, result ) =
+    case result of
+        Err [] ->
+            -- initial state, or invalid gamedata/couldn't find spells
+            []
+
+        Err deadEnds ->
+            [ div [] [ text "Error" ]
+            , ul [ style "list-style-type" "none" ]
+                (deadEnds
+                    |> List.map
+                        (\deadEnd ->
+                            li []
+                                [ blockquote [] [ code [] [ text <| Runecorder.deadEndToSourceLine source deadEnd ] ]
+                                , text <| Runecorder.deadEndToString deadEnd
+                                ]
+                        )
                 )
             ]
-        , div [ style "float" "right" ]
-            (case model.runecorderSim of
-                ( _, Err [] ) ->
-                    -- initial state, or invalid gamedata/couldn't find spells
-                    []
 
-                ( source, Err deadEnds ) ->
-                    [ div [] [ text "Error" ]
-                    , ul [ style "list-style-type" "none" ]
-                        (deadEnds
-                            |> List.map
-                                (\deadEnd ->
-                                    li []
-                                        [ blockquote [] [ code [] [ text <| Runecorder.deadEndToSourceLine source deadEnd ] ]
-                                        , text <| Runecorder.deadEndToString deadEnd
-                                        ]
-                                )
-                        )
-                    ]
+        Ok sim ->
+            [ div [] (viewSimulation sim)
 
-                ( _, Ok sim ) ->
-                    [ div [] (viewSimulation sim)
-
-                    --, ul []
-                    --    (lines
-                    --        |> List.map viewParsedLine
-                    --        |> List.map (li [])
-                    --    )
-                    ]
-            )
-        , div []
-            [ textarea
-                [ rows 40
-                , cols 80
-                , onInput Model.RunecorderInput
-                , onBlur Model.RunecorderRun
-                , value model.runecorderSource
-                ]
-                []
+            --, ul []
+            --    (lines
+            --        |> List.map viewParsedLine
+            --        |> List.map (li [])
+            --    )
             ]
-        , div [] [ button [ onClick Model.RunecorderRun ] [ text "Run" ] ]
-        ]
 
 
 viewSimulation : Runecorder.SimTimeline -> List (Html msg)
@@ -95,6 +106,7 @@ viewSimulation sim =
     , div [] (viewResource " energy" sim.end.energy)
 
     -- TODO this doesn't correctly represent fatigue when looping - we might recover some fatigue at the start of the loop!
+    -- still, it's close enough for the common blast -> rest cycle.
     , div []
         (List.map
             (\fat ->
@@ -106,11 +118,16 @@ viewSimulation sim =
             )
             GameData.fatigues
         )
-    , ul []
+    , if Runecorder.isResourceNeutral sim.end then
+        div [] [ span [ style "color" "lightgreen" ] [ text "🗹" ], text " Resource-neutral, yay! You can safely loop this forever." ]
+
+      else
+        div [ style "color" "red" ] [ text "🗷", text " Not resource-neutral! Be careful looping this for a long time." ]
+    , table [ class "runecorder-timeline" ]
         (sim.timeline
             |> List.map viewLogEntry
             |> List.filter ((/=) [])
-            |> List.map (li [])
+            |> List.map (tr [])
         )
     ]
 
@@ -132,28 +149,39 @@ viewLogEntry ( { at, payload }, snapshot ) =
         Runecorder.ActionCompleted act ->
             case act of
                 Runecorder.WaitAction ms ->
-                    [ viewTimestamp at, text ": Waited ", text <| String.fromFloat (toFloat ms / 1000), text " sec" ]
+                    [ td [] [ viewTimestamp at ]
+                    , td [] [ text "Waited ", text <| String.fromFloat (toFloat ms / 1000), text " sec" ]
+                    ]
 
                 Runecorder.ClickAction ->
-                    [ viewTimestamp at, text ": Clicked" ]
+                    [ td [] [ viewTimestamp at ], td [] [ text "Clicked" ] ]
 
                 Runecorder.SpellAction spell ->
-                    [ viewTimestamp at
-                    , text ": Cast "
-                    , code [] [ text spell.displayName ]
-                    , text ": "
-                    , div [] [ kbd [ style "color" "green" ] [ spell.runeCombination |> List.map String.fromInt |> String.join " " |> text ] ]
+                    [ td [] [ viewTimestamp at ]
+                    , td []
+                        [ text "Cast "
+                        , code [] [ text spell.displayName ]
+                        ]
+                    , td [ style "color" "lightgreen" ]
+                        [ kbd [] [ spell.runeCombination |> List.map String.fromInt |> String.join " " |> text ]
+                        ]
                     ]
 
         Runecorder.BuffExpires buff ->
-            [ viewTimestamp at, text ": Expired buff: ", code [] [ text buff.id ] ]
+            [ td [ style "color" "yellow" ] [ viewTimestamp at ]
+            , td [ style "color" "yellow" ] [ text "Expired buff: ", code [] [ text buff.id ] ]
+            ]
 
         Runecorder.BuffTicks buff ->
             if buff.id == "buff:energon" then
-                [ viewTimestamp at, text ": Ticked ", code [] [ text "Energon Cube" ] ]
+                [ td [] [ viewTimestamp at ]
+                , td [] [ text "Ticked ", code [] [ text "Energon Cube" ] ]
+                ]
 
             else
-                [ viewTimestamp at, text ": Ticked buff: ", code [] [ text buff.id ] ]
+                [ td [] [ viewTimestamp at ]
+                , td [] [ text "Ticked buff: ", code [] [ text buff.id ] ]
+                ]
 
         _ ->
             []
@@ -185,10 +213,46 @@ viewTimestamp time =
         |> (\str -> code [] [ text str ])
 
 
+viewSpellButtons : GameData.Character -> List (Html Msg)
+viewSpellButtons char =
+    [ text "Insert an action:"
+    , div []
+        [ button [ onClick <| Model.RunecorderAppend "click;" ] [ text "Click" ]
+        , button [ onClick <| Model.RunecorderAppend "wait 3000;" ] [ text "Wait 3 seconds (3000 millis)" ]
+        , button [ onClick <| Model.RunecorderAppend "loop 3 {\n  // Add some looped actions between the { braces }\n  \n};" ] [ text "Loop actions 3 times" ]
+        ]
+    , div []
+        (char.spells
+            |> List.filter (\s -> Set.singleton 7 == s.types)
+            |> List.map viewSpellEntry
+        )
+    , div []
+        (GameData.fatigues
+            |> List.map
+                (\f ->
+                    char.spells
+                        |> List.filter (\s -> Set.singleton f.ord == s.types)
+                        |> List.map viewSpellEntry
+                        |> List.map (\b -> div [] [ b ])
+                        |> div [ style "display" "inline-block" ]
+                )
+        )
+    , div []
+        (char.spells
+            |> List.filter (\s -> Set.size s.types > 1)
+            |> List.map viewSpellEntry
+        )
+    , text "Complete example scripts:"
+    , div []
+        [ button [ onClick <| Model.RunecorderAppend Runecorder.example1 ] [ text "Resource-neutral Ice1 spam" ]
+        ]
+    ]
+
+
 viewSpellEntry : GameData.Spell -> Html Msg
 viewSpellEntry s =
     let
-        lineIf : Bool -> List (Html msg) -> List (Html msg)
+        lineIf : Bool -> List String -> List String
         lineIf b l =
             if b then
                 l
@@ -208,28 +272,27 @@ viewSpellEntry s =
         fats =
             GameData.spellFatigue s
 
-        lines : List (List (Html msg))
+        lines : List (List String)
         lines =
             [ []
-            , [ text s.id ]
+            , [ s.id ]
 
             -- , lineIf (s.description /= "") [ text s.description ]
             -- , [ text "Runes: ", kbd [] [ s.runeCombination |> List.map String.fromInt |> String.join " " |> text ] ]
             -- , lineIf (s.damageMultiplier > 0) [ text <| "Damage: ×" ++ String.fromFloat damage ]
-            , lineIf (durationSecs > 0) [ text <| "Cast time: " ++ String.fromFloat durationSecs ++ "s" ]
-            , lineIf (s.manaCost > 0) [ text <| "Mana cost: " ++ String.fromInt s.manaCost ]
-            , lineIf (energy > 0) [ text <| "Energy cost: " ++ String.fromInt energy ]
+            , lineIf (durationSecs > 0) [ "Cast time: " ++ String.fromFloat durationSecs ++ "s" ]
+            , lineIf (s.manaCost > 0) [ "Mana cost: " ++ String.fromInt s.manaCost ]
+            , lineIf (energy > 0) [ "Energy cost: " ++ String.fromInt energy ]
             , lineIf (fats /= [])
-                [ text <| "Fatigue: "
+                [ "Fatigue: "
                 , fats
                     |> List.map (\( fat, val ) -> String.fromInt val ++ "× " ++ fat.label)
                     |> String.join ", "
-                    |> text
                 ]
             ]
-    in
-    li []
-        [ button [ onClick <| Model.RunecorderAppend <| s.id ++ ";" ] [ text s.displayName ]
 
-        -- , ul [] (lines |> List.filter ((/=) []) |> List.map (li []))
-        ]
+        txt : String
+        txt =
+            lines |> List.filter ((/=) []) |> List.map (String.join "") |> String.join "\n"
+    in
+    button [ title txt, onClick <| Model.RunecorderAppend <| s.id ++ ";" ] [ text s.displayName ]

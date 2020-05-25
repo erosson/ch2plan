@@ -246,3 +246,7 @@ nav {
 .flammable {
   color: #881111;
 }
+
+table.runecorder-timeline td {
+  border-bottom: 1px dashed grey;
+}
