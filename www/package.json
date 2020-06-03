@@ -32,7 +32,7 @@
     "parcel-plugin-static-files-copy": "^2.3.1",
     "prettier": "^2.0.5",
     "scripty": "^2.0.0",
-    "serve": "^11.3.0",
+    "serve": "^11.3.1",
     "sort-json": "^2.0.0"
   },
   "private": true
