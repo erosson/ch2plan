@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "npm"
+    directory: "/assets"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "npm"
+    directory: "/exporter"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "npm"
+    directory: "/www"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "elm"
+    directory: "/www"
+    schedule:
+      interval: "daily"
