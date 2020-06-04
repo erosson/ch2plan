@@ -28,6 +28,8 @@
             "zaboco/elm-draggable": "4.0.6"
         },
         "indirect": {
+            "elm/bytes": "1.0.8",
+            "elm/file": "1.0.5",
             "elm/random": "1.0.0",
             "mpizenberg/elm-pointer-events": "3.0.0"
         }
