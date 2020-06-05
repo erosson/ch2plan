@@ -29,6 +29,10 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 ---
 
+## 2020-05-19
+
+- Update to live version 0.13.0.
+
 ## 2020-05-24
 
 - Wizard stats are now calculated.

@@ -1,6 +1,6 @@
 {
   "ch2": {
-    "GAME_VERSION": "0.12.0 r464"
+    "GAME_VERSION": "0.13.0 r490"
   },
   "heroes": {
     "helpfulAdventurer": {
@@ -555,7 +555,7 @@
           "flavorText": null,
           "icon": "damagex3",
           "name": "Synchrony",
-          "tooltip": "Skills do not interrupt Auto Attacks."
+          "tooltip": "Skills do not interrupt Auto Attacks.  Auto Attacks generate 2 extra energy when Autoattackstorm is active."
         },
         "Q22": {
           "flammable": true,
@@ -601,17 +601,17 @@
         },
         "Q28": {
           "flammable": true,
-          "flavorText": "This effect can not occur more than once every second.",
+          "flavorText": "",
           "icon": "damagex3",
           "name": "Jerator's Enchantment",
-          "tooltip": "Critical Hits from Auto Attacks can restore 1 mana one time per second."
+          "tooltip": "Critical Hits from Auto Attacks restore 1 mana and 3 energy."
         },
         "Q29": {
           "flammable": true,
-          "flavorText": "AutoAttackStorm is like Clickstorm, but does not replace it and can be used in conjunction with Clickstorm.",
+          "flavorText": "Replaces your current Storm.",
           "icon": "damagex3",
           "name": "AutoAttackStorm",
-          "tooltip": "Consumes 1.25 mana per second to auto attack 2.5 times per second, until you run out of mana."
+          "tooltip": "Storm: Consumes 2.5 mana per second to auto attack 5 times per second, until you run out of mana.  These attacks generate 1 extra energy. Autoattack damage is doubled while active."
         },
         "Q30": {
           "flammable": true,
@@ -622,10 +622,10 @@
         },
         "Q41": {
           "flammable": true,
-          "flavorText": "Replaces Clickstorm.",
+          "flavorText": "Replaces your current Storm.",
           "icon": "damagex3",
           "name": "Golden Clicks",
-          "tooltip": "Consumes 1.25 energy per second to click 2.5 times per second, until you run out of energy. Doubles gold gained while active."
+          "tooltip": "Storm: Consumes 1.25 energy per second to click 2.5 times per second, until you run out of energy. Doubles gold gained while active."
         },
         "Q42": {
           "flammable": true,
@@ -685,10 +685,10 @@
         },
         "Q65": {
           "flammable": true,
-          "flavorText": "Replaces Clickstorm.",
+          "flavorText": "Replaces your current Storm.",
           "icon": "damagex3",
           "name": "CritStorm",
-          "tooltip": "Consumes 2.5 energy per second to click 5 times per second, until you run out of energy. Clicks from this skill have double chance of being critical strikes."
+          "tooltip": "Storm: Consumes 2.5 energy per second to click 5 times per second, until you run out of energy. Clicks from this skill have double chance of being critical strikes."
         },
         "Q66": {
           "flammable": true,
@@ -748,10 +748,17 @@
         },
         "Q88": {
           "flammable": true,
-          "flavorText": "Replaces Clickstorm.",
+          "flavorText": "Replaces your current Storm.",
           "icon": "damagex3",
           "name": "ClickTorrent",
-          "tooltip": "Consumes 10 energy per second to click 30 times per second, until you run out of energy."
+          "tooltip": "Storm: Consumes 10 energy per second to click 30 times per second, until you run out of energy."
+        },
+        "Q89": {
+          "flammable": true,
+          "flavorText": "Do you really need to be going that fast?",
+          "icon": "damagex3",
+          "name": "Limited Haste",
+          "tooltip": "Triples your damage at the cost of half of your haste."
         },
         "Ra": {
           "__ch2plan_tooltip": "Increases Energy and Mana restored by Reload by 10 and reduces the remaining cooldown of skills by a further 0.30%.",
@@ -1249,7 +1256,7 @@
           "flavorText": null,
           "icon": "clickstorm",
           "name": "Skill: Clickstorm",
-          "tooltip": "Consumes 2.5 energy per second to click 5 times per second, until you run out of energy."
+          "tooltip": "Storm: Consumes 2.5 energy per second to click 5 times per second, until you run out of energy."
         },
         "T5": {
           "flammable": true,
@@ -8494,7 +8501,7 @@
           },
           {
             "293": {
-              "val": "Q81",
+              "val": "Q89",
               "x": 263,
               "y": 803
             }
@@ -11883,64 +11890,64 @@
           "tooltip": "Does Absolutely NOTHING."
         },
         "Fa1": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
-          "flavorText": "Stacks with similar effects but not with itself.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
+          "flavorText": null,
           "icon": "fireCorrosion1",
           "name": "Fire: Corrosion",
           "upgradeable": true
         },
         "Fa2": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
-          "flavorText": "Stacks with similar effects but not with itself.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
+          "flavorText": null,
           "icon": "fireCorrosion1",
           "name": "Fire: Corrosion",
           "upgradeable": true
         },
         "Fa3": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
-          "flavorText": "Stacks with similar effects but not with itself.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
+          "flavorText": null,
           "icon": "fireCorrosion1",
           "name": "Fire: Corrosion",
           "upgradeable": true
         },
         "Fa4": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
-          "flavorText": "Stacks with similar effects but not with itself.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
+          "flavorText": null,
           "icon": "fireCorrosion1",
           "name": "Fire: Corrosion",
           "upgradeable": true
         },
         "Fa5": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
-          "flavorText": "Stacks with similar effects but not with itself.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
+          "flavorText": null,
           "icon": "fireCorrosion1",
           "name": "Fire: Corrosion",
           "upgradeable": true
         },
         "Fa6": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
-          "flavorText": "Stacks with similar effects but not with itself.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
+          "flavorText": null,
           "icon": "fireCorrosion1",
           "name": "Fire: Corrosion",
           "upgradeable": true
         },
         "Fa7": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
-          "flavorText": "Stacks with similar effects but not with itself.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
+          "flavorText": null,
           "icon": "fireCorrosion1",
           "name": "Fire: Corrosion",
           "upgradeable": true
         },
         "Fa8": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
-          "flavorText": "Stacks with similar effects but not with itself.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
+          "flavorText": null,
           "icon": "fireCorrosion1",
           "name": "Fire: Corrosion",
           "upgradeable": true
         },
         "Fa9": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
-          "flavorText": "Stacks with similar effects but not with itself.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
+          "flavorText": null,
           "icon": "fireCorrosion1",
           "name": "Fire: Corrosion",
           "upgradeable": true
@@ -12198,55 +12205,55 @@
           "upgradeable": false
         },
         "Ft3": {
-          "__ch2plan_tooltip": "Increases the chance for all Burn damage from Rank 1-3 Fire Spells to occur twice by 20.00% chance for all Burn damage to occur twice for 8 seconds.",
+          "__ch2plan_tooltip": "Increases all Burn effects chance to occur twice for 8 seconds by 20.00% after casting a Rank 1-3 Fire Spell.",
           "flavorText": null,
           "icon": "fireTraitCombustion",
           "name": "Fire Trait: Combustion",
           "upgradeable": true
         },
         "Ft4": {
-          "__ch2plan_tooltip": "Increases the chance for all Burn damage from Rank 1-3 Fire Spells to occur twice by 20.00% chance for all Burn damage to occur twice for 8 seconds.",
+          "__ch2plan_tooltip": "Increases all Burn effects chance to occur twice for 8 seconds by 20.00% after casting a Rank 1-3 Fire Spell.",
           "flavorText": null,
           "icon": "fireTraitCombustion",
           "name": "Fire Trait: Combustion",
           "upgradeable": true
         },
         "Ft5": {
-          "__ch2plan_tooltip": "Increases the chance for all Burn damage from Rank 1-3 Fire Spells to occur twice by 20.00% chance for all Burn damage to occur twice for 8 seconds.",
+          "__ch2plan_tooltip": "Increases all Burn effects chance to occur twice for 8 seconds by 20.00% after casting a Rank 1-3 Fire Spell.",
           "flavorText": null,
           "icon": "fireTraitCombustion",
           "name": "Fire Trait: Combustion",
           "upgradeable": true
         },
         "Ft6": {
-          "flammable": true,
           "flavorText": null,
           "icon": "fireTraitWarmth",
           "name": "Fire Trait: Heat Burst",
           "tooltip": "Non-Fire Spells have a chance to increase damage of Fire spells by 10% for 10 seconds. Chance increases with higher rank spells.",
-          "upgradeable": false
+          "upgradeable": true
         },
         "Ft7": {
-          "flammable": true,
           "flavorText": null,
           "icon": "fireTraitWarmth",
           "name": "Fire Trait: Heat Burst 2",
           "tooltip": "Non-Fire Spells have a chance to increase damage of Fire spells by 10% for 10 seconds. Chance increases with higher rank spells.",
-          "upgradeable": false
+          "upgradeable": true
         },
         "Ft8": {
+          "flammable": true,
           "flavorText": null,
           "icon": "fireTraitExplosion",
           "name": "Fire Trait: Explosion",
           "tooltip": "Rank 7-9 Fire Spells cause the current monster to explode on death, dealing 50% burn damage they have suffered to the next monster.",
-          "upgradeable": true
+          "upgradeable": false
         },
         "Ft9": {
+          "flammable": true,
           "flavorText": null,
           "icon": "fireTraitExplosion",
           "name": "Fire Trait: Explosion 2",
           "tooltip": "Rank 7-9 Fire Spells cause the current monster to explode on death, dealing 50% burn damage they have suffered to the next monster.",
-          "upgradeable": true
+          "upgradeable": false
         },
         "Fw6": {
           "__ch2plan_tooltip": "Increases the damage of Heat Burst by 5.00%.",
@@ -12719,55 +12726,55 @@
           "upgradeable": false
         },
         "It3": {
-          "__ch2plan_tooltip": "Increases the chance for Rank 1-3 Ice Spells to score a critical hit by 8.00% with all Spells for 10 seconds.",
+          "__ch2plan_tooltip": "Increases all spells chance of scoring a critical hit for 10 seconds by 8.00% after casting a Rank 1-3 Ice Spell.",
           "flavorText": null,
           "icon": "iceTraitCoolCriticals",
           "name": "Ice Trait: Cool Criticals",
           "upgradeable": true
         },
         "It4": {
-          "__ch2plan_tooltip": "Increases the chance for Rank 1-3 Ice Spells to score a critical hit by 8.00% with all Spells for 10 seconds.",
+          "__ch2plan_tooltip": "Increases all spells chance of scoring a critical hit for 10 seconds by 8.00% after casting a Rank 1-3 Ice Spell.",
           "flavorText": null,
           "icon": "iceTraitCoolCriticals",
           "name": "Ice Trait: Cool Criticals",
           "upgradeable": true
         },
         "It5": {
-          "__ch2plan_tooltip": "Increases the chance for Rank 1-3 Ice Spells to score a critical hit by 8.00% with all Spells for 10 seconds.",
+          "__ch2plan_tooltip": "Increases all spells chance of scoring a critical hit for 10 seconds by 8.00% after casting a Rank 1-3 Ice Spell.",
           "flavorText": null,
           "icon": "iceTraitCoolCriticals",
           "name": "Ice Trait: Cool Criticals",
           "upgradeable": true
         },
         "It6": {
-          "flammable": true,
           "flavorText": null,
           "icon": "iceTraitCoolth",
           "name": "Ice Trait: Cold Front",
           "tooltip": "Non-Ice Spells have a chance to increase damage of Ice spells by 10% for 10 seconds. Chance increases with higher rank spells.",
-          "upgradeable": false
+          "upgradeable": true
         },
         "It7": {
-          "flammable": true,
           "flavorText": null,
           "icon": "iceTraitCoolth",
           "name": "Ice Trait: Cold Front 2",
           "tooltip": "Non-Ice Spells have a chance to increase damage of Ice spells by 10% for 10 seconds. Chance increases with higher rank spells.",
-          "upgradeable": false
+          "upgradeable": true
         },
         "It8": {
+          "flammable": true,
           "flavorText": null,
           "icon": "iceTraitShatter",
           "name": "Ice Trait: Shatter",
           "tooltip": "Rank 7-9 Ice Spells that kill a monster cause it to shatter, dealing 20% of the damage to each of the next 3 monsters.",
-          "upgradeable": true
+          "upgradeable": false
         },
         "It9": {
+          "flammable": true,
           "flavorText": null,
           "icon": "iceTraitShatter",
           "name": "Ice Trait: Shatter 2",
           "tooltip": "Rank 7-9 Ice Spells that kill a monster cause it to shatter, dealing 20% of the damage to each of the next 3 monsters.",
-          "upgradeable": true
+          "upgradeable": false
         },
         "Iw6": {
           "__ch2plan_tooltip": "Increases the damage of Cold Front by 5.00%.",
@@ -13241,55 +13248,55 @@
           "upgradeable": false
         },
         "Lt3": {
-          "__ch2plan_tooltip": "Increases the chance for Rank 1-3 Lightning Spells to strike the target additional times by 10.00% for your next 3 Spells..",
+          "__ch2plan_tooltip": "Increases your next 3 spells chance of striking additional times by 10.00% after casting a Rank 1-3 Lightning Spell.",
           "flavorText": null,
           "icon": "lightningTraitFlash",
           "name": "Lightning Trait: Flash",
           "upgradeable": true
         },
         "Lt4": {
-          "__ch2plan_tooltip": "Increases the chance for Rank 1-3 Lightning Spells to strike the target additional times by 10.00% for your next 3 Spells..",
+          "__ch2plan_tooltip": "Increases your next 3 spells chance of striking additional times by 10.00% after casting a Rank 1-3 Lightning Spell.",
           "flavorText": null,
           "icon": "lightningTraitFlash",
           "name": "Lightning Trait: Flash",
           "upgradeable": true
         },
         "Lt5": {
-          "__ch2plan_tooltip": "Increases the chance for Rank 1-3 Lightning Spells to strike the target additional times by 10.00% for your next 3 Spells..",
+          "__ch2plan_tooltip": "Increases your next 3 spells chance of striking additional times by 10.00% after casting a Rank 1-3 Lightning Spell.",
           "flavorText": null,
           "icon": "lightningTraitFlash",
           "name": "Lightning Trait: Flash",
           "upgradeable": true
         },
         "Lt6": {
-          "flammable": true,
           "flavorText": null,
           "icon": "lightningTraitEnergize",
           "name": "Lightning Trait: Thunderstorm 1",
           "tooltip": "Non-Lightning Spells have a chance to increase damage of Lightning spells by 10% for 10 seconds. Chance increases with higher rank spells.",
-          "upgradeable": false
+          "upgradeable": true
         },
         "Lt7": {
-          "flammable": true,
           "flavorText": null,
           "icon": "lightningTraitEnergize",
           "name": "Lightning Trait: Thunderstorm 2",
           "tooltip": "Non-Lightning Spells have a chance to increase damage of Lightning spells by 10% for 10 seconds. Chance increases with higher rank spells.",
-          "upgradeable": false
+          "upgradeable": true
         },
         "Lt8": {
+          "flammable": true,
           "flavorText": null,
           "icon": "lightningTraitCircuit",
-          "name": "Lightning Trait: Circuit",
-          "tooltip": "Rank 7-9 Lightning Spells strike the current monster additional times equal to half your chain chance for 50% damage.",
-          "upgradeable": true
+          "name": "Lightning Trait: Conductor",
+          "tooltip": " Monsters struck by Rank 7-9 Lightning Spells become conduits, having a 10% chance of being struck by additional copies of the original spell every 0.1 seconds for 1 second.",
+          "upgradeable": false
         },
         "Lt9": {
+          "flammable": true,
           "flavorText": null,
           "icon": "lightningTraitCircuit",
-          "name": "Lightning Trait: Circuit 2",
-          "tooltip": "Rank 7-9 Lightning Spells strike the current monster additional times equal to half your chain chance for 50% damage.",
-          "upgradeable": true
+          "name": "Lightning Trait: Conductor 2",
+          "tooltip": " Monsters struck by Rank 7-9 Lightning Spells become conduits, having a 10% chance of being struck by additional copies of the original spell every 0.1 seconds for 1 second.",
+          "upgradeable": false
         },
         "Lw6": {
           "__ch2plan_tooltip": "Increases damage of Thunderstorm by 5.00%.",
@@ -13710,21 +13717,23 @@
           "flammable": true,
           "icon": "iceMangoSlurry",
           "name": "Neutral: Energon Cube",
-          "tooltip": "Unlocks Energon Cube Spell. Energon Cube restores 2.5% of your energy with a 20% chance of reducing all Fatigue by 1 every 3 seconds.",
+          "tooltip": "Unlocks Energon Cube Spell. Energon Cube restores 2% of your energy with a 20% chance of reducing all Fatigue by 1 every 3 seconds.",
           "upgradeable": false
         },
         "Ms5": {
           "flammable": true,
+          "flavorText": null,
           "icon": "synergyIceLightning1",
-          "name": "Ice and Lightning: Synergy",
-          "tooltip": "Ice and Lightning Spells gain the benefit of all stats that affect either Ice or Lightning Magic for 30 seconds per charge, up to 5 charges.",
+          "name": "Ice and Lightning: Symbiosis",
+          "tooltip": "After casting a Spell of Ice or Lightning, the damage of your next 3 Spells is increased by 50% if and only if they are a Spell of the other element. The damage increase effect stacks additively with itself.",
           "upgradeable": false
         },
         "Ms7": {
           "flammable": true,
+          "flavorText": null,
           "icon": "synergyIceLightning1",
-          "name": "Ice and Lightning: Synergy",
-          "tooltip": "Ice and Lightning Spells gain the benefit of all stats that affect either Ice or Lightning Magic for 30 seconds per charge, up to 5 charges.",
+          "name": "Ice and Lightning: Symbiosis 2",
+          "tooltip": "After casting a Spell of Ice or Lightning, the damage of your next 3 Spells is increased by 50% if and only if they are a Spell of the other element. The damage increase effect stacks additively with itself.",
           "upgradeable": false
         },
         "Ms9": {
@@ -14010,16 +14019,18 @@
         },
         "Ns5": {
           "flammable": true,
+          "flavorText": null,
           "icon": "synergyLightningFire1",
-          "name": "Lightning and Fire: Synergy",
-          "tooltip": "Lightning and Fire Spells gain the benefit of all stats that affect either Lightning and Fire Magic for 30 seconds per charge, up to 5 charges.",
+          "name": "Lightning and Fire: Symbiosis",
+          "tooltip": "After casting a Spell of Lightning or Fire, the damage of your next 3 Spells is increased by 50% if and only if they are a Spell of the other element. The damage increase effect stacks additively with itself.",
           "upgradeable": false
         },
         "Ns7": {
           "flammable": true,
+          "flavorText": null,
           "icon": "synergyLightningFire1",
-          "name": "Lightning and Fire: Synergy",
-          "tooltip": "Lightning and Fire Spells gain the benefit of all stats that affect either Lightning and Fire Magic for 30 seconds per charge, up to 5 charges.",
+          "name": "Lightning and Fire: Symbiosis 2",
+          "tooltip": "After casting a Spell of Lightning or Fire, the damage of your next 3 Spells is increased by 50% if and only if they are a Spell of the other element. The damage increase effect stacks additively with itself.",
           "upgradeable": false
         },
         "Ns9": {
@@ -14037,66 +14048,66 @@
           "upgradeable": false
         },
         "Oa1": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by an Ice spell until a monster is killed.\nIncreases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by an Ice spell.\nIncreases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
           "flavorText": null,
           "icon": "dualIceFireCorrosionDamage1",
-          "name": "Ice and Fire: Corrosion Damage",
+          "name": "Ice and Fire: Corrosion",
           "upgradeable": true
         },
         "Oa2": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by an Ice spell until a monster is killed.\nIncreases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by an Ice spell.\nIncreases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
           "flavorText": null,
           "icon": "dualIceFireCorrosionDamage1",
-          "name": "Ice and Fire: Corrosion Damage",
+          "name": "Ice and Fire: Corrosion",
           "upgradeable": true
         },
         "Oa3": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by an Ice spell until a monster is killed.\nIncreases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by an Ice spell.\nIncreases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
           "flavorText": null,
           "icon": "dualIceFireCorrosionDamage1",
-          "name": "Ice and Fire: Corrosion Damage",
+          "name": "Ice and Fire: Corrosion",
           "upgradeable": true
         },
         "Oa4": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by an Ice spell until a monster is killed.\nIncreases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by an Ice spell.\nIncreases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
           "flavorText": null,
           "icon": "dualIceFireCorrosionDamage1",
-          "name": "Ice and Fire: Corrosion Damage",
+          "name": "Ice and Fire: Corrosion",
           "upgradeable": true
         },
         "Oa5": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by an Ice spell until a monster is killed.\nIncreases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by an Ice spell.\nIncreases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
           "flavorText": null,
           "icon": "dualIceFireCorrosionDamage1",
-          "name": "Ice and Fire: Corrosion Damage",
+          "name": "Ice and Fire: Corrosion",
           "upgradeable": true
         },
         "Oa6": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by an Ice spell until a monster is killed.\nIncreases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by an Ice spell.\nIncreases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
           "flavorText": null,
           "icon": "dualIceFireCorrosionDamage1",
-          "name": "Ice and Fire: Corrosion Damage",
+          "name": "Ice and Fire: Corrosion",
           "upgradeable": true
         },
         "Oa7": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by an Ice spell until a monster is killed.\nIncreases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by an Ice spell.\nIncreases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
           "flavorText": null,
           "icon": "dualIceFireCorrosionDamage1",
-          "name": "Ice and Fire: Corrosion Damage",
+          "name": "Ice and Fire: Corrosion",
           "upgradeable": true
         },
         "Oa8": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by an Ice spell until a monster is killed.\nIncreases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by an Ice spell.\nIncreases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
           "flavorText": null,
           "icon": "dualIceFireCorrosionDamage1",
-          "name": "Ice and Fire: Corrosion Damage",
+          "name": "Ice and Fire: Corrosion",
           "upgradeable": true
         },
         "Oa9": {
-          "__ch2plan_tooltip": "Increases all damage dealt to monsters by 10.00% after being hit by an Ice spell until a monster is killed.\nIncreases all damage dealt to monsters by 10.00% after being hit by a Fire spell until a monster is killed.",
+          "__ch2plan_tooltip": "Increases damage dealt to burning monsters by 8.00% after being hit by an Ice spell.\nIncreases damage dealt to burning monsters by 8.00% after being hit by a Fire spell.",
           "flavorText": null,
           "icon": "dualIceFireCorrosionDamage1",
-          "name": "Ice and Fire: Corrosion Damage",
+          "name": "Ice and Fire: Corrosion",
           "upgradeable": true
         },
         "Ob1": {
@@ -14306,16 +14317,18 @@
         },
         "Os5": {
           "flammable": true,
+          "flavorText": null,
           "icon": "synergyIceFire1",
-          "name": "Ice and Fire: Synergy",
-          "tooltip": "Ice and Fire Spells gain the benefit of all stats that affect either Ice or Fire Magic for 30 seconds per charge, up to 5 charges.",
+          "name": "Ice and Fire: Symbiosis",
+          "tooltip": "After casting a Spell of Ice or Fire, the damage of your next 3 Spells is increased by 50% if and only if they are a Spell of the other element. The damage increase effect stacks additively with itself.",
           "upgradeable": false
         },
         "Os7": {
           "flammable": true,
+          "flavorText": null,
           "icon": "synergyIceFire1",
-          "name": "Ice and Fire: Synergy",
-          "tooltip": "Ice and Fire Spells gain the benefit of all stats that affect either Ice or Fire Magic for 30 seconds per charge, up to 5 charges.",
+          "name": "Ice and Fire: Symbiosis 2",
+          "tooltip": "After casting a Spell of Ice or Fire, the damage of your next 3 Spells is increased by 50% if and only if they are a Spell of the other element. The damage increase effect stacks additively with itself.",
           "upgradeable": false
         },
         "Os9": {
@@ -33523,7 +33536,7 @@
           },
           {
             "1267": {
-              "val": "Lb9",
+              "val": "Lc9",
               "x": -289,
               "y": -2473
             }
@@ -34877,7 +34890,7 @@
         {
           "costMultiplier": 0,
           "damageMultiplier": 0,
-          "description": "Restores 2.5% energy with a 20% chance to reduce all Fatigue by 1 every 3 seconds for 18 seconds. Stacks.",
+          "description": "Restores 2% energy with a 20% chance to reduce all Fatigue by 1 every 3 seconds for 18 seconds. Stacks.",
           "displayName": "Energon Cube",
           "id": "Energon Cube",
           "manaCost": 25,
