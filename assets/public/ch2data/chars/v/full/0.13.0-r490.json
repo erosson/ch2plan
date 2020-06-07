@@ -35933,7 +35933,7 @@
         0,
         "linear",
         [
-          0.1,
+          0.08,
           0
         ]
       ],
@@ -35989,7 +35989,7 @@
         0,
         "linear",
         [
-          0.1,
+          0.08,
           0
         ]
       ],
@@ -36222,6 +36222,30 @@
         "linear",
         [
           5,
+          0
+        ]
+      ],
+      "ICE_LIGHTNING_SYMBIOSIS": [
+        0,
+        "linear",
+        [
+          0.5,
+          0
+        ]
+      ],
+      "FIRE_LIGHTNING_SYMBIOSIS": [
+        0,
+        "linear",
+        [
+          0.5,
+          0
+        ]
+      ],
+      "ICE_FIRE_SYMBIOSIS": [
+        0,
+        "linear",
+        [
+          0.5,
           0
         ]
       ],
@@ -37086,6 +37110,33 @@
               "range": [
                 6,
                 9
+              ]
+            }
+          ],
+          "ICE_LIGHTNING_SYMBIOSIS": [
+            {
+              "prefix": "Ms",
+              "range": [
+                5,
+                7
+              ]
+            }
+          ],
+          "FIRE_LIGHTNING_SYMBIOSIS": [
+            {
+              "prefix": "Ns",
+              "range": [
+                5,
+                7
+              ]
+            }
+          ],
+          "ICE_FIRE_SYMBIOSIS": [
+            {
+              "prefix": "Os",
+              "range": [
+                5,
+                7
               ]
             }
           ]

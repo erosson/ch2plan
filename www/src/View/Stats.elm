@@ -202,12 +202,14 @@ cursorStatEntrySpecs =
         , ( "Ice Corrosion Damage", ICE_CORROSION_PERCENT_DAMAGE_INCREASE, entryPct )
         , ( "Ice Chain Chance", ICE_CHAIN_CHANCE_PERCENT, entryPct )
 
-        -- TODO not yet represented by our stats
+        -- TODO transcension; not yet represented by our stats
         -- , ( "Synergy Ice Lighting Duration", STAT_CLICK_DAMAGE, entrySecAdd )
         -- , ( "Synergy Ice Fire Duration", STAT_CLICK_DAMAGE, entrySecAdd )
         , ( "Cold Front Duration", COLD_FRONT_DURATION_TRAIT, entrySecAdd )
         , ( "Cold Front Damage", COLD_FRONT_DAMAGE_TRAIT, entryPct )
         , ( "Cold Front Chance Per Rank", COLD_FRONT_ACTIVATION_CHANCE_PER_RANK, entryPct )
+        , ( "Ice Fire Symbiosis Damage", ICE_FIRE_SYMBIOSIS, entryPct )
+        , ( "Ice Lightning Symbiosis Damage", ICE_LIGHTNING_SYMBIOSIS, entryPct )
         ]
       )
     , ( "Fire"
@@ -228,6 +230,8 @@ cursorStatEntrySpecs =
         , ( "Heat Burst Duration", HEAT_BURST_DURATION_TRAIT, entrySecAdd )
         , ( "Heat Burst Damage", HEAT_BURST_DAMAGE_TRAIT, entryPct )
         , ( "Heat Burst Chance Per Rank", HEAT_BURST_ACTIVATION_CHANCE_PER_RANK, entryPct )
+        , ( "Ice Fire Symbiosis Damage", ICE_FIRE_SYMBIOSIS, entryPct )
+        , ( "Lightning Fire Symbiosis Damage", FIRE_LIGHTNING_SYMBIOSIS, entryPct )
         ]
       )
     , ( "Lightning"
@@ -247,6 +251,8 @@ cursorStatEntrySpecs =
         , ( "Thunderstorm Duration ", THUNDERSTORM_DURATION_TRAIT, entrySecAdd )
         , ( "Thunderstorm Damage", THUNDERSTORM_DAMAGE_TRAIT, entryPct )
         , ( "Thunderstorm Chance Per Rank", THUNDERSTORM_ACTIVATION_CHANCE_PER_RANK, entryPct )
+        , ( "Ice Lightning Symbiosis Damage", ICE_LIGHTNING_SYMBIOSIS, entryPct )
+        , ( "Lightning Fire Symbiosis Damage", FIRE_LIGHTNING_SYMBIOSIS, entryPct )
         ]
       )
     ]

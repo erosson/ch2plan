@@ -55,14 +55,14 @@
     "LIGHTNING_ZAP_PERCENT_DAMAGE": [0.5, "linear", [0.05, 0.5]],
     "LIGHTNING_CHAIN_PERCENT": [0, "linear", [0.1, 0]],
     "LIGHTNING_ADDITIONAL_PERCENT_DAMAGE": [0, "linear", [0.05, 0]],
-    "FIRE_CORROSION_PERCENT_DAMAGE_INCREASE": [0, "linear", [0.1, 0]],
+    "FIRE_CORROSION_PERCENT_DAMAGE_INCREASE": [0, "linear", [0.08, 0]],
     "FIRE_BURN_PERCENT_DAMAGE_INCREASE": [0, "linear", [0.1, 0]],
     "FIRE_ADDITIONAL_PERCENT_DAMAGE": [0, "linear", [0.05, 0]],
     "LIGHTNING_CRIT_PERCENT_CHANCE": [0, "linear", [0.04, 0]],
     "ICE_CHAIN_CHANCE_PERCENT": [0, "linear", [0.1, 0]],
     "FIRE_ZAP_PERCENT_DAMAGE": [0, "linear", [0.05, 0]],
     "LIGHTNING_BURN_PERCENT_DAMAGE_INCREASE": [0, "linear", [0.1, 0]],
-    "ICE_CORROSION_PERCENT_DAMAGE_INCREASE": [0, "linear", [0.1, 0]],
+    "ICE_CORROSION_PERCENT_DAMAGE_INCREASE": [0, "linear", [0.08, 0]],
     "FIRE_CRIT_DAMAGE_PERCENT": [0, "linear", [0.08, 0]],
 
     "ICE_COOL_CRITICALS_CRIT_CHANCE_PERCENT": [0, "linear", [0.04, 0]],
@@ -95,6 +95,10 @@
     "COLD_FRONT_ACTIVATION_CHANCE_PER_RANK": [0.1, "linear", [0, 0.1]],
     "COLD_FRONT_DAMAGE_TRAIT": [0, "linear", [0.05, 0]],
     "COLD_FRONT_DURATION_TRAIT": [0, "linear", [5, 0]],
+
+    "ICE_LIGHTNING_SYMBIOSIS": [0, "linear", [0.50, 0]],
+    "FIRE_LIGHTNING_SYMBIOSIS": [0, "linear", [0.50, 0]],
+    "ICE_FIRE_SYMBIOSIS": [0, "linear", [0.50, 0]],
 
     "//LEGACY STUFF BELOW": [0, "noop", []],
     "STAT_BOSS_GOLD": [0, "noop", []],
@@ -329,6 +333,15 @@
         "COLD_FRONT_DURATION_TRAIT": [
           { "prefix": "It", "range": [6, 7], "level": 2 },
           { "prefix": "Ix", "range": [6, 9] }
+        ],
+        "ICE_LIGHTNING_SYMBIOSIS": [
+          { "prefix": "Ms", "range": [5, 7] }
+        ],
+        "FIRE_LIGHTNING_SYMBIOSIS": [
+          { "prefix": "Ns", "range": [5, 7] }
+        ],
+        "ICE_FIRE_SYMBIOSIS": [
+          { "prefix": "Os", "range": [5, 7] }
         ]
       }
     }

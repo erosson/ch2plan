@@ -29,16 +29,17 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 ---
 
-## 2020-05-19
+## 2020-06-07
+
+- Updated Wizard stats for 0.13.0.
+
+## 2020-06-05
 
 - Update to live version 0.13.0.
 
 ## 2020-05-24
 
 - Wizard stats are now calculated.
-
-## 2020-05-20
-
 - Fixed wizard spell cast times.
 
 ## 2020-05-20
