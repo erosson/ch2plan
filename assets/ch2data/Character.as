@@ -100,7 +100,7 @@ package models
       
       public static const ETHEREAL_ITEM_PURCHASE_COOLDOWN:int = 84600000;
       
-      public static const TRANSCENDENCE_MOTE_PURCHASE_COOLDOWN:Number = 1207800000;
+      public static const TRANSCENDENCE_MOTE_PURCHASE_COOLDOWN:Number = 84600000;
       
       public static const AUTOMATOR_POINT_PURCHASE_COOLDOWN:int = 14400000;
       
@@ -132,7 +132,7 @@ package models
       
       public static var staticSkillInstances:Object = {};
       
-      public static var staticFields:Array = ["flavorName","flavorClass","flavor","characterSelectOrder","availableForCreation","visibleOnCharacterSelect","defaultSaveName","startingSkills","levelCostScaling","upgradeableStats","traitsToLevel","assetGroupName","damageMultiplierBase","maxManaMultiplierBase","maxEnergyMultiplierBase","attackMsDelay","gcdBase","autoAttackDamageMultiplierBase","damageMultiplierValueFunction","maxManaMultiplierValueFunction","maxEnergyMultiplierValueFunction","damageMultiplierCostFunction","maxManaMultiplierCostFunction","maxEnergyMultiplierCostFunction","statValueFunctions","statPanelTraits","traitInfo","statBaseValues","monstersPerZone","preKumaMonstersPerZone","monsterHealthMultiplier","attackRange","levelGraph","levelGraphNodeTypes","transcensionPerks","systemTraits","hardcodedSystemTraits","gildStartBuild","etherealTraitTooltipInfo","traitTooltipInfo"];
+      public static var staticFields:Array = ["flavorName","flavorClass","flavor","characterSelectOrder","availableForCreation","visibleOnCharacterSelect","defaultSaveName","startingSkills","levelCostScaling","upgradeableStats","traitsToLevel","assetGroupName","damageMultiplierBase","maxManaMultiplierBase","maxEnergyMultiplierBase","attackMsDelay","gcdBase","gcdMinimum","autoAttackDamageMultiplierBase","damageMultiplierValueFunction","maxManaMultiplierValueFunction","maxEnergyMultiplierValueFunction","damageMultiplierCostFunction","maxManaMultiplierCostFunction","maxEnergyMultiplierCostFunction","statValueFunctions","statPanelTraits","traitInfo","statBaseValues","monstersPerZone","preKumaMonstersPerZone","monsterHealthMultiplier","attackRange","levelGraph","levelGraphNodeTypes","transcensionPerks","systemTraits","hardcodedSystemTraits","gildStartBuild","etherealTraitTooltipInfo","traitTooltipInfo"];
        
       
       public var isMouseOverClickableActivationUnlocked:Boolean = false;
@@ -245,7 +245,7 @@ package models
       
       public var transcendenceMotes:Number = 0;
       
-      public var currentTranscendenceMoteCooldown:Number = 1207800000;
+      public var currentTranscendenceMoteCooldown:Number = 84600000;
       
       public var timeSinceLastAncientShardPurchase:int = 84600000;
       
@@ -1895,7 +1895,7 @@ package models
       
       public function get hasAvailableStatPoints() : Boolean
       {
-         return this.availableStatPoints.gtN(0);
+         return this.availableStatPoints.gtN(0.99);
       }
       
       public function get currentWorld() : AscensionWorld
@@ -2570,7 +2570,7 @@ package models
             this.serverTimeOfLastUpdate = ServerTimeKeeper.instance.timestamp;
          }
          var msecOfflineSinceLastSession:Number = ServerTimeKeeper.instance.timestamp - this.serverTimeOfLastUpdate;
-         msecOfflineSinceLastSession = Math.min(msecOfflineSinceLastSession,1000 * 60 * 60 * 12);
+         msecOfflineSinceLastSession = Math.min(msecOfflineSinceLastSession,1000 * 60 * 60 * 24.5);
          if(msecOfflineSinceLastSession > 0 || Validate.IS_VALIDATING)
          {
             if(!CH2.user.disableOfflineProgress)
@@ -3518,7 +3518,9 @@ package models
       
       public function get energyRegeneration() : BigNumber
       {
-         return this.getStat(CH2.STAT_ENERGY_REGEN).addN(ENERGY_REGEN_PER_AUTO_ATTACK);
+         var temp:BigNumber = this.getStat(CH2.STAT_ENERGY_REGEN);
+         temp.plusEqualsN(ENERGY_REGEN_PER_AUTO_ATTACK);
+         return temp;
       }
       
       public function get autoattackDamageMultiplier() : Number
@@ -3590,7 +3592,7 @@ package models
          {
             statRating = this.getClassStat(id);
             statRating = statRating.addN(this.inventory.getEquippedStatRating(id));
-            statRating = statRating.addN(this.buffs.getBuffedStatRating(id));
+            statRating.plusEqualsN(this.buffs.getBuffedStatRating(id));
             statRating.timesEqualsN(this.getEtherealEquippedStatMultiplier(id));
             return statRating;
          }
@@ -3680,10 +3682,13 @@ package models
          if(this.skills[replaceUid] && this.skills[replaceUid].isActive)
          {
             slot = this.skills[replaceUid].slot;
-            if(CH2UI.instance.mainUI.hud.skillBar.skillSlots[slot].skillSlotUI != null)
+            if(slot >= 0 && slot < CH2UI.instance.mainUI.hud.skillBar.skillSlots.length)
             {
-               CH2UI.instance.mainUI.hud.skillBar.skillSlots[slot].skillSlotUI.skill = null;
-               CH2UI.instance.mainUI.hud.skillBar.skillSlots[slot].skillSlotUI.removeItemIcon();
+               if(CH2UI.instance.mainUI.hud.skillBar.skillSlots[slot].skillSlotUI != null)
+               {
+                  CH2UI.instance.mainUI.hud.skillBar.skillSlots[slot].skillSlotUI.skill = null;
+                  CH2UI.instance.mainUI.hud.skillBar.skillSlots[slot].skillSlotUI.removeItemIcon();
+               }
             }
             this.deactivateSkill(replaceUid);
          }
@@ -3755,6 +3760,10 @@ package models
             this.skills[id].cooldownRemaining = 0;
          }
          this.activeSkills = [];
+         if(CH2UI.instance.mainUI)
+         {
+            CH2UI.instance.mainUI.mainPanel.skillsPanel.clearSkillsPanelEntries();
+         }
       }
       
       public function activateSkill(skillUid:String) : void
@@ -3786,6 +3795,7 @@ package models
             skill.isActive = false;
             skill.cooldownRemaining = 0;
             this.activeSkills.splice(this.activeSkills.indexOf(skill),1);
+            CH2UI.instance.mainUI.mainPanel.skillsPanel.clearSkillsPanelEntries();
             return;
          }
          throw Error("Can\'t find skill with uid: " + skillUid);
@@ -4651,47 +4661,48 @@ package models
       
       public function transcendDefault() : void
       {
-         var _loc2_:int = 0;
-         var _loc4_:* = null;
-         var _loc5_:Skill = null;
-         var _loc6_:Number = NaN;
-         this.transcendenceMotes--;
-         this.transcensionLevel++;
-         this.heroSouls.plusEquals(this.pendingHeroSouls);
+         var _loc3_:int = 0;
+         var _loc5_:* = null;
+         var _loc6_:Skill = null;
+         var _loc7_:Number = NaN;
+         var _loc1_:Number = Math.min(this.transcendenceMotes,Math.floor(10 + this.transcensionLevel));
+         this.transcendenceMotes = this.transcendenceMotes - _loc1_;
+         this.transcensionLevel = this.transcensionLevel + _loc1_ / (10 + Math.floor(this.transcensionLevel));
+         this.heroSouls.plusEquals(this.pendingHeroSouls.multiplyN(_loc1_));
          this.pendingHeroSouls = new BigNumber(0);
-         var _loc1_:Character = new Character();
-         _loc1_.name = this.name;
-         Characters.populateStaticFields(_loc1_);
+         var _loc2_:Character = new Character();
+         _loc2_.name = this.name;
+         Characters.populateStaticFields(_loc2_);
          this.buffs.removeAllBuffs();
-         for(_loc2_ = 0; _loc2_ < this.activeSkills.length; _loc2_++)
+         for(_loc3_ = 0; _loc3_ < this.activeSkills.length; _loc3_++)
          {
-            _loc5_ = this.activeSkills[_loc2_];
-            _loc6_ = null;
-            if(_loc5_ && _loc5_.isActive)
+            _loc6_ = this.activeSkills[_loc3_];
+            _loc7_ = null;
+            if(_loc6_ && _loc6_.isActive)
             {
-               _loc6_ = _loc5_.slot;
-               if(_loc6_ >= 0 && CH2UI.instance.mainUI)
+               _loc7_ = _loc6_.slot;
+               if(_loc7_ >= 0 && CH2UI.instance.mainUI)
                {
-                  CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc6_].removeChild(CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc6_].skillSlotUI);
-                  CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc6_].onDropRemoved(CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc6_].skillSlotUI);
+                  CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc7_].removeChild(CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc7_].skillSlotUI);
+                  CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc7_].onDropRemoved(CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc7_].skillSlotUI);
                }
             }
          }
          this.deactivateAllSkills();
-         for(_loc2_ = 0; _loc2_ < this.lostOnAscending.length; _loc2_++)
+         for(_loc3_ = 0; _loc3_ < this.lostOnAscending.length; _loc3_++)
          {
-            this[this.lostOnAscending[_loc2_]] = _loc1_[this.lostOnAscending[_loc2_]];
+            this[this.lostOnAscending[_loc3_]] = _loc2_[this.lostOnAscending[_loc3_]];
          }
-         var _loc3_:Object = this.traits;
-         for(_loc2_ = 0; _loc2_ < this.lostOnTranscension.length; _loc2_++)
+         var _loc4_:Object = this.traits;
+         for(_loc3_ = 0; _loc3_ < this.lostOnTranscension.length; _loc3_++)
          {
-            this[this.lostOnTranscension[_loc2_]] = _loc1_[this.lostOnTranscension[_loc2_]];
+            this[this.lostOnTranscension[_loc3_]] = _loc2_[this.lostOnTranscension[_loc3_]];
          }
-         for(_loc4_ in _loc3_)
+         for(_loc5_ in _loc4_)
          {
-            if(this.traitTranscensionPersisting[_loc4_] == true)
+            if(this.traitTranscensionPersisting[_loc5_] == true)
             {
-               this.traits[_loc4_] = _loc3_[_loc4_];
+               this.traits[_loc5_] = _loc4_[_loc5_];
             }
          }
          if(this.extendedVariables)
@@ -5080,6 +5091,8 @@ package models
       
       public function generateRubyShopDefault() : void
       {
+         var option2:RubyPurchase = null;
+         var option3:RubyPurchase = null;
          var option1:RubyPurchase = null;
          this.currentRubyShop = [];
          if(this.transcendenceMotePurchase.canAppear())
@@ -5107,7 +5120,7 @@ package models
                this.currentRubyShop.push(option1);
             }
          }
-         var option2:RubyPurchase = this.getRandomRubyPurchase(2);
+         option2 = this.getRandomRubyPurchase(2);
          if(!option2)
          {
             option2 = this.getRandomRubyPurchase(3);
@@ -5116,7 +5129,7 @@ package models
          {
             this.currentRubyShop.push(option2);
          }
-         var option3:RubyPurchase = this.getRandomRubyPurchase(3);
+         option3 = this.getRandomRubyPurchase(3);
          if(option3)
          {
             this.currentRubyShop.push(option3);
@@ -5288,7 +5301,6 @@ package models
       {
          this.transcendenceMotes++;
          this.timeSinceLastTranscendenceMotePurchase = 0;
-         this.currentTranscendenceMoteCooldown = this.currentTranscendenceMoteCooldown + 86400000;
       }
       
       public function canTranscendenceMoteAppear() : Boolean
@@ -5921,7 +5933,7 @@ package models
          var etherealItem:EtherealItem = null;
          statChosen = this.chooseEtherealItemStat(this.etherealItemStatChoices);
          slot = -1;
-         if(statChosen)
+         if(statChosen > -1)
          {
             if(fixedSlot != -1)
             {
@@ -5977,7 +5989,7 @@ package models
          {
             return _loc5_;
          }
-         return null;
+         return -1;
       }
       
       public function equipPendingEtherealItems() : void
@@ -6041,6 +6053,30 @@ package models
                CH2.currentCharacter.nodeLevels[nodeId] = CH2.currentCharacter.nodeLevels[nodeId] + 1;
                CH2.currentCharacter.heroSouls.minusEquals(cost);
             }
+         }
+      }
+      
+      public function refundAndResetNodeId(nodeType:String) : void
+      {
+         var nodeId:int = 0;
+         var i:int = 0;
+         var nodeTypeObject:Object = null;
+         var cost:BigNumber = null;
+         for(i = 1; i < CH2.currentCharacter.levelGraph.nodes.length - 1; i++)
+         {
+            if(CH2.currentCharacter.levelGraph.nodes[i].type == nodeType)
+            {
+               nodeId = CH2.currentCharacter.levelGraph.nodes[i].id;
+               break;
+            }
+         }
+         nodeTypeObject = CH2.currentCharacter.levelGraphNodeTypes[nodeType];
+         var costFunction:Function = nodeTypeObject["upgradeCostFunction"];
+         while(CH2.currentCharacter.nodeLevels[nodeId] > 1)
+         {
+            CH2.currentCharacter.nodeLevels[nodeId]--;
+            cost = costFunction(CH2.currentCharacter.nodeLevels[nodeId]);
+            CH2.currentCharacter.heroSouls.plusEquals(cost);
          }
       }
    }
