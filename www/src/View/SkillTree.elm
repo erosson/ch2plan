@@ -219,4 +219,16 @@ viewTooltip model graph node =
              else
                 []
             )
+        , div [] <|
+            if model.features.transcendNodes then
+                if model.tooltip == Just ( node.id, Model.Longpressing ) || model.tooltip == Just ( node.id, Model.CtrlClicking ) then
+                    [ button [ disabled True ] [ text "Upgrade (TODO)" ]
+                    , button [ disabled True ] [ text "Downgrade (TODO)" ]
+                    ]
+
+                else
+                    []
+
+            else
+                []
         ]

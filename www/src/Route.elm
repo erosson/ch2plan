@@ -84,14 +84,12 @@ type Route
 
 
 type alias Features =
-    -- { fancyTooltips : Bool }
-    {}
+    { transcendNodes : Bool }
 
 
 features0 : Features
 features0 =
-    -- { fancyTooltips = True }
-    {}
+    { transcendNodes = False }
 
 
 parse : Url -> Maybe Route
@@ -209,8 +207,8 @@ parseFeatures =
 featuresParser : P.Parser (Features -> a) a
 featuresParser =
     P.map Features <|
-        -- <?> flagParam "enableFancyTooltips" features0.fancyTooltips
         P.top
+            <?> flagParam "enableTranscendNodes" features0.transcendNodes
 
 
 ifFeature : Bool -> a -> a -> a

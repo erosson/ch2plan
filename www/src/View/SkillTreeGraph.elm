@@ -297,9 +297,11 @@ viewNode features home { id, x, y, val } =
                 ]
         , E.onMouseOver <| Model.NodeMouseOver id
         , E.onMouseOut <| Model.NodeMouseOut id
-        , E.onMouseDown <| Model.NodeMouseDown id
+
+        -- , E.onMouseDown <| Model.NodeMouseDown id
+        , E.on "mousedown" <| Decode.map (Model.NodeMouseDown id) ctrlKeyDecoder
         , E.onMouseUp <| Model.NodeMouseUp id
-        , E.on "touchStart" <| Decode.succeed <| Model.NodeMouseDown id
+        , E.on "touchStart" <| Decode.succeed <| Model.NodeMouseDown id False
         , E.on "touchEnd" <| Decode.succeed <| Model.NodeMouseUp id
         ]
         [ S.image
@@ -311,6 +313,11 @@ viewNode features home { id, x, y, val } =
             ]
             []
         ]
+
+
+ctrlKeyDecoder : Decode.Decoder Bool
+ctrlKeyDecoder =
+    Decode.field "ctrlKey" Decode.bool
 
 
 isNodeHighlighted : Maybe Regex -> GameData.NodeType -> Bool

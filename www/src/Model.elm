@@ -4,6 +4,7 @@ module Model exposing
     , Model
     , Msg(..)
     , StatsSummary
+    , TooltipState(..)
     , center
     , init
     , nodeIconSize
@@ -47,7 +48,7 @@ type Msg
     = SearchInput String
     | SearchNav (Maybe String) (Maybe String)
     | SearchHelp Bool
-    | NodeMouseDown NodeId
+    | NodeMouseDown NodeId Bool
     | NodeMouseUp NodeId
     | NodeMouseOver NodeId
     | NodeMouseOut NodeId
@@ -108,6 +109,7 @@ type TooltipState
     = Hovering
     | Shortpressing
     | Longpressing
+    | CtrlClicking
 
 
 type alias Flags =
@@ -237,6 +239,9 @@ visibleTooltip { tooltip } =
         Just ( id, Longpressing ) ->
             Just id
 
+        Just ( id, CtrlClicking ) ->
+            Just id
+
         _ ->
             Nothing
 
@@ -338,12 +343,20 @@ update msg model =
                         ( model, Cmd.none )
 
                 NodeMouseOver id ->
-                    ( { model | tooltip = Just ( id, Hovering ) }, Cmd.none )
+                    if model.tooltip == Just ( id, CtrlClicking ) then
+                        ( model, Cmd.none )
+
+                    else
+                        ( { model | tooltip = Just ( id, Hovering ) }, Cmd.none )
 
                 NodeMouseOut id ->
-                    ( { model | tooltip = Nothing }, Cmd.none )
+                    if model.tooltip == Just ( id, CtrlClicking ) then
+                        ( model, Cmd.none )
 
-                NodeMouseDown id ->
+                    else
+                        ( { model | tooltip = Nothing }, Cmd.none )
+
+                NodeMouseDown id ctrlKey ->
                     case model.tooltip of
                         Nothing ->
                             -- clicked without hovering - this could be mobile/longpress.
@@ -362,8 +375,13 @@ update msg model =
                             else
                                 case state of
                                     Hovering ->
-                                        -- Mouse-user, clicked while hovering. Select this node, don't wait for mouseout
-                                        updateNode id model
+                                        if model.features.transcendNodes && ctrlKey then
+                                            -- Ctrl-click displays a persistent tooltip
+                                            ( { model | tooltip = Just ( id, CtrlClicking ) }, Cmd.none )
+
+                                        else
+                                            -- Mouse-user, clicked while hovering. Select this node, don't wait for mouseout
+                                            updateNode id model
 
                                     _ ->
                                         -- Multitouch...? Ignore other mousedowns.
@@ -402,6 +420,10 @@ update msg model =
                                     Longpressing ->
                                         -- end of a tooltip longpress - hide the tooltip
                                         ( { model | tooltip = Nothing }, Cmd.none )
+
+                                    CtrlClicking ->
+                                        -- mouse-user, end of a ctrl-click
+                                        ( model, Cmd.none )
 
                 Preprocess ->
                     -- calculate dijkstra immediately after the view renders, so we have it ready later, when the user clicks.
