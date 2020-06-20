@@ -67,6 +67,8 @@ type Msg
     | RunecorderInput String
     | RunecorderSelect (Maybe Int)
     | RunecorderRun
+    | TranscendNodeUpgrade NodeId
+    | TranscendNodeDowngrade NodeId
 
 
 type alias Model =
@@ -75,6 +77,7 @@ type alias Model =
     , gameData : Result D.Error GameData
     , route : Maybe Route
     , graph : Maybe GraphModel
+    , transcendNodes : Dict NodeId Int
     , features : Features
     , windowSize : WindowSize
     , tooltip : Maybe ( NodeId, TooltipState )
@@ -154,6 +157,7 @@ init flags loc urlKey =
       , features = Route.parseFeatures loc
       , route = route
       , graph = graph
+      , transcendNodes = Dict.empty
       , sidebarOpen = True
       , tooltip = Nothing
       , searchString = search
@@ -582,6 +586,27 @@ update msg model =
 
                 Resize windowSize ->
                     ( { model | windowSize = windowSize }, Cmd.none )
+
+                TranscendNodeUpgrade id ->
+                    ( { model | transcendNodes = model.transcendNodes |> transcendNodeIncr id 1 }, Cmd.none )
+
+                TranscendNodeDowngrade id ->
+                    ( { model | transcendNodes = model.transcendNodes |> transcendNodeIncr id -1 }, Cmd.none )
+
+
+transcendNodeIncr : NodeId -> Int -> Dict NodeId Int -> Dict NodeId Int
+transcendNodeIncr nodeId val =
+    Dict.update nodeId
+        (Maybe.withDefault 1
+            >> (+) val
+            >> (\v ->
+                    if v <= 1 then
+                        Nothing
+
+                    else
+                        Just v
+               )
+        )
 
 
 runecorderRun : GameData -> Model -> Model

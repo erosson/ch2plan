@@ -166,7 +166,7 @@ viewSearch model version =
         ]
 
 
-viewTooltip : Model -> GraphModel -> GameData.Node -> Html msg
+viewTooltip : Model -> GraphModel -> GameData.Node -> Html Msg
 viewTooltip model graph node =
     -- no css-scaling here - tooltips don't scale with zoom.
     -- no svg here - svg can't word-wrap, and <foreignObject> has screwy browser support.
@@ -220,14 +220,39 @@ viewTooltip model graph node =
                 []
             )
         , div [] <|
+            let
+                level =
+                    model.transcendNodes |> Dict.get node.id |> Maybe.withDefault 1
+            in
             if model.features.transcendNodes then
-                if model.tooltip == Just ( node.id, Model.Longpressing ) || model.tooltip == Just ( node.id, Model.CtrlClicking ) then
-                    [ button [ disabled True ] [ text "Upgrade (TODO)" ]
-                    , button [ disabled True ] [ text "Downgrade (TODO)" ]
-                    ]
+                [ div [] <|
+                    if level > 1 then
+                        [ text "Level ", text <| String.fromInt level ]
 
-                else
-                    []
+                    else
+                        -- `&nbsp;` https://twitter.com/rtfeldman/status/767263564214120448?lang=en
+                        -- this ensures the buttons don't move between levels 1 and 2
+                        [ text "\u{00A0}" ]
+                , div [] <|
+                    if model.tooltip == Just ( node.id, Model.Longpressing ) || model.tooltip == Just ( node.id, Model.CtrlClicking ) then
+                        if node.val.flammable then
+                            [ button [ disabled True ] [ text "Cannot Upgrade" ] ]
+
+                        else
+                            [ button
+                                [ onClick <| Model.TranscendNodeUpgrade node.id
+                                ]
+                                [ text "Upgrade" ]
+                            , button
+                                [ onClick <| Model.TranscendNodeDowngrade node.id
+                                , disabled <| level <= 1
+                                ]
+                                [ text "Downgrade" ]
+                            ]
+
+                    else
+                        []
+                ]
 
             else
                 []
