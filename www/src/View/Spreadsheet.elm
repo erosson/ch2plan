@@ -7,6 +7,7 @@ import Html.Attributes as A exposing (..)
 import Html.Events as E exposing (..)
 import Model exposing (Model)
 import Route exposing (Route)
+import Set exposing (Set)
 
 
 view : Model -> GameData -> Route.HomeParams -> Html msg
@@ -58,7 +59,7 @@ formatTranscendNodes url model =
         Nothing ->
             Err "no graph"
 
-        Just { char } ->
+        Just { char, selected } ->
             Dict.toList model.transcendNodes
                 |> List.map
                     (\( id, level ) ->
@@ -66,29 +67,45 @@ formatTranscendNodes url model =
                             []
 
                         else
+                            let
+                                isSelected =
+                                    if Set.member id selected then
+                                        "TRUE"
+
+                                    else
+                                        "FALSE"
+                            in
                             case Dict.get id char.graph.nodes of
                                 Nothing ->
                                     [ String.fromInt id
                                     , String.fromInt level
+                                    , isSelected
                                     ]
 
                                 Just node ->
                                     [ String.fromInt id
                                     , String.fromInt level
+                                    , isSelected
                                     , node.val.key
                                     , "'" ++ node.val.name
                                     ]
                     )
                 |> List.filter ((/=) [])
-                |> (::) [ "node-id", "level", "node-type", "label", "build planner:", url ]
+                |> (::) [ "node-id", "level", "is-selected", "node-type", "label", "", "build planner:", url ]
                 |> formatCells
                 |> Ok
 
 
 format : String -> Model -> Model.StatsSummary -> String
-format url _ stats =
-    formatRows stats
-        |> (::) [ "id", "count", "label", "", "build planner:", url ]
+format url model stats =
+    formatRows model stats
+        |> (::)
+            (if model.features.transcendNodes then
+                [ "id", "count", "label", "is-upgradable", "", "build planner:", url ]
+
+             else
+                [ "id", "count", "label", "", "build planner:", url ]
+            )
         |> formatCells
 
 
@@ -97,8 +114,8 @@ formatCells =
     List.map (String.join "\t") >> String.join "\n"
 
 
-formatRows : Model.StatsSummary -> List (List String)
-formatRows stats =
+formatRows : Model -> Model.StatsSummary -> List (List String)
+formatRows model stats =
     let
         mapCounts count nodeType =
             ( nodeType.key, count )
@@ -115,4 +132,15 @@ formatRows stats =
                 , counts |> Dict.get node.key |> Maybe.withDefault 0 |> String.fromInt
                 , "'" ++ node.name
                 ]
+                    ++ (if model.features.transcendNodes then
+                            [ if node.flammable then
+                                "FALSE"
+
+                              else
+                                "TRUE"
+                            ]
+
+                        else
+                            []
+                       )
             )
