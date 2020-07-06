@@ -165,6 +165,22 @@ package models
       
       public var modDependencies:Object;
       
+      public var isChallengeCharacter:Boolean = false;
+      
+      public var challengeTimeToDisplayFunction:Function;
+      
+      public var challengeTooltipFunction:Function;
+      
+      public var challengeProgressTextDisplayFunction:Function;
+      
+      public var challengeProgressTooltipFunction:Function;
+      
+      public var isChallengeFinishedFunction:Function;
+      
+      public var getChallengeAchievementTimes:Function;
+      
+      public var isSkillTreeConfirmationEnabled:Boolean = true;
+      
       public var version:Number = 0;
       
       public var hasSeenMigrationPopup:Boolean = true;
@@ -331,7 +347,7 @@ package models
       
       public var automator:Automator;
       
-      public var currentWorldEndAutomationOption:int = -1;
+      public var currentWorldEndAutomationOption:int = 0;
       
       public var worldEndAutomationOptions:Array;
       
@@ -360,6 +376,8 @@ package models
       public var timeOfLastOutOfEnergy:Number = 0;
       
       public var timeOfLastLevelUp:Number = 0;
+      
+      public var timeCarriedOverFromOfflineProgress:Number = 0;
       
       public var treasureChestsAreMonsters:Number = 0;
       
@@ -689,7 +707,9 @@ package models
       
       public var updateHandler:Object = null;
       
-      public var cachedTimelapseServerTime = 0;
+      public var cachedTimelapseServerTime:Number = 0;
+      
+      public var hasteThisFrame:Number = 0;
       
       public var changeStateHandler:Object = null;
       
@@ -915,6 +935,7 @@ package models
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicNumber,"totalRubies");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicNumber,"numAscensions");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_TRUE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicChild,"achievements",Achievements);
+         this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_FALSE,registerDynamicBoolean,"isSkillTreeConfirmationEnabled");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicChild,"inventory",Items);
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicChild,"automator",Automator);
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicNumber,"currentWorldEndAutomationOption");
@@ -1006,7 +1027,7 @@ package models
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicBigNumber,"experienceForCurrentWorld");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicBigNumber,"experienceAtRunStart");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicNumber,"highestWorldCompleted");
-         this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicObject,"fastestWorldTimes");
+         this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_TRUE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicObject,"fastestWorldTimes");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicObject,"highestMonstersKilled");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicObject,"runsCompletedPerWorld");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicObject,"statLevels");
@@ -1908,6 +1929,11 @@ package models
          return CH2.user.totalMsecsPlayed - this.timeOfLastRun;
       }
       
+      public function get timeOnlineSeconds() : int
+      {
+         return int(this.timeOnlineMilliseconds / 1000);
+      }
+      
       public function setupRoller() : void
       {
          if(!this.roller.isInitialized && this.roller.seedRoller.numUses == 0)
@@ -2340,6 +2366,17 @@ package models
       
       public function populateWorldEndAutomationOptionsDefault() : void
       {
+         var doNothingOption:AutomatorWorldEndOption = new AutomatorWorldEndOption();
+         doNothingOption.name = "Do Nothing";
+         doNothingOption.onWorldEndFunction = function():*
+         {
+            trace("World Finished, Doing Nothing");
+         };
+         doNothingOption.isUnlockedFunction = function():*
+         {
+            return true;
+         };
+         this.worldEndAutomationOptions.push(doNothingOption);
          var rerunCurrentWorldOption:AutomatorWorldEndOption = new AutomatorWorldEndOption();
          rerunCurrentWorldOption.name = "Rerun Current World";
          rerunCurrentWorldOption.onWorldEndFunction = this.onWorldEndRerunCurrentWorld;
@@ -2355,15 +2392,16 @@ package models
          attemptHighestWorldOption.onWorldEndFunction = this.onWorldEndAttemptHighestWorld;
          attemptHighestWorldOption.isUnlockedFunction = this.isAttemptHighestWorldOnWorldEndUnlocked;
          this.worldEndAutomationOptions.push(attemptHighestWorldOption);
+         var stopBeforeGildOption:AutomatorWorldEndOption = new AutomatorWorldEndOption();
+         stopBeforeGildOption.name = "Attempt Up To Next System";
+         stopBeforeGildOption.onWorldEndFunction = this.onWorldEndStopBeforeGild;
+         stopBeforeGildOption.isUnlockedFunction = this.isStopBeforeGildOnWorldEndUnlocked;
+         this.worldEndAutomationOptions.push(stopBeforeGildOption);
       }
       
       public function onWorldEndStopBeforeGild() : void
       {
-         if((this.currentWorldId + 1) % this.worldsPerSystem == 1)
-         {
-            this.changeWorld(this.currentWorldId);
-         }
-         else
+         if((this.currentWorldId + 1) % this.worldsPerSystem != 1)
          {
             this.changeWorld(this.currentWorldId + 1);
          }
@@ -2484,9 +2522,9 @@ package models
             this.regenerateManaAndEnergy(this.timeSinceRegen);
             this.timeSinceRegen = 0;
          }
-         var hasteThisFrame:Number = this.hasteRating.numberValue();
-         this.cooldownSkills(dt,hasteThisFrame);
-         this.gcdRemaining = this.gcdRemaining - dt * Math.min(hasteThisFrame,this.baseGCD / this.gcdMinimum);
+         this.hasteThisFrame = this.hasteRating.numberValue();
+         this.cooldownSkills(dt,this.hasteThisFrame);
+         this.gcdRemaining = this.gcdRemaining - dt * Math.min(this.hasteThisFrame,this.baseGCD / this.gcdMinimum);
          if(IdleHeroMain.IS_RENDERING)
          {
             this.characterDisplay.update(dt);
@@ -2552,7 +2590,7 @@ package models
          }
          if(!(CH2.world.isBossZone(this.currentZone) && !this.isNextMonsterInRange && CH2.world.getNextMonster() != null) && (!CH2.world.bossEncounter || CH2.world.bossEncounter.battleStarted && !CH2.world.bossEncounter.battleEnded))
          {
-            this.buffs.updateBuffs(dt,hasteThisFrame);
+            this.buffs.updateBuffs(dt,this.hasteThisFrame);
          }
          this.updateRubyShopFields(dt);
          if(Math.floor(this.timeOnlineMilliseconds / 3600000) != Math.floor((this.timeOnlineMilliseconds - dt) / 3600000))
@@ -3219,17 +3257,17 @@ package models
             {
                this.etherealItemIndiciesForPopup.push(this.addEtherealItemToInventory(this.rollEtherealItem(CH2.currentCharacter.currentWorld.starSystemId)));
             }
-         }
-         if(this.fastestWorldTimes.hasOwnProperty(this.currentWorldId))
-         {
-            if(this.fastestWorldTimes[this.currentWorldId] > this.timeSinceMostRecentRunBegan)
+            if(this.fastestWorldTimes.hasOwnProperty(this.currentWorldId))
+            {
+               if(this.fastestWorldTimes[this.currentWorldId] > this.timeSinceMostRecentRunBegan)
+               {
+                  this.fastestWorldTimes[this.currentWorldId] = this.timeSinceMostRecentRunBegan;
+               }
+            }
+            else
             {
                this.fastestWorldTimes[this.currentWorldId] = this.timeSinceMostRecentRunBegan;
             }
-         }
-         else
-         {
-            this.fastestWorldTimes[this.currentWorldId] = this.timeSinceMostRecentRunBegan;
          }
          CH2.user.remoteStatsTracking.addEvent({
             "type":"finishRun",
@@ -3254,6 +3292,7 @@ package models
          }
          this.killedMonsterDuringWorld = false;
          this.interactedWithGameDuringDuringWorld = false;
+         ItemDropManager.instance.clear();
       }
       
       public function setHighestWorldCompleted(newHighestWorldCompleted:int) : void
@@ -3404,6 +3443,10 @@ package models
       
       public function get attackDelay() : Number
       {
+         if(this.hasteThisFrame != 0)
+         {
+            return this.baseAttackDelay / this.hasteThisFrame;
+         }
          return this.baseAttackDelay / this.hasteRating.numberValue();
       }
       
@@ -4330,6 +4373,10 @@ package models
       
       public function playRandomHitSound(attackData:AttackData) : void
       {
+         if(!CH2.user.clickSFXEnabled)
+         {
+            return;
+         }
          var volume:Number = !!attackData.isAutoAttack?Number(0.2):Number(0.52);
          if(attackData.isKillShot || attackData.isCritical)
          {
@@ -5035,11 +5082,12 @@ package models
       
       public function getRandomRubyPurchase(priority:int) : RubyPurchase
       {
+         var possiblePurchases:Array = null;
          var rubyPurchase:RubyPurchase = null;
          var isAlreadyInShop:Boolean = false;
          var i:int = 0;
          var index:int = 0;
-         var possiblePurchases:Array = [];
+         possiblePurchases = [];
          for each(rubyPurchase in this.rubyPurchaseOptions)
          {
             isAlreadyInShop = false;
@@ -5300,7 +5348,7 @@ package models
       public function onTranscendenceMotePurchase() : void
       {
          this.transcendenceMotes++;
-         this.timeSinceLastTranscendenceMotePurchase = 0;
+         this.timeSinceLastTranscendenceMotePurchase = this.timeSinceLastTranscendenceMotePurchase - this.currentTranscendenceMoteCooldown;
       }
       
       public function canTranscendenceMoteAppear() : Boolean

@@ -29,6 +29,10 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 
 ---
 
+## 2020-07-06
+
+- Updated to live version 0.14.0.
+
 ## 2020-06-07
 
 - Updated Wizard stats for 0.13.0.

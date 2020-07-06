@@ -104,13 +104,13 @@ package
 		public static const LIGHTNING_CHAIN_PERCENT:Number = 10;			// 9 Lb LightningChainChance
 		public static const LIGHTNING_ADDITIONAL_PERCENT_DAMAGE:Number = 5;	// 9 Lc LightningAdditionalPercentDamage 
 		public static const FIRE_CORROSION_PERCENT_DAMAGE_INCREASE:Number = 8;	// 9 Fa FireCorrosionDamageBonus
-		public static const FIRE_BURN_PERCENT_DAMAGE_INCREASE:Number = 10;		// 9 Fb FireBurnDamage
+		public static const FIRE_BURN_PERCENT_DAMAGE_INCREASE:Number = 8;		// 9 Fb FireBurnDamage
 		public static const FIRE_ADDITIONAL_PERCENT_DAMAGE:Number = 5;			// 9 Fc FireAdditionalPercentDamage
 		public static const LIGHTNING_CRIT_PERCENT_CHANCE:Number = 4;				// 9 Ma LightningAdditionalCritChance
 		public static const ICE_LIGHTNING_CHAIN_CHANCE:Number = 10;					// 9 Mb IceChainChance
 		public static const LIGHTNING_CHAIN_PERCENT_ADDITIONAL:Number = 10;			// 9 Mb LightningChainChance
 		public static const FIRE_ZAP_PERCENT_DAMAGE:Number = 5;						// 9 Na FireZapPercentDamage
-		public static const LIGHTNING_BURN_PERCENT_DAMAGE_INCREASE:Number = 10;		// 9 Nb LightningBurnDamage
+		public static const LIGHTNING_BURN_PERCENT_DAMAGE_INCREASE:Number = 8;		// 9 Nb LightningBurnDamage
 		public static const ICE_CORROSION_DAMAGE_PERCENT_DAMAGE:Number = 10;		// 9 Oa IceCorrosionDamageBonus
 		public static const FIRE_CRIT_DAMAGE_PERCENT:Number = 8;					// 9 Ob FireCritAdditionalDamage
 		
@@ -744,7 +744,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalCritChance", ICE_CRIT_PERCENT_CHANCE, ICE_CRIT_PERCENT_CHANCE, "your chance to score a critical hit with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
 					"icon": "iceCritChance1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -754,7 +754,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalCritChance", ICE_CRIT_PERCENT_CHANCE, ICE_CRIT_PERCENT_CHANCE, "your chance to score a critical hit with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
 					"icon": "iceCritChance1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -764,7 +764,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalCritChance", ICE_CRIT_PERCENT_CHANCE, ICE_CRIT_PERCENT_CHANCE, "your chance to score a critical hit with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
 					"icon": "iceCritChance1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -774,7 +774,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalCritChance", ICE_CRIT_PERCENT_CHANCE, ICE_CRIT_PERCENT_CHANCE, "your chance to score a critical hit with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
 					"icon": "iceCritChance1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -784,7 +784,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalCritChance", ICE_CRIT_PERCENT_CHANCE, ICE_CRIT_PERCENT_CHANCE, "your chance to score a critical hit with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
 					"icon": "iceCritChance1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -794,7 +794,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalCritChance", ICE_CRIT_PERCENT_CHANCE, ICE_CRIT_PERCENT_CHANCE, "your chance to score a critical hit with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
 					"icon": "iceCritChance1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -804,7 +804,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalCritChance", ICE_CRIT_PERCENT_CHANCE, ICE_CRIT_PERCENT_CHANCE, "your chance to score a critical hit with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
 					"icon": "iceCritChance1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -814,7 +814,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalCritChance", ICE_CRIT_PERCENT_CHANCE, ICE_CRIT_PERCENT_CHANCE, "your chance to score a critical hit with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
 					"icon": "iceCritChance1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -824,7 +824,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalCritChance", ICE_CRIT_PERCENT_CHANCE, ICE_CRIT_PERCENT_CHANCE, "your chance to score a critical hit with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalCritChance", ((ICE_CRIT_PERCENT_CHANCE/100) * (nodeLevel)), true); },
 					"icon": "iceCritChance1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -834,7 +834,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceCritAdditionalDamage", ICE_CRIT_DAMAGE_PERCENT, ICE_CRIT_DAMAGE_PERCENT, "the damage of your critical hits with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
 					"icon": "wizCritDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -844,7 +844,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceCritAdditionalDamage", ICE_CRIT_DAMAGE_PERCENT, ICE_CRIT_DAMAGE_PERCENT, "the damage of your critical hits with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
 					"icon": "wizCritDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -854,7 +854,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceCritAdditionalDamage", ICE_CRIT_DAMAGE_PERCENT, ICE_CRIT_DAMAGE_PERCENT, "the damage of your critical hits with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
 					"icon": "wizCritDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -864,7 +864,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceCritAdditionalDamage", ICE_CRIT_DAMAGE_PERCENT, ICE_CRIT_DAMAGE_PERCENT, "the damage of your critical hits with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
 					"icon": "wizCritDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -874,7 +874,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceCritAdditionalDamage", ICE_CRIT_DAMAGE_PERCENT, ICE_CRIT_DAMAGE_PERCENT, "the damage of your critical hits with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
 					"icon": "wizCritDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -884,7 +884,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceCritAdditionalDamage", ICE_CRIT_DAMAGE_PERCENT, ICE_CRIT_DAMAGE_PERCENT, "the damage of your critical hits with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
 					"icon": "wizCritDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -894,7 +894,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceCritAdditionalDamage", ICE_CRIT_DAMAGE_PERCENT, ICE_CRIT_DAMAGE_PERCENT, "the damage of your critical hits with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
 					"icon": "wizCritDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -904,7 +904,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceCritAdditionalDamage", ICE_CRIT_DAMAGE_PERCENT, ICE_CRIT_DAMAGE_PERCENT, "the damage of your critical hits with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
 					"icon": "wizCritDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -914,7 +914,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceCritAdditionalDamage", ICE_CRIT_DAMAGE_PERCENT, ICE_CRIT_DAMAGE_PERCENT, "the damage of your critical hits with Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceCritAdditionalDamage", ((ICE_CRIT_DAMAGE_PERCENT/100) * (nodeLevel)), true); },
 					"icon": "wizCritDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -924,7 +924,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalPercentDamage", ICE_ADDITIONAL_PERCENT_DAMAGE, ICE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "iceDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -934,7 +934,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalPercentDamage", ICE_ADDITIONAL_PERCENT_DAMAGE, ICE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "iceDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -944,7 +944,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalPercentDamage", ICE_ADDITIONAL_PERCENT_DAMAGE, ICE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "iceDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -954,7 +954,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalPercentDamage", ICE_ADDITIONAL_PERCENT_DAMAGE, ICE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "iceDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -964,7 +964,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalPercentDamage", ICE_ADDITIONAL_PERCENT_DAMAGE, ICE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "iceDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -974,7 +974,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalPercentDamage", ICE_ADDITIONAL_PERCENT_DAMAGE, ICE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "iceDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -984,7 +984,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalPercentDamage", ICE_ADDITIONAL_PERCENT_DAMAGE, ICE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "iceDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -994,7 +994,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalPercentDamage", ICE_ADDITIONAL_PERCENT_DAMAGE, ICE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "iceDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1004,7 +1004,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("IceAdditionalPercentDamage", ICE_ADDITIONAL_PERCENT_DAMAGE, ICE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Ice Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("IceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeIceAdditionalPercentDamage", ((ICE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "iceDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1015,7 +1015,7 @@ package
 					"tooltip": "After casting a Lightning spell, your next 2 click attacks are increased by an additional  "+LIGHTNING_ZAP_PERCENT_DAMAGE+"% of the spell's damage and cost no energy." ,
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningZapps",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1025,7 +1025,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningZapPercentDamage", LIGHTNING_ZAP_PERCENT_DAMAGE, LIGHTNING_ZAP_PERCENT_DAMAGE, "the damage of your next 2 clicks performed after a Lightning spell", "% and will cost no energy"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningZapps",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1035,7 +1035,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningZapPercentDamage", LIGHTNING_ZAP_PERCENT_DAMAGE, LIGHTNING_ZAP_PERCENT_DAMAGE, "the damage of your next 2 clicks performed after a Lightning spell", "% and will cost no energy"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningZapps",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1045,7 +1045,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningZapPercentDamage", LIGHTNING_ZAP_PERCENT_DAMAGE, LIGHTNING_ZAP_PERCENT_DAMAGE, "the damage of your next 2 clicks performed after a Lightning spell", "% and will cost no energy"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningZapps",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1055,7 +1055,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningZapPercentDamage", LIGHTNING_ZAP_PERCENT_DAMAGE, LIGHTNING_ZAP_PERCENT_DAMAGE, "the damage of your next 2 clicks performed after a Lightning spell", "% and will cost no energy"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningZapps",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1065,7 +1065,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningZapPercentDamage", LIGHTNING_ZAP_PERCENT_DAMAGE, LIGHTNING_ZAP_PERCENT_DAMAGE, "the damage of your next 2 clicks performed after a Lightning spell", "% and will cost no energy"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningZapps",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1075,7 +1075,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningZapPercentDamage", LIGHTNING_ZAP_PERCENT_DAMAGE, LIGHTNING_ZAP_PERCENT_DAMAGE, "the damage of your next 2 clicks performed after a Lightning spell", "% and will cost no energy"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningZapps",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1085,7 +1085,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningZapPercentDamage", LIGHTNING_ZAP_PERCENT_DAMAGE, LIGHTNING_ZAP_PERCENT_DAMAGE, "the damage of your next 2 clicks performed after a Lightning spell", "% and will cost no energy"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningZapps",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1095,7 +1095,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningZapPercentDamage", LIGHTNING_ZAP_PERCENT_DAMAGE, LIGHTNING_ZAP_PERCENT_DAMAGE, "the damage of your next 2 clicks performed after a Lightning spell", "% and will cost no energy"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningZapPercentDamage", ((LIGHTNING_ZAP_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningZapps",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1105,7 +1105,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningChainChance", LIGHTNING_CHAIN_PERCENT, LIGHTNING_CHAIN_PERCENT, "the chance that your Lightning Spells will hit an additional monster", "%"),
 					"flavorText": "This effect can hit additional monsters after every 100% chance.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true); },
 					"icon": "lightningChain1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1115,7 +1115,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningChainChance", LIGHTNING_CHAIN_PERCENT, LIGHTNING_CHAIN_PERCENT, "the chance that your Lightning Spells will hit an additional monster", "%"),
 					"flavorText": "This effect can hit additional monsters after every 100% chance.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true); },
 					"icon": "lightningChain1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1125,7 +1125,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningChainChance", LIGHTNING_CHAIN_PERCENT, LIGHTNING_CHAIN_PERCENT, "the chance that your Lightning Spells will hit an additional monster", "%"),
 					"flavorText": "This effect can hit additional monsters after every 100% chance.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)));  CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true);},
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)),false,true);  CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true);},
 					"icon": "lightningChain1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1135,7 +1135,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningChainChance", LIGHTNING_CHAIN_PERCENT, LIGHTNING_CHAIN_PERCENT, "the chance that your Lightning Spells will hit an additional monster", "%"),
 					"flavorText": "This effect can hit additional monsters after every 100% chance.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)));  CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true);},
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)),false,true);  CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true);},
 					"icon": "lightningChain1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1145,7 +1145,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningChainChance", LIGHTNING_CHAIN_PERCENT, LIGHTNING_CHAIN_PERCENT, "the chance that your Lightning Spells will hit an additional monster", "%"),
 					"flavorText": "This effect can hit additional monsters after every 100% chance.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)));  CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true);},
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)),false,true);  CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true);},
 					"icon": "lightningChain1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1155,7 +1155,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningChainChance", LIGHTNING_CHAIN_PERCENT, LIGHTNING_CHAIN_PERCENT, "the chance that your Lightning Spells will hit an additional monster", "%"),
 					"flavorText": "This effect can hit additional monsters after every 100% chance.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)));  CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true);},
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)),false,true);  CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true);},
 					"icon": "lightningChain1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1165,7 +1165,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningChainChance", LIGHTNING_CHAIN_PERCENT, LIGHTNING_CHAIN_PERCENT, "the chance that your Lightning Spells will hit an additional monster", "%"),
 					"flavorText": "This effect can hit additional monsters after every 100% chance.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)));  CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true);},
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)),false,true);  CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true);},
 					"icon": "lightningChain1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1175,7 +1175,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningChainChance", LIGHTNING_CHAIN_PERCENT, LIGHTNING_CHAIN_PERCENT, "the chance that your Lightning Spells will hit an additional monster", "%"),
 					"flavorText": "This effect can hit additional monsters after every 100% chance.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)));  CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true);},
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)),false,true);  CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true);},
 					"icon": "lightningChain1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1185,7 +1185,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningChainChance", LIGHTNING_CHAIN_PERCENT, LIGHTNING_CHAIN_PERCENT, "the chance that your Lightning Spells will hit an additional monster", "%"),
 					"flavorText": "This effect can hit additional monsters after every 100% chance.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)));  CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true);},
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)),false,true);  CH2.currentCharacter.addTrait("TreeLightningChainChance", ((LIGHTNING_CHAIN_PERCENT/100) * (nodeLevel)), true);},
 					"icon": "lightningChain1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1196,7 +1196,7 @@ package
 					"tooltip": "Increases the damage of Lightning Spells by "+LIGHTNING_ADDITIONAL_PERCENT_DAMAGE+"%." ,
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1206,7 +1206,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningAdditionalPercentDamage", LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, "the damage of Lightning Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1216,7 +1216,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningAdditionalPercentDamage", LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, "the damage of Lightning Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1226,7 +1226,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningAdditionalPercentDamage", LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, "the damage of Lightning Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1236,7 +1236,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningAdditionalPercentDamage", LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, "the damage of Lightning Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1246,7 +1246,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningAdditionalPercentDamage", LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, "the damage of Lightning Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1256,7 +1256,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningAdditionalPercentDamage", LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, "the damage of Lightning Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1266,7 +1266,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningAdditionalPercentDamage", LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, "the damage of Lightning Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1276,7 +1276,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("LightningAdditionalPercentDamage", LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, LIGHTNING_ADDITIONAL_PERCENT_DAMAGE, "the damage of Lightning Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "lightningDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1286,7 +1286,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireCorrosionDamageBonus", FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, "damage dealt to burning monsters", "% after being hit by a Fire spell"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireCorrosion1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1296,7 +1296,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireCorrosionDamageBonus", FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, "damage dealt to burning monsters", "% after being hit by a Fire spell"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireCorrosion1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1306,7 +1306,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireCorrosionDamageBonus", FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, "damage dealt to burning monsters", "% after being hit by a Fire spell"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireCorrosion1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1316,7 +1316,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireCorrosionDamageBonus", FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, "damage dealt to burning monsters", "% after being hit by a Fire spell"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireCorrosion1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1326,7 +1326,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireCorrosionDamageBonus", FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, "damage dealt to burning monsters", "% after being hit by a Fire spell"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireCorrosion1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1336,7 +1336,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireCorrosionDamageBonus", FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, "damage dealt to burning monsters", "% after being hit by a Fire spell"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireCorrosion1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1346,7 +1346,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireCorrosionDamageBonus", FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, "damage dealt to burning monsters", "% after being hit by a Fire spell"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireCorrosion1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1356,7 +1356,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireCorrosionDamageBonus", FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, "damage dealt to burning monsters", "% after being hit by a Fire spell"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireCorrosion1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1366,7 +1366,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireCorrosionDamageBonus", FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, FIRE_CORROSION_PERCENT_DAMAGE_INCREASE, "damage dealt to burning monsters", "% after being hit by a Fire spell"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireCorrosionDamageBonus", ((FIRE_CORROSION_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireCorrosion1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1376,7 +1376,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireBurnDamage", FIRE_BURN_PERCENT_DAMAGE_INCREASE, FIRE_BURN_PERCENT_DAMAGE_INCREASE, "the damage over time of Fire Spells" , "%"), 
 					"flavorText": "Stacks.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireBurn1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1386,7 +1386,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireBurnDamage", FIRE_BURN_PERCENT_DAMAGE_INCREASE, FIRE_BURN_PERCENT_DAMAGE_INCREASE, "the damage over time of Fire Spells" , "%"), 
 					"flavorText": "Stacks.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireBurn1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1396,7 +1396,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireBurnDamage", FIRE_BURN_PERCENT_DAMAGE_INCREASE, FIRE_BURN_PERCENT_DAMAGE_INCREASE, "the damage over time of Fire Spells" , "%"), 
 					"flavorText": "Stacks.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireBurn1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1406,7 +1406,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireBurnDamage", FIRE_BURN_PERCENT_DAMAGE_INCREASE, FIRE_BURN_PERCENT_DAMAGE_INCREASE, "the damage over time of Fire Spells" , "%"), 
 					"flavorText": "Stacks.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireBurn1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1416,7 +1416,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireBurnDamage", FIRE_BURN_PERCENT_DAMAGE_INCREASE, FIRE_BURN_PERCENT_DAMAGE_INCREASE, "the damage over time of Fire Spells" , "%"), 
 					"flavorText": "Stacks.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireBurn1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1426,7 +1426,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireBurnDamage", FIRE_BURN_PERCENT_DAMAGE_INCREASE, FIRE_BURN_PERCENT_DAMAGE_INCREASE, "the damage over time of Fire Spells" , "%"), 
 					"flavorText": "Stacks.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireBurn1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1436,7 +1436,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireBurnDamage", FIRE_BURN_PERCENT_DAMAGE_INCREASE, FIRE_BURN_PERCENT_DAMAGE_INCREASE, "the damage over time of Fire Spells" , "%"), 
 					"flavorText": "Stacks.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireBurn1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1446,7 +1446,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireBurnDamage", FIRE_BURN_PERCENT_DAMAGE_INCREASE, FIRE_BURN_PERCENT_DAMAGE_INCREASE, "the damage over time of Fire Spells" , "%"), 
 					"flavorText": "Stacks.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireBurn1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1456,7 +1456,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireBurnDamage", FIRE_BURN_PERCENT_DAMAGE_INCREASE, FIRE_BURN_PERCENT_DAMAGE_INCREASE, "the damage over time of Fire Spells" , "%"), 
 					"flavorText": "Stacks.",
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireBurnDamage", ((FIRE_BURN_PERCENT_DAMAGE_INCREASE/100) * (nodeLevel)), true); },
 					"icon": "fireBurn1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1466,7 +1466,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireAdditionalPercentDamage", FIRE_ADDITIONAL_PERCENT_DAMAGE, FIRE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Fire Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "fireDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1476,7 +1476,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireAdditionalPercentDamage", FIRE_ADDITIONAL_PERCENT_DAMAGE, FIRE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Fire Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "fireDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1486,7 +1486,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireAdditionalPercentDamage", FIRE_ADDITIONAL_PERCENT_DAMAGE, FIRE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Fire Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "fireDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1496,7 +1496,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireAdditionalPercentDamage", FIRE_ADDITIONAL_PERCENT_DAMAGE, FIRE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Fire Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "fireDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1506,7 +1506,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireAdditionalPercentDamage", FIRE_ADDITIONAL_PERCENT_DAMAGE, FIRE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Fire Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "fireDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1516,7 +1516,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireAdditionalPercentDamage", FIRE_ADDITIONAL_PERCENT_DAMAGE, FIRE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Fire Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "fireDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1526,7 +1526,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireAdditionalPercentDamage", FIRE_ADDITIONAL_PERCENT_DAMAGE, FIRE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Fire Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "fireDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1536,7 +1536,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireAdditionalPercentDamage", FIRE_ADDITIONAL_PERCENT_DAMAGE, FIRE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Fire Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "fireDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1546,7 +1546,7 @@ package
 					"tooltipFunction": getTraitTooltipFunction("FireAdditionalPercentDamage", FIRE_ADDITIONAL_PERCENT_DAMAGE, FIRE_ADDITIONAL_PERCENT_DAMAGE, "the damage of Fire Spells", "%"),
 					"flavorText": null,
 					"setupFunction": function() {},
-					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)),false,true); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
 					"icon": "fireDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
@@ -1558,7 +1558,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceCostReduction",
 					"upgradeable": true,
@@ -1571,7 +1571,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceCostReduction",
 					"upgradeable": true,
@@ -1584,7 +1584,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceCostReduction",
 					"upgradeable": true,
@@ -1597,7 +1597,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceCostReduction",
 					"upgradeable": true,
@@ -1610,7 +1610,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceCostReduction",
 					"upgradeable": true,
@@ -1623,7 +1623,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceCostReduction",
 					"upgradeable": true,
@@ -1636,7 +1636,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceCostReduction",
 					"upgradeable": true,
@@ -1649,7 +1649,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceCostReduction",
 					"upgradeable": true,
@@ -1662,7 +1662,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceCostReduction",
 					"upgradeable": true,
@@ -1675,7 +1675,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningCostReduction",
 					"upgradeable": true,
@@ -1688,7 +1688,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningCostReduction",
 					"upgradeable": true,
@@ -1701,7 +1701,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningCostReduction",
 					"upgradeable": true,
@@ -1714,7 +1714,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningCostReduction",
 					"upgradeable": true,
@@ -1727,7 +1727,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningCostReduction",
 					"upgradeable": true,
@@ -1740,7 +1740,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningCostReduction",
 					"upgradeable": true,
@@ -1753,7 +1753,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningCostReduction",
 					"upgradeable": true,
@@ -1766,7 +1766,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningCostReduction",
 					"upgradeable": true,
@@ -1779,7 +1779,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningCostReduction",
 					"upgradeable": true,
@@ -1792,7 +1792,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "fireCostReduction",
 					"upgradeable": true,
@@ -1805,7 +1805,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "fireCostReduction",
 					"upgradeable": true,
@@ -1818,7 +1818,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "fireCostReduction",
 					"upgradeable": true,
@@ -1831,7 +1831,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "fireCostReduction",
 					"upgradeable": true,
@@ -1844,7 +1844,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "fireCostReduction",
 					"upgradeable": true,
@@ -1857,7 +1857,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "fireCostReduction",
 					"upgradeable": true,
@@ -1870,7 +1870,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "fireCostReduction",
 					"upgradeable": true,
@@ -1883,7 +1883,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "fireCostReduction",
 					"upgradeable": true,
@@ -1896,7 +1896,7 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "fireCostReduction",
 					"upgradeable": true,
@@ -1913,8 +1913,8 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceLightningCostReduction",
 					"upgradeable": true,
@@ -1931,8 +1931,8 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceLightningCostReduction",
 					"upgradeable": true,
@@ -1949,8 +1949,8 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceLightningCostReduction",
 					"upgradeable": true,
@@ -1967,8 +1967,8 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceLightningCostReduction",
 					"upgradeable": true,
@@ -1985,8 +1985,8 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceLightningCostReduction",
 					"upgradeable": true,
@@ -2003,8 +2003,8 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceLightningCostReduction",
 					"upgradeable": true,
@@ -2021,8 +2021,8 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceLightningCostReduction",
 					"upgradeable": true,
@@ -2039,8 +2039,8 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceLightningCostReduction",
 					"upgradeable": true,
@@ -2057,8 +2057,8 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceLightningCostReduction",
 					"upgradeable": true,
@@ -2071,156 +2071,156 @@ package
 						return getCostReductionTooltip("Lightning Spells", "LightningCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel) + "\n" + 
 								getCostReductionTooltip("Fire Spells", "FireCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel);
 					} ,
-					"flavorText": "Cost reduction lowers the cost of Ice and Lightning spells.",
+					"flavorText": "Cost reduction lowers the cost of Lightning and Fire spells.",
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningFireCostReduction",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
 				},
 				"Nd2": {
-					"name": "Lightning and Fire: Cost Reduction 2",
+					"name": "Lightning and Fire: Cost Reduction",
 					"tooltip": "Reduces the cost of Lightning and Fire spells." ,
 					"tooltipFunction": function(currentNodeLevel:Number):String {
 						return getCostReductionTooltip("Lightning Spells", "LightningCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel) + "\n" + 
 								getCostReductionTooltip("Fire Spells", "FireCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel);
 					} ,
-					"flavorText": "Cost reduction lowers the cost of Ice and Lightning spells.",
+					"flavorText": "Cost reduction lowers the cost of Lightning and Fire spells.",
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningFireCostReduction",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
 				},
 				"Nd3": {
-					"name": "Lightning and Fire: Cost Reduction 3",
+					"name": "Lightning and Fire: Cost Reduction",
 					"tooltip": "Reduces the cost of Lightning and Fire spells." ,
 					"tooltipFunction": function(currentNodeLevel:Number):String {
 						return getCostReductionTooltip("Lightning Spells", "LightningCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel) + "\n" + 
 								getCostReductionTooltip("Fire Spells", "FireCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel);
 					} ,
-					"flavorText": "Cost reduction lowers the cost of Ice and Lightning spells.",
+					"flavorText": "Cost reduction lowers the cost of Lightning and Fire spells.",
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningFireCostReduction",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
 				},
 				"Nd4": {
-					"name": "Lightning and Fire: Cost Reduction 4",
+					"name": "Lightning and Fire: Cost Reduction",
 					"tooltip": "Reduces the cost of Lightning and Fire spells." ,
 					"tooltipFunction": function(currentNodeLevel:Number):String {
 						return getCostReductionTooltip("Lightning Spells", "LightningCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel) + "\n" + 
 								getCostReductionTooltip("Fire Spells", "FireCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel);
 					} ,
-					"flavorText": "Cost reduction lowers the cost of Ice and Lightning spells.",
+					"flavorText": "Cost reduction lowers the cost of Lightning and Fire spells.",
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningFireCostReduction",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
 				},
 				"Nd5": {
-					"name": "Lightning and Fire: Cost Reduction 5",
+					"name": "Lightning and Fire: Cost Reduction",
 					"tooltip": "Reduces the cost of Lightning and Fire spells." ,
 					"tooltipFunction": function(currentNodeLevel:Number):String {
 						return getCostReductionTooltip("Lightning Spells", "LightningCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel) + "\n" + 
 								getCostReductionTooltip("Fire Spells", "FireCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel);
 					} ,
-					"flavorText": "Cost reduction lowers the cost of Ice and Lightning spells.",
+					"flavorText": "Cost reduction lowers the cost of Lightning and Fire spells.",
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningFireCostReduction",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
 				},
 				"Nd6": {
-					"name": "Lightning and Fire: Cost Reduction 6",
+					"name": "Lightning and Fire: Cost Reduction",
 					"tooltip": "Reduces the cost of Lightning and Fire spells." ,
 					"tooltipFunction": function(currentNodeLevel:Number):String {
 						return getCostReductionTooltip("Lightning Spells", "LightningCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel) + "\n" + 
 								getCostReductionTooltip("Fire Spells", "FireCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel);
 					} ,
-					"flavorText": "Cost reduction lowers the cost of Ice and Lightning spells.",
+					"flavorText": "Cost reduction lowers the cost of Lightning and Fire spells.",
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningFireCostReduction",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
 				},
 				"Nd7": {
-					"name": "Lightning and Fire: Cost Reduction 7",
-					"tooltip": "Reduces the cost ofLightning and Fire spells." ,
+					"name": "Lightning and Fire: Cost Reduction",
+					"tooltip": "Reduces the cost of Lightning and Fire spells." ,
 					"tooltipFunction": function(currentNodeLevel:Number):String {
 						return getCostReductionTooltip("Lightning Spells", "LightningCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel) + "\n" + 
 								getCostReductionTooltip("Fire Spells", "FireCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel);
 					} ,
-					"flavorText": "Cost reduction lowers the cost of Ice and Lightning spells.",
+					"flavorText": "Cost reduction lowers the cost of Lightning and Fire spells.",
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningFireCostReduction",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
 				},
 				"Nd8": {
-					"name": "Lightning and Fire: Cost Reduction 8",
+					"name": "Lightning and Fire: Cost Reduction",
 					"tooltip": "Reduces the cost of Lightning and Fire spells." ,
 					"tooltipFunction": function(currentNodeLevel:Number):String {
 						return getCostReductionTooltip("Lightning Spells", "LightningCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel) + "\n" + 
 								getCostReductionTooltip("Fire Spells", "FireCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel);
 					} ,
-					"flavorText": "Cost reduction lowers the cost of Ice and Lightning spells.",
+					"flavorText": "Cost reduction lowers the cost of Lightning and Fire spells.",
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningFireCostReduction",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
 				},
 				"Nd9": {
-					"name": "Lightning and Fire: Cost Reduction 9",
+					"name": "Lightning and Fire: Cost Reduction",
 					"tooltip": "Reduces the cost of Lightning and Fire spells." ,
 					"tooltipFunction": function(currentNodeLevel:Number):String {
 						return getCostReductionTooltip("Lightning Spells", "LightningCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel) + "\n" + 
 								getCostReductionTooltip("Fire Spells", "FireCostReductionLevel", LIGHTNING_COST_REDUCTION_PERCENT_PER_LEVEL)(currentNodeLevel);
 					} ,
-					"flavorText": "Cost reduction lowers the cost of Ice and Lightning spells.",
+					"flavorText": "Cost reduction lowers the cost of Lightning and Fire spells.",
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("LightningCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeLightningCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "lightningFireCostReduction",
 					"upgradeable": true,
@@ -2237,8 +2237,8 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceFireCostReduction",
 					"upgradeable": true,
@@ -2255,8 +2255,8 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceFireCostReduction",
 					"upgradeable": true,
@@ -2273,8 +2273,8 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceFireCostReduction",
 					"upgradeable": true,
@@ -2291,8 +2291,8 @@ package
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
 						var levelsToAdd:Number = Math.pow(1.1, (nodeLevel - 1));
-						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
-						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("FireCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeFireCostReductionLevel", levelsToAdd, true);
+						CH2.currentCharacter.addTrait("IceCostReductionLevel",levelsToAdd,false,true ); CH2.currentCharacter.addTrait("TreeIceCostReductionLevel", levelsToAdd, true);
 					},
 					"icon": "iceFireCostReduction",
 					"upgradeable": true,
@@ -3085,6 +3085,7 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("LightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeLightningAdditionalPercentDamage", ((LIGHTNING_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); CH2.currentCharacter.addTrait("FireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel))); CH2.currentCharacter.addTrait("TreeFireAdditionalPercentDamage", ((FIRE_ADDITIONAL_PERCENT_DAMAGE/100) * (nodeLevel)), true); },
+					"icon": "dualLightningFireDamage1",
 					"upgradeable": true,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
 				},
@@ -4090,14 +4091,15 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("ThunderstormDuration", ((THUNDERSTORM_DURATION_TRAIT*2) * (nodeLevel)));
+						CH2.currentCharacter.addTrait("ThunderstormDuration", ((THUNDERSTORM_DURATION_TRAIT*2) * (nodeLevel)), false, true);
 						CH2.currentCharacter.addTrait("TreeThunderstormDuration", ((THUNDERSTORM_DURATION_TRAIT*2) * (nodeLevel)), true);
-						CH2.currentCharacter.addTrait("ThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT*2/100) * (nodeLevel)));
+						CH2.currentCharacter.addTrait("ThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT*2/100) * (nodeLevel)), false, true);
 						CH2.currentCharacter.addTrait("TreeThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT*2/100) * (nodeLevel)), true);
-						CH2.currentCharacter.addTrait("isThunderstormUnlocked", 1, false, false, false);
+						CH2.currentCharacter.addTrait("isThunderstormUnlocked", 1, false, true, false);
 					},
 					"icon": "lightningTraitEnergize",
 					"upgradeable": true,
+					"flammable": false,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
 				},
 				"Lt7": {
@@ -4106,14 +4108,15 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("ThunderstormDuration", ((THUNDERSTORM_DURATION_TRAIT*2) * (nodeLevel)));
+						CH2.currentCharacter.addTrait("ThunderstormDuration", ((THUNDERSTORM_DURATION_TRAIT*2) * (nodeLevel)), false, true);
 						CH2.currentCharacter.addTrait("TreeThunderstormDuration", ((THUNDERSTORM_DURATION_TRAIT*2)  * (nodeLevel)), true);
-						CH2.currentCharacter.addTrait("ThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT*2/100) * (nodeLevel)));
+						CH2.currentCharacter.addTrait("ThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT*2/100) * (nodeLevel)), false, true);
 						CH2.currentCharacter.addTrait("TreeThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT*2/100) * (nodeLevel)), true);
-						CH2.currentCharacter.addTrait("isThunderstormUnlocked", 1, false, false, false);
+						CH2.currentCharacter.addTrait("isThunderstormUnlocked", 1, false, true, false);
 					},
 					"icon": "lightningTraitEnergize",
 					"upgradeable": true,
+					"flammable": false,
 					"upgradeCostFunction": Character.linearExponential(5, 1, 2)
 				},
 				"Lw6": {
@@ -4122,7 +4125,7 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("ThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT/100) * (nodeLevel)));
+						CH2.currentCharacter.addTrait("ThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT/100) * (nodeLevel)), false, true);
 						CH2.currentCharacter.addTrait("TreeThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT/100) * (nodeLevel)), true);
 					},
 					"icon": "lightningTraitEnergizeEnergyRestore",
@@ -4135,7 +4138,7 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("ThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT/100) * (nodeLevel)));
+						CH2.currentCharacter.addTrait("ThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT/100) * (nodeLevel)), false, true);
 						CH2.currentCharacter.addTrait("TreeThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT/100) * (nodeLevel)), true);
 					},
 					"icon": "lightningTraitEnergizeEnergyRestore",
@@ -4148,7 +4151,7 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("ThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT/100) * (nodeLevel)));
+						CH2.currentCharacter.addTrait("ThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT/100) * (nodeLevel)), false, true);
 						CH2.currentCharacter.addTrait("TreeThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT/100) * (nodeLevel)), true);
 					},
 					"icon": "lightningTraitEnergizeEnergyRestore",
@@ -4161,7 +4164,7 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("ThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT/100) * (nodeLevel)));
+						CH2.currentCharacter.addTrait("ThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT/100) * (nodeLevel)), false, true);
 						CH2.currentCharacter.addTrait("TreeThunderstormDamage", ((THUNDERSTORM_DAMAGE_TRAIT/100) * (nodeLevel)), true);
 					},
 					"icon": "lightningTraitEnergizeEnergyRestore",
@@ -4174,7 +4177,7 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("ThunderstormDuration", THUNDERSTORM_DURATION_TRAIT);
+						CH2.currentCharacter.addTrait("ThunderstormDuration", THUNDERSTORM_DURATION_TRAIT, false, true);
 						CH2.currentCharacter.addTrait("TreeThunderstormDuration", THUNDERSTORM_DURATION_TRAIT, true);
 					},
 					"icon": "lightningTraitEnergizeDuration",
@@ -4187,7 +4190,7 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("ThunderstormDuration", THUNDERSTORM_DURATION_TRAIT);
+						CH2.currentCharacter.addTrait("ThunderstormDuration", THUNDERSTORM_DURATION_TRAIT, false, true);
 						CH2.currentCharacter.addTrait("TreeThunderstormDuration", THUNDERSTORM_DURATION_TRAIT, true);
 					},
 					"icon": "lightningTraitEnergizeDuration",
@@ -4200,7 +4203,7 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("ThunderstormDuration", THUNDERSTORM_DURATION_TRAIT);
+						CH2.currentCharacter.addTrait("ThunderstormDuration", THUNDERSTORM_DURATION_TRAIT, false, true);
 						CH2.currentCharacter.addTrait("TreeThunderstormDuration", THUNDERSTORM_DURATION_TRAIT, true);
 					},
 					"icon": "lightningTraitEnergizeDuration",
@@ -4213,7 +4216,7 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("ThunderstormDuration", THUNDERSTORM_DURATION_TRAIT);
+						CH2.currentCharacter.addTrait("ThunderstormDuration", THUNDERSTORM_DURATION_TRAIT, false, true);
 						CH2.currentCharacter.addTrait("TreeThunderstormDuration", THUNDERSTORM_DURATION_TRAIT, true);
 					},
 					"icon": "lightningTraitEnergizeDuration",
@@ -4226,11 +4229,11 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("HeatBurstDuration", ((HEAT_BURST_DURATION_TRAIT*2) * (nodeLevel)));
+						CH2.currentCharacter.addTrait("HeatBurstDuration", ((HEAT_BURST_DURATION_TRAIT*2) * (nodeLevel)), false, true);
 						CH2.currentCharacter.addTrait("TreeHeatBurstDuration", ((HEAT_BURST_DURATION_TRAIT*2) * (nodeLevel)), true);
-						CH2.currentCharacter.addTrait("HeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT*2/100) * (nodeLevel)));
+						CH2.currentCharacter.addTrait("HeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT*2/100) * (nodeLevel)), false, true);
 						CH2.currentCharacter.addTrait("TreeHeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT*2/100) * (nodeLevel)), true);
-						CH2.currentCharacter.addTrait("isHeatBurstUnlocked", 1, false, false, false);
+						CH2.currentCharacter.addTrait("isHeatBurstUnlocked", 1, false, true, false);
 					},
 					"icon": "fireTraitWarmth",
 					"upgradeable": true,
@@ -4242,11 +4245,11 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("HeatBurstDuration", ((HEAT_BURST_DURATION_TRAIT*2) * (nodeLevel)));
+						CH2.currentCharacter.addTrait("HeatBurstDuration", ((HEAT_BURST_DURATION_TRAIT*2) * (nodeLevel)), false, true);
 						CH2.currentCharacter.addTrait("TreeHeatBurstDuration", ((HEAT_BURST_DURATION_TRAIT*2) * (nodeLevel)), true);
-						CH2.currentCharacter.addTrait("HeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT*2/100) * (nodeLevel)));
+						CH2.currentCharacter.addTrait("HeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT*2/100) * (nodeLevel)), false, true);
 						CH2.currentCharacter.addTrait("TreeHeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT*2/100) * (nodeLevel)), true);
-						CH2.currentCharacter.addTrait("isHeatBurstUnlocked", 1, false, false, false);
+						CH2.currentCharacter.addTrait("isHeatBurstUnlocked", 1, false, true, false);
 					},
 					"icon": "fireTraitWarmth",
 					"upgradeable": true,
@@ -4258,7 +4261,7 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("HeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT/100) * (nodeLevel)));
+						CH2.currentCharacter.addTrait("HeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT/100) * (nodeLevel)), false, true);
 						CH2.currentCharacter.addTrait("TreeHeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT/100) * (nodeLevel)), true);
 					},
 					"icon": "fireTraitWarmthHypothermiaRedUp",
@@ -4271,7 +4274,7 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("HeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT/100) * (nodeLevel)));
+						CH2.currentCharacter.addTrait("HeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT/100) * (nodeLevel)), false, true);
 						CH2.currentCharacter.addTrait("TreeHeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT/100) * (nodeLevel)), true);
 					},
 					"icon": "fireTraitWarmthHypothermiaRedUp",
@@ -4284,7 +4287,7 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("HeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT/100) * (nodeLevel)));
+						CH2.currentCharacter.addTrait("HeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT/100) * (nodeLevel)), false, true);
 						CH2.currentCharacter.addTrait("TreeHeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT/100) * (nodeLevel)), true);
 					},
 					"icon": "fireTraitWarmthHypothermiaRedUp",
@@ -4297,7 +4300,7 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("HeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT/100) * (nodeLevel)));
+						CH2.currentCharacter.addTrait("HeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT/100) * (nodeLevel)), false, true);
 						CH2.currentCharacter.addTrait("TreeHeatBurstDamage", ((HEAT_BURST_DAMAGE_TRAIT/100) * (nodeLevel)), true);
 					},
 					"icon": "fireTraitWarmthHypothermiaRedUp",
@@ -4310,7 +4313,7 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("HeatBurstDuration", HEAT_BURST_DURATION_TRAIT);
+						CH2.currentCharacter.addTrait("HeatBurstDuration", HEAT_BURST_DURATION_TRAIT, false, true);
 						CH2.currentCharacter.addTrait("TreeHeatBurstDuration", HEAT_BURST_DURATION_TRAIT, true);
 					},
 					"icon": "fireTraitWarmthBurnCountUp",
@@ -4323,7 +4326,7 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("HeatBurstDuration", HEAT_BURST_DURATION_TRAIT);
+						CH2.currentCharacter.addTrait("HeatBurstDuration", HEAT_BURST_DURATION_TRAIT, false, true);
 						CH2.currentCharacter.addTrait("TreeHeatBurstDuration", HEAT_BURST_DURATION_TRAIT, true);
 					},
 					"icon": "fireTraitWarmthBurnCountUp",
@@ -4336,7 +4339,7 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("HeatBurstDuration", HEAT_BURST_DURATION_TRAIT);
+						CH2.currentCharacter.addTrait("HeatBurstDuration", HEAT_BURST_DURATION_TRAIT, false, true);
 						CH2.currentCharacter.addTrait("TreeHeatBurstDuration", HEAT_BURST_DURATION_TRAIT, true);
 					},
 					"icon": "fireTraitWarmthBurnCountUp",
@@ -4349,7 +4352,7 @@ package
 					"flavorText": null,
 					"setupFunction": function() {},
 					"purchaseFunction": function(nodeLevel:Number) {
-						CH2.currentCharacter.addTrait("HeatBurstDuration", HEAT_BURST_DURATION_TRAIT);
+						CH2.currentCharacter.addTrait("HeatBurstDuration", HEAT_BURST_DURATION_TRAIT, false, true);
 						CH2.currentCharacter.addTrait("TreeHeatBurstDuration", HEAT_BURST_DURATION_TRAIT, true);
 					},
 					"icon": "fireTraitWarmthBurnCountUp",
@@ -4461,7 +4464,7 @@ package
 					"flavorText": null,
 					"loadFunction": function(){},
 					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("symbiosisIceLightning", nodeLevel, false, false); },
-					"icon": "synergyIceLightning1",
+					"icon": "symbiosisIceLightning1",
 					"flammable": true,
 					"upgradeable": false
 				},
@@ -4471,7 +4474,7 @@ package
 					"flavorText": null,
 					"loadFunction": function(){},
 					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("symbiosisIceLightning", nodeLevel, false, false); },
-					"icon": "synergyIceLightning1",
+					"icon": "symbiosisIceLightning1",
 					"flammable": true,
 					"upgradeable": false
 				},
@@ -4481,7 +4484,7 @@ package
 					"flavorText": null,
 					"loadFunction": function(){},
 					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("symbiosisLightningFire", nodeLevel, false, false); },
-					"icon": "synergyLightningFire1",
+					"icon": "symbiosisLFireLightning1",
 					"flammable": true,
 					"upgradeable": false
 				},
@@ -4491,7 +4494,7 @@ package
 					"flavorText": null,
 					"loadFunction": function(){},
 					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("symbiosisLightningFire", nodeLevel, false, false); },
-					"icon": "synergyLightningFire1",
+					"icon": "symbiosisLFireLightning1",
 					"flammable": true,
 					"upgradeable": false
 				},
@@ -4501,7 +4504,7 @@ package
 					"flavorText": null,
 					"loadFunction": function(){},
 					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("symbiosisIceFire", nodeLevel, false, false); },
-					"icon": "synergyIceFire1",
+					"icon": "symbiosisFireIce1",
 					"flammable": true,
 					"upgradeable": false
 				},
@@ -4511,7 +4514,7 @@ package
 					"flavorText": null,
 					"loadFunction": function(){},
 					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.addTrait("symbiosisIceFire", nodeLevel, false, false); },
-					"icon": "synergyIceFire1",
+					"icon": "symbiosisFireIce1",
 					"flammable": true,
 					"upgradeable": false
 				},
@@ -4577,8 +4580,8 @@ package
 				},
 				"Qs0": {
 					"name": "Runecorder",
-					"tooltip": "Unlocks the Runecorder." ,
-					"flavorText": null,
+					"tooltip": "Unlocks the Runecorder and Exchange. Exchange is an incantation that can be used to purchase and level up items." ,
+					"flavorText": function(){ return getSpell("buyRandomCatalogItem").extendedTooltip.body; },
 					"setupFunction": function() {},
 					"loadFunction": function(){ unlockSpell("buyRandomCatalogItem", true); },
 					"purchaseFunction": function(nodeLevel:Number) { CH2.currentCharacter.hasUnlockedAutomator = true; CH2.currentCharacter.addTrait("HasAutomator", 1); unlockSpell("buyRandomCatalogItem"); },
@@ -4704,7 +4707,7 @@ package
 				"tooltipFunction": Character.getTranscendencePerkTooltipFunctionCommon("30"),
 				"costFunction": Character.linearExponential(1000, 1, 2000),
 				"levelFunction": function() {
-					unlockSpell("synergyIceFire", true);
+					unlockSpell("synergyIceFire");
 					CH2.currentCharacter.addTrait("synergyIceFire", 1, false, true, true); //each level should increase duration by 25sec
 				},
 				"maxLevel": -1,
@@ -4717,7 +4720,7 @@ package
 				"tooltipFunction": Character.getTranscendencePerkTooltipFunctionCommon("31"),
 				"costFunction": Character.linearExponential(1000, 1, 2000),
 				"levelFunction": function() {
-					unlockSpell("synergyIceLightning", true);
+					unlockSpell("synergyIceLightning");
 					CH2.currentCharacter.addTrait("synergyIceLightning", 1, false, true, true);
 				},
 				"maxLevel": -1,
@@ -4730,7 +4733,7 @@ package
 				"tooltipFunction": Character.getTranscendencePerkTooltipFunctionCommon("32"),
 				"costFunction": Character.linearExponential(1000, 1, 2000),
 				"levelFunction": function() {
-					unlockSpell("synergyFireLightning", true);
+					unlockSpell("synergyFireLightning");
 					CH2.currentCharacter.addTrait("synergyFireLightning", 1, false, true, true);
 				},
 				"maxLevel": -1,
@@ -4739,7 +4742,7 @@ package
 			
 			wizard.levelGraph = LevelGraph.loadGraph(wizard.levelGraphObject, wizard);
 			
-			wizard.name = "Wizard";
+			wizard.name = CHARACTER_NAME;
 			wizard.heroId = 2;
 			wizard.flavorName = "Cursor"
 			wizard.flavorClass = "The Cursed Wizard"
@@ -5886,123 +5889,6 @@ package
 			spellBar.refresh(dt, cachedBarSpells);
 			CH2.currentCharacter.updateDefault(dt);
 			
-			//#########################################
-			//############# TRANSMUTATION #############
-			//#########################################
-			var recordings:Array = CH2.currentCharacter.extendedVariables["recordings"];
-			var idleBuffName:String = "Transmutation";
-			if ((MiscUtils.requiresUpdate(1000, dt) && recordings.length > 0) || (recordings.length > 0 && isPlayingRecording() && !CH2.currentCharacter.buffs.hasBuffByName(idleBuffName)))
-			{
-				if (!CH2.currentCharacter.buffs.hasBuffByName(idleBuffName) && isPlayingRecording())
-				{
-					var idleBuff:Buff = new Buff();
-					idleBuff.isUntimedBuff = true;
-					idleBuff.name = idleBuffName;
-					idleBuff.iconId = 168;
-					idleBuff.stateValues["damageAdded"] = new BigNumber(0);
-					idleBuff.stateValues["isPlaying"] = true;
-					idleBuff.unhastened = true;
-					idleBuff.tooltipFunction = function() {
-						var isActive:String = (this.stateValues["isPlaying"] == true) ? "Runecorder Is Active: True" : "Runecorder Is Active: False";
-						return {
-							"header": idleBuffName,
-							"body": "Transmutes most gold gained while the Runecorder is active into damage.\nCurrent Gold To Damage Ratio: 1 Gold = "+Number(this.stateValues["getConversionRateDamageFromGold"]()).toFixed(3)+" Damage\n\n"+isActive+"\nCurrent Damage Gained: "+CH2.game.formattedNumber(this.stateValues["currentDamageGained"]())
-						};
-					}
-					idleBuff.tickFunction = function() {
-						if (CH2.currentCharacter.buffs.hasBuffByName("Transmutation") && this.stateValues["isPlaying"])
-						{
-							idleBuff.buffStat(CH2.STAT_GOLD, 0.1);
-						}
-						else
-						{
-							idleBuff.buffStat(CH2.STAT_GOLD, 1);
-						}
-					}
-					idleBuff.onGoldGainedFunction = function(goldGained:BigNumber):void
-					{
-						if (this.stateValues["isPlaying"] && CH2.currentCharacter.buffs.hasBuffByName("Transmutation"))
-						{
-							var modifiedGoldReward:BigNumber = BigNumber.clone(goldGained);
-							modifiedGoldReward = modifiedGoldReward.divide(CH2.currentCharacter.currentWorld.costMultiplier);
-							modifiedGoldReward.base = Math.pow(modifiedGoldReward.base, 0.972);
-							modifiedGoldReward.power *= 0.972;
-							
-							CH2.currentCharacter.unarmedDamage.plusEquals(modifiedGoldReward);
-							
-							//normalize the exponent to an integer value
-							var exponentDecimal:Number = CH2.currentCharacter.unarmedDamage.power % 1;
-							CH2.currentCharacter.unarmedDamage.base *= Math.pow(10, exponentDecimal);
-							CH2.currentCharacter.unarmedDamage.power = Math.floor(CH2.currentCharacter.unarmedDamage.power);
-							CH2.currentCharacter.unarmedDamage.normalize();
-						}
-					}
-					idleBuff.stateValues["getConversionRateDamageFromGold"] = function():Number
-					{
-						var modifiedGoldReward:BigNumber = new BigNumber(1000);
-						modifiedGoldReward = modifiedGoldReward.divide(CH2.currentCharacter.currentWorld.costMultiplier);
-						modifiedGoldReward.base = Math.pow(modifiedGoldReward.base, 0.972);
-						modifiedGoldReward.power *= 0.972;
-						var exponentDecimal:Number = modifiedGoldReward.power % 1;
-						modifiedGoldReward.base *= Math.pow(10, exponentDecimal);
-						modifiedGoldReward.power = Math.floor(modifiedGoldReward.power);
-						modifiedGoldReward.normalize();
-						
-						modifiedGoldReward.timesEqualsN(CH2.currentCharacter.ancientShardDamageMultiplier);
-						modifiedGoldReward.timesEqualsN(1 + (CH2.currentCharacter.powerRuneActivated ? Character.POWER_RUNE_DAMAGE_BONUS : 0));
-						modifiedGoldReward.timesEquals(CH2.currentCharacter.damageMultiplier);
-						//modifiedGoldReward.timesEquals(CH2.currentCharacter.gildedDamageMultiplier); //AO: Removed when moving over to master
-						if (CH2.currentCharacter.isIdle)
-						{
-							modifiedGoldReward.timesEquals(CH2.currentCharacter.idleDamageMultiplier);
-						}
-						modifiedGoldReward.floorInPlace();
-						
-						return modifiedGoldReward.numberValue()/1000;
-					}
-					idleBuff.stateValues["currentDamageGained"] = function():BigNumber
-					{
-						var unarmedDamage:BigNumber = CH2.currentCharacter.unarmedDamage.subtract(new BigNumber(1));
-						unarmedDamage.timesEqualsN(CH2.currentCharacter.ancientShardDamageMultiplier);
-						unarmedDamage.timesEqualsN(1 + (CH2.currentCharacter.powerRuneActivated ? Character.POWER_RUNE_DAMAGE_BONUS : 0));
-						unarmedDamage.timesEquals(CH2.currentCharacter.damageMultiplier);
-						//unarmedDamage.timesEquals(CH2.currentCharacter.gildedDamageMultiplier); //AO: Removed when moving over to master
-						if (CH2.currentCharacter.isIdle)
-						{
-							unarmedDamage.timesEquals(CH2.currentCharacter.idleDamageMultiplier);
-						}
-						unarmedDamage.floorInPlace();
-						return unarmedDamage;
-					}
-					CH2.currentCharacter.buffs.addBuff(idleBuff);
-				}
-				else if (CH2.currentCharacter.buffs.hasBuffByName(idleBuffName))
-				{
-					CH2.currentCharacter.buffs.getBuff(idleBuffName).stateValues["isPlaying"] = isPlayingRecording();
-					CH2.currentCharacter.buffs.getBuff(idleBuffName).tooltipFunction = function() {
-						var isActive:String = (isPlayingRecording()) ? "Runecorder Is Active: True" : "Runecorder Is Active: False";
-						var conversionRate:Number = Number(this.stateValues["getConversionRateDamageFromGold"]());
-						var goldToDamageConversionRate:String = "";
-						if (conversionRate < 10)
-						{
-							goldToDamageConversionRate = conversionRate.toFixed(3)
-						}
-						else
-						{
-							goldToDamageConversionRate = CH2.game.formattedNumber(conversionRate);
-						}
-						return {
-							"header": idleBuffName,
-							"body": "Transmutes most gold gained while the Runecorder is active into damage.\nCurrent Effective Gold To Damage Ratio: 1 Gold = "+goldToDamageConversionRate+" Damage\n\n"+isActive+"\nCurrent Damage Gained: "+CH2.game.formattedNumber(this.stateValues["currentDamageGained"]())
-						};
-					}
-				}
-			}
-			else if (CH2.currentCharacter.buffs.hasBuffByName(idleBuffName))
-			{
-				CH2.currentCharacter.buffs.getBuff(idleBuffName).stateValues["isPlaying"] = isPlayingRecording();
-			}
-			
 			//Save state of dark ritual and flash stacks
 			
 			var darkRitualBuffName:String = "DarkRitual";
@@ -6061,7 +5947,7 @@ package
 				criticalDamageMultiplier.timesEqualsN(numCrits);
 				var attackData:AttackData = new AttackData();
 				attackData.isAutoAttack = true;
-				attackData.damage = BigNumber.max(one, CH2.currentCharacter.autoAttackDamage);
+				attackData.damage = BigNumber.clone(BigNumber.max(one, CH2.currentCharacter.autoAttackDamage));
 				attackData.isCritical = numCrits > 0;
 				if (attackData.isCritical)
 				{
@@ -6111,6 +5997,19 @@ package
 					applyFlashBuff();
 					CH2.currentCharacter.buffs.getBuff("FlashBuff").stacks = CH2.currentCharacter.extendedVariables["flashStacks"];
 				}
+				
+				if (CH2.currentCharacter.getTrait("synergyIceFire") > 0)
+				{
+					unlockSpell("synergyIceFire", true);
+				}
+				if (CH2.currentCharacter.getTrait("synergyIceLightning") > 0)
+				{
+					unlockSpell("synergyIceLightning", true);
+				}
+				if (CH2.currentCharacter.getTrait("synergyFireLightning") > 0)
+				{
+					unlockSpell("synergyFireLightning", true);
+				}
 			}
 			CH2.currentCharacter.onCharacterLoadedDefault();
 		}
@@ -6118,10 +6017,6 @@ package
 		public function ascendOverride():void
 		{
 			CH2.currentCharacter.unarmedDamage = new BigNumber(1);
-			if (CH2.currentCharacter.buffs.hasBuffByName("Transmutation"))
-			{
-				CH2.currentCharacter.buffs.getBuff("Transmutation").stateValues["damageAdded"] = new BigNumber(0);
-			}
 			if (CH2.currentCharacter.extendedVariables["isCastingSpell"])
 			{
 				endSpell();
@@ -6136,16 +6031,26 @@ package
 			deactivateAllSpells();
 			
 			CH2.currentCharacter.ascendDefault();
+			
+			if (CH2.currentCharacter.getTrait("synergyIceFire") > 0)
+			{
+				unlockSpell("synergyIceFire", true);
+			}
+			if (CH2.currentCharacter.getTrait("synergyIceLightning") > 0)
+			{
+				unlockSpell("synergyIceLightning", true);
+			}
+			if (CH2.currentCharacter.getTrait("synergyFireLightning") > 0)
+			{
+				unlockSpell("synergyFireLightning", true);
+			}
 		}
 		
 		public function onWorldStartedOverride(worldNum:Number):void
 		{
 			CH2.currentCharacter.onWorldStartedDefault(worldNum);
 			CH2.currentCharacter.unarmedDamage = new BigNumber(1);
-			if (CH2.currentCharacter.buffs.hasBuffByName("Transmutation"))
-			{
-				CH2.currentCharacter.buffs.getBuff("Transmutation").stateValues["damageAdded"] = new BigNumber(0);
-			}
+			
 			restartActivePlaylist();
 			if (CH2.currentCharacter.extendedVariables["isCastingSpell"])
 			{
@@ -6288,6 +6193,12 @@ package
 				getSpell("synergyFireLightning").isActive = false;
 			}
 			
+			if (characterInstance.version <= 12)
+			{
+				// Convert for new transcendence changes.
+				characterInstance.currentWorldEndAutomationOption++;
+			}
+			
 			// ^^ NEW MIGRATIONS GO ABOVE THIS LINE ^^
 			
 			CH2.currentCharacter = null;
@@ -6332,7 +6243,7 @@ package
 		{
 			var attackData:AttackData = new AttackData();
 			attackData.isClickAttack = true;
-			attackData.damage = BigNumber.max(one, CH2.currentCharacter.clickDamage);
+			attackData.damage = BigNumber.clone(BigNumber.max(one, CH2.currentCharacter.clickDamage));
 			
 			CH2.currentCharacter.characterDisplay.playClickAttack();
 			CH2.currentCharacter.attack(attackData);
@@ -6439,10 +6350,6 @@ package
 		public function transcendOverride():void
 		{
 			CH2.currentCharacter.unarmedDamage = new BigNumber(1);
-			if (CH2.currentCharacter.buffs.hasBuffByName("Transmutation"))
-			{
-				CH2.currentCharacter.buffs.getBuff("Transmutation").stateValues["damageAdded"] = new BigNumber(0);
-			}
 			if (CH2.currentCharacter.extendedVariables["isCastingSpell"])
 			{
 				endSpell();
@@ -6455,6 +6362,7 @@ package
 			CH2.currentCharacter.buffs.removeBuff("FlashBuff");
 			CH2UI.instance.redrawBuffBar();
 			deactivateAllSpells();
+			stopAllPlayback();
 			
 			CH2.currentCharacter.transcendDefault();
 			if (CH2.currentCharacter.getTrait("synergyIceFire") > 0)
@@ -6869,6 +6777,11 @@ package
 		public function onCharacterUnloadedOverride():void
 		{
 			deactivateAllSpells();
+			
+			_memoizedValidSpellStatus = {};
+			_cachedHighestSpell = null;
+			_cachedCurrentSpellRuneValues = null;
+			_cachedCurrentSpellRuneValuesString = null;
 			stopAllRecording();
 			CH2.currentCharacter.buffs.removeAllBuffs();
 			symbiosisBuffs = [];
@@ -7110,17 +7023,17 @@ package
 				types.push(spell.types[i]);
 			}
 			
-			if (CH2.currentCharacter.buffs.hasBuffByName("IceLightningBuff1") && (spell.isIce() > -1 || spell.isLightning()))
+			if (CH2.currentCharacter.buffs.hasBuffByName("IceLightningBuff1") && (spell.isIce() || spell.isLightning()))
 			{
 				types.push(ICE_RUNE_ID);
 				types.push(LIGHTNING_RUNE_ID);
 			}
-			if (CH2.currentCharacter.buffs.hasBuffByName("IceFireBuff1") && (spell.isIce() > -1 || spell.isFire()))
+			if (CH2.currentCharacter.buffs.hasBuffByName("IceFireBuff1") && (spell.isIce() || spell.isFire()))
 			{
 				types.push(ICE_RUNE_ID);
 				types.push(FIRE_RUNE_ID);
 			}
-			if (CH2.currentCharacter.buffs.hasBuffByName("FireLightningBuff1") && (spell.isFire() > -1 || spell.isLightning()))
+			if (CH2.currentCharacter.buffs.hasBuffByName("FireLightningBuff1") && (spell.isFire() || spell.isLightning()))
 			{
 				types.push(FIRE_RUNE_ID);
 				types.push(LIGHTNING_RUNE_ID);
@@ -7903,8 +7816,11 @@ package
 					CH2.user.awardAchievement(23);
 				}
 			}
-			useSymbiosis();
-			applyAllSymbiosis(spell);
+			if (!isFlashAttack)
+			{
+				useSymbiosis();
+				applyAllSymbiosis(spell);
+			}
 		}
 		
 		public function iceFire1Activation():void
@@ -8411,7 +8327,7 @@ package
 			if (target)
 			{
 				var dotTickRate:Number = BASE_ACTIVATION_WINDOW_PER_RUNE;
-				var numTicks:Number = spell.runeCombination.length * 2;
+				var numTicks:Number = spell.runeCombination.length * 3;
 				var damagePerTick:BigNumber = attackDealt.damage.divideN(numTicks).multiplyN(1 + CH2.currentCharacter.getTrait(type+"BurnDamage"));
 				var isExploding:Boolean = CH2.currentCharacter.getTrait("FireExplosionDamagePercent") > 0 && spell.tier == 3;
 				
@@ -9366,10 +9282,187 @@ package
 		
 		public function buyRandomCatalogItemActivation(spell:Spell):void
 		{
+			/*
+				Buy Random Catalog if enough gold, 
+				Else Upgrade Newest Item 10x if enough gold,
+				Else Upgrade Second Newest Item 10x if enough gold,
+				Else Upgrade Third Newest Item 10x if enough gold.
+			*/
+			
 			if (canBuyRandomCatalogItem())
 			{
 				buyRandomCatalogItem();
 			}
+			else if (canUpgradeNewestItem10x())
+			{
+				upgradeNewestItem10x();
+			}
+			else if (canUpgradeSecondNewestItem10x())
+			{
+				upgradeSecondNewestItem10x();
+			}
+			else if (canUpgradeThirdNewestItem10x())
+			{
+				upgradeThirdNewestItem10x();
+			}
+		}
+		
+		public function getXNewestItem(numBeforeCurrent:int):Item
+		{
+			var character:Character = CH2.currentCharacter;
+			
+			if (character.inventory.items.length >= numBeforeCurrent)
+			{
+				var currentCatalogRank:int = character.currentCatalogRank; //rank of most recently purchased item
+				var rankOfItemToUpgrade:int = currentCatalogRank - numBeforeCurrent + 1;
+				var inventory:Array = character.inventory.items;
+				for each (item in inventory)
+				{
+					if (item.rank == rankOfItemToUpgrade)
+					{
+						if (character.gold.gte(item.cost(10)))
+						{
+							return item;
+						}
+					}
+				}
+			}
+			else
+			{
+				return null;
+			}
+		}
+		
+		public function upgradeThirdNewestItem10x():Boolean
+		{
+			var character:Character = CH2.currentCharacter;
+			
+			if (canUpgradeThirdNewestItem10x())
+			{
+				character.levelUpItem(getXNewestItem(3), getXNewestItem(3).levelOfNextMultiplier - getXNewestItem(3).level);
+				return true;
+			}
+			return false;
+		}
+		
+		public function upgradeSecondNewestItem10x():Boolean
+		{
+			var character:Character = CH2.currentCharacter;
+			
+			if (canUpgradeSecondNewestItem10x())
+			{
+				character.levelUpItem(getXNewestItem(2), getXNewestItem(2).levelOfNextMultiplier - getXNewestItem(2).level);
+				return true;
+			}
+			return false;
+		}
+		
+		public function upgradeNewestItem10x():Boolean
+		{
+			var character:Character = CH2.currentCharacter;
+			
+			if (character.isPurchasingLocked)
+			{
+				return false;
+			}
+			
+			var item:Item;
+			var newestItem:Item;
+			var newestRank:Number = 0;
+			var newestCost:BigNumber;
+			
+			var inventory:Array = character.inventory.items;
+			for each (item in inventory)
+			{
+				var rank:Number = item.rank;
+				if (newestRank == 0 || rank > newestRank)
+				{
+					newestItem = item;
+					newestRank = rank;
+					newestCost = item.cost(item.levelOfNextMultiplier - item.level);
+				}
+			}
+			
+			if (newestItem != null && character.gold.gte(newestCost))
+			{
+				character.levelUpItem(newestItem,newestItem.levelOfNextMultiplier - newestItem.level);
+				return true;
+			}
+			return false;
+		}
+		
+		public function canUpgradeThirdNewestItem10x():Boolean
+		{
+			var character:Character = CH2.currentCharacter;
+			
+			if (character.isPurchasingLocked || character.inventory.items.length < 3)
+			{
+				return false;
+			}
+			
+			var itemToUpgrade:Item = getXNewestItem(3);
+			if (itemToUpgrade)
+			{
+				return (character.gold.gte(itemToUpgrade.cost(itemToUpgrade.levelOfNextMultiplier - itemToUpgrade.level)));
+			}
+			else
+			{
+				return false;
+			}
+		}
+		
+		public function canUpgradeSecondNewestItem10x():Boolean
+		{
+			var character:Character = CH2.currentCharacter;
+			
+			if (character.isPurchasingLocked || character.inventory.items.length < 2)
+			{
+				return false;
+			}
+			
+			var itemToUpgrade:Item = getXNewestItem(2);
+			if (itemToUpgrade)
+			{
+				return (character.gold.gte(itemToUpgrade.cost(itemToUpgrade.levelOfNextMultiplier - itemToUpgrade.level)));
+			}
+			else
+			{
+				return false;
+			}
+		}
+		
+		public function canUpgradeNewestItem10x():Boolean
+		{
+			var character:Character = CH2.currentCharacter;
+			
+			if (character.isPurchasingLocked)
+			{
+				return false;
+			}
+			if (character.inventory.items.length <= 0)
+			{
+				return false;
+			}
+			var item:Item;
+			var newestItem:Item;
+			var newestRank:Number = 0;
+			var newestCost:BigNumber;
+			
+			// Find newest item
+			var inventory:Array = character.inventory.items;
+			for each (item in inventory)
+			{
+				var rank:Number = item.rank;
+				
+				if (newestRank == 0 || rank > newestRank)
+				{
+					newestItem = item;
+					newestRank = rank;
+					newestCost = item.cost(item.levelOfNextMultiplier - item.level);
+				}
+			}
+			
+			return (newestItem != null && character.gold.gte(newestCost));
 		}
 		
 		public function canBuyRandomCatalogItem():Boolean
@@ -9650,7 +9743,7 @@ package
 		
 		public function useSymbiosis():void
 		{
-			for (var i:int = 0; i < symbiosisBuffs.length; i++)
+			for (var i:int = symbiosisBuffs.length-1; i >= 0; i--)
 			{
 				var symbiosisBuff:Buff = symbiosisBuffs[i];
 				symbiosisBuff.stacks--;
@@ -9666,28 +9759,28 @@ package
 		{
 			if (spell.isIce())
 			{
-				addSymbiosisBuff(WizardMain.FIRE_RUNE_ID, WizardMain.ICE_RUNE_ID, CH2.currentCharacter.getTraitValue("symbiosisIceFire"));
-				addSymbiosisBuff(WizardMain.LIGHTNING_RUNE_ID, WizardMain.ICE_RUNE_ID, CH2.currentCharacter.getTraitValue("symbiosisIceLightning"));
+				addSymbiosisBuff(WizardMain.FIRE_RUNE_ID, WizardMain.ICE_RUNE_ID, CH2.currentCharacter.getTraitValue("symbiosisIceFire"), 223);
+				addSymbiosisBuff(WizardMain.LIGHTNING_RUNE_ID, WizardMain.ICE_RUNE_ID, CH2.currentCharacter.getTraitValue("symbiosisIceLightning"), 262);
 			}
 			if (spell.isFire())
 			{
-				addSymbiosisBuff(WizardMain.ICE_RUNE_ID, WizardMain.FIRE_RUNE_ID, CH2.currentCharacter.getTraitValue("symbiosisIceFire"));
-				addSymbiosisBuff(WizardMain.LIGHTNING_RUNE_ID, WizardMain.FIRE_RUNE_ID, CH2.currentCharacter.getTraitValue("symbiosisLightningFire"));
+				addSymbiosisBuff(WizardMain.ICE_RUNE_ID, WizardMain.FIRE_RUNE_ID, CH2.currentCharacter.getTraitValue("symbiosisIceFire"), 242);
+				addSymbiosisBuff(WizardMain.LIGHTNING_RUNE_ID, WizardMain.FIRE_RUNE_ID, CH2.currentCharacter.getTraitValue("symbiosisLightningFire"), 262);
 			}
 			if (spell.isLightning())
 			{
-				addSymbiosisBuff(WizardMain.ICE_RUNE_ID, WizardMain.LIGHTNING_RUNE_ID, CH2.currentCharacter.getTraitValue("symbiosisIceLightning"));
-				addSymbiosisBuff(WizardMain.FIRE_RUNE_ID, WizardMain.LIGHTNING_RUNE_ID, CH2.currentCharacter.getTraitValue("symbiosisLightningFire"));
+				addSymbiosisBuff(WizardMain.ICE_RUNE_ID, WizardMain.LIGHTNING_RUNE_ID, CH2.currentCharacter.getTraitValue("symbiosisIceLightning"), 242);
+				addSymbiosisBuff(WizardMain.FIRE_RUNE_ID, WizardMain.LIGHTNING_RUNE_ID, CH2.currentCharacter.getTraitValue("symbiosisLightningFire"), 223);
 			}
 		}
 		
-		public function addSymbiosisBuff(type:int, baseType:int, level:int):void
+		public function addSymbiosisBuff(type:int, baseType:int, level:int, iconId:int):void
 		{
 			if (level < 1) return;
 			
 			var buffName:String = "Symbiosis"+(type + MiscUtils.cachedTime)+"_"+Rnd.integer(0,99999);
 			var symbiosisBuff:Buff = new Buff();
-			symbiosisBuff.iconId = 1; //needs buff icon
+			symbiosisBuff.iconId = iconId; //needs buff icon
 			symbiosisBuff.isUntimedBuff = true;
 			symbiosisBuff.unhastened = true;
 			symbiosisBuff.name = buffName;
@@ -9701,7 +9794,7 @@ package
 				var percentDamageIncrease:String = Math.floor(this.stateValues["damage"] * 100);
 				return {
 					"header": typeName + " Symbiosis",
-					"body": "Your next spell consumes symbiosis. If that spell is "+typeName+" it's damage will be increased by "+percentDamageIncrease+"%."
+					"body": "Your next spell consumes symbiosis. If that spell is "+typeName+" its damage will be increased by "+percentDamageIncrease+"%."
 				}
 			};
 			CH2.currentCharacter.buffs.addBuff(symbiosisBuff);
@@ -9745,6 +9838,8 @@ package
 		public var activeCircleEffects:Array = [];
 		public function addSpellCircleEffect(highestSpell:Spell):void
 		{
+			if (!CH2.user.skillEffectsEnabled || !IdleHeroMain.IS_RENDERING || IdleHeroMain.IS_TIMELAPSE || CH2.game.isContextLost() || Validate.IS_VALIDATING) return;
+			
 			for (var i:int = 0; i < highestSpell.spellRings.length; i++)
 			{
 				var circleAsset:GpuImage = CH2AssetManager.instance.getGpuImage("Wizard_spellCircle" + highestSpell.spellRings[i]);
@@ -9857,18 +9952,20 @@ package
 		
 		public function addIgniteEffect(displayToAttachTo:starling.display.DisplayObject):void
 		{
+			if (!CH2.user.skillEffectsEnabled || !IdleHeroMain.IS_RENDERING || IdleHeroMain.IS_TIMELAPSE || CH2.game.isContextLost() || Validate.IS_VALIDATING) return;
 			var igniteEffect:GpuMovieClip = CH2AssetManager.instance.getGpuMovieClip("Wizard_efModifyIgnite");
 			addSinglePlayAttachedEffect(igniteEffect, displayToAttachTo);
 		}
 		public function addRunePlacedEffect(displayToAttachTo:starling.display.DisplayObject):void
 		{
+			if (!CH2.user.skillEffectsEnabled || !IdleHeroMain.IS_RENDERING || IdleHeroMain.IS_TIMELAPSE || CH2.game.isContextLost() || Validate.IS_VALIDATING) return;
 			var runePlacedEffect:GpuMovieClip = CH2AssetManager.instance.getGpuMovieClip("Wizard_runePlaced");
 			addSinglePlayAttachedEffect(runePlacedEffect, displayToAttachTo);
 		}
 		
 		public function addSinglePlayAttachedEffect(effect:GpuMovieClip, displayToAttachTo:starling.display.DisplayObject):void
 		{
-			if (!CH2.user.skillEffectsEnabled || !IdleHeroMain.IS_RENDERING || CH2.game.isContextLost() || Validate.IS_VALIDATING || IdleHeroMain.IS_TIMELAPSE) return;
+			if (!CH2.user.skillEffectsEnabled || !IdleHeroMain.IS_RENDERING || IdleHeroMain.IS_TIMELAPSE || CH2.game.isContextLost() || Validate.IS_VALIDATING) return;
 			
 			effect.gotoAndPlay(1);
 			effect.isLooping = false;
@@ -10506,10 +10603,10 @@ package
 			cut.spellActivationFunction = function(){cutActivation();};
 			cut.damageMultiplier = 0;
 			cut.costMultiplier = 0;
-			cut.manaCost = 20;
+			cut.manaCost = 0;
 			cut.iconId = 366;
 			cut.msecsPerRune = BASE_ACTIVATION_WINDOW_PER_RUNE;
-			cut.cooldownMsec = 600000;
+			cut.cooldownMsec = 300000;
 			cut.spellPanelIcon = "BitmapHUD_utilityCutAndPaste";
 			cut.spellBarIcon = "BitmapHUD_SBcutAndPaste";
 			cut.displayName = "Cut";
@@ -10587,7 +10684,7 @@ package
 			synergyIceFire.spellActivationFunction = function(){iceFire1Activation();};
 			synergyIceFire.damageMultiplier = 0;
 			synergyIceFire.costMultiplier = 0;
-			synergyIceFire.manaCost = 50;
+			synergyIceFire.manaCost = 25;
 			synergyIceFire.msecsPerRune = (ICE_MSEC_PER_RUNE + FIRE_MSEC_PER_RUNE)/2;
 			synergyIceFire.cooldownMsec = 300000;
 			synergyIceFire.iconId = 384;
@@ -10608,7 +10705,7 @@ package
 			synergyIceLightning.spellActivationFunction = function(){iceLightning1Activation();};
 			synergyIceLightning.damageMultiplier = 0;
 			synergyIceLightning.costMultiplier = 0;
-			synergyIceLightning.manaCost = 50;
+			synergyIceLightning.manaCost = 25;
 			synergyIceLightning.msecsPerRune = (ICE_MSEC_PER_RUNE + LIGHTNING_MSEC_PER_RUNE)/2;
 			synergyIceLightning.cooldownMsec = 300000;
 			synergyIceLightning.iconId = 388;
@@ -10629,7 +10726,7 @@ package
 			synergyFireLightning.spellActivationFunction = function(){fireLightning1Activation();};
 			synergyFireLightning.damageMultiplier = 0;
 			synergyFireLightning.costMultiplier = 0;
-			synergyFireLightning.manaCost = 50;
+			synergyFireLightning.manaCost = 25;
 			synergyFireLightning.msecsPerRune = (LIGHTNING_MSEC_PER_RUNE + FIRE_MSEC_PER_RUNE)/2;
 			synergyFireLightning.cooldownMsec = 300000;
 			synergyFireLightning.iconId = 386;
@@ -10651,7 +10748,7 @@ package
 			iceFireDamage.spellActivationFunction = function(){doSpellDamage(this);};
 			iceFireDamage.damageMultiplier = (ICE_DAMAGE_MULTIPLIER + FIRE_DAMAGE_MULTIPLIER);
 			iceFireDamage.costMultiplier = 0;
-			iceFireDamage.manaCost = 100;
+			iceFireDamage.manaCost = 10;
 			iceFireDamage.msecsPerRune = (ICE_MSEC_PER_RUNE + FIRE_MSEC_PER_RUNE)/2;
 			iceFireDamage.iconId = 390;
 			iceFireDamage.cooldownMsec = 120000;
@@ -10672,7 +10769,7 @@ package
 			iceLightningDamage.spellActivationFunction = function(){doSpellDamage(this);};
 			iceLightningDamage.damageMultiplier = (ICE_DAMAGE_MULTIPLIER + LIGHTNING_DAMAGE_MULTIPLIER)/2;
 			iceLightningDamage.costMultiplier = 0;
-			iceLightningDamage.manaCost = 100;
+			iceLightningDamage.manaCost = 10;
 			iceLightningDamage.msecsPerRune = (ICE_MSEC_PER_RUNE + LIGHTNING_MSEC_PER_RUNE)/2;
 			iceLightningDamage.iconId = 392;
 			iceLightningDamage.cooldownMsec = 120000;
@@ -10693,7 +10790,7 @@ package
 			fireLightningDamage.spellActivationFunction = function(){doSpellDamage(this);};
 			fireLightningDamage.damageMultiplier = (FIRE_DAMAGE_MULTIPLIER + LIGHTNING_DAMAGE_MULTIPLIER)/2;
 			fireLightningDamage.costMultiplier = 0;
-			fireLightningDamage.manaCost = 100;
+			fireLightningDamage.manaCost = 10;
 			fireLightningDamage.msecsPerRune = (FIRE_MSEC_PER_RUNE + LIGHTNING_MSEC_PER_RUNE)/2;
 			fireLightningDamage.iconId = 394;
 			fireLightningDamage.cooldownMsec = 120000;
@@ -10715,7 +10812,7 @@ package
 			iceLightningThundersnow.spellActivationFunction = function(){thunderSnowActivation(this);};
 			iceLightningThundersnow.damageMultiplier = 0;
 			iceLightningThundersnow.costMultiplier = 0;
-			iceLightningThundersnow.manaCost = 100;
+			iceLightningThundersnow.manaCost = 10;
 			iceLightningThundersnow.msecsPerRune = (ICE_MSEC_PER_RUNE + LIGHTNING_MSEC_PER_RUNE)/2;
 			iceLightningThundersnow.iconId = 398;
 			iceLightningThundersnow.spellPanelIcon = "BitmapHUD_dualUltimaIceLightning"; //need new one
@@ -10736,7 +10833,7 @@ package
 			fireLightningSolarStorm.spellActivationFunction = function(){solarStormActivation(this);};
 			fireLightningSolarStorm.damageMultiplier = 0;
 			fireLightningSolarStorm.costMultiplier = 0;
-			fireLightningSolarStorm.manaCost = 100;
+			fireLightningSolarStorm.manaCost = 10;
 			fireLightningSolarStorm.msecsPerRune = (FIRE_MSEC_PER_RUNE + LIGHTNING_MSEC_PER_RUNE)/2;
 			fireLightningSolarStorm.iconId = 395;
 			fireLightningSolarStorm.spellPanelIcon = "BitmapHUD_dualUltimaLightningFire"; //need new one
@@ -10757,7 +10854,7 @@ package
 			iceFireCometShower.spellActivationFunction = function(){cometShowerActivation(this);};
 			iceFireCometShower.damageMultiplier = 0;
 			iceFireCometShower.costMultiplier = 0;
-			iceFireCometShower.manaCost = 100;
+			iceFireCometShower.manaCost = 10;
 			iceFireCometShower.msecsPerRune = (ICE_MSEC_PER_RUNE + FIRE_MSEC_PER_RUNE)/2;
 			iceFireCometShower.iconId = 396;
 			iceFireCometShower.spellPanelIcon = "BitmapHUD_dualUltimaIceFire"; //need new one
@@ -10783,7 +10880,7 @@ package
 			buyRandomCatalogItem.iconId = 396;
 			buyRandomCatalogItem.spellPanelIcon = "BitmapHUD_exchange"; //need new one
 			buyRandomCatalogItem.displayName = "Exchange";
-			buyRandomCatalogItem.description = "Purchases a random catalog item.";
+			buyRandomCatalogItem.description = "Attempts the following in listed order:\n1. Purchase a random catalog item.\n2. Level the newest item to next 10th level.\n3. Level the 2nd newest item to next 10th level.\n4. Level the 3rd newest item to next 10th level.";
 			characterInstance.extendedVariables["spells"].push(buyRandomCatalogItem);
 		}
 		
@@ -11788,6 +11885,7 @@ class SpellSlotUI
 	
 	public function updateDisplay():void
 	{
+		if (!IdleHeroMain.IS_RENDERING || IdleHeroMain.IS_TIMELAPSE || CH2.game.isContextLost()) return;
 		if (spell)
 		{
 			if (CH2.currentCharacter.buffs.hasBuffByName(spell.id + " Cooldown"))
@@ -13897,4 +13995,4 @@ class WizardStatsSubTab extends MovieClip
 			}
 		}
 	}
-}
+}

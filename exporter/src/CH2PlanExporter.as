@@ -39,47 +39,50 @@ package
 			}
 		}
 		private function _onStartup(game:IdleHeroMain):void {
+			// Collect all data needed by ch2plan in `json`. 
 			json.ch2 = pick(IdleHeroMain, ['GAME_VERSION']);
 			json.loadedModNames = ModLoader.instance.loadedModNames;
 			json.modsHaveLoaded = [ModLoader.instance.modsLoaded, ModLoader.instance.modsStartedLoading];
 			for (var ckey:String in Characters.startingDefaultInstances) {
 				var char:* = Characters.startingDefaultInstances[ckey];
-				var slug:String = slugs[ckey];
-				json.heroes[slug] = pick(char, ['name', 'flavorName', 'flavorClass', 'flavor']);
-				json.heroes[slug].levelGraphObject = char.levelGraphObject || {nodes:[], edges:[]};
-				json.heroes[slug].levelGraphNodeTypes = {};
-				for (var nodekey:String in char.levelGraphNodeTypes || {}) {
-					var node:Object = char.levelGraphNodeTypes[nodekey] || {};
-					json.heroes[slug].levelGraphNodeTypes[nodekey] = {};
-					for (var fieldkey:String in node) {
-						json.heroes[slug].levelGraphNodeTypes[nodekey][fieldkey] = node[fieldkey];
-					}
-					if (node['tooltipFunction']) {
-						try {
-							var cc:* = CH2.currentCharacter;
-							CH2.currentCharacter = char;
-							json.heroes[slug].levelGraphNodeTypes[nodekey]['__ch2plan_tooltip'] = node['tooltipFunction'](1);
-							CH2.currentCharacter = cc;
+				if (!char.isChallengeCharacter) {
+					var slug:String = slugs[ckey];
+					json.heroes[slug] = pick(char, ['name', 'flavorName', 'flavorClass', 'flavor']);
+					json.heroes[slug].levelGraphObject = char.levelGraphObject || {nodes:[], edges:[]};
+					json.heroes[slug].levelGraphNodeTypes = {};
+					for (var nodekey:String in char.levelGraphNodeTypes || {}) {
+						var node:Object = char.levelGraphNodeTypes[nodekey] || {};
+						json.heroes[slug].levelGraphNodeTypes[nodekey] = {};
+						for (var fieldkey:String in node) {
+							json.heroes[slug].levelGraphNodeTypes[nodekey][fieldkey] = node[fieldkey];
 						}
-						catch (e:Error) {
-							//json.heroes[slug].levelGraphNodeTypes[nodekey]['__ch2plan_tooltip_error'] = e.getStackTrace();
-							throw e;
+						if (node['tooltipFunction']) {
+							try {
+								var cc:* = CH2.currentCharacter;
+								CH2.currentCharacter = char;
+								json.heroes[slug].levelGraphNodeTypes[nodekey]['__ch2plan_tooltip'] = node['tooltipFunction'](1);
+								CH2.currentCharacter = cc;
+							}
+							catch (e:Error) {
+								//json.heroes[slug].levelGraphNodeTypes[nodekey]['__ch2plan_tooltip_error'] = e.getStackTrace();
+								throw e;
+							}
 						}
 					}
-				}
 
-				var empty:Character = new Character();
-				empty.name = char.name;
-				ModLoader.instance.onCharacterCreated(empty);
-				if (empty.extendedVariables && empty.extendedVariables["spells"]) {
-					json.heroes[slug].spells = [];
-					for (var spellKey:String in empty.extendedVariables["spells"]) {
-						var spell:Object = empty.extendedVariables["spells"][spellKey];
-						json.heroes[slug].spells[spellKey] = pick(spell, ["id", "rank", "types", "runeCombination", "spellRings", "damageMultiplier", "costMultiplier", "msecsPerRune", "spellPanelIcon", "displayName", "description", "tier", "manaCost"]);
+					var empty:Character = new Character();
+					empty.name = char.name;
+					ModLoader.instance.onCharacterCreated(empty);
+					if (empty.extendedVariables && empty.extendedVariables["spells"]) {
+						json.heroes[slug].spells = [];
+						for (var spellKey:String in empty.extendedVariables["spells"]) {
+							var spell:Object = empty.extendedVariables["spells"][spellKey];
+							json.heroes[slug].spells[spellKey] = pick(spell, ["id", "rank", "types", "runeCombination", "spellRings", "damageMultiplier", "costMultiplier", "msecsPerRune", "spellPanelIcon", "displayName", "description", "tier", "manaCost"]);
+						}
 					}
-				}
-				else {
-					json.heroes[slug].spells = null;
+					else {
+						json.heroes[slug].spells = null;
+					}
 				}
 			}
 			for (var skey:String in Character.staticSkillInstances) {
@@ -88,6 +91,7 @@ package
 				this.json.skills[skey].char = slugs[skill.modName];
 			}
 			
+			// Try to read a configuration file in the same directory as the mod. Optional, it can be missing.
 			var config: Object = {};
 			var file:File = File.applicationDirectory.resolvePath("mods\\active\\ch2plan-exporter.json")
 			try {
@@ -98,6 +102,8 @@ package
 				config._nativePath = file.nativePath;
 				//this.writeFile(File.desktopDirectory.resolvePath("config.json"), JSON.stringify(config, null, 2));
 			}
+			
+			// Finally, output the data needed by ch2plan.
 			var outDir:File = config["dest"] ? new File(config["dest"]) : File.desktopDirectory;
 			this.writeFile(outDir.resolvePath("latest.json"), JSON.stringify(json, null, 2));
 		}
