@@ -49,7 +49,8 @@ view : Model -> GameData -> Route.HomeParams -> Html msg
 view model gameData params =
     case ( model.graph, model.error ) of
         ( Nothing, Just err ) ->
-            div [] [ text <| Debug.toString err ]
+            -- div [] [ text <| Debug.toString err ]
+            div [] [ text "???no graph???" ]
 
         ( Nothing, Nothing ) ->
             div [] [ text "???no graph???" ]
