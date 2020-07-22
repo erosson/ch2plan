@@ -10,8 +10,8 @@
     "tf:init": "terraform init",
     "tf:plan": "terraform plan",
     "tf:apply": "terraform apply -auto-approve",
-    "dev": "cd www && yarn dev",
     "start": "cd www && yarn start",
+    "start:prod": "cd www && yarn start:prod",
     "test": "cd www && yarn test",
     "build": "cd www && yarn build"
   },
