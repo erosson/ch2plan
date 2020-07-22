@@ -1,11 +1,12 @@
 {
-  "//rules": "enable different behavior for different ch2 versions. Kind of like feature-flags between ch2 versions.",
+  // enable different behavior for different ch2 versions. Kind of like feature-flags between ch2 versions
   "rules": {
     "//hasteAffectsDuration": "since 0.07. https://www.reddit.com/r/ClickerHeroes/comments/9587av/clicker_heroes_2_007_can_now_be_tested/",
     "hasteAffectsDuration": true
   },
-  "//statValueFunctions": "based on ./ch2data/Character.as. First number is the statBaseValue.",
+  // based on ./ch2data/Character.as. First number is the statBaseValue.
   "statValueFunctions": {
+    // cid
     "STAT_IDLE_GOLD": [1, "linear", [0.25, 1]],
     "STAT_HASTE": [1, "onePlusLinearReciprocalComplement", [0.005, 1, 9]],
     "STAT_GOLD": [1, "linear", [0.05, 1]],
@@ -48,7 +49,7 @@
     "Powersurge_damage": [2, "linear", [0.05, 1]],
     "Reload_effect": [40, "linear", [10]],
 
-    "// Wizard": [0, "noop", []],
+    // Wizard
     "ICE_CRIT_PERCENT_CHANCE": [0, "linear", [0.04, 0]],
     "ICE_CRIT_DAMAGE_PERCENT": [0, "linear", [0.08, 0]],
     "ICE_ADDITIONAL_PERCENT_DAMAGE": [0, "linear", [0.05, 0]],
@@ -67,16 +68,16 @@
 
     "ICE_COOL_CRITICALS_CRIT_CHANCE_PERCENT": [0, "linear", [0.04, 0]],
     "ICE_COOL_CRITICALS_DURATION_SECONDS": [0, "linear", [5, 0]],
-    "//ICE_CHILLY_COOL_CRITICALS_CRIT_CHANCE_PERCENT": [0, "linear", [0.04, 0]],
-    "//ICE_COLD_COOL_CRITICALS_DURATION_SECONDS": [0, "linear", [5, 0]],
+    //ICE_CHILLY_COOL_CRITICALS_CRIT_CHANCE_PERCENT": [0, "linear", [0.04, 0]],
+    //ICE_COLD_COOL_CRITICALS_DURATION_SECONDS": [0, "linear", [5, 0]],
     "LIGHTNING_FLASH_SPEED_INCREASE_PERCENT": [0, "linear", [10, 0]],
     "LIGHTNING_FLASH_NUM_SPELLS": [0, "linear", [3, 0]],
-    "//LIGHTNING_FLASHIER_FLASH_HASTE_PERCENT": [0, "linear", [5, 0]],
-    "//LIGHTNING_LINGERING_FLASH_NUM_SPELLS": [0, "linear", [1, 0]],
+    //LIGHTNING_FLASHIER_FLASH_HASTE_PERCENT": [0, "linear", [5, 0]],
+    //LIGHTNING_LINGERING_FLASH_NUM_SPELLS": [0, "linear", [1, 0]],
     "FIRE_COMBUSTION_CHANCE_PERCENT": [0, "linear", [20, 0]],
     "FIRE_COMBUSTION_DURATION_SECONDS": [0, "linear", [8, 0]],
-    "//FIRE_INCENDIARY_COMBUSTION_CHANCE_PERCENT": [0, "linear", [10, 0]],
-    "//FIRE_SEETHING_COMBUSTION_DURATION_SECONDS": [0, "linear", [4, 0]],
+    //FIRE_INCENDIARY_COMBUSTION_CHANCE_PERCENT": [0, "linear", [10, 0]],
+    //FIRE_SEETHING_COMBUSTION_DURATION_SECONDS": [0, "linear", [4, 0]],
     "FIRE_EXPLOSION_DAMAGE_PERCENT": [0, "linear", [0.5, 0]],
     "LIGHTNING_CIRCUIT_DAMAGE_PERCENT": [0, "linear", [0.5, 0]],
     "SHATTER_DAMAGE_PERCENT": [0, "linear", [0.2, 0]],
@@ -100,7 +101,7 @@
     "FIRE_LIGHTNING_SYMBIOSIS": [0, "linear", [0.50, 0]],
     "ICE_FIRE_SYMBIOSIS": [0, "linear", [0.50, 0]],
 
-    "//LEGACY STUFF BELOW": [0, "noop", []],
+    // LEGACY STUFF BELOW
     "STAT_BOSS_GOLD": [0, "noop", []],
     "Powersurge_manaCost": [0, "noop", []],
     "Powersurge_cooldown": [0, "noop", []],
@@ -110,7 +111,7 @@
     "MultiClick_energyCost": [0, "noop", []],
     "Reload_cooldown": [0, "noop", []]
   },
-  "//characters": "based on ./ch2data/HelpfulAdventurerMain.as purchaseFunction()s",
+  // based on ./ch2data/HelpfulAdventurerMain.as purchaseFunction()s
   "characters": {
     "helpfulAdventurer": {
       "stats": {
@@ -205,7 +206,50 @@
         "Powersurge_duration": [["Pt", 1]],
         "Powersurge_damage": [["Pa", 1]],
         "Reload_effect": [["Ra", 1]]
-      }
+      },
+      "transcensionPerks": {
+        "0": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_GOLD"},
+        "1": {"costFunction": ["linearExponential", [5, 2, 2]], "trait": "STAT_CRIT_CHANCE"},
+        "2": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_CRIT_DAMAGE"},
+        "3": {"costFunction": ["linearExponential", [5, 2, 2]], "trait": "STAT_HASTE"},
+        "4": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_CLICKABLE_GOLD"},
+        "5": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_CLICK_DAMAGE"},
+        "6": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_MONSTER_GOLD"},
+        "7": {"costFunction": ["linearExponential", [5, 2, 2]], "trait": "STAT_ITEM_COST_REDUCTION"},
+        "8": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_TOTAL_MANA"},
+        "9": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_MANA_REGEN"},
+        "10": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_TOTAL_ENERGY"},
+        "11": {"costFunction": ["linearExponential", [5, 2, 2]], "trait": "STAT_BONUS_GOLD_CHANCE"},
+        "12": {"costFunction": ["linearExponential", [5, 2, 2]], "trait": "STAT_CLICKABLE_CHANCE"},
+        "13": {"costFunction": ["linearExponential", [5, 2, 2]], "trait": "STAT_TREASURE_CHEST_CHANCE"},
+        "14": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_TREASURE_CHEST_GOLD"},
+        "15": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_ITEM_WEAPON_DAMAGE"},
+        "16": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_ITEM_HEAD_DAMAGE"},
+        "17": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_ITEM_CHEST_DAMAGE"},
+        "18": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_ITEM_RING_DAMAGE"},
+        "19": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_ITEM_LEGS_DAMAGE"},
+        "20": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_ITEM_HANDS_DAMAGE"},
+        "21": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_ITEM_FEET_DAMAGE"},
+        "22": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_ITEM_BACK_DAMAGE"},
+        "23": {"costFunction": ["linearExponential", [5, 2, 2]], "trait": "STAT_AUTOMATOR_SPEED"},
+        "24": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "STAT_AUTOATTACK_DAMAGE"},
+
+        "35": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "BigClicksDamage"},
+        "38": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "HugeClickDamage"},
+        "39": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "ManaCritDamage"},
+        "40": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "ImprovedEnergize"},
+        "41": {"costFunction": ["linearExponential", [5, 2, 2]], "trait": "SustainedPowersurge"},
+        "42": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "ImprovedPowersurge"},
+        "43": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "ImprovedReload"},
+
+        "50": {"costFunction": ["exponentialMultiplier", [5]]},
+        "100": {"costFunction": ["constant", [10000]]},
+        "101": {"costFunction": ["constant", [250000]]},
+        "102": {"costFunction": ["constant", [6000000]]},
+        "103": {"costFunction": ["constant", [15000000]]},
+        "104": {"costFunction": ["constant", [500000000]]},
+        "105": {"costFunction": ["constant", [50000]]},
+      },
     },
     "wizard": {
       "stats": {
@@ -343,6 +387,42 @@
         "ICE_FIRE_SYMBIOSIS": [
           { "prefix": "Os", "range": [5, 7] }
         ]
+      },
+      "transcensionPerks": {
+        "0": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "IceAdditionalPercentDamage"},
+        "1": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "IceAdditionalCritChance"},
+        "2": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "IceCritAdditionalDamage"},
+        "3": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "IceCostReduction"},
+        "4": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "LightningAdditionalPercentDamage"},
+        "5": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "LightningZapPercentDamage"},
+        "6": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "LightningChainChance"},
+        "7": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "LightningCostReduction"},
+        "8": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "FireAdditionalPercentDamage"},
+        "9": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "FireCorrosionDamageBonus"},
+        "10": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "FireBurnDamage"},
+        "11": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "FireCostReduction"},
+        "12": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "Ice1CritChance"},
+        "13": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "Ice1CritDuration"},
+        "14": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "LightningFlashHaste"},
+        "15": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "LightningFlashNumSpells"},
+        "16": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "DoubleBurnChance"},
+        "17": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "DoubleBurnDuration"},
+        "18": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "ColdFrontDamage"},
+        "19": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "ColdFrontDuration"},
+        "20": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "ThunderstormDamage"},
+        "21": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "ThunderstormDuration"},
+        "22": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "HeatBurstDamage"},
+        "23": {"costFunction": ["linearExponential", [5, 1, 1.1]], "trait": "HeatBurstDuration"},
+
+        "24": {"costFunction": ["exponentialMultiplier", [5]]},
+        "25": {"costFunction": ["linearExponential", [500000, 1, 100]]},
+        "26": {"costFunction": ["linearExponential", [500000, 1, 100]]},
+        "27": {"costFunction": ["linearExponential", [5000000, 1, 100]]},
+        "28": {"costFunction": ["linearExponential", [5000000, 1, 100]]},
+        "29": {"costFunction": ["linearExponential", [5000000, 1, 100]]},
+        "30": {"costFunction": ["linearExponential", [1000, 1, 2000]]},
+        "31": {"costFunction": ["linearExponential", [1000, 1, 2000]]},
+        "32": {"costFunction": ["linearExponential", [1000, 1, 2000]]},
       }
     }
   }

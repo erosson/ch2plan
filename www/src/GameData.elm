@@ -12,6 +12,7 @@ module GameData exposing
     , NodeType
     , Skill
     , Spell
+    , TranscensionPerk
     , decoder
     , fatigue
     , fatigues
@@ -63,6 +64,7 @@ type alias Character =
     , graph : Graph
     , skills : Dict String Skill
     , spells : List Spell
+    , transcensionPerks : Dict Int TranscensionPerk
     }
 
 
@@ -119,6 +121,14 @@ type alias NodeType =
     , flammable : Bool
     , stats : List ( Stat, Int )
     , quality : NodeQuality
+    }
+
+
+type alias TranscensionPerk =
+    { name : String
+    , maxLevel : Maybe Int
+    , icon : String
+    , description : String
     }
 
 
@@ -317,6 +327,37 @@ characterDecoder skills stats =
                 |> D.map (Maybe.withDefault [])
             )
             []
+        |> P.optional "transcensionPerks"
+            (D.keyValuePairs transcensionPerkDecoder
+                |> D.map
+                    (List.filterMap
+                        (\( k, v ) ->
+                            String.toInt k
+                                |> Maybe.map (\ki -> ( ki, v ))
+                        )
+                        >> Dict.fromList
+                    )
+            )
+            Dict.empty
+
+
+transcensionPerkDecoder : D.Decoder TranscensionPerk
+transcensionPerkDecoder =
+    D.succeed TranscensionPerk
+        |> P.required "name" D.string
+        |> P.required "maxLevel"
+            (D.int
+                |> D.map
+                    (\i ->
+                        if i < 0 then
+                            Nothing
+
+                        else
+                            Just i
+                    )
+            )
+        |> P.required "icon" D.string
+        |> P.required "description" D.string
 
 
 spellDecoder : D.Decoder Spell

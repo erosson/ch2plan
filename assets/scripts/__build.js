@@ -26,7 +26,7 @@ async function readStats(path) {
     return body;
   } catch (e) {
     console.log(path, "no stats snapshot yet, using ./stats.json");
-    return await fs.readFile("./stats.json");
+    return await fs.readFile("./stats.json5");
   }
 }
 async function main() {

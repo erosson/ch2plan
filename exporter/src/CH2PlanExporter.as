@@ -49,6 +49,7 @@ package
 					var slug:String = slugs[ckey];
 					json.heroes[slug] = pick(char, ['name', 'flavorName', 'flavorClass', 'flavor']);
 					json.heroes[slug].levelGraphObject = char.levelGraphObject || {nodes:[], edges:[]};
+					json.heroes[slug].transcensionPerks = char.transcensionPerks;
 					json.heroes[slug].levelGraphNodeTypes = {};
 					for (var nodekey:String in char.levelGraphNodeTypes || {}) {
 						var node:Object = char.levelGraphNodeTypes[nodekey] || {};

@@ -8,9 +8,7 @@
   },
   "private": true,
   "devDependencies": {
-    "sort-json": "^2.0.0"
-  },
-  "dependencies": {
+    "sort-json": "^2.0.0",
     "json5": "^2.1.3"
   }
 }

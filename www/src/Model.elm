@@ -78,6 +78,7 @@ type alias Model =
     , route : Maybe Route
     , graph : Maybe GraphModel
     , transcendNodes : Dict NodeId Int
+    , transcendPerks : Dict Int Int
     , features : Features
     , windowSize : WindowSize
     , tooltip : Maybe ( NodeId, TooltipState )
@@ -158,6 +159,7 @@ init flags loc urlKey =
       , route = route
       , graph = graph
       , transcendNodes = Dict.empty
+      , transcendPerks = Dict.empty
       , sidebarOpen = True
       , tooltip = Nothing
       , searchString = search

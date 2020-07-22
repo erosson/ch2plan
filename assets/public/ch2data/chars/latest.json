@@ -1,6 +1,6 @@
 {
   "ch2": {
-    "GAME_VERSION": "0.14.0 r504"
+    "GAME_VERSION": "0.14.0 r507"
   },
   "heroes": {
     "helpfulAdventurer": {
@@ -11948,7 +11948,243 @@
         ]
       },
       "name": "Helpful Adventurer",
-      "spells": null
+      "spells": null,
+      "transcensionPerks": {
+        "0": {
+          "description": "Increases the power of Gold Received nodes in the skill tree.",
+          "icon": "goldx3",
+          "maxLevel": -1,
+          "name": "Transcendent Gold Received"
+        },
+        "1": {
+          "description": "Increases the power of Critical Chance nodes in the skill tree.",
+          "icon": "critChance",
+          "maxLevel": -1,
+          "name": "Transcendent Critical Chance"
+        },
+        "2": {
+          "description": "Increases the power of Critical Damage nodes in the skill tree.",
+          "icon": "critDamage",
+          "maxLevel": -1,
+          "name": "Transcendent Critical Damage"
+        },
+        "3": {
+          "description": "Increases the power of Haste nodes in the skill tree.",
+          "icon": "haste",
+          "maxLevel": -1,
+          "name": "Transcendent Haste"
+        },
+        "4": {
+          "description": "Increases the power of Clickable Gold nodes in the skill tree.",
+          "icon": "clickableGold",
+          "maxLevel": -1,
+          "name": "Transcendent Clickable Gold"
+        },
+        "5": {
+          "description": "Increases the power of Click Damage nodes in the skill tree.",
+          "icon": "clickDamage",
+          "maxLevel": -1,
+          "name": "Transcendent Click Damage"
+        },
+        "6": {
+          "description": "Increases the power of Monster Gold nodes in the skill tree.",
+          "icon": "bossGold",
+          "maxLevel": -1,
+          "name": "Transcendent Monster Gold"
+        },
+        "7": {
+          "description": "Increases the power of Item Cost Reduction nodes in the skill tree.",
+          "icon": "itemCostReduction",
+          "maxLevel": -1,
+          "name": "Transcendent Item Cost Reduction"
+        },
+        "8": {
+          "description": "Increases the power of Total Mana nodes in the skill tree.",
+          "icon": "totalMana",
+          "maxLevel": -1,
+          "name": "Transcendent Total Mana"
+        },
+        "9": {
+          "description": "Increases the power of Mana Regeneration nodes in the skill tree.",
+          "icon": "manaRegen",
+          "maxLevel": -1,
+          "name": "Transcendent Mana Regeneration"
+        },
+        "10": {
+          "description": "Increases the power of Total Energy nodes in the skill tree.",
+          "icon": "totalEnergy",
+          "maxLevel": -1,
+          "name": "Transcendent Total Energy"
+        },
+        "11": {
+          "description": "Increases the power of Bonus Gold Chance nodes in the skill tree.",
+          "icon": "goldChance",
+          "maxLevel": -1,
+          "name": "Transcendent Bonus Gold Chance"
+        },
+        "12": {
+          "description": "Increases the power of Clickable Chance nodes in the skill tree.",
+          "icon": "goldPiles",
+          "maxLevel": -1,
+          "name": "Transcendent Clickable Chance"
+        },
+        "13": {
+          "description": "Increases the power of Treasure Chest Chance nodes in the skill tree.",
+          "icon": "treasureChance",
+          "maxLevel": -1,
+          "name": "Transcendent Treasure Chest Chance"
+        },
+        "14": {
+          "description": "Increases the power of Treasure Chest Gold nodes in the skill tree.",
+          "icon": "treasureGold",
+          "maxLevel": -1,
+          "name": "Transcendent Treasure Chest Gold"
+        },
+        "15": {
+          "description": "Increases the power of Weapon Damage nodes in the skill tree.",
+          "icon": "damageWeapon",
+          "maxLevel": -1,
+          "name": "Transcendent Weapon Damage"
+        },
+        "16": {
+          "description": "Increases the power of Helmet Damage nodes in the skill tree.",
+          "icon": "damageHead",
+          "maxLevel": -1,
+          "name": "Transcendent Helmet Damage"
+        },
+        "17": {
+          "description": "Increases the power of Breastplate Damage nodes in the skill tree.",
+          "icon": "damageTop",
+          "maxLevel": -1,
+          "name": "Transcendent Breastplate Damage"
+        },
+        "18": {
+          "description": "Increases the power of Ring Damage nodes in the skill tree.",
+          "icon": "damageAccesory",
+          "maxLevel": -1,
+          "name": "Transcendent Ring Damage"
+        },
+        "19": {
+          "description": "Increases the power of Pants Damage nodes in the skill tree.",
+          "icon": "damageLegs",
+          "maxLevel": -1,
+          "name": "Transcendent Pants Damage"
+        },
+        "20": {
+          "description": "Increases the power of Gloves Damage nodes in the skill tree.",
+          "icon": "damageHands",
+          "maxLevel": -1,
+          "name": "Transcendent Gloves Damage"
+        },
+        "21": {
+          "description": "Increases the power of Boots Damage nodes in the skill tree.",
+          "icon": "damageFeet",
+          "maxLevel": -1,
+          "name": "Transcendent Boots Damage"
+        },
+        "22": {
+          "description": "Increases the power of Cape Damage nodes in the skill tree.",
+          "icon": "damageBack",
+          "maxLevel": -1,
+          "name": "Transcendent Cape Damage"
+        },
+        "23": {
+          "description": "Increases the power of Automator Speed nodes in the skill tree.",
+          "icon": "automatorSpeed",
+          "maxLevel": -1,
+          "name": "Transcendent Automator Speed"
+        },
+        "24": {
+          "description": "Increases the power of Auto Attack Damage nodes in the skill tree.",
+          "icon": "damagex3",
+          "maxLevel": -1,
+          "name": "Transcendent Auto Attack Damage"
+        },
+        "35": {
+          "description": "Increases the power of Bigger Big Clicks nodes in the skill tree.",
+          "icon": "iconBigClicks",
+          "maxLevel": -1,
+          "name": "Transcendent Bigger Big Clicks"
+        },
+        "38": {
+          "description": "Increases the power of Huger Huge Click nodes in the skill tree.",
+          "icon": "hugeClicks",
+          "maxLevel": -1,
+          "name": "Transcendent Huger Huge Click"
+        },
+        "39": {
+          "description": "Increases the power of Mana Crit Damage nodes in the skill tree.",
+          "icon": "manaClick",
+          "maxLevel": -1,
+          "name": "Transcendent Mana Crit Damage"
+        },
+        "40": {
+          "description": "Increases the power of Improved Energize nodes in the skill tree.",
+          "icon": "energize",
+          "maxLevel": -1,
+          "name": "Transcendent Improved Energize"
+        },
+        "41": {
+          "description": "Increases the power of Sustained Powersurge nodes in the skill tree.",
+          "icon": "powersurgeDuration",
+          "maxLevel": -1,
+          "name": "Transcendent Sustained Powersurge"
+        },
+        "42": {
+          "description": "Increases the power of Improved Powersurge nodes in the skill tree.",
+          "icon": "powersurgeDamage",
+          "maxLevel": -1,
+          "name": "Transcendent Improved Powersurge"
+        },
+        "43": {
+          "description": "Increases the power of Improved Reload nodes in the skill tree.",
+          "icon": "improvedReload",
+          "maxLevel": -1,
+          "name": "Transcendent Improved Reload"
+        },
+        "50": {
+          "description": "Increases the stat points available after ascending.",
+          "icon": "improvedAscensionIcon",
+          "maxLevel": -1,
+          "name": "Improved Ascension"
+        },
+        "100": {
+          "description": "Grants the Hand of Libertas skill.",
+          "icon": "handOfLibertasIcon",
+          "maxLevel": 1,
+          "name": "Hand of Libertas"
+        },
+        "101": {
+          "description": "Greatly increases the power of Clicktorrent.",
+          "icon": "damagex3",
+          "maxLevel": 1,
+          "name": "Downpour"
+        },
+        "102": {
+          "description": "Causes auto attacks to grow in power with Curse of the Juggernaut.",
+          "icon": "kineticEnergyIcon",
+          "maxLevel": 1,
+          "name": "Kinetic Energy"
+        },
+        "103": {
+          "description": "Makes clickables scale with your treasure chest stats.",
+          "icon": "clickableValueIcon",
+          "maxLevel": 1,
+          "name": "Clickable Value"
+        },
+        "104": {
+          "description": "Transforms Golden Clicks to make you wealthy beyond your wildest dreams (terms and conditions apply).",
+          "icon": "gloriousBountyIcon",
+          "maxLevel": 1,
+          "name": "Glorious Bounty"
+        },
+        "105": {
+          "description": "Start each transcension with one full copy of the Automator tree.",
+          "icon": "automaticAutomationIcon",
+          "maxLevel": 1,
+          "name": "Automatic Automation"
+        }
+      }
     },
     "wizard": {
       "flavor": "A character who spells doom to those around him.",
@@ -35314,7 +35550,207 @@
             7
           ]
         }
-      ]
+      ],
+      "transcensionPerks": {
+        "0": {
+          "description": "Increases the power of Ice Damage nodes in the skill tree.",
+          "icon": "iceDamage1",
+          "maxLevel": -1,
+          "name": "Transcendent Ice Damage"
+        },
+        "1": {
+          "description": "Increases the power of Ice Crit Chance nodes in the skill tree.",
+          "icon": "iceCritChance1",
+          "maxLevel": -1,
+          "name": "Transcendent Ice Crit Chance"
+        },
+        "2": {
+          "description": "Increases the power of Ice Crit Damage nodes in the skill tree.",
+          "icon": "wizCritDamage1",
+          "maxLevel": -1,
+          "name": "Transcendent Ice Crit Damage"
+        },
+        "3": {
+          "description": "Increases the power of Ice Cost Reduction nodes in the skill tree.",
+          "icon": "iceCostReduction",
+          "maxLevel": -1,
+          "name": "Transcendent Ice Cost Reduction"
+        },
+        "4": {
+          "description": "Increases the power of Lightning Damage nodes in the skill tree.",
+          "icon": "lightningDamage1",
+          "maxLevel": -1,
+          "name": "Transcendent Lightning Damage"
+        },
+        "5": {
+          "description": "Increases the power of Lightning Zap Damage nodes in the skill tree.",
+          "icon": "lightningZapps",
+          "maxLevel": -1,
+          "name": "Transcendent Lightning Zap Damage"
+        },
+        "6": {
+          "description": "Increases the power of Lightning Chain Chance nodes in the skill tree.",
+          "icon": "lightningChain1",
+          "maxLevel": -1,
+          "name": "Transcendent Lightning Chain Chance"
+        },
+        "7": {
+          "description": "Increases the power of Lightning Cost Reduction nodes in the skill tree.",
+          "icon": "lightningCostReduction",
+          "maxLevel": -1,
+          "name": "Transcendent Lightning Cost Reduction"
+        },
+        "8": {
+          "description": "Increases the power of Fire Damage nodes in the skill tree.",
+          "icon": "fireDamage1",
+          "maxLevel": -1,
+          "name": "Transcendent Fire Damage"
+        },
+        "9": {
+          "description": "Increases the power of Fire Corrosion Damage nodes in the skill tree.",
+          "icon": "fireCorrosion1",
+          "maxLevel": -1,
+          "name": "Transcendent Fire Corrosion Damage"
+        },
+        "10": {
+          "description": "Increases the power of Fire Burn Damage nodes in the skill tree.",
+          "icon": "fireBurn1",
+          "maxLevel": -1,
+          "name": "Transcendent Fire Burn Damage"
+        },
+        "11": {
+          "description": "Increases the power of Fire Cost Reduction nodes in the skill tree.",
+          "icon": "fireCostReduction",
+          "maxLevel": -1,
+          "name": "Transcendent Fire Cost Reduction"
+        },
+        "12": {
+          "description": "Increases the power of Chilly Cool Criticals nodes in the skill tree.",
+          "icon": "iceTraitChillyCoolCriticals1",
+          "maxLevel": -1,
+          "name": "Transcendent Chilly Cool Criticals"
+        },
+        "13": {
+          "description": "Increases the power of Cold Cool Criticals nodes in the skill tree.",
+          "icon": "iceTraitColdCoolCriticals1",
+          "maxLevel": -1,
+          "name": "Transcendent Cold Cool Criticals"
+        },
+        "14": {
+          "description": "Increases the power of Flashier Flash nodes in the skill tree.",
+          "icon": "lightningTraitFlashierFlash1",
+          "maxLevel": -1,
+          "name": "Transcendent Flashier Flash"
+        },
+        "15": {
+          "description": "Increases the power of Lingering Flash nodes in the skill tree.",
+          "icon": "lightningTraitLingeringFlash1",
+          "maxLevel": -1,
+          "name": "Transcendent Lingering Flash"
+        },
+        "16": {
+          "description": "Increases the power of Incendiary Combustion nodes in the skill tree.",
+          "icon": "fireTraitIncendiaryCombustion1",
+          "maxLevel": -1,
+          "name": "Transcendent Incendiary Combustion"
+        },
+        "17": {
+          "description": "Increases the power of Seething Combustion nodes in the skill tree.",
+          "icon": "fireTraitSeethingCombustion1",
+          "maxLevel": -1,
+          "name": "Transcendent Seething Combustion"
+        },
+        "18": {
+          "description": "Increases the power of Frosty Cold Front nodes in the skill tree.",
+          "icon": "iceTraitHyperthermia",
+          "maxLevel": -1,
+          "name": "Transcendent Frosty Cold Front"
+        },
+        "19": {
+          "description": "Increases the power of Sustained Cold Front nodes in the skill tree.",
+          "icon": "iceTraitCoolthCrit",
+          "maxLevel": -1,
+          "name": "Transcendent Sustained Cold Front"
+        },
+        "20": {
+          "description": "Increases the power of Severe Thunderstorm nodes in the skill tree.",
+          "icon": "lightningTraitEnergizeEnergyRestore",
+          "maxLevel": -1,
+          "name": "Transcendent Severe Thunderstorm"
+        },
+        "21": {
+          "description": "Increases the power of Developing Thunderstorm nodes in the skill tree.",
+          "icon": "lightningTraitEnergizeDuration",
+          "maxLevel": -1,
+          "name": "Transcendent Developing Thunderstorm"
+        },
+        "22": {
+          "description": "Increases the power of Evaporating Heat Burst nodes in the skill tree.",
+          "icon": "fireTraitWarmthHypothermiaRedUp",
+          "maxLevel": -1,
+          "name": "Transcendent Evaporating Heat Burst"
+        },
+        "23": {
+          "description": "Increases the power of Persisting Heat Burst nodes in the skill tree.",
+          "icon": "fireTraitWarmthBurnCountUp",
+          "maxLevel": -1,
+          "name": "Transcendent Persisting Heat Burst"
+        },
+        "24": {
+          "description": "Increases the stat points available after ascending.",
+          "icon": "fireTraitWarmthBurnCountUp",
+          "maxLevel": -1,
+          "name": "Improved Ascension"
+        },
+        "25": {
+          "description": "Pasted Spells cost no energy, incur no fatigue, and do 100% increased damage after casting Cut. Applies to one pasted spell per level of Improved Clipboard.",
+          "icon": "utilityCutAndPaste",
+          "maxLevel": -1,
+          "name": "Improved Clipboard"
+        },
+        "26": {
+          "description": "Increases all damage by a portion of an expired Dark Ritual for 30 minutes.",
+          "icon": "darkRitual",
+          "maxLevel": -1,
+          "name": "Darker Ritual"
+        },
+        "27": {
+          "description": "Gain Lightning zap bonus per stack of Enervation after Lightning spells strike monsters suffering from corrosion.",
+          "icon": "darkRitual",
+          "maxLevel": -1,
+          "name": "Enervating Zap"
+        },
+        "28": {
+          "description": "Gain Ice critical damage bonus per stack of Hypothermia after Ice spells chain to a monster suffering from burn.",
+          "icon": "darkRitual",
+          "maxLevel": -1,
+          "name": "Hypo Critical"
+        },
+        "29": {
+          "description": "Gain Fire Burn bonus per stack of Hyperthermia after Fire spells chain.",
+          "icon": "darkRitual",
+          "maxLevel": -1,
+          "name": "Hyper Burn"
+        },
+        "30": {
+          "description": "Ice and Fire Spells gain the benefit of all stats that affect either Ice or Fire Magic for 25 seconds per charge, up to 4 charges.",
+          "icon": "darkRitual",
+          "maxLevel": -1,
+          "name": "Ice Fire Synergy"
+        },
+        "31": {
+          "description": "Ice and Lightning Spells gain the benefit of all stats that affect either Ice or Lightning Magic for 25 seconds per charge, up to 4 charges.",
+          "icon": "darkRitual",
+          "maxLevel": -1,
+          "name": "Ice Lightning Synergy"
+        },
+        "32": {
+          "description": "Fire and Lightning Spells gain the benefit of all stats that affect either Fire or Lightning Magic for 25 seconds per charge, up to 4 charges.",
+          "icon": "darkRitual",
+          "maxLevel": -1,
+          "name": "Fire Lightning Synergy"
+        }
+      }
     }
   },
   "loadedModNames": [

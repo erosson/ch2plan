@@ -16,6 +16,7 @@ import View.Runecorder
 import View.SkillTree
 import View.Spreadsheet
 import View.Stats
+import View.Transcend
 
 
 view : Model -> Browser.Document Msg
@@ -58,17 +59,20 @@ viewBody model =
                                 Just graph ->
                                     View.SkillTree.view header model graph home
 
-                        Route.Changelog ->
-                            div [] (header ++ [ View.Changelog.view model.changelog ])
-
                         Route.Stats params ->
                             div [] (header ++ [ View.Stats.view model gameData params ])
 
                         Route.StatsTSV params ->
                             View.Spreadsheet.view model gameData params
 
+                        Route.Transcend params ->
+                            View.Transcend.view model gameData params
+
                         Route.EthItems ->
                             div [] (header ++ [ View.EthItems.view model ])
+
+                        Route.Changelog ->
+                            div [] (header ++ [ View.Changelog.view model.changelog ])
 
                         Route.Runecorder _ ->
                             div [] (header ++ [ View.Runecorder.view model gameData ])

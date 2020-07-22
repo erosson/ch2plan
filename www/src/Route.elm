@@ -41,7 +41,7 @@ legacyVersion =
 
 liveVersion : String
 liveVersion =
-    "0.14.0-r504"
+    "0.14.0-r507"
 
 
 defaultHero =
@@ -69,6 +69,9 @@ params route =
         StatsTSV args ->
             Just args
 
+        Transcend args ->
+            Just args
+
         _ ->
             Nothing
 
@@ -78,6 +81,7 @@ type Route
     | Home HomeParams
     | Stats HomeParams
     | StatsTSV HomeParams
+    | Transcend HomeParams
     | EthItems
     | Changelog
     | Runecorder (Maybe String)
@@ -164,6 +168,7 @@ parser =
         , P.map Stats <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "s" </> encodedString </> P.string
         , P.map StatsTSV <| P.map HomeParams <| homeQS <| P.s "tsv" </> encodedString </> P.string </> maybeString
         , P.map StatsTSV <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "tsv" </> encodedString </> P.string
+        , P.map Transcend <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "transcend" </> encodedString </> P.string
         , P.map EthItems <| P.s "ethitems"
         , P.map Changelog <| P.s "changelog"
         , P.map Runecorder <| P.s "runecorder" <?> Q.string "body"
@@ -259,6 +264,9 @@ stringify route =
 
         StatsTSV args ->
             "#/tsv" ++ stringifyHomePath args
+
+        Transcend args ->
+            "#/transcend" ++ stringifyHomePath args
 
         Changelog ->
             "#/changelog"

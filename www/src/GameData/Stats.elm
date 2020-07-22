@@ -6,6 +6,7 @@ module GameData.Stats exposing
     , StatTotal
     , StatValue
     , Stats
+    , TranscensionPerk
     , calcStat
     , calcStats
     , decoder
@@ -29,6 +30,8 @@ type Growth
     | LinearReciprocal
     | LinearReciprocalComplement
     | OnePlusLinearReciprocalComplement
+    | LinearExponential
+    | Constant
 
 
 type alias StatValue =
@@ -44,8 +47,13 @@ type alias Stats =
 
 type alias Character =
     { stats : Dict NodeType (List ( Stat, Int ))
+    , transcensionPerks : Dict Int TranscensionPerk
+    }
 
-    -- there used to be more here, but the extra layer's now a bit redundant
+
+type alias TranscensionPerk =
+    { costFunction : ( Growth, List Float )
+    , trait : Maybe String
     }
 
 
@@ -69,8 +77,30 @@ decoder =
 charDecoder : D.Decoder Character
 charDecoder =
     D.succeed Character
-        -- TODO traits
         |> P.required "stats" (charStatsDecoder |> D.map charStatsByNodeType)
+        |> P.optional "transcensionPerks"
+            (D.keyValuePairs transcensionPerkDecoder
+                |> D.map
+                    (List.filterMap
+                        (\( k, v ) ->
+                            String.toInt k
+                                |> Maybe.map (\ki -> ( ki, v ))
+                        )
+                        >> Dict.fromList
+                    )
+            )
+            Dict.empty
+
+
+transcensionPerkDecoder : D.Decoder TranscensionPerk
+transcensionPerkDecoder =
+    D.succeed TranscensionPerk
+        |> P.required "costFunction"
+            (D.succeed Tuple.pair
+                |> P.custom (D.index 0 growthDecoder)
+                |> P.custom (D.index 1 (D.list D.float))
+            )
+        |> P.optional "trait" (D.maybe D.string) Nothing
 
 
 rulesDecoder : D.Decoder Rules
@@ -173,6 +203,12 @@ growthDecoder =
                     "onePlusLinearReciprocalComplement" ->
                         D.succeed OnePlusLinearReciprocalComplement
 
+                    "linearExponential" ->
+                        D.succeed LinearExponential
+
+                    "constant" ->
+                        D.succeed Constant
+
                     _ ->
                         D.fail <| "unknown stat growth function: " ++ str
             )
@@ -250,6 +286,14 @@ calcStat stats stat intlevel =
                             statValue.args |> listAtDefault 2 1
                     in
                     1 + max * (1 - 1 / (level * scale + base))
+
+                LinearExponential ->
+                    -- TODO
+                    0
+
+                Constant ->
+                    -- TODO
+                    0
 
 
 listAt : Int -> List a -> Maybe a
