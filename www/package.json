@@ -7,7 +7,7 @@
   "scripts": {
     "start": "yarn _assets && sh -c 'ELM_DEBUGGER=false elm-app start'",
     "start:prod": "yarn build && serve dist",
-    "build": "yarn _assets && elm-app build",
+    "build": "yarn _assets && elm-app build && mv build dist",
     "_assets": "rm -rf public/ch2data/ && cp -rp ../assets/public/ch2data public/ch2data",
     "test": "yarn lint && elm-app test",
     "format": "elm-format --yes src && prettier --write src",
