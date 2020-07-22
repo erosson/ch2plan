@@ -6,5 +6,11 @@
     "icons": "scripty",
     "as3": "scripty"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "sort-json": "^2.0.0"
+  },
+  "dependencies": {
+    "json5": "^2.1.3"
+  }
 }

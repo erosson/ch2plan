@@ -17,6 +17,7 @@
  */
 const fs = require("fs").promises;
 const sortJson = require("sort-json");
+const JSON5 = require("json5");
 
 async function readStats(path) {
   try {
@@ -35,14 +36,14 @@ async function main() {
     // the dir already exists, that's fine
   }
 
-  const json = sortJson(JSON.parse(await fs.readFile("./latest.json")));
+  const json = sortJson(JSON5.parse(await fs.readFile("./latest.json")));
 
   const rawSortedJson = Object.assign({}, json);
   json.versionSlug = json.ch2.GAME_VERSION.replace(/\s/g, "-");
   const statsSnapshotPath =
     "./public/ch2data/chars/v/full/" + json.versionSlug + ".stats.json";
   const statsText = await readStats(statsSnapshotPath);
-  const statsJson = JSON.parse(statsText);
+  const statsJson = JSON5.parse(statsText);
   // no need to snapshot my comments
   for (let key of Object.keys(statsJson)) {
     if (key.startsWith("//")) {
@@ -57,7 +58,7 @@ async function main() {
   json.stats = statsJson;
 
   const allPath = "./public/ch2data/chars/all.min.json";
-  const allJson = JSON.parse(await fs.readFile(allPath));
+  const allJson = JSON5.parse(await fs.readFile(allPath));
   if (!allJson.byVersion[json.versionSlug]) {
     allJson.versionList.push(json.versionSlug);
   }
