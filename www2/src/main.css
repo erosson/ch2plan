@@ -1,0 +1,252 @@
+body {
+  background: #080010;
+  color: #fff;
+}
+h2 {
+  white-space: nowrap;
+}
+svg {
+  background: url("../../assets/public/ch2data/img/starBG.png");
+  margin: 0;
+  padding: 0;
+}
+svg .edge {
+  stroke: #8888;
+  stroke-width: 12px;
+  filter: url(#edge);
+}
+svg .edge-selected {
+  stroke: #0f08;
+  stroke-width: 40px;
+  filter: url(#edgeSelected);
+}
+svg .node {
+  stroke: #aaa;
+  stroke-width: 1;
+  fill: #ddd;
+}
+svg .zoom-buttons {
+  fill: #222d;
+  stroke: #ccc;
+  stroke-width: 3;
+  border-radius: 5;
+}
+svg .zoom-buttons text {
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+.svg-container {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  /* border: 1px solid grey; */
+}
+.svg-container,
+.svg-container svg,
+.skill-tree-main,
+body,
+html {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.skill-tree-main .sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 480px;
+  height: 100%;
+  background: #080010f0;
+  overflow: auto;
+}
+.skill-tree-main {
+  overflow: hidden;
+}
+.sidebar-hide {
+  float: right;
+}
+.sidebar-show {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+}
+.sidebar-show,
+.sidebar-hide {
+  border: 3px solid #ccc;
+  border-radius: 5px;
+  background: #080010f0;
+  color: #ccc;
+  font-weight: bold;
+  font-size: 120%;
+}
+
+.tooltip {
+  position: absolute;
+  display: inline-block;
+  background: #222e;
+  width: 300px;
+  padding: 0.5em;
+  border: 0.3em ridge #ddd;
+  border-radius: 0.5em;
+  color: #ddd;
+  margin: 0;
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+.tooltip .flavor {
+  color: #999;
+}
+
+.node-highlight0 {
+  filter: url(#highlight0);
+}
+.node-highlight1 {
+  filter: url(#highlight1);
+}
+.node-highlight2 {
+  filter: url(#highlight2);
+}
+.node-highlight3 {
+  filter: url(#highlight3);
+}
+.node-highlight4 {
+  filter: url(#highlight4);
+}
+.node-highlight5 {
+  filter: url(#highlight5);
+}
+.node-summary .icon {
+  float: left;
+}
+.node-summary .icon .icon-main {
+  width: 1em;
+  height: 1em;
+}
+.node-summary .icon .icon-background {
+  /* original plan was to put the background behind the icon, but separately actually works better for visibility and the background looks like a bullet point */
+  width: 1em;
+  height: 1em;
+}
+.node-summary .clear {
+  clear: left;
+}
+.node-summary {
+  list-style-type: none;
+  padding-left: 1em;
+}
+.node-summary li {
+  margin: 0.2em;
+}
+
+.stats-summary {
+  margin-left: 1em;
+}
+.node-Keystone,
+.node-summary .node-Keystone,
+.stats-summary .level-high {
+  color: cyan;
+}
+.node-summary .node-Notable,
+.stats-summary .level-mid {
+  color: yellow;
+}
+.spells-summary > ul,
+.skills-summary > ul {
+  padding: 0;
+}
+.skills-summary .stat-line {
+  width: 100%;
+  display: flex;
+  flex-wrap: nowrap;
+}
+.skills-summary .stat-label {
+  flex-grow: 1;
+  margin-left: 0.5em;
+}
+.skills-summary .stat-value {
+  text-align: right;
+  flex-grow: 1;
+  padding-left: 1em;
+  padding-right: 2em;
+}
+.stats-summary .stat-value {
+  text-align: right;
+  padding-left: 1em;
+  padding-right: 2em;
+}
+
+.changelog h1 {
+  display: none;
+}
+a {
+  color: #ccc;
+}
+nav a {
+  padding: 0.5em;
+  margin: 0.5em;
+  background: #ccc3;
+  background-opacity: 0.3;
+  border: 0.1em solid #ccc;
+  border-radius: 5px;
+}
+.skill-tree-main nav a {
+  display: block;
+}
+nav {
+  padding: 0.5em;
+  margin: 0.5em;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+.stats-flex {
+  display: flex;
+}
+.stats-flex .stats-box {
+  white-space: nowrap;
+}
+.spells-summary ul,
+.skills-summary ul {
+  list-style-type: none;
+}
+.skill-icon {
+  height: 1.6em;
+  width: 1.6em;
+  border: 0.2em ridge gold;
+  border-radius: 0.5em;
+  margin-right: 0.3em;
+  float: left;
+}
+
+.saveSelectHint {
+  margin-top: 5px;
+  font-size: 75%;
+  color: lightgrey;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}
+
+.spreadsheet {
+  user-select: none;
+  height: 100%;
+}
+.spreadsheet .tsv {
+  user-select: all;
+  width: 120em;
+  height: 50%;
+  color: inherit;
+  background: inherit;
+}
+.flammable {
+  color: #881111;
+}
+
+table.runecorder-timeline td {
+  border-bottom: 1px dashed grey;
+}
