@@ -3,6 +3,7 @@ module Model exposing
     , Flags
     , Model
     , Msg(..)
+    , NodeTypeSummary
     , StatsSummary
     , TooltipState(..)
     , center
@@ -709,17 +710,29 @@ v2Clamp minV maxV v =
         (clamp (V2.getY minV) (V2.getY maxV) (V2.getY v))
 
 
-nodeSummary : { a | selected : Set NodeId, char : GameData.Character } -> List ( Int, NodeType )
-nodeSummary { selected, char } =
-    char.graph.nodes
-        |> Dict.filter (\id nodeType -> Set.member id selected)
+type alias NodeTypeSummary =
+    { nodeType : NodeType
+    , transcendLevel : Int
+    , count : Int
+    }
+
+
+nodeSummary : { m | transcendNodes : Dict NodeId Int } -> { a | selected : Set NodeId, char : GameData.Character } -> List NodeTypeSummary
+nodeSummary m { selected, char } =
+    let
+        selectedNodes : Dict NodeId ( NodeType, Int )
+        selectedNodes =
+            char.graph.nodes
+                |> Dict.filter (\id nodeType -> Set.member id selected)
+                |> Dict.map (\id n -> ( n.val, m.transcendNodes |> Dict.get id |> Maybe.withDefault 1 ))
+    in
+    selectedNodes
         |> Dict.values
-        |> List.map .val
-        |> List.sortBy .name
+        |> List.sortBy (\( n, tlvl ) -> ( n.name, tlvl ))
         |> List.Extra.group
-        |> List.map (\( head, tail ) -> ( List.length tail + 1, head ))
+        |> List.map (\( ( nodeType, tlvl ), tail ) -> { nodeType = nodeType, count = List.length tail + 1, transcendLevel = tlvl })
         |> List.sortBy
-            (\( count, nodeType ) ->
+            (\{ count, nodeType } ->
                 -1
                     * (count
                         -- I really can't sort on a tuple, Elm? Sigh.
@@ -737,10 +750,10 @@ nodeSummary { selected, char } =
             )
 
 
-statsSummary : { a | selected : Set NodeId, char : GameData.Character, game : GameData.GameVersionData } -> List StatTotal
-statsSummary g =
-    nodeSummary g
-        |> List.concatMap (\( count, node ) -> node.stats |> List.map (\( stat, level ) -> ( stat, count * level )))
+statsSummary : { m | transcendNodes : Dict NodeId Int } -> { a | selected : Set NodeId, char : GameData.Character, game : GameData.GameVersionData } -> List StatTotal
+statsSummary m g =
+    nodeSummary m g
+        |> List.concatMap (\s -> s.nodeType.stats |> List.map (\( stat, level ) -> ( stat, s.transcendLevel * s.count * level )))
         |> Stats.calcStats g.game.stats
 
 
@@ -748,14 +761,14 @@ type alias StatsSummary =
     { selected : Set NodeId
     , char : GameData.Character
     , game : GameData.GameVersionData
-    , nodes : List ( Int, NodeType )
+    , nodes : List NodeTypeSummary
     , stats : List StatTotal
     , params : Route.HomeParams
     }
 
 
-parseStatsSummary : GameData -> Route.HomeParams -> Result String StatsSummary
-parseStatsSummary gd params =
+parseStatsSummary : Model -> GameData -> Route.HomeParams -> Result String StatsSummary
+parseStatsSummary model gd params =
     Graph.parse gd params
         |> Result.map
             (Tuple.first
@@ -763,8 +776,8 @@ parseStatsSummary gd params =
                         { selected = m.selected
                         , char = m.char
                         , game = m.game
-                        , nodes = nodeSummary m
-                        , stats = statsSummary m
+                        , nodes = nodeSummary model m
+                        , stats = statsSummary model m
                         , params = params
                         }
                    )

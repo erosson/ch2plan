@@ -1,10 +1,12 @@
 module View.Spreadsheet exposing (format, view)
 
 import Dict exposing (Dict)
+import Dict.Extra
 import GameData exposing (GameData, NodeId, NodeType)
 import Html as H exposing (..)
 import Html.Attributes as A exposing (..)
 import Html.Events as E exposing (..)
+import Maybe.Extra
 import Model exposing (Model)
 import Route exposing (Route)
 import Set exposing (Set)
@@ -24,7 +26,7 @@ view model gameData params =
             ]
          , textarea [ class "tsv" ]
             [ text
-                (case Model.parseStatsSummary gameData params of
+                (case Model.parseStatsSummary model gameData params of
                     Err err ->
                         "error: " ++ err
 
@@ -101,7 +103,7 @@ format url model stats =
     formatRows model stats
         |> (::)
             (if model.features.transcendNodes then
-                [ "id", "count", "label", "is-upgradable", "", "build planner:", url ]
+                [ "id", "trnslvl", "count", "label", "is-upgradable", "", "build planner:", url ]
 
              else
                 [ "id", "count", "label", "", "build planner:", url ]
@@ -117,30 +119,58 @@ formatCells =
 formatRows : Model -> Model.StatsSummary -> List (List String)
 formatRows model stats =
     let
-        mapCounts count nodeType =
-            ( nodeType.key, count )
-
+        counts : Dict String (List Model.NodeTypeSummary)
         counts =
-            stats.nodes |> List.map (\( a, b ) -> mapCounts a b) |> Dict.fromList
-    in
-    stats.char.nodeTypes
-        |> Dict.values
-        |> List.sortBy .key
-        |> List.map
-            (\node ->
-                [ node.key
-                , counts |> Dict.get node.key |> Maybe.withDefault 0 |> String.fromInt
-                , "'" ++ node.name
-                ]
-                    ++ (if model.features.transcendNodes then
-                            [ if node.flammable then
-                                "FALSE"
+            stats.nodes |> Dict.Extra.groupBy (\s -> s.nodeType.key)
 
-                              else
-                                "TRUE"
-                            ]
+        rowdata : List ( NodeType, Maybe Model.NodeTypeSummary )
+        rowdata =
+            stats.char.nodeTypes
+                |> Dict.values
+                |> List.sortBy .key
+                |> List.concatMap
+                    (\node ->
+                        case Dict.get node.key counts of
+                            Nothing ->
+                                [ ( node, Nothing ) ]
+
+                            Just [] ->
+                                [ ( node, Nothing ) ]
+
+                            Just cs ->
+                                cs |> List.map (\c -> ( node, Just c ))
+                    )
+    in
+    rowdata
+        |> List.map
+            (\( node, statcount ) ->
+                List.filterMap identity
+                    [ Just node.key
+                    , if model.features.transcendNodes then
+                        if node.flammable then
+                            Just ""
 
                         else
-                            []
-                       )
+                            statcount
+                                |> Maybe.Extra.unwrap 1 .transcendLevel
+                                |> String.fromInt
+                                |> Just
+
+                      else
+                        Nothing
+                    , statcount
+                        |> Maybe.Extra.unwrap 0 .count
+                        |> String.fromInt
+                        |> Just
+                    , "'" ++ node.name |> Just
+                    , if model.features.transcendNodes then
+                        if node.flammable then
+                            Just "FALSE"
+
+                        else
+                            Just "TRUE"
+
+                      else
+                        Nothing
+                    ]
             )

@@ -48,7 +48,7 @@ view header model graph params =
                        , viewSearch model params.version
                        , p [] [ a [ Route.href <| Route.EthItems ] [ text <| String.fromInt ethItemCount, text " ethereal items" ] ]
                        , p [] [ a [ Route.href <| Route.Stats params ] [ text "Statistics:" ] ]
-                       , View.Stats.viewStatsSummary graph.char <| Stats.statTable <| Model.statsSummary graph
+                       , View.Stats.viewStatsSummary graph.char <| Stats.statTable <| Model.statsSummary model graph
                        , p [] [ a [ Route.href <| Route.Stats params ] [ text <| String.fromInt (Set.size graph.selected) ++ " skill points" ] ]
                        , p [] [ a [ Route.href <| Route.StatsTSV params ] [ text "Spreadsheet format" ] ]
                        ]
@@ -211,6 +211,8 @@ viewTooltip model graph node =
     div ([ class "tooltip" ] ++ style_)
         [ b [] [ text node.val.name ]
         , p [] [ text <| GameData.tooltip node.val "" ]
+
+        -- , p [] [ text <| Debug.toString node.val.stats ]
         , p [ class "flavor" ] [ text <| Maybe.withDefault "" node.val.flavorText ]
         , p [ class "flammable" ]
             (if node.val.flammable then

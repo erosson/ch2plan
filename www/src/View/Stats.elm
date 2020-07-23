@@ -19,7 +19,7 @@ import View.Util
 
 view : Model -> GameData -> Route.HomeParams -> Html msg
 view model gameData params =
-    case Model.parseStatsSummary gameData params of
+    case Model.parseStatsSummary model gameData params of
         Err err ->
             div [] [ text <| "error: " ++ err ]
 
@@ -384,18 +384,18 @@ statLevelTier level =
         "low"
 
 
-viewNodeSummary : Bool -> List ( Int, GameData.NodeType ) -> Html msg
+viewNodeSummary : Bool -> List Model.NodeTypeSummary -> Html msg
 viewNodeSummary showTooltips ns =
     ul [ class "node-summary" ] <|
         if List.length ns == 0 then
             []
 
         else
-            List.map ((\f ( a, b ) -> f a b) <| viewNodeSummaryLine showTooltips) ns
+            List.map (viewNodeSummaryLine showTooltips) ns
 
 
-viewNodeSummaryLine : Bool -> Int -> GameData.NodeType -> Html msg
-viewNodeSummaryLine showTooltips count nodeType =
+viewNodeSummaryLine : Bool -> Model.NodeTypeSummary -> Html msg
+viewNodeSummaryLine showTooltips { nodeType, count, transcendLevel } =
     let
         tooltip =
             if showTooltips then
