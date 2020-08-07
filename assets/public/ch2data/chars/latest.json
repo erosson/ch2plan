@@ -1,6 +1,6 @@
 {
   "ch2": {
-    "GAME_VERSION": "0.14.0 r507"
+    "GAME_VERSION": "0.15.0 r531"
   },
   "heroes": {
     "helpfulAdventurer": {
@@ -12161,7 +12161,7 @@
           "name": "Downpour"
         },
         "102": {
-          "description": "Causes auto attacks to grow in power with Curse of the Juggernaut.",
+          "description": "Curse of the Juggernaut amplifies autoattack damage while active.",
           "icon": "kineticEnergyIcon",
           "maxLevel": 1,
           "name": "Kinetic Energy"
@@ -35757,11 +35757,12 @@
     "Helpful Adventurer",
     "Wizard",
     "ch2plan-exporter",
-    "One World Frenzy"
+    "One World Frenzy",
+    "One World Exhaustion"
   ],
   "modsHaveLoaded": [
-    4,
-    4
+    5,
+    5
   ],
   "skills": {
     "Autoattackstorm": {
@@ -35771,7 +35772,7 @@
       "iconId": 201,
       "ignoresGCD": false,
       "manaCost": 0,
-      "modName": "One World Frenzy",
+      "modName": "One World Exhaustion",
       "name": "Autoattackstorm",
       "uid": "Autoattackstorm"
     },
@@ -35782,9 +35783,20 @@
       "iconId": 198,
       "ignoresGCD": false,
       "manaCost": 0,
-      "modName": "One World Frenzy",
+      "modName": "One World Exhaustion",
       "name": "Big Clicks",
       "uid": "Big Clicks"
+    },
+    "Challenge Autoattackstorm": {
+      "cooldown": 420000,
+      "description": "",
+      "energyCost": 0,
+      "iconId": 201,
+      "ignoresGCD": false,
+      "manaCost": 0,
+      "modName": "One World Exhaustion",
+      "name": "Challenge Autoattackstorm",
+      "uid": "Challenge Autoattackstorm"
     },
     "Clickstorm": {
       "cooldown": 600000,
@@ -35793,7 +35805,7 @@
       "iconId": 200,
       "ignoresGCD": false,
       "manaCost": 0,
-      "modName": "One World Frenzy",
+      "modName": "One World Exhaustion",
       "name": "Clickstorm",
       "uid": "Clickstorm"
     },
@@ -35804,7 +35816,7 @@
       "iconId": 202,
       "ignoresGCD": false,
       "manaCost": 0,
-      "modName": "One World Frenzy",
+      "modName": "One World Exhaustion",
       "name": "Clicktorrent",
       "uid": "Clicktorrent"
     },
@@ -35815,7 +35827,7 @@
       "iconId": 201,
       "ignoresGCD": false,
       "manaCost": 0,
-      "modName": "One World Frenzy",
+      "modName": "One World Exhaustion",
       "name": "Critstorm",
       "uid": "Critstorm"
     },
@@ -35826,7 +35838,7 @@
       "iconId": 35,
       "ignoresGCD": false,
       "manaCost": 25,
-      "modName": "One World Frenzy",
+      "modName": "One World Exhaustion",
       "name": "Energize",
       "uid": "Energize"
     },
@@ -35837,7 +35849,7 @@
       "iconId": 35,
       "ignoresGCD": false,
       "manaCost": 25,
-      "modName": "One World Frenzy",
+      "modName": "One World Exhaustion",
       "name": "Energize: Extend",
       "uid": "Energize: Extend"
     },
@@ -35848,7 +35860,7 @@
       "iconId": 35,
       "ignoresGCD": false,
       "manaCost": 25,
-      "modName": "One World Frenzy",
+      "modName": "One World Exhaustion",
       "name": "Energize: Rush",
       "uid": "Energize: Rush"
     },
@@ -35883,7 +35895,7 @@
       "iconId": 201,
       "ignoresGCD": false,
       "manaCost": 0,
-      "modName": "One World Frenzy",
+      "modName": "One World Exhaustion",
       "name": "GoldenClicks",
       "uid": "GoldenClicks"
     },
@@ -35894,7 +35906,7 @@
       "iconId": 50,
       "ignoresGCD": false,
       "manaCost": 0,
-      "modName": "One World Frenzy",
+      "modName": "One World Exhaustion",
       "name": "Hand of Libertas",
       "uid": "Hand of Libertas"
     },
@@ -35917,7 +35929,7 @@
       "iconId": 199,
       "ignoresGCD": false,
       "manaCost": 0,
-      "modName": "One World Frenzy",
+      "modName": "One World Exhaustion",
       "name": "Huge Click",
       "uid": "Huge Click"
     },
@@ -35964,7 +35976,7 @@
       "iconId": 1,
       "ignoresGCD": false,
       "manaCost": 20,
-      "modName": "One World Frenzy",
+      "modName": "One World Exhaustion",
       "name": "Mana Crit",
       "uid": "Mana Crit"
     },
@@ -35975,7 +35987,7 @@
       "iconId": 35,
       "ignoresGCD": false,
       "manaCost": 0,
-      "modName": "One World Frenzy",
+      "modName": "One World Exhaustion",
       "name": "Managize",
       "uid": "Managize"
     },
@@ -35986,7 +35998,7 @@
       "iconId": 197,
       "ignoresGCD": false,
       "manaCost": 0,
-      "modName": "One World Frenzy",
+      "modName": "One World Exhaustion",
       "name": "MultiClick",
       "uid": "MultiClick"
     },
@@ -36009,7 +36021,7 @@
       "iconId": 150,
       "ignoresGCD": false,
       "manaCost": 50,
-      "modName": "One World Frenzy",
+      "modName": "One World Exhaustion",
       "name": "Powersurge",
       "uid": "Powersurge"
     },
@@ -36020,7 +36032,7 @@
       "iconId": 168,
       "ignoresGCD": false,
       "manaCost": 0,
-      "modName": "One World Frenzy",
+      "modName": "One World Exhaustion",
       "name": "Reload",
       "uid": "Reload"
     },

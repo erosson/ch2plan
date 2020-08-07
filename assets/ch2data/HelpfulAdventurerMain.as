@@ -2413,6 +2413,7 @@
 				"costFunction": function() { return(new BigNumber(250000)); },
 				"levelFunction": function() {
 					CH2.currentCharacter.setTrait("Downpour", 1, false, true, true);
+					CH2.currentCharacter.alwaysAvailableNodes[338] = true;
 				},
 				"maxLevel": 1,
 				"icon": "damagex3"
@@ -2420,11 +2421,12 @@
 			
 			helpfulAdventurer.transcensionPerks["102"] = {
 				"name": "Kinetic Energy",
-				"description": "Causes auto attacks to grow in power with Curse of the Juggernaut.",
+				"description": "Curse of the Juggernaut amplifies autoattack damage while active.",
 				"tooltipFunction": Character.getTranscendencePerkTooltipFunctionCommon("102"),
 				"costFunction": function() { return(new BigNumber(6000000)); },
 				"levelFunction": function() {
 					CH2.currentCharacter.setTrait("KineticEnergy", 1, false, true, true);
+					CH2.currentCharacter.alwaysAvailableNodes[472] = true;
 				},
 				"maxLevel": 1,
 				"icon": "kineticEnergyIcon"
@@ -2449,6 +2451,7 @@
 				"costFunction": function() { return(new BigNumber(500000000)); },
 				"levelFunction": function() {
 					CH2.currentCharacter.setTrait("GloriousBounty", 1, false, true, true);
+					CH2.currentCharacter.alwaysAvailableNodes[151] = true;
 				},
 				"maxLevel": 1,
 				"icon": "gloriousBountyIcon"
@@ -3316,14 +3319,14 @@
 			}
 		}
 		
-		private function unlockAutomator():void
+		protected function unlockAutomator():void
 		{
 			CH2.currentCharacter.automator.addCooldownStone(CHARACTER_NAME+"_16", 10000);
 			CH2.currentCharacter.automator.addCooldownStone(CHARACTER_NAME+"_11", 4000);
 			CH2.currentCharacter.automator.addGem(CHARACTER_NAME+"_23", "Perform a click", 1, "Performs a single click.", onClickActivate, canClickActivate, 0);
 		}
 		
-		private function purchaseAutomator():void
+		protected function purchaseAutomator():void
 		{
 			CH2.currentCharacter.onAutomatorUnlocked();
 			CH2.currentCharacter.automator.unlockStone(CHARACTER_NAME+"_16");
@@ -3335,6 +3338,7 @@
 				CH2.currentCharacter.automatorPoints++;
 			}
 		}
+		
 		private function canClickActivate():Boolean
 		{
 			return CH2.currentCharacter.energy > 0;
@@ -3749,7 +3753,8 @@
 				return !CH2.user.isOnBossZone;
             })
         }  
-		private function addBuffComparisonStone(stoneId:String, stoneName:String, stoneDescription:String, buffName:String, comparison:int, comparisonValue:int):void
+		
+		protected function addBuffComparisonStone(stoneId:String, stoneName:String, stoneDescription:String, buffName:String, comparison:int, comparisonValue:int):void
 		{
 			var stoneFunction:Function;
 			switch (comparison) 
@@ -3954,6 +3959,43 @@
 			
 		}
 		
+		protected function applySpecialTraitsBeforeAttack(attackData:AttackData):AttackData 
+		{
+			var character:Character = CH2.currentCharacter;
+			
+			if (character.getTrait("LowEnergyDamageBonus") && character.energy < character.maxEnergy.numberValue() * 0.60)
+			{
+				attackData.damage.timesEqualsN(2);
+			}
+			
+			return attackData;
+		}
+		
+		protected function applySpecialTraitsAfterAttack(attackData:AttackData):AttackData 
+		{
+			var character:Character = CH2.currentCharacter;
+			
+			if (attackData.isCritical && (character.getTrait("BhaalsRise") || character.getTrait("BhallsRise")))
+			{
+				var manaCrit:Skill = character.getSkill("Mana Crit");
+				if (manaCrit)
+				{	
+					manaCrit.cooldownRemaining -= 1000;
+				}
+			}
+			
+			if (attackData.isKillShot && attackData.isCritical && (character.getTrait("CritKillPowerSurge") || character.getTrait("CritKillPowerSurgeCooldown")))
+			{
+				var powerSurge:Skill = character.getSkill("Powersurge");
+				if (powerSurge)
+				{
+					powerSurge.cooldownRemaining -= 5000;
+				}
+			}
+			
+			return attackData;
+		}
+		
 		//public function helpfulAdventurerAttack(attackData:AttackData):void
 		public function attackOverride(attackData:AttackData):void
 		{
@@ -3963,11 +4005,6 @@
 			if (currentSystem.traits[WT_ROBUST])
 			{
 				attackData.critChanceModifier = -100;
-			}
-			
-			if (character.getTrait("LowEnergyDamageBonus") && character.energy < character.maxEnergy.numberValue() * 0.60)
-			{
-				attackData.damage.timesEqualsN(2);
 			}
 			
 			var monsterHealth:BigNumber; 
@@ -3983,7 +4020,9 @@
 				}
 			}
 			
+			attackData = applySpecialTraitsBeforeAttack(attackData);
 			character.attackDefault(attackData);
+			attackData = applySpecialTraitsAfterAttack(attackData);
 			
 			if (!attackData.isAutoAttack && currentSystem.traits[WT_EXHAUSTING])
 			{
@@ -4028,24 +4067,6 @@
 			{
 				character.addMana(1);
 				character.addEnergy(2);
-			}
-			
-			if (attackData.isCritical && (character.getTrait("BhaalsRise") || character.getTrait("BhallsRise")))
-			{
-				var manaCrit:Skill = character.getSkill("Mana Crit");
-				if (manaCrit)
-				{	
-					manaCrit.cooldownRemaining -= 1000;
-				}
-			}
-			
-			if (attackData.isKillShot && attackData.isCritical && (character.getTrait("CritKillPowerSurge") || character.getTrait("CritKillPowerSurgeCooldown")))
-			{
-				var powerSurge:Skill = character.getSkill("Powersurge");
-				if (powerSurge)
-				{
-					powerSurge.cooldownRemaining -= 5000;
-				}
 			}
 			
 			if (attackData.isKillShot && (character.buffs.hasBuffByName("Mana Crit")) && character.getTrait("ManaCritOverflow"))
@@ -4133,6 +4154,8 @@
 							attackData.damage.timesEquals(character.criticalDamageMultiplier);
 						}
 						attackData.monster = target;
+						attackData = applySpecialTraitsBeforeAttack(attackData);
+						attackData = applySpecialTraitsAfterAttack(attackData);
 						target.takeDamage(attackData);
 						attackData.isClickAttack = false;
 						character.buffs.onAttack(attackData);
@@ -4886,10 +4909,6 @@
 					juggernautBuff.maximumStacks = 0;
 					juggernautBuff.skillUseFunction = function(skill:Skill) {
 						juggernautBuff.stacks++;
-						if (character.getTrait("KineticEnergy"))
-						{
-							juggernautBuff.buffStat(CH2.STAT_AUTOATTACK_DAMAGE, juggernautBuff.getStatValue(CH2.STAT_AUTOATTACK_DAMAGE) * 1.05);
-						}
 					}
 					juggernautBuff.tooltipFunction = function() {
 						return {
@@ -4904,7 +4923,7 @@
 					
 					if (character.getTrait("KineticEnergy"))
 					{
-						juggernautBuff.buffStat(CH2.STAT_AUTOATTACK_DAMAGE, 1.05);
+						juggernautBuff.buffStat(CH2.STAT_AUTOATTACK_DAMAGE, character.getClassStat(CH2.STAT_AUTOATTACK_DAMAGE).pow(3));
 					}
 					
 					character.buffs.addBuff(juggernautBuff);
@@ -6128,6 +6147,23 @@
 			{
 				// Convert for new transcendence changes.
 				characterInstance.currentWorldEndAutomationOption++;
+			}
+			
+			if (characterInstance.version <= 13)
+			{
+				var previousMotes:Number = characterInstance.transcendenceMotes;
+				characterInstance.transcendenceMotes = 0;
+				characterInstance.firstTranscendenceMoteCooldown = (60 + 2 * Math.floor(characterInstance.transcensionLevel)) * Character.TRANSCENDENCE_MOTE_TIME_UNIT;
+				characterInstance.currentTranscendenceMoteCooldown = characterInstance.firstTranscendenceMoteCooldown;
+				var entitledMoteTime:Number = previousMotes * 84600000 + characterInstance.timeSinceLastTranscendenceMotePurchase;
+				while (entitledMoteTime >= characterInstance.currentTranscendenceMoteCooldown)
+				{
+					entitledMoteTime -= characterInstance.currentTranscendenceMoteCooldown;
+					characterInstance.timeSinceLastTranscendenceMotePurchase = characterInstance.currentTranscendenceMoteCooldown;
+					characterInstance.onTranscendenceMotePurchase();
+				}
+				characterInstance.timeSinceLastTranscendenceMotePurchase = entitledMoteTime;
+				characterInstance.pendingHeroSouls = characterInstance.pendingHeroSouls.divideN(6);
 			}
 			
 			// ^^ NEW MIGRATIONS GO ABOVE THIS LINE ^^

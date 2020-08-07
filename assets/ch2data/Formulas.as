@@ -458,8 +458,7 @@ package heroclickerlib.managers
       {
          var result:BigNumber = new BigNumber(1.15);
          result = result.pow(systemId);
-         result.timesEqualsN(0.5 * systemId);
-         result = result.ceil();
+         result.timesEqualsN(systemId / 12);
          return result;
       }
       

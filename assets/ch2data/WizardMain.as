@@ -265,7 +265,7 @@ package
 		public function onStartup(game:IdleHeroMain):void //Save data is NOT loaded at this point, init() has not yet been run
 		{
 			wizard.assetGroupName = CHARACTER_ASSET_GROUP;
-			wizard.gildStartBuild = [1,2,3,4,5,6,7];
+			wizard.gildStartBuild = [2, 3, 4, 1, 5, 6, 7];
 			wizard.worldsPerSystem = 50;
 			
 			// Needs to be populated for use with getAddTraittooltipFunction
@@ -6044,6 +6044,7 @@ package
 			{
 				unlockSpell("synergyFireLightning", true);
 			}
+			CH2.currentCharacter.setTrait("solarFlarePercentHealth", 0);
 		}
 		
 		public function onWorldStartedOverride(worldNum:Number):void
@@ -6199,6 +6200,23 @@ package
 				characterInstance.currentWorldEndAutomationOption++;
 			}
 			
+			if (characterInstance.version <= 13)
+			{
+				var previousMotes:Number = characterInstance.transcendenceMotes;
+				characterInstance.transcendenceMotes = 0;
+				characterInstance.firstTranscendenceMoteCooldown = (60 + 2 * Math.floor(characterInstance.transcensionLevel)) * Character.TRANSCENDENCE_MOTE_TIME_UNIT;
+				characterInstance.currentTranscendenceMoteCooldown = characterInstance.firstTranscendenceMoteCooldown;
+				var entitledMoteTime:Number = previousMotes * 84600000 + characterInstance.timeSinceLastTranscendenceMotePurchase;
+				while (entitledMoteTime >= characterInstance.currentTranscendenceMoteCooldown)
+				{
+					entitledMoteTime -= characterInstance.currentTranscendenceMoteCooldown;
+					characterInstance.timeSinceLastTranscendenceMotePurchase = characterInstance.currentTranscendenceMoteCooldown;
+					characterInstance.onTranscendenceMotePurchase();
+				}
+				characterInstance.timeSinceLastTranscendenceMotePurchase = entitledMoteTime;
+				characterInstance.pendingHeroSouls = characterInstance.pendingHeroSouls.divideN(6);
+			}
+			
 			// ^^ NEW MIGRATIONS GO ABOVE THIS LINE ^^
 			
 			CH2.currentCharacter = null;
@@ -6284,10 +6302,7 @@ package
 						}
 						damageMultiplier *= enervatingZapMultiplier;
 					}
-					for (var i:int = 0; i < zapBuff.stateValues["attacksPerClick"]; i++)
-					{
-						doSpellDamage(zapBuff.stateValues["spell"], true, damageMultiplier);
-					}
+					consolidateSpellDamageCalls(zapBuff.stateValues["spell"], zapBuff.stateValues["attacksPerClick"], 20, damageMultiplier);
 					useLightningZap();
 				}
 				
@@ -6295,10 +6310,8 @@ package
 				{
 					var fireZapBuff:Buff = CH2.currentCharacter.buffs.getBuff("FireZap");
 					var damageMultiplier:Number = fireZapBuff.stateValues["spellDamageMultiplier"];
-					for (var i:int = 0; i < fireZapBuff.stateValues["attacksPerClick"]; i++)
-					{
-						doSpellDamage(fireZapBuff.stateValues["spell"], true, damageMultiplier);
-					}
+					
+					consolidateSpellDamageCalls(fireZapBuff.stateValues["spell"], fireZapBuff.stateValues["attacksPerClick"], 20, damageMultiplier);
 					useFireZap();
 				}
 				
@@ -7395,7 +7408,7 @@ package
 		}
 		
 		public var appliedFlashBuff:Boolean = false;
-		public function doSpellDamage(spell:Spell, isFlashAttack:Boolean=false, damageMultiplier:Number=1, isConductorAttack:Boolean=false):void
+		public function doSpellDamage(spell:Spell, isFlashAttack:Boolean=false, damageMultiplier:Number=1, isConductorAttack:Boolean=false, numSpellsActivations:int=1):void
 		{
 			var livingMonsters:Vector.<Monster> = CH2.world.monsters.getLivingMonsters();
 			if (livingMonsters.length == 0) return;
@@ -7628,7 +7641,7 @@ package
 				
 				if (numChainMonstersAttacked > 0)
 				{
-					if (spell.isIce() && !CH2.currentCharacter.buffs.hasBuffByName("Hypo Critical"))
+					if (spell.isIce() && CH2.currentCharacter.getTrait("HypoCritical") >= 1 && !CH2.currentCharacter.buffs.hasBuffByName("Hypo Critical"))
 					{
 						if (CH2.currentCharacter.buffs.hasBuffByName("Burn"))
 						{
@@ -7653,7 +7666,7 @@ package
 							}
 						}
 					}
-					else if (spell.isFire() && !CH2.currentCharacter.buffs.hasBuffByName("Hyper Burn"))
+					else if (spell.isFire() && CH2.currentCharacter.getTrait("HyperBurn") >= 1 && !CH2.currentCharacter.buffs.hasBuffByName("Hyper Burn"))
 					{
 						if (CH2.currentCharacter.buffs.hasBuffByName("Burn"))
 						{
@@ -7766,13 +7779,7 @@ package
 				{
 					useFlashBuff();
 					numAdditionalStrikes = int(CH2.currentCharacter.getTrait("LightningFlashHaste")) + CH2.roller.attackRoller.boolean(CH2.currentCharacter.getTrait("LightningFlashHaste") % 1);
-					for (var i:int = 0; i < numAdditionalStrikes; i++)
-					{
-						if (CH2.world.getNextMonster() != null)
-						{
-							doSpellDamage(spell, true);
-						}
-					}
+					consolidateSpellDamageCalls(spell, numAdditionalStrikes, 20, 1);
 				}
 			}
 			
@@ -7783,7 +7790,7 @@ package
 			{
 				if (CH2.currentCharacter.getTrait("LightningBurnDamage") > 0)
 				{
-					applyFireDamageOverTimeBuff(spell, "Lightning", damageDealt, monsterListToAttack);
+					applyFireDamageOverTimeBuff(spell, "Lightning", damageDealt, monsterListToAttack, numSpellsActivations);
 				}
 				if (!isFlashAttack && !CH2.currentCharacter.extendedVariables["usedLightningZap"] && !isConductorAttack)
 				{
@@ -7792,7 +7799,7 @@ package
 			}
 			if (types.indexOf(FIRE_RUNE_ID) > -1)
 			{
-				applyFireDamageOverTimeBuff(spell, "Fire", damageDealt, monsterListToAttack);
+				applyFireDamageOverTimeBuff(spell, "Fire", damageDealt, monsterListToAttack, numSpellsActivations);
 				
 				if (CH2.currentCharacter.getTrait("FireZapPercentDamage") > 0 && !isFlashAttack && !CH2.currentCharacter.extendedVariables["usedFireZap"] && !isConductorAttack)
 				{
@@ -7820,6 +7827,35 @@ package
 			{
 				useSymbiosis();
 				applyAllSymbiosis(spell);
+			}
+		}
+		
+		private function consolidateSpellDamageCalls(baseSpell:Spell, numCalls:int, numToGroup:int, damageMultiplier:Number):void
+		{
+			if (numCalls > 0)
+			{
+				//Do the first few spells at normal damage, at least do one spell to ensure flash gets the correct value
+				for (var i:int = 0; i < Math.max(1, numCalls % numToGroup); i++)
+				{
+					if (CH2.world.getNextMonster() != null)
+					{
+						doSpellDamage(baseSpell, true, damageMultiplier);
+					}
+				}
+				
+				if (numCalls >= numToGroup)
+				{
+					var numRemainingStrikesToCombine:int = Math.floor(numCalls / numToGroup) * numToGroup;
+					var numStrikesToMake:int = numToGroup;
+					var multiplier:Number = Math.floor(numRemainingStrikesToCombine / numStrikesToMake);
+					for (var i:int = 0; i < numStrikesToMake; i++)
+					{
+						if (CH2.world.getNextMonster() != null)
+						{
+							doSpellDamage(baseSpell, true, multiplier*damageMultiplier, false, multiplier);
+						}
+					}
+				}
 			}
 		}
 		
@@ -8321,8 +8357,9 @@ package
 			return actualSearchResult;
 		}
 		
-		public function applyFireDamageOverTimeBuff(spell:Spell, type:String, attackDealt:AttackData, monstersAttacked:Array):void
+		public function applyFireDamageOverTimeBuff(spell:Spell, type:String, attackDealt:AttackData, monstersAttacked:Array, numConsolidatedActivations:int):void
 		{
+			trace("applyFireDamageOverTimeBuff x"+numConsolidatedActivations);
 			var target:Monster = CH2.world.getNextMonster();
 			if (target)
 			{
@@ -8373,7 +8410,7 @@ package
 				//############### END EXPLOSION ###############
 				
 				var buff:Buff = new Buff();
-				buff.name = "Burn"+MiscUtils.cachedTime+"_"+Rnd.integer(0,99999);
+				buff.name = "IndividualBurn";
 				buff.tickRate = dotTickRate;
 				buff.iconId = 171;
 				buff.isUntimedBuff = false;
@@ -8388,28 +8425,22 @@ package
 				}
 				buff.stateValues["spellAttackData"] = attackDealt;
 				buff.stateValues["burnEffects"] = [];
+				buff.stateValues["numConsolidatedBurns"] = numConsolidatedActivations;
+				buff.stateValues["doubleBurnChance"] = CH2.currentCharacter.getTrait("DoubleBurnChance");
+				buff.stateValues["timeAdded"] = MiscUtils.cachedTime;
 				
-				for (var i:int = 0; i < buff.stateValues["targetMonsters"].length; i++)
+				if (CH2.user.skillEffectsEnabled && IdleHeroMain.IS_RENDERING && !IdleHeroMain.IS_TIMELAPSE && !CH2.game.isContextLost() && !Validate.IS_VALIDATING)
 				{
-					buff.stateValues["burnEffects"].push( doDamageOverTimeBurnEffect(buff.stateValues["targetMonsters"][i]) );
-				}
-				buff.stateValues["damage"] = damagePerTick;
-				//###### CALL BELOW ON TICK ######
-				buff.stateValues["dealBurnDamage"] = function(parentBuff:Buff, attackData:AttackData, numDamages:int):void{
-					if (attackData.monster.isAlive)
+					for (var i:int = 0; i < buff.stateValues["targetMonsters"].length; i++)
 					{
-						if (cachedBuffNameCheck("Hyper Burn"))
+						if (CH2.world.getAnimationIdsAddedThisFrame(101) < 5 && CH2.world.animationIndexesForAnimationId(101).length < 5)
 						{
-							var hyperBurnMultiplier:Number = CH2.currentCharacter.buffs.getBuff("Hyper Burn").stateValues["hyperBurnBonus"]();
-							attackData.damage.timesEqualsN(hyperBurnMultiplier);
-						}
-						CH2.currentCharacter.buffs.getBuff("Burn").stateValues["poolAttack"](attackData.getCopy(), numDamages);
-						if (cachedBuffNameCheck("Explosion") && attackData.monster == parentBuff.stateValues["primaryMonster"])
-						{
-							CH2.currentCharacter.buffs.getBuff("Explosion").stateValues["burnDamageDealt"].plusEquals(attackData.damage.multiplyN(numDamages));
+							buff.stateValues["burnEffects"].push( doDamageOverTimeBurnEffect(buff.stateValues["targetMonsters"][i]) );
 						}
 					}
-				};
+				}
+				buff.stateValues["damage"] = damagePerTick;
+				
 				buff.tickFunction = function(){
 					var atLeastOneMonsterIsAlive:Boolean = false;
 					for (var i:int = 0; i < this.stateValues["targetMonsters"].length; i++)
@@ -8427,13 +8458,12 @@ package
 							var burnsToApply:int = 1;
 							if (cachedBuffNameCheck("CombustionBuff"))
 							{
-								var chanceOfDoubleAttack:Number = CH2.currentCharacter.getTrait("DoubleBurnChance");
-								var additionalBurnsToApply:int = int(chanceOfDoubleAttack) + CH2.roller.attackRoller.boolean(chanceOfDoubleAttack % 1);
+								var additionalBurnsToApply:int = int(this.stateValues["doubleBurnChance"]) + CH2.roller.attackRoller.boolean(this.stateValues["doubleBurnChance"] % 1);
 								burnsToApply += additionalBurnsToApply;
 							}
 							
 							//############################## Call dealBurnDamage ###############################
-							this.stateValues["dealBurnDamage"](this, attackData, burnsToApply); //CALL FUNCTION ABOVE
+							dealBurnDamage(this, attackData, burnsToApply);
 							//##################################################################################
 						}
 					}
@@ -8459,15 +8489,26 @@ package
 					}
 					CH2.currentCharacter.buffs.getBuff("Burn").stateValues["removeBurn"](this);
 				}
-				buff.tooltipFunction = function() {
-					return {
-						"header": "Burn",
-						"body": "Deals "+CH2.game.formattedNumber(this.stateValues["damage"])+" burn damage every "+Number(this.tickRate/1000).toFixed(2)+" seconds"
-					};
-				}
 				CH2.currentCharacter.buffs.getBuff("Burn").stateValues["addBurn"](buff);
 			}
 		}
+		
+		private function dealBurnDamage(parentBuff:Buff, attackData:AttackData, numDamages:int):void
+		{
+			if (attackData.monster.isAlive)
+			{
+				if (cachedBuffNameCheck("Hyper Burn"))
+				{
+					var hyperBurnMultiplier:Number = CH2.currentCharacter.buffs.getBuff("Hyper Burn").stateValues["hyperBurnBonus"]();
+					attackData.damage.timesEqualsN(hyperBurnMultiplier);
+				}
+				CH2.currentCharacter.buffs.getBuff("Burn").stateValues["poolAttack"](attackData.getCopy(), numDamages);
+				if (cachedBuffNameCheck("Explosion") && attackData.monster == parentBuff.stateValues["primaryMonster"])
+				{
+					CH2.currentCharacter.buffs.getBuff("Explosion").stateValues["burnDamageDealt"].plusEquals(attackData.damage.multiplyN(numDamages));
+				}
+			}
+		};
 		
 		public function debugBurn():void
 		{
@@ -8520,13 +8561,13 @@ package
 						this["pooledAttacks"][monsterId] = attackData.getCopy();
 						this["pooledAttacks"][monsterId].damage = this["pooledAttacks"][monsterId].damage.multiplyN(numDamages);
 					}
-					SoundManager.instance.playSound("burn");
 				}
 				buff.stateValues["activatePooledAttacks"] = function(){
 					for each(var attack:AttackData in this.pooledAttacks)
 					{
 						attack.monster.takeDamage(attack);
 					}
+					SoundManager.instance.playSound("burn");
 					this.pooledAttacks = {};
 				}
 				buff.tickFunction = function(){
@@ -8539,12 +8580,33 @@ package
 				}
 				buff.stateValues["addBurn"] = function(buff:Buff)
 				{
-					this.stacks++;
+					this.stacks += buff.stateValues["numConsolidatedBurns"];
+					
+					//further consolidate this burn with others like it
+					var numBurns:int = this["currentBurns"].length;
+					if (numBurns > 0)
+					{
+						if(this["currentBurns"][numBurns - 1]["stateValues"].timeAdded == buff["stateValues"].timeAdded)
+						{
+							if (this["currentBurns"][numBurns - 1]["stateValues"].targetMonsters[0] == buff["stateValues"].targetMonsters[0] &&
+								this["currentBurns"][numBurns - 1]["stateValues"].targetMonsters.length == buff["stateValues"].targetMonsters.length)
+							{
+								if (this["currentBurns"][numBurns - 1]["stateValues"].spellAttackData.damage.eq(buff["stateValues"].spellAttackData.damage))
+								{
+									//consolidate this burn into the other one
+									this["currentBurns"][numBurns - 1]["stateValues"].damage.plusEquals(buff["stateValues"].damage);
+									this["currentBurns"][numBurns - 1]["stateValues"].numConsolidatedBurns += buff.stateValues["numConsolidatedBurns"];
+									trace("merged burn");
+									return;
+								}
+							}
+						}
+					}
 					this["currentBurns"].push(buff);
 				}
 				buff.stateValues["removeBurn"] = function(buff:Buff)
 				{
-					this.stacks--;
+					this.stacks -= buff.stateValues["numConsolidatedBurns"];
 					(this["currentBurns"] as Array).removeAt((this["currentBurns"] as Array).indexOf(buff));
 					
 					if (this.stacks == 0)
@@ -8654,7 +8716,7 @@ package
 		public function multiplierValueForRitualBuffOfType(type:String):Number
 		{
 			var buffName:String = type+"RitualBuff";
-			var baseValue:Number = CH2.currentCharacter.getTrait("Ethereal" + type+"Ritual");
+			var baseValue:Number = CH2.currentCharacter.getTrait("Ethereal"+type+"Ritual");
 			if (CH2.currentCharacter.buffs.hasBuffByName(buffName))
 			{
 				var buff:Buff = CH2.currentCharacter.buffs.getBuff(buffName);
@@ -8817,22 +8879,26 @@ package
 		
 		public function solarStormActivation(spell:Spell):void
 		{
-			if (hasCharge("fireLightning3"))
+			var buffName:String = "Solar Storm";
+			if (!CH2.currentCharacter.buffs.hasBuffByName(buffName))
 			{
-				var solarStormPercentHealthRemaining:Number = CH2.currentCharacter.getTrait("solarFlarePercentHealth");
-				if (solarStormPercentHealthRemaining == 0) solarStormPercentHealthRemaining = 1;
-				CH2.currentCharacter.addEnergy(CH2.currentCharacter.energy * -1); //set energy to 0
-				for (var i:int = 0; i < 20; i++)
+				if (hasCharge("fireLightning3"))
 				{
-					applySpellTypeFatigue(getSpell("fire5")); //add 100 hyperthermia
+					var solarStormPercentHealthRemaining:Number = CH2.currentCharacter.getTrait("solarFlarePercentHealth");
+					if (solarStormPercentHealthRemaining == 0) solarStormPercentHealthRemaining = 1;
+					CH2.currentCharacter.addEnergy(CH2.currentCharacter.energy * -1); //set energy to 0
+					for (var i:int = 0; i < 20; i++)
+					{
+						applySpellTypeFatigue(getSpell("fire5")); //add 100 hyperthermia
+					}
+					var chargeHealthReduction:Number = Math.min(10, numCharges("fireLightning3")) * .01;
+					solarStormPercentHealthRemaining = (1 - chargeHealthReduction);
+					CH2.currentCharacter.setTrait("solarFlarePercentHealth", solarStormPercentHealthRemaining);
+					
+					startsolarFlareBuff();
+					
+					useCharges("fireLightning3");
 				}
-				var chargeHealthReduction:Number = Math.min(10, numCharges("fireLightning3")) * .01;
-				solarStormPercentHealthRemaining *= (1 - chargeHealthReduction);
-				CH2.currentCharacter.setTrait("solarFlarePercentHealth", solarStormPercentHealthRemaining);
-				
-				startsolarFlareBuff();
-				
-				useCharges("fireLightning3");
 			}
 		}
 		
@@ -8866,6 +8932,9 @@ package
 					attackData.monster = monster;
 					attackData.damage = damageToDeal;
 					monster.takeDamage(attackData);
+				};
+				buff.finishFunction = function(){
+					CH2.currentCharacter.setTrait("solarFlarePercentHealth", 1);
 				};
 				CH2.currentCharacter.buffs.addBuff(buff);
 				
@@ -9253,6 +9322,7 @@ package
 		
 		public function fireZapActivation(spell:Spell, damageDealt:AttackData, numAdditionalStrikes:int):void
 		{
+			trace("fire zap: "+spell.displayName);
 			var buffName:String = "FireZap";
 			if (!CH2.currentCharacter.buffs.hasBuffByName(buffName))
 			{
@@ -9995,13 +10065,17 @@ package
 		
 		public function doSpellHitEffect(spell:Spell, monster:Monster):void
 		{
+			if (!CH2.user.skillEffectsEnabled || !IdleHeroMain.IS_RENDERING || IdleHeroMain.IS_TIMELAPSE || CH2.game.isContextLost() || Validate.IS_VALIDATING) return;
 			for each(var spellType:int in spell.types)
 			{
 				if (spellType > 0 && spellType < 4)
 				{
-					var animation:GpuMovieClip = CH2AssetManager.instance.getGpuMovieClip("Wizard_" + SPELL_TYPE_NAMES[spellType].toLowerCase() + "Hit", 30);
-					animation.isLooping = false;
-					CH2.world.addEffect(animation, CH2.world.roomsFront, monster.x, monster.y, World.REMOVE_EFFECT_WHEN_FINISHED_OR_HITS_CAP, 100, 20);
+					if (CH2.world.getAnimationIdsAddedThisFrame(100) < 10 && CH2.world.animationIndexesForAnimationId(100).length < 10)
+					{
+						var animation:GpuMovieClip = CH2AssetManager.instance.getGpuMovieClip("Wizard_" + SPELL_TYPE_NAMES[spellType].toLowerCase() + "Hit", 30);
+						animation.isLooping = false;
+						CH2.world.addEffect(animation, CH2.world.roomsFront, monster.x, monster.y, World.REMOVE_EFFECT_WHEN_FINISHED, 100, 10);
+					}
 				}
 			}
 		}
@@ -10010,17 +10084,21 @@ package
 		{
 			var animation:GpuMovieClip = CH2AssetManager.instance.getGpuMovieClip("Wizard_bedOfFlames");
 			animation.isLooping = true;
-			CH2.world.addEffect(animation, CH2.world.roomsBack, monster.x, monster.y, World.REMOVE_EFFECT_WHEN_FINISHED_OR_HITS_CAP, 101, 10);
+			CH2.world.addEffect(animation, CH2.world.roomsBack, monster.x, monster.y, World.REMOVE_EFFECT_WHEN_FINISHED, 101, 5);
 			return animation;
 		}
 		
 		public function renderChainLightningBetweenMonsters(monsters:Vector.<Monster>):void
 		{
+			if (!CH2.user.skillEffectsEnabled || !IdleHeroMain.IS_RENDERING || IdleHeroMain.IS_TIMELAPSE || CH2.game.isContextLost() || Validate.IS_VALIDATING) return;
 			for (var i:int = 0; i < monsters.length; i++)
 			{
-				var animation:GpuMovieClip = CH2AssetManager.instance.getGpuMovieClip("Wizard_singleLightningBolt");
-				animation.isLooping = false;
-				CH2.world.addEffect(animation, CH2.world.roomsFront, monsters[i].x, monsters[i].y, World.REMOVE_EFFECT_WHEN_FINISHED_OR_HITS_CAP, 102, 10);
+				if (CH2.world.getAnimationIdsAddedThisFrame(102) < 5 && CH2.world.animationIndexesForAnimationId(102).length < 5)
+				{
+					var animation:GpuMovieClip = CH2AssetManager.instance.getGpuMovieClip("Wizard_singleLightningBolt");
+					animation.isLooping = false;
+					CH2.world.addEffect(animation, CH2.world.roomsFront, monsters[i].x, monsters[i].y, World.REMOVE_EFFECT_WHEN_FINISHED, 102, 5);
+				}
 			}
 		}
 		
@@ -13995,4 +14073,4 @@ class WizardStatsSubTab extends MovieClip
 			}
 		}
 	}
-}
+}

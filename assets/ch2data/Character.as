@@ -12,6 +12,7 @@ package models
    import flash.utils.getQualifiedClassName;
    import heroclickerlib.CH2;
    import heroclickerlib.LevelGraph;
+   import heroclickerlib.LevelGraphNode;
    import heroclickerlib.managers.Formulas;
    import heroclickerlib.managers.ItemDropManager;
    import heroclickerlib.managers.MusicManager;
@@ -101,6 +102,8 @@ package models
       public static const ETHEREAL_ITEM_PURCHASE_COOLDOWN:int = 84600000;
       
       public static const TRANSCENDENCE_MOTE_PURCHASE_COOLDOWN:Number = 84600000;
+      
+      public static const TRANSCENDENCE_MOTE_TIME_UNIT:Number = 472131.1475;
       
       public static const AUTOMATOR_POINT_PURCHASE_COOLDOWN:int = 14400000;
       
@@ -261,7 +264,9 @@ package models
       
       public var transcendenceMotes:Number = 0;
       
-      public var currentTranscendenceMoteCooldown:Number = 84600000;
+      public var firstTranscendenceMoteCooldown:Number = 2.832786885E7;
+      
+      public var currentTranscendenceMoteCooldown:Number = 2.832786885E7;
       
       public var timeSinceLastAncientShardPurchase:int = 84600000;
       
@@ -352,6 +357,10 @@ package models
       public var worldEndAutomationOptions:Array;
       
       public var automatorStones:Number = 0;
+      
+      public var skillTreePlans:Array;
+      
+      public var activeSkillTreePlanIndex:int = 0;
       
       public var currentTutorial:Tutorial = null;
       
@@ -551,6 +560,10 @@ package models
       
       public var isViewingAutomatorTree:Boolean = false;
       
+      public var isViewingTreePlanner:Boolean = false;
+      
+      public var treePlannerIndexViewed:int = 0;
+      
       public var skillTreeViewX:Number = 0;
       
       public var skillTreeViewY:Number = 0;
@@ -638,6 +651,10 @@ package models
       public var levelGraphNodeTypes:Object;
       
       public var nodesPurchased:Object;
+      
+      public var unavailableNodes:Object;
+      
+      public var alwaysAvailableNodes:Object;
       
       public var transcensionPerks:Object;
       
@@ -848,6 +865,7 @@ package models
          this.catalogItemsForSale = [];
          this.automator = new Automator();
          this.worldEndAutomationOptions = [];
+         this.skillTreePlans = [];
          this.tutorials = [];
          this.totalGold = new BigNumber(0);
          this.monstersKilledPerZone = {};
@@ -875,6 +893,8 @@ package models
          this.statValueFunctions = new Array();
          this.statBaseValues = new Array();
          this.nodesPurchased = {};
+         this.unavailableNodes = {};
+         this.alwaysAvailableNodes = {};
          this.transcensionPerks = {};
          this.transcensionPerkLevels = {};
          this.undoNodes = {};
@@ -938,6 +958,8 @@ package models
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_FALSE,registerDynamicBoolean,"isSkillTreeConfirmationEnabled");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicChild,"inventory",Items);
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicChild,"automator",Automator);
+         this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_TRUE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicCollection,"skillTreePlans",SkillTreePlan);
+         this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_TRUE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicNumber,"activeSkillTreePlanIndex");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicNumber,"currentWorldEndAutomationOption");
          this.persist(ASCENSION_PERSISTING_FALSE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicCollection,"skills",Skill);
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicNumber,"currentCatalogRank");
@@ -962,6 +984,7 @@ package models
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicNumber,"timeSinceLastAutomatorPointPurchase");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_TRUE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicNumber,"ancientShards");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_TRUE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicNumber,"transcendenceMotes");
+         this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_TRUE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicNumber,"firstTranscendenceMoteCooldown");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_TRUE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicNumber,"currentTranscendenceMoteCooldown");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicBoolean,"powerRuneActivated");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicBoolean,"speedRuneActivated");
@@ -1038,6 +1061,8 @@ package models
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicNumber,"gilds");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicBigNumber,"ascensionDamageMultiplier");
          this.persist(ASCENSION_PERSISTING_FALSE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicObject,"nodesPurchased");
+         this.persist(ASCENSION_PERSISTING_FALSE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicObject,"unavailableNodes");
+         this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_TRUE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicObject,"alwaysAvailableNodes");
          this.persist(ASCENSION_PERSISTING_FALSE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicObject,"undoNodes");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_FALSE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicObject,"traits");
          this.persist(ASCENSION_PERSISTING_TRUE,TRANSCENSION_PERSISTING_TRUE,VALIDATION_CHECK_VALUE_TRUE,registerDynamicObject,"traitMultipliers");
@@ -1869,6 +1894,24 @@ package models
          return this.skins[this.selectedSkinIndex];
       }
       
+      public function getActiveSkillTreePlan() : SkillTreePlan
+      {
+         if(this.activeSkillTreePlanIndex != -1 && this.skillTreePlans[this.activeSkillTreePlanIndex])
+         {
+            return this.skillTreePlans[this.activeSkillTreePlanIndex];
+         }
+         return null;
+      }
+      
+      public function getSkillTreePlanBeingViewed() : SkillTreePlan
+      {
+         if(this.skillTreePlans[this.treePlannerIndexViewed])
+         {
+            return this.skillTreePlans[this.treePlannerIndexViewed];
+         }
+         return null;
+      }
+      
       public function get isOnHighestZone() : Boolean
       {
          return this.highestZone == this.currentZone;
@@ -2397,6 +2440,18 @@ package models
          stopBeforeGildOption.onWorldEndFunction = this.onWorldEndStopBeforeGild;
          stopBeforeGildOption.isUnlockedFunction = this.isStopBeforeGildOnWorldEndUnlocked;
          this.worldEndAutomationOptions.push(stopBeforeGildOption);
+         var ascendOnSystemEndOption:AutomatorWorldEndOption = new AutomatorWorldEndOption();
+         ascendOnSystemEndOption.name = "Ascend At End Of System";
+         ascendOnSystemEndOption.tooltipText = "Attempts the next world and Ascends once you\'ve completed the Star System.";
+         ascendOnSystemEndOption.onWorldEndFunction = this.onSystemEndAscend;
+         ascendOnSystemEndOption.isUnlockedFunction = this.isAscendOnSystemEndUnlocked;
+         this.worldEndAutomationOptions.push(ascendOnSystemEndOption);
+         var ascendOnPlanCompleted:AutomatorWorldEndOption = new AutomatorWorldEndOption();
+         ascendOnPlanCompleted.name = "Ascend On Plan Completed";
+         ascendOnPlanCompleted.tooltipText = "Attempts the next world until your active skill tree plan is completed. Once your skill tree plan is completed you will ascend so long as you have at least 1 Starfire.";
+         ascendOnPlanCompleted.onWorldEndFunction = this.onPlanCompletedAscend;
+         ascendOnPlanCompleted.isUnlockedFunction = this.isAscendOnPlanCompletedUnlocked;
+         this.worldEndAutomationOptions.push(ascendOnPlanCompleted);
       }
       
       public function onWorldEndStopBeforeGild() : void
@@ -2407,9 +2462,44 @@ package models
          }
       }
       
+      public function onSystemEndAscend() : void
+      {
+         if((this.currentWorldId + 1) % this.worldsPerSystem != 1)
+         {
+            this.changeWorld(this.currentWorldId + 1);
+         }
+         else
+         {
+            if(this.starfire > 0)
+            {
+               this.ascend();
+            }
+            this.changeWorld(this.currentWorldId + 1);
+         }
+      }
+      
+      public function onPlanCompletedAscend() : void
+      {
+         this.changeWorld(this.currentWorldId + 1);
+         if(this.getActiveSkillTreePlan() != null && this.getActiveSkillTreePlan().isPlanComplete() && this.starfire > 0)
+         {
+            this.ascend();
+         }
+      }
+      
       public function isStopBeforeGildOnWorldEndUnlocked() : Boolean
       {
          return this.highestWorldCompleted >= WORLD_END_AUTOMATION_OPTIONS_UNLOCK_WORLD;
+      }
+      
+      public function isAscendOnSystemEndUnlocked() : Boolean
+      {
+         return CH2.currentCharacter.transcensionLevel > 0;
+      }
+      
+      public function isAscendOnPlanCompletedUnlocked() : Boolean
+      {
+         return CH2.currentCharacter.transcensionLevel > 0;
       }
       
       public function onWorldEndRerunCurrentWorld() : void
@@ -2500,6 +2590,10 @@ package models
          {
             this.cachedTimelapseServerTime = 0;
             this.serverTimeOfLastUpdate = ServerTimeKeeper.instance.timestamp;
+         }
+         if(MiscUtils.requiresUpdate(1000,dt))
+         {
+            this.purchaseSkillTreeNodesFromPlan();
          }
          this.updateStats(dt);
          if(this.timeUntilDamageCache <= 0)
@@ -3666,15 +3760,77 @@ package models
          return statRating;
       }
       
+      public function getSkillTreePlanWithName(name:String) : SkillTreePlan
+      {
+         for(var i:int = 0; i < this.skillTreePlans.length; i++)
+         {
+            if(this.skillTreePlans[i].name == name)
+            {
+               return this.skillTreePlans[i];
+            }
+         }
+         return null;
+      }
+      
+      public function deleteSkillTreePlan(planIndex:int) : void
+      {
+         if(this.skillTreePlans.length > planIndex)
+         {
+            if(this.activeSkillTreePlanIndex == planIndex)
+            {
+               return;
+            }
+            if(this.activeSkillTreePlanIndex > planIndex)
+            {
+               this.activeSkillTreePlanIndex--;
+               this.skillTreePlans.splice(planIndex,1);
+            }
+            else
+            {
+               this.skillTreePlans.splice(planIndex,1);
+            }
+            if(this.treePlannerIndexViewed >= this.skillTreePlans.length)
+            {
+               this.treePlannerIndexViewed = 0;
+            }
+         }
+      }
+      
+      public function createNewSkillTreePlan(newName:String) : void
+      {
+         var newSkillTreePlan:SkillTreePlan = null;
+         if(!this.getSkillTreePlanWithName(newName))
+         {
+            newSkillTreePlan = new SkillTreePlan();
+            newSkillTreePlan.name = newName;
+            this.skillTreePlans.push(newSkillTreePlan);
+         }
+      }
+      
+      public function setActiveSkillTreePlanIndex(newActiveIndex:int) : void
+      {
+         if(this.skillTreePlans.length > newActiveIndex)
+         {
+            this.activeSkillTreePlanIndex = newActiveIndex;
+         }
+      }
+      
       public function setupSkillTree() : void
       {
          var key:* = null;
+         var newSkillTreePlan:SkillTreePlan = null;
          for(key in this.levelGraphNodeTypes)
          {
             if(this.levelGraphNodeTypes[key].setupFunction)
             {
                this.levelGraphNodeTypes[key].setupFunction();
             }
+         }
+         if(!this.skillTreePlans || this.skillTreePlans.length == 0)
+         {
+            newSkillTreePlan = new SkillTreePlan();
+            newSkillTreePlan.name = "Unnamed";
+            this.skillTreePlans.push(newSkillTreePlan);
          }
       }
       
@@ -4541,6 +4697,7 @@ package models
             "level":this.level,
             "ancientShardsPurchased":this.ancientShards
          });
+         this.purchaseSkillTreeNodesFromPlan();
       }
       
       public function addExperience(points:BigNumber) : void
@@ -4574,6 +4731,34 @@ package models
          }
          CH2UI.instance.refreshXPDisplays();
          CH2UI.instance.refreshWorldStatDisplay();
+      }
+      
+      public function purchaseSkillTreeNodesFromPlan() : void
+      {
+         var didSpendPoints:Boolean = false;
+         var nodeIdToPurchase:int = 0;
+         var node:LevelGraphNode = null;
+         if(this.getActiveSkillTreePlan() != null)
+         {
+            didSpendPoints = false;
+            while(CH2.currentCharacter.availableStatPoints.round().gtN(0) && this.getActiveSkillTreePlan().getNextNodeToPurchase() > -1)
+            {
+               nodeIdToPurchase = this.getActiveSkillTreePlan().getNextNodeToPurchase();
+               node = this.levelGraph.nodes[nodeIdToPurchase];
+               if(node.canBePurchased())
+               {
+                  this.levelGraph.purchaseNode(nodeIdToPurchase);
+                  didSpendPoints = true;
+                  continue;
+               }
+               break;
+            }
+            if(didSpendPoints && CH2UI.instance.mainUI && CH2UI.instance.mainUI.mainPanel.isOnGraphPanel)
+            {
+               CH2UI.instance.mainUI.mainPanel.graphPanel.redrawGraph();
+               CH2UI.instance.mainUI.mainPanel.graphPanel.updateInteractiveLayer();
+            }
+         }
       }
       
       public function getLevelUpCostToNextLevel(level:Number) : BigNumber
@@ -4712,11 +4897,13 @@ package models
          var _loc5_:* = null;
          var _loc6_:Skill = null;
          var _loc7_:Number = NaN;
-         var _loc1_:Number = Math.min(this.transcendenceMotes,Math.floor(10 + this.transcensionLevel));
+         var _loc1_:Number = Math.min(this.transcendenceMotes,Math.floor(60 + 2 * this.transcensionLevel));
          this.transcendenceMotes = this.transcendenceMotes - _loc1_;
-         this.transcensionLevel = this.transcensionLevel + _loc1_ / (10 + Math.floor(this.transcensionLevel));
+         this.transcensionLevel = this.transcensionLevel + _loc1_ / (60 + 2 * Math.floor(this.transcensionLevel));
          this.heroSouls.plusEquals(this.pendingHeroSouls.multiplyN(_loc1_));
          this.pendingHeroSouls = new BigNumber(0);
+         this.firstTranscendenceMoteCooldown = (60 + 2 * Math.floor(this.transcensionLevel)) * TRANSCENDENCE_MOTE_TIME_UNIT;
+         this.currentTranscendenceMoteCooldown = this.firstTranscendenceMoteCooldown;
          var _loc2_:Character = new Character();
          _loc2_.name = this.name;
          Characters.populateStaticFields(_loc2_);
@@ -4941,7 +5128,7 @@ package models
       
       public function isRubyShopAvailableDefault() : Boolean
       {
-         return this.currentRubyShop && this.currentRubyShop.length > 0 && !CH2.world.isBossZone(this.currentZone) && !this.didFinishWorld && this.totalRubies >= 50 && !CH2.world.massiveOrangeFish.isActive;
+         return this.currentRubyShop && this.currentRubyShop.length > 0 && !CH2.world.isBossZone(this.currentZone) && !this.didFinishWorld && this.totalRubies >= 50;
       }
       
       public function populateRubyPurchaseOptions() : void
@@ -4979,7 +5166,10 @@ package models
          this.transcendenceMotePurchase.getDescription = this.getTranscendenceMoteDescription;
          this.transcendenceMotePurchase.getSoldOutText = this.getDefaultSoldOutText;
          this.transcendenceMotePurchase.onPurchase = this.onTranscendenceMotePurchase;
-         this.transcendenceMotePurchase.canAppear = this.canTranscendenceMoteAppear;
+         this.transcendenceMotePurchase.canAppear = function():*
+         {
+            return false;
+         };
          this.transcendenceMotePurchase.canPurchase = this.canPurchaseTranscendenceMote;
          this.rubyPurchaseOptions.push(this.transcendenceMotePurchase);
          if(this.populateRubyPurchaseOptionsHandler)
@@ -4994,6 +5184,8 @@ package models
       
       public function populateRubyPurchaseOptionsDefault() : void
       {
+         var bagOfGold:RubyPurchase = null;
+         var magicalBrew:RubyPurchase = null;
          var powerRunePurchase:RubyPurchase = new RubyPurchase();
          powerRunePurchase.id = "powerRunePurchase";
          powerRunePurchase.priority = 2;
@@ -5054,7 +5246,7 @@ package models
          zoneMetalDetector.canAppear = this.canZoneMetalDetectorAppear;
          zoneMetalDetector.canPurchase = this.canPurchaseZoneMetalDetector;
          this.rubyPurchaseOptions.push(zoneMetalDetector);
-         var bagOfGold:RubyPurchase = new RubyPurchase();
+         bagOfGold = new RubyPurchase();
          bagOfGold.id = "bagOfGold";
          bagOfGold.priority = 3;
          bagOfGold.name = "Bag of Gold";
@@ -5066,7 +5258,7 @@ package models
          bagOfGold.canAppear = this.canBagOfGoldAppear;
          bagOfGold.canPurchase = this.canPurchaseBagOfGold;
          this.rubyPurchaseOptions.push(bagOfGold);
-         var magicalBrew:RubyPurchase = new RubyPurchase();
+         magicalBrew = new RubyPurchase();
          magicalBrew.id = "magicalBrew";
          magicalBrew.priority = 3;
          magicalBrew.name = "Magical Brew";
@@ -5209,6 +5401,10 @@ package models
          this.timeSinceLastAutomatorPointPurchase = this.timeSinceLastAutomatorPointPurchase + dt;
          this.timeSinceLastEtherealItemPurchase = this.timeSinceLastEtherealItemPurchase + dt;
          this.timeSinceLastTranscendenceMotePurchase = this.timeSinceLastTranscendenceMotePurchase + dt;
+         if(this.timeSinceLastTranscendenceMotePurchase >= this.currentTranscendenceMoteCooldown)
+         {
+            this.onTranscendenceMotePurchase();
+         }
          this.timeSinceTimeMetalDetectorActivated = this.timeSinceTimeMetalDetectorActivated + dt;
          if(this.timeMetalDetectorActive && this.timeSinceTimeMetalDetectorActivated > METAL_DETECTOR_TIME_DURATION)
          {
@@ -5230,7 +5426,6 @@ package models
             rubyPurchase.onPurchase();
             this.rubies = this.rubies - rubyPurchasePrice;
          }
-         CH2UI.instance.mainUI.rightPanel.currentPanel.refreshAll();
       }
       
       public function getDefaultSoldOutText() : String
@@ -5349,6 +5544,18 @@ package models
       {
          this.transcendenceMotes++;
          this.timeSinceLastTranscendenceMotePurchase = this.timeSinceLastTranscendenceMotePurchase - this.currentTranscendenceMoteCooldown;
+         if(this.transcendenceMotes < 60 + 2 * this.transcensionLevel)
+         {
+            this.currentTranscendenceMoteCooldown = this.currentTranscendenceMoteCooldown - TRANSCENDENCE_MOTE_TIME_UNIT;
+         }
+         else
+         {
+            this.currentTranscendenceMoteCooldown = 86400000;
+         }
+         if(this.pendingHeroSouls.gtN(0))
+         {
+            this.hasUnlockedTranscendencePanel = true;
+         }
       }
       
       public function canTranscendenceMoteAppear() : Boolean
@@ -5359,6 +5566,11 @@ package models
       public function canPurchaseTranscendenceMote() : Boolean
       {
          return this.timeSinceLastTranscendenceMotePurchase > this.currentTranscendenceMoteCooldown;
+      }
+      
+      public function getMoteCap() : Number
+      {
+         return Math.floor(60 + 2 * this.transcensionLevel);
       }
       
       public function getAutomatorPointDescription() : String
