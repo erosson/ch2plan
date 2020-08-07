@@ -35,6 +35,7 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 - Added an import/export field compatible with the new in-game tree planner.
 - New builds now track and display the order of node purchases.
   - Old builds will still work, but their node order will be wrong.
+- Fixed a bug breaking this changelog page.
 
 ## 2020-07-06
 

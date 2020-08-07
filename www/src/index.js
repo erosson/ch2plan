@@ -3,7 +3,7 @@ import { Zlib } from "zlibjs/bin/rawinflate.min.js";
 import AMF from "amf-js";
 import { Elm } from "../src/Main.elm";
 import gameData from "../../assets/public/ch2data/chars/all.min.json";
-import changelog from "raw-loader!../../CHANGELOG.md";
+import changelog from "!!raw-loader!../../CHANGELOG.md";
 
 // google analytics
 window.dataLayer = window.dataLayer || [];
