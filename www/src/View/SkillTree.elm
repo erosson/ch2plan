@@ -7,7 +7,7 @@ Don't import Svg!
 -}
 
 import Dict exposing (Dict)
-import GameData exposing (GameData)
+import GameData exposing (GameData, NodeId)
 import GameData.Stats as Stats exposing (Stat(..))
 import Html as H exposing (..)
 import Html.Attributes as A exposing (..)
@@ -224,12 +224,13 @@ viewTooltip model graph node =
             ]
                 |> List.map (Tuple.mapSecond <| \n -> String.fromFloat n ++ "px")
                 |> List.map (\( k, v ) -> style k v)
+
+        transcendLevel =
+            model.transcendNodes |> Dict.get node.id |> Maybe.withDefault 1
     in
     div ([ class "tooltip" ] ++ style_)
         [ b [] [ text node.val.name ]
         , p [] [ text <| GameData.tooltip node.val "" ]
-
-        -- , p [] [ text <| Debug.toString node.val.stats ]
         , p [ class "flavor" ] [ text <| Maybe.withDefault "" node.val.flavorText ]
         , p [ class "flammable" ]
             (if node.val.flammable then
@@ -238,15 +239,17 @@ viewTooltip model graph node =
              else
                 []
             )
+        , p [ class "node-tooltip-traits" ] <|
+            if model.features.transcendNodes then
+                node.val.stats |> List.map (viewTooltipTrait transcendLevel)
+
+            else
+                []
         , div [] <|
-            let
-                level =
-                    model.transcendNodes |> Dict.get node.id |> Maybe.withDefault 1
-            in
             if model.features.transcendNodes then
                 [ div [] <|
-                    if level > 1 then
-                        [ text "Level ", text <| String.fromInt level ]
+                    if transcendLevel > 1 then
+                        [ text "Level ", text <| String.fromInt transcendLevel ]
 
                     else
                         -- `&nbsp;` https://twitter.com/rtfeldman/status/767263564214120448?lang=en
@@ -264,7 +267,7 @@ viewTooltip model graph node =
                                 [ text "Upgrade" ]
                             , button
                                 [ onClick <| Model.TranscendNodeDowngrade node.id
-                                , disabled <| level <= 1
+                                , disabled <| transcendLevel <= 1
                                 ]
                                 [ text "Downgrade" ]
                             ]
@@ -276,3 +279,16 @@ viewTooltip model graph node =
             else
                 []
         ]
+
+
+viewTooltipTrait : Int -> ( Stat, Int ) -> Html msg
+viewTooltipTrait transcendLevel ( trait, level0 ) =
+    let
+        name =
+            Stats.statToString trait
+
+        level =
+            level0 * transcendLevel
+    in
+    -- div [] []
+    div [] [ text name, text ": +", text <| String.fromInt level ]

@@ -13,6 +13,7 @@ module GameData.Stats exposing
     , getStat
     , growthToString
     , statTable
+    , statToString
     )
 
 import Dict exposing (Dict)

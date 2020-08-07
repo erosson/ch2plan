@@ -102,6 +102,10 @@ html {
 .tooltip .flavor {
   color: #999;
 }
+.node-tooltip-traits {
+  font-size: 70%;
+  color: #777;
+}
 
 .node-highlight0 {
   filter: url(#highlight0);
