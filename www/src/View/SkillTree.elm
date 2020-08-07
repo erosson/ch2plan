@@ -41,6 +41,7 @@ view header model graph params =
                 ([ button [ A.class "sidebar-hide", A.title "hide", E.onClick Model.ToggleSidebar ] [ text "<<" ] ]
                     ++ header
                     ++ [ viewSelectSave ]
+                    ++ viewImportExport params
                     ++ viewError model.error
                     ++ [ h4 [] [ text <| graph.char.flavorName ++ ", " ++ graph.char.flavorClass ]
                        , p [] [ text <| graph.char.flavor ]
@@ -49,7 +50,7 @@ view header model graph params =
                        , p [] [ a [ Route.href <| Route.EthItems ] [ text <| String.fromInt ethItemCount, text " ethereal items" ] ]
                        , p [] [ a [ Route.href <| Route.Stats params ] [ text "Statistics:" ] ]
                        , View.Stats.viewStatsSummary graph.char <| Stats.statTable <| Model.statsSummary model graph
-                       , p [] [ a [ Route.href <| Route.Stats params ] [ text <| String.fromInt (Set.size graph.selected) ++ " skill points" ] ]
+                       , p [] [ a [ Route.href <| Route.Stats params ] [ text <| String.fromInt (Set.size graph.selected.set) ++ " skill points" ] ]
                        , p [] [ a [ Route.href <| Route.StatsTSV params ] [ text "Spreadsheet format" ] ]
                        ]
                 )
@@ -57,6 +58,16 @@ view header model graph params =
           else
             button [ A.class "sidebar-show", A.title "show", E.onClick Model.ToggleSidebar ] [ text ">>" ]
         ]
+
+
+viewImportExport : Route.HomeParams -> List (Html Msg)
+viewImportExport params =
+    [ div []
+        [ text "In-game planner import/export:"
+        , input [ onInput Model.TextImport, value <| Maybe.withDefault "" params.build ] []
+        , div [] [ small [] [ text "copy this to export, or paste here to import" ] ]
+        ]
+    ]
 
 
 viewGraph : Model -> GraphModel -> Html Msg

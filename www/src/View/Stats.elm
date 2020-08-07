@@ -54,7 +54,7 @@ view model gameData params =
                         ]
                     , div [ class "stats-box" ]
                         [ p []
-                            [ a [ Route.href <| Route.Home params ] [ text <| String.fromInt (Set.size selected) ++ " skill points:" ]
+                            [ a [ Route.href <| Route.Home params ] [ text <| String.fromInt (Set.size selected.set) ++ " skill points:" ]
                             , text " ("
                             , a [ Route.href <| Route.StatsTSV params ] [ text "spreadsheet format" ]
 

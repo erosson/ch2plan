@@ -230,10 +230,10 @@ isEdgeSelected : GraphModel -> GameData.Edge -> Bool
 isEdgeSelected home ( a, b ) =
     let
         aSelected =
-            Set.member a.id home.selected
+            Set.member a.id home.selected.set
 
         bSelected =
-            Set.member b.id home.selected
+            Set.member b.id home.selected.set
     in
     aSelected && bSelected
 
@@ -273,7 +273,7 @@ viewNodeBackground { selected, search, neighbors } { id, x, y, val } =
         , A.xlinkHref <|
             View.Util.nodeBackgroundImage val
                 { isHighlighted = isNodeHighlighted search val
-                , isSelected = Set.member id selected
+                , isSelected = Set.member id selected.set
                 , isNeighbor = Set.member id neighbors
                 }
         , A.x <| String.fromInt <| x - nodeBGSize // 2
@@ -304,15 +304,31 @@ viewNode features home { id, x, y, val } =
         , E.on "touchStart" <| Decode.succeed <| Model.NodeMouseDown id False
         , E.on "touchEnd" <| Decode.succeed <| Model.NodeMouseUp id
         ]
-        [ S.image
-            [ A.xlinkHref <| View.Util.nodeIconUrl val
-            , A.x <| String.fromInt <| x - iconSize // 2
-            , A.y <| String.fromInt <| y - iconSize // 2
-            , A.width <| String.fromInt iconSize
-            , A.height <| String.fromInt iconSize
+        (List.filterMap identity
+            [ S.image
+                [ A.xlinkHref <| View.Util.nodeIconUrl val
+                , A.x <| String.fromInt <| x - iconSize // 2
+                , A.y <| String.fromInt <| y - iconSize // 2
+                , A.width <| String.fromInt iconSize
+                , A.height <| String.fromInt iconSize
+                ]
+                []
+                |> Just
+            , Dict.get id home.selected.indexById
+                |> Maybe.map
+                    (\ord ->
+                        S.text_
+                            [ A.class "node-index"
+                            , A.x <| String.fromInt <| x - iconSize // 2
+                            , A.y <| String.fromInt <| y - iconSize // 2
+
+                            -- , A.width <| String.fromInt iconSize
+                            -- , A.height <| String.fromInt iconSize
+                            ]
+                            [ S.text <| String.fromInt <| 1 + ord ]
+                    )
             ]
-            []
-        ]
+        )
 
 
 ctrlKeyDecoder : Decode.Decoder Bool
@@ -359,9 +375,9 @@ nodeHighlightClass q t =
             "node-highlight node-highlight" ++ String.fromInt i
 
 
-nodeSelectedClass : Set Int -> Int -> String
+nodeSelectedClass : Graph.Selected -> Int -> String
 nodeSelectedClass selected id =
-    if Set.member id selected then
+    if Set.member id selected.set then
         "node-selected"
 
     else

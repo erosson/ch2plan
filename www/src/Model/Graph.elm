@@ -1,19 +1,19 @@
 module Model.Graph exposing
-    (  GraphModel
-       -- select
-
+    ( GraphModel
+    , Selected
+    , createSelected
     , nodesToBuild
     , parse
-    ,  reachableSelectedNodes
-       -- create/update
-
+    , reachableSelectedNodes
+    , removeSelected
     , search
     , updateOnChange
     )
 
 import Dict exposing (Dict)
-import GameData exposing (GameData)
+import GameData exposing (GameData, NodeId)
 import Lazy exposing (Lazy)
+import List.Extra
 import Maybe.Extra
 import Model.Dijkstra as Dijkstra
 import Ports
@@ -38,21 +38,43 @@ type alias GraphModel =
     { game : GameData.GameVersionData
     , char : GameData.Character
     , search : Maybe Regex
-    , selected : Set GameData.NodeId
-    , neighbors : Set GameData.NodeId
+    , selected : Selected
+    , neighbors : Set NodeId
     , dijkstra : Lazy Dijkstra.Result
     }
 
 
-create : GameData.GameVersionData -> GameData.Character -> Set GameData.NodeId -> GraphModel
-create game char selected =
+type alias Selected =
+    -- TODO ordered-set instead of set/list
+    { list : List NodeId, set : Set NodeId, indexById : Dict NodeId Int }
+
+
+create : GameData.GameVersionData -> GameData.Character -> List NodeId -> GraphModel
+create game char selectedList =
+    let
+        selected =
+            createSelected selectedList
+    in
     { game = game
     , char = char
     , search = Nothing -- this has its own message, parsed in js for https://github.com/erosson/ch2plan/issues/44
     , selected = selected
-    , neighbors = neighborNodes char.graph selected
-    , dijkstra = Lazy.lazy (\() -> runDijkstra char.graph selected)
+    , neighbors = neighborNodes char.graph selected.set
+    , dijkstra = Lazy.lazy (\() -> runDijkstra char.graph selected.set)
     }
+
+
+createSelected : List NodeId -> Selected
+createSelected nodes =
+    nodes
+        |> List.indexedMap (\o n -> ( n, o ))
+        |> Dict.fromList
+        |> Selected nodes (Set.fromList nodes)
+
+
+removeSelected : NodeId -> Selected -> Selected
+removeSelected id =
+    .list >> List.Extra.remove id >> createSelected
 
 
 runDijkstra graph selected =
@@ -63,15 +85,15 @@ runDijkstra graph selected =
     Dijkstra.dijkstra graph selected Nothing
 
 
-neighborNodes : GameData.Graph -> Set GameData.NodeId -> Set GameData.NodeId
+neighborNodes : GameData.Graph -> Set NodeId -> Set NodeId
 neighborNodes graph selected =
     Set.foldr (\id res -> GameData.neighbors id graph |> Set.union res) (GameData.startNodes graph) selected
         |> (\res -> Set.diff res selected)
 
 
-nodesToBuild : GameData.Graph -> Set GameData.NodeId -> Maybe String
+nodesToBuild : GameData.Graph -> Selected -> Maybe String
 nodesToBuild graph =
-    Set.toList
+    .list
         >> List.map String.fromInt
         >> String.join "&"
         >> (\s ->
@@ -83,42 +105,15 @@ nodesToBuild graph =
            )
 
 
-buildToNodes : GameData.Graph -> Maybe String -> Result String (Set GameData.NodeId)
-buildToNodes graph build =
-    let
-        strList =
-            build |> Maybe.withDefault "" |> String.split "&"
-
-        idList =
-            -- non-ints are ignored. TODO: maybe we should error for these
-            strList |> List.map String.toInt |> Maybe.Extra.values
-
-        ids =
-            idList |> Set.fromList
-    in
-    if strList == [ "all" ] then
-        -- special-case a build with all nodes selected, "all"
-        Ok <| allSelectableNodes graph
-
-    else if List.length idList /= Set.size ids then
-        Err "can't select a node twice"
-
-    else if not <| isValidSelection graph ids then
-        Err "some nodes in this build aren't connected to the start location"
-
-    else
-        Ok ids
-
-
 {-| Remove any selected nodes that can't be reached from the start location.
 -}
-reachableSelectedNodes : GameData.Graph -> Set GameData.NodeId -> Set GameData.NodeId
-reachableSelectedNodes graph selected =
+reachableNodes : GameData.Graph -> Set NodeId -> Set NodeId
+reachableNodes graph selected =
     let
         loop :
-            GameData.NodeId
-            -> { reachable : Set GameData.NodeId, tried : Set GameData.NodeId }
-            -> { reachable : Set GameData.NodeId, tried : Set GameData.NodeId }
+            NodeId
+            -> { reachable : Set NodeId, tried : Set NodeId }
+            -> { reachable : Set NodeId, tried : Set NodeId }
         loop id res =
             if Set.member id res.tried then
                 res
@@ -138,17 +133,29 @@ reachableSelectedNodes graph selected =
         |> .reachable
 
 
-allSelectableNodes : GameData.Graph -> Set GameData.NodeId
+reachableSelectedNodes : GameData.Graph -> Selected -> Selected
+reachableSelectedNodes graph selected =
+    let
+        reachable : Set NodeId
+        reachable =
+            reachableNodes graph selected.set
+    in
+    selected.list
+        |> List.filter (\n -> Set.member n reachable)
+        |> createSelected
+
+
+allSelectableNodes : GameData.Graph -> Set NodeId
 allSelectableNodes graph =
     graph.nodes
         |> Dict.keys
         |> Set.fromList
-        |> reachableSelectedNodes graph
+        |> reachableNodes graph
 
 
-isValidSelection : GameData.Graph -> Set GameData.NodeId -> Bool
+isValidSelection : GameData.Graph -> Set NodeId -> Bool
 isValidSelection graph selected =
-    reachableSelectedNodes graph selected == selected
+    reachableNodes graph selected == selected
 
 
 search : String -> GraphModel -> GraphModel
@@ -188,9 +195,37 @@ parse gameData q =
 
                                 Err err ->
                                     -- this error is recoverable: show an empty tree with the error message
-                                    ( Set.empty, Just err )
+                                    ( [], Just err )
                     in
                     Ok <| ( create game char selected, error )
+
+
+buildToNodes : GameData.Graph -> Maybe String -> Result String (List NodeId)
+buildToNodes graph build =
+    let
+        strList =
+            build |> Maybe.withDefault "" |> String.split "&"
+
+        idList =
+            -- non-ints are ignored. TODO: maybe we should error for these
+            strList |> List.map String.toInt |> Maybe.Extra.values
+
+        ids =
+            idList |> Set.fromList
+    in
+    if strList == [ "all" ] then
+        -- special-case a build with all nodes selected, "all"
+        -- TODO: topo-sort; this is an invalid build when imported into the game
+        Ok <| Set.toList <| allSelectableNodes graph
+
+    else if List.length idList /= Set.size ids then
+        Err "can't select a node twice"
+
+    else if not <| isValidSelection graph ids then
+        Err "some nodes in this build aren't connected to the start location"
+
+    else
+        Ok idList
 
 
 updateOnChange : GraphModel -> GraphModel -> GraphModel

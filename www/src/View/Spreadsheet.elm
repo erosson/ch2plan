@@ -71,7 +71,7 @@ formatTranscendNodes url model =
                         else
                             let
                                 isSelected =
-                                    if Set.member id selected then
+                                    if Set.member id selected.set then
                                         "TRUE"
 
                                     else

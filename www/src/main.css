@@ -25,6 +25,9 @@ svg .node {
   stroke-width: 1;
   fill: #ddd;
 }
+svg .node-index {
+  font-size: 200%;
+}
 svg .zoom-buttons {
   fill: #222d;
   stroke: #ccc;

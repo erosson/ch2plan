@@ -32,6 +32,9 @@ These recently left beta, and are turned _on_ by default. For now, you can disab
 ## 2020-08-07
 
 - Updated to live version 0.15.0.
+- Added an import/export field compatible with the new in-game tree planner.
+- New builds now track and display the order of node purchases.
+  - Old builds will still work, but their node order will be wrong.
 
 ## 2020-07-06
 

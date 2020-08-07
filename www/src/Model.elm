@@ -64,6 +64,7 @@ type Msg
     | ToggleSidebar
     | SaveFileSelected String
     | SaveFileImport D.Value
+    | TextImport String
     | RunecorderAppend String
     | RunecorderInput String
     | RunecorderSelect (Maybe Int)
@@ -172,7 +173,7 @@ init flags loc urlKey =
                 |> Maybe.Extra.unwrap 1
                     (\{ char, selected } ->
                         clampZoom flags.windowSize char.graph <|
-                            if selected == Set.empty then
+                            if Set.isEmpty selected.set then
                                 1
 
                             else
@@ -228,15 +229,6 @@ preprocessCmd =
         |> Task.perform identity
 
 
-invert : comparable -> Set comparable -> Set comparable
-invert id set =
-    if Set.member id set then
-        Set.remove id set
-
-    else
-        Set.insert id set
-
-
 visibleTooltip : Model -> Maybe NodeId
 visibleTooltip { tooltip } =
     case tooltip of
@@ -261,17 +253,20 @@ updateNode id model =
         (\graph params ->
             let
                 selected =
-                    if Set.member id graph.selected then
+                    if Set.member id graph.selected.set then
                         -- deselect a node: remove it, and any disconnected from the start by its removal
                         graph.selected
-                            |> invert id
+                            |> Graph.removeSelected id
                             |> Graph.reachableSelectedNodes graph.char.graph
 
                     else
                         -- select a node: add it, and any in between
-                        Dijkstra.selectPathToNode (Lazy.force graph.dijkstra) id
-                            |> Set.fromList
-                            |> Set.union graph.selected
+                        graph.selected.list
+                            ++ (id
+                                    |> Dijkstra.selectPathToNode (Lazy.force graph.dijkstra)
+                                    |> List.filter (\n -> Set.member n graph.selected.set |> not)
+                               )
+                            |> Graph.createSelected
 
                 route =
                     Route.Home
@@ -464,6 +459,21 @@ update msg model =
 
                 ToggleSidebar ->
                     ( { model | sidebarOpen = not model.sidebarOpen }, Cmd.none )
+
+                TextImport str ->
+                    let
+                        cmd : Cmd Msg
+                        cmd =
+                            case model.route of
+                                Just (Route.Home params) ->
+                                    Route.Home { params | build = Just str }
+                                        |> Route.stringify
+                                        |> Nav.pushUrl model.urlKey
+
+                                _ ->
+                                    Cmd.none
+                    in
+                    ( model, cmd )
 
                 SaveFileSelected elemId ->
                     ( model, Ports.saveFileSelected elemId )
@@ -717,13 +727,13 @@ type alias NodeTypeSummary =
     }
 
 
-nodeSummary : { m | transcendNodes : Dict NodeId Int } -> { a | selected : Set NodeId, char : GameData.Character } -> List NodeTypeSummary
+nodeSummary : { m | transcendNodes : Dict NodeId Int } -> { a | selected : Graph.Selected, char : GameData.Character } -> List NodeTypeSummary
 nodeSummary m { selected, char } =
     let
         selectedNodes : Dict NodeId ( NodeType, Int )
         selectedNodes =
             char.graph.nodes
-                |> Dict.filter (\id nodeType -> Set.member id selected)
+                |> Dict.filter (\id nodeType -> Set.member id selected.set)
                 |> Dict.map (\id n -> ( n.val, m.transcendNodes |> Dict.get id |> Maybe.withDefault 1 ))
     in
     selectedNodes
@@ -750,7 +760,7 @@ nodeSummary m { selected, char } =
             )
 
 
-statsSummary : { m | transcendNodes : Dict NodeId Int } -> { a | selected : Set NodeId, char : GameData.Character, game : GameData.GameVersionData } -> List StatTotal
+statsSummary : { m | transcendNodes : Dict NodeId Int } -> { a | selected : Graph.Selected, char : GameData.Character, game : GameData.GameVersionData } -> List StatTotal
 statsSummary m g =
     nodeSummary m g
         |> List.concatMap (\s -> s.nodeType.stats |> List.map (\( stat, level ) -> ( stat, s.transcendLevel * s.count * level )))
@@ -758,7 +768,7 @@ statsSummary m g =
 
 
 type alias StatsSummary =
-    { selected : Set NodeId
+    { selected : Graph.Selected
     , char : GameData.Character
     , game : GameData.GameVersionData
     , nodes : List NodeTypeSummary
