@@ -66,7 +66,7 @@ viewBody model =
                             View.Spreadsheet.view model gameData params
 
                         Route.Transcend params ->
-                            View.Transcend.view model gameData params
+                            View.Transcend.view (div [] header) model gameData params
 
                         Route.EthItems ->
                             div [] (header ++ [ View.EthItems.view model ])

@@ -11,22 +11,6 @@ The developer: https://github.com/erosson . Also on [Reddit](https://www.reddit.
 Shameless self-promotion: if you like Clicker Heroes, you should try my game, [Swarm Simulator](https://www.swarmsim.com).
 Now also on [Android](https://play.google.com/store/apps/details?id=com.ironhorse.swarmsimulator) and [iOS](https://itunes.apple.com/us/app/swarm-simulator-evolution/id1320056680)!
 
-## [Unreleased]
-
-### Beta/experimental features
-
-These new features are at least partially working, but turned _off_ by default.
-
-- Nothing, for now.
-
-### New features
-
-These recently left beta, and are turned _on_ by default. For now, you can disable them if they're causing trouble - that won't be possible forever, so if they're broken, please [contact the developer](https://www.reddit.com/user/kawaritai)!
-
-- [Prettier-looking, faster-activating skill info tooltips/mouseover text](https://ch2.erosson.org/?enableFancyTooltips=0).
-- [Import your build from a saved game](https://ch2.erosson.org/?enableSaveImport=0).
-- [Full-screen skill tree](https://ch2.erosson.org/?enableFullscreen=0).
-
 ---
 
 ## 2020-08-07

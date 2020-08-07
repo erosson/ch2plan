@@ -11,6 +11,7 @@ module GameData.Stats exposing
     , calcStats
     , decoder
     , getStat
+    , growthToString
     , statTable
     )
 
@@ -824,6 +825,34 @@ statToString stat =
 
         ICE_FIRE_SYMBIOSIS ->
             "ICE_FIRE_SYMBIOSIS"
+
+
+growthToString : Growth -> String
+growthToString g =
+    case g of
+        Noop ->
+            "Noop"
+
+        ExponentialMultiplier ->
+            "ExponentialMultiplier"
+
+        Linear ->
+            "Linear"
+
+        LinearReciprocal ->
+            "LinearReciprocal"
+
+        LinearReciprocalComplement ->
+            "LinearReciprocalComplement"
+
+        OnePlusLinearReciprocalComplement ->
+            "OnePlusLinearReciprocalComplement"
+
+        LinearExponential ->
+            "LinearExponential"
+
+        Constant ->
+            "Constant"
 
 
 statsBySkill : Dict String (Dict String Stat)

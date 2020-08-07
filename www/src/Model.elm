@@ -71,6 +71,7 @@ type Msg
     | RunecorderRun
     | TranscendNodeUpgrade NodeId
     | TranscendNodeDowngrade NodeId
+    | TranscendPerkInput Int String
 
 
 type alias Model =
@@ -605,6 +606,23 @@ update msg model =
 
                 TranscendNodeDowngrade id ->
                     ( { model | transcendNodes = model.transcendNodes |> transcendNodeIncr id -1 }, Cmd.none )
+
+                TranscendPerkInput id str ->
+                    ( { model | transcendPerks = model.transcendPerks |> transcendPerkInput id str }, Cmd.none )
+
+
+transcendPerkInput : Int -> String -> Dict Int Int -> Dict Int Int
+transcendPerkInput id input =
+    if input == "" then
+        Dict.remove id
+
+    else
+        case String.toInt input of
+            Nothing ->
+                identity
+
+            Just val ->
+                val |> max 0 |> Dict.insert id
 
 
 transcendNodeIncr : NodeId -> Int -> Dict NodeId Int -> Dict NodeId Int

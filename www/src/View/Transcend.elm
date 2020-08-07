@@ -7,8 +7,10 @@ import Html as H exposing (..)
 import Html.Attributes as A exposing (..)
 import Html.Events as E exposing (..)
 import Maybe.Extra
-import Model exposing (Model)
+import Model exposing (Model, Msg)
+import Model.Graph exposing (GraphModel)
 import Model.Skill as Skill
+import NumberSuffix
 import Result.Extra
 import Route
 import Set exposing (Set)
@@ -45,8 +47,13 @@ zipPerks char params game =
                 |> Result.Extra.combine
 
 
-view : Model -> GameData -> Route.HomeParams -> Html msg
-view model gameData params =
+perkLevel : TranscensionPerk -> Model -> Int
+perkLevel perk =
+    .transcendPerks >> Dict.get perk.key >> Maybe.withDefault 0
+
+
+view : Html Msg -> Model -> GameData -> Route.HomeParams -> Html Msg
+view header model gameData params =
     case ( model.graph, model.error ) of
         ( Nothing, Just err ) ->
             -- div [] [ text <| Debug.toString err ]
@@ -55,36 +62,132 @@ view model gameData params =
         ( Nothing, Nothing ) ->
             div [] [ text "???no graph???" ]
 
-        ( Just { game, char }, _ ) ->
-            case zipPerks char params game of
+        ( Just graph, _ ) ->
+            case zipPerks graph.char params graph.game of
                 Err err ->
                     div [] [ text err ]
 
                 Ok perks ->
-                    perks
-                        |> List.map
-                            (\perk ->
-                                let
-                                    level : Int
-                                    level =
-                                        Dict.get perk.key model.transcendPerks |> Maybe.withDefault 0
-                                in
-                                li []
-                                    [ div [] [ b [] [ text perk.data.name ] ]
-                                    , div [] [ text perk.data.description ]
+                    let
+                        perkLevels =
+                            perks |> List.map (\p -> ( p, perkLevel p model ))
+                    in
+                    div []
+                        [ viewHeader header params graph perkLevels
+                        , ul [ class "transcend-perks" ]
+                            (List.map (viewPerk params graph) perkLevels)
+                        ]
 
-                                    -- , div [] [ text <| Debug.toString perk.stats.costFunction ]
-                                    , div []
-                                        (case perk.stats.trait of
-                                            Nothing ->
-                                                []
 
-                                            Just t ->
-                                                [ text "trait: ", text t ]
-                                        )
-                                    , div [] [ text "Level: ", text <| String.fromInt level ]
+viewHeader : Html msg -> Route.HomeParams -> GraphModel -> List ( TranscensionPerk, Int ) -> Html msg
+viewHeader header params { game, char } perks =
+    let
+        totalCost =
+            perks |> List.map (\( p, lvl ) -> totalLevelCost p.stats lvl) |> List.sum
+    in
+    div [ class "transcend-perks-header" ]
+        [ header
+        , p [] [ a [ Route.href <| Route.Home params ] [ text "View Skill Tree" ] ]
+        , div [] [ viewInt totalCost, text " hero souls spent" ]
+        ]
 
-                                    -- , div [] [ text <| Debug.toString perk ]
-                                    ]
+
+viewPerk : Route.HomeParams -> GraphModel -> ( TranscensionPerk, Int ) -> Html Msg
+viewPerk params { game, char } ( perk, level ) =
+    let
+        ( g, ga ) =
+            perk.stats.costFunction
+
+        debugText =
+            String.join "\n" <|
+                [ "cost: " ++ Stats.growthToString g ++ "(" ++ String.join ", " (List.map String.fromFloat ga) ++ ")" ]
+                    ++ (case perk.stats.trait of
+                            Nothing ->
+                                []
+
+                            Just t ->
+                                [ "trait: " ++ t ]
+                       )
+    in
+    li []
+        [ div [ class "transcend-perk-level" ]
+            [ input
+                [ type_ "number"
+                , A.min "0"
+                , A.max "6666"
+                , onInput <| Model.TranscendPerkInput perk.key
+                , value <| String.fromInt level
+                ]
+                []
+            ]
+        , div
+            [ class "transcend-perk-body"
+            , title debugText
+            ]
+            [ h4 [] [ text perk.data.name ]
+            , p [] [ text perk.data.description ]
+
+            -- , div [] [ text <| Debug.toString perk.stats.costFunction ]
+            -- , div [] [ text <| Debug.toString perk ]
+            , div [ class "cost" ]
+                [ [ nextLevelCost perk.stats level
+                        |> Maybe.map
+                            (\c ->
+                                formatInt c ++ " souls for next level"
                             )
-                        |> ul []
+                  , let
+                        c =
+                            totalLevelCost perk.stats level
+                    in
+                    if c <= 0 then
+                        Nothing
+
+                    else
+                        Just <| formatInt c ++ " souls spent"
+                  ]
+                    |> List.filterMap identity
+                    |> String.join "; "
+                    |> text
+                ]
+            ]
+        , div [ style "clear" "left" ] []
+        ]
+
+
+formatInt =
+    NumberSuffix.formatInt NumberSuffix.standardConfig
+
+
+viewInt =
+    text << formatInt
+
+
+totalLevelCost : Stats.TranscensionPerk -> Int -> Int
+totalLevelCost perk level =
+    List.range 0 (level - 1)
+        |> List.filterMap (nextLevelCost perk)
+        |> List.sum
+
+
+nextLevelCost : Stats.TranscensionPerk -> Int -> Maybe Int
+nextLevelCost perk level =
+    let
+        levelf =
+            toFloat level
+    in
+    case perk.costFunction of
+        ( Stats.Constant, [ cost ] ) ->
+            if level == 0 then
+                cost |> ceiling |> Just
+
+            else
+                Nothing
+
+        ( Stats.ExponentialMultiplier, [ pow ] ) ->
+            (pow ^ levelf) |> ceiling |> Just
+
+        ( Stats.LinearExponential, [ base, incr, pow ] ) ->
+            (base + levelf) * (pow ^ levelf) |> ceiling |> Just
+
+        _ ->
+            Nothing

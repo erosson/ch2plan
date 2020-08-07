@@ -48,6 +48,12 @@ view header model graph params =
                        , viewVersionNav graph.game params
                        , viewSearch model params.version
                        , p [] [ a [ Route.href <| Route.EthItems ] [ text <| String.fromInt ethItemCount, text " ethereal items" ] ]
+                       , p [] <|
+                            if model.features.transcendNodes then
+                                [ a [ Route.href <| Route.Transcend params ] [ text "Transcension Perks" ] ]
+
+                            else
+                                []
                        , p [] [ a [ Route.href <| Route.Stats params ] [ text "Statistics:" ] ]
                        , View.Stats.viewStatsSummary graph.char <| Stats.statTable <| Model.statsSummary model graph
                        , p [] [ a [ Route.href <| Route.Stats params ] [ text <| String.fromInt (Set.size graph.selected.set) ++ " skill points" ] ]
