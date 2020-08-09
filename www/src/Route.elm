@@ -168,6 +168,7 @@ parser =
         , P.map Stats <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "s" </> encodedString </> P.string
         , P.map StatsTSV <| P.map HomeParams <| homeQS <| P.s "tsv" </> encodedString </> P.string </> maybeString
         , P.map StatsTSV <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "tsv" </> encodedString </> P.string
+        , P.map Transcend <| P.map (\v h -> HomeParams v h) <| homeQS <| P.s "transcend" </> encodedString </> P.string </> maybeString
         , P.map Transcend <| P.map (\v h -> HomeParams v h Nothing) <| homeQS <| P.s "transcend" </> encodedString </> P.string
         , P.map EthItems <| P.s "ethitems"
         , P.map Changelog <| P.s "changelog"
