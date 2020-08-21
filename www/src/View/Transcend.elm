@@ -190,7 +190,6 @@ nextLevelCost perk level =
             -- Character.as: linearExponential(start, scale, base)
             (start + levelf * scale)
                 * (base ^ levelf)
-                |> Debug.log ("linexp:" ++ String.fromInt level)
                 |> ceiling
                 |> Just
 
