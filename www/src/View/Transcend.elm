@@ -1,4 +1,4 @@
-module View.Transcend exposing (view)
+module View.Transcend exposing (nextLevelCost, view)
 
 import Dict exposing (Dict)
 import GameData exposing (Character, GameData, GameVersionData)
@@ -186,8 +186,13 @@ nextLevelCost perk level =
         ( Stats.ExponentialMultiplier, [ pow ] ) ->
             (pow ^ levelf) |> ceiling |> Just
 
-        ( Stats.LinearExponential, [ base, incr, pow ] ) ->
-            (base + levelf) * (pow ^ levelf) |> ceiling |> Just
+        ( Stats.LinearExponential, [ start, scale, base ] ) ->
+            -- Character.as: linearExponential(start, scale, base)
+            (start + levelf * scale)
+                * (base ^ levelf)
+                |> Debug.log ("linexp:" ++ String.fromInt level)
+                |> ceiling
+                |> Just
 
         _ ->
             Nothing
