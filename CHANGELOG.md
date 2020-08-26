@@ -13,6 +13,10 @@ Now also on [Android](https://play.google.com/store/apps/details?id=com.ironhors
 
 ---
 
+## 2020-08-26
+
+- Updated Cid's stats.
+
 ## 2020-08-07
 
 - Updated to live version 0.15.0.

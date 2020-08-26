@@ -156,32 +156,30 @@ viewStatsSummary char getStat =
         toEntry ( label, statId, format ) =
             getStat statId
                 |> Result.map (\stat -> { label = label, level = stat.level, value = format stat })
-    in
-    case String.toLower char.name of
-        "wizard" ->
-            div []
-                (cursorStatEntrySpecs
-                    |> List.map
-                        (\( label, group ) ->
-                            details [ A.attribute "open" "open" ]
-                                [ summary [] [ text label ]
-                                , table [ class "stats-summary" ]
-                                    (group
-                                        |> List.map toEntry
-                                        |> List.filterMap Result.toMaybe
-                                        |> List.filterMap viewStatEntry
-                                    )
-                                ]
-                        )
-                )
 
-        _ ->
-            table [ class "stats-summary" ]
-                (cidStatEntrySpecs
-                    |> List.map toEntry
-                    |> List.filterMap Result.toMaybe
-                    |> List.filterMap viewStatEntry
+        stats =
+            case String.toLower char.name of
+                "wizard" ->
+                    cursorStatEntrySpecs
+
+                _ ->
+                    cidStatEntrySpecs
+    in
+    div []
+        (stats
+            |> List.map
+                (\( label, group ) ->
+                    details [ A.attribute "open" "open" ]
+                        [ summary [] [ text label ]
+                        , table [ class "stats-summary" ]
+                            (group
+                                |> List.map toEntry
+                                |> List.filterMap Result.toMaybe
+                                |> List.filterMap viewStatEntry
+                            )
+                        ]
                 )
+        )
 
 
 type alias StatsEntrySpec =
@@ -258,45 +256,54 @@ cursorStatEntrySpecs =
     ]
 
 
-cidStatEntrySpecs : List StatsEntrySpec
+cidStatEntrySpecs : List ( String, List StatsEntrySpec )
 cidStatEntrySpecs =
-    -- try to match the order of the in-game stats screen here. See scripts/ui/StatsSubtab.as
-    --
-    -- autoattack damage
-    -- click damage
-    [ ( "Click Damage Multiplier", STAT_CLICK_DAMAGE, entryPct ) -- not actually in the stats screen, only flat click damage
-    , ( "Autoattack Damage Multiplier", STAT_AUTOATTACK_DAMAGE, entryPct )
-    , ( "Attack Delay", STAT_HASTE, entrySecDiv 600 )
-
-    -- damage multiplier from level
-    -- energy from auto attacks - currently a constant, not useful here
-    , ( "Global Cooldown Time", STAT_HASTE, entrySecDiv 2000 ) -- TODO that one keystone for <1 sec
-    , ( "Automator Speed", STAT_AUTOMATOR_SPEED, entryPct )
-    , ( "Critical Chance", STAT_CRIT_CHANCE, entryPct )
-    , ( "Critical Damage Multiplier", STAT_CRIT_DAMAGE, entryPct )
-    , ( "Haste", STAT_HASTE, entryPct )
-    , ( "Maximum Energy", STAT_TOTAL_ENERGY, entryInt )
-    , ( "Maximum Mana", STAT_TOTAL_MANA, entryInt )
-    , ( "Mana Regeneration", STAT_MANA_REGEN, entryPct )
-    , ( "Run Speed", STAT_MOVEMENT_SPEED, entryPct ) -- currently a constant
-    , ( "Gold from All Sources", STAT_GOLD, entryPct )
-    , ( "Bonus Gold Chance (×10)", STAT_BONUS_GOLD_CHANCE, entryPct ) -- the multiplier is datamined from heroclickerlib/managers/Formulas.as
-    , ( "Boss Gold", STAT_BOSS_GOLD, entryPct )
-    , ( "Clickable Find Chance", STAT_CLICKABLE_CHANCE, entryPct ) -- not in total stats; skill-tree-stats only
-    , ( "Clickable Gold Multiplier", STAT_CLICKABLE_GOLD, entryPct ) -- not in total stats; skill-tree-stats only
-    , ( "Treasure Chest Chance", STAT_TREASURE_CHEST_CHANCE, entryPct )
-    , ( "Treasure Chest Gold", STAT_TREASURE_CHEST_GOLD, entryPct )
-    , ( "Item Cost Reduction", STAT_ITEM_COST_REDUCTION, entryPct )
-
-    -- ancient shards (not in tree-stats; total-stats only)
-    , ( "Weapon Damage", STAT_ITEM_WEAPON_DAMAGE, entryPct )
-    , ( "Helm Damage", STAT_ITEM_HEAD_DAMAGE, entryPct )
-    , ( "Chest Damage", STAT_ITEM_CHEST_DAMAGE, entryPct )
-    , ( "Ring Damage", STAT_ITEM_RING_DAMAGE, entryPct )
-    , ( "Legging Damage", STAT_ITEM_LEGS_DAMAGE, entryPct )
-    , ( "Gloves Damage", STAT_ITEM_HANDS_DAMAGE, entryPct )
-    , ( "Boots Damage", STAT_ITEM_FEET_DAMAGE, entryPct )
-    , ( "Cape Damage", STAT_ITEM_BACK_DAMAGE, entryPct )
+    [ ( "Stats"
+      , -- try to match the order of the in-game stats screen here. See scripts/ui/StatsSubtab.as
+        [ ( "Click Damage", STAT_CLICK_DAMAGE, entryPct )
+        , ( "Auto Attack Damage", STAT_AUTOATTACK_DAMAGE, entryPct )
+        , ( "Critical Chance", STAT_CRIT_CHANCE, entryPct )
+        , ( "Critical Damage Multiplier", STAT_CRIT_DAMAGE, entryPct )
+        , ( "Haste", STAT_HASTE, entryPct )
+        , ( "Gold Received", STAT_GOLD, entryPct )
+        , ( "Monster Gold", STAT_BOSS_GOLD, entryPct )
+        , ( "Bonus Gold Chance (×10)", STAT_BONUS_GOLD_CHANCE, entryPct ) -- the multiplier is datamined from heroclickerlib/managers/Formulas.as
+        , ( "Clickable Chance", STAT_CLICKABLE_CHANCE, entryPct )
+        , ( "Clickable Gold", STAT_CLICKABLE_GOLD, entryPct )
+        , ( "Treasure Chest Chance", STAT_TREASURE_CHEST_CHANCE, entryPct )
+        , ( "Treasure Chest Gold", STAT_TREASURE_CHEST_GOLD, entryPct )
+        , ( "Item Cost Reduction", STAT_ITEM_COST_REDUCTION, entryPct )
+        , ( "Total Energy", STAT_TOTAL_ENERGY, entryInt )
+        , ( "Total Mana", STAT_TOTAL_MANA, entryInt )
+        , ( "Mana Regeneration", STAT_MANA_REGEN, entryPct )
+        , ( "Weapon Damage", STAT_ITEM_WEAPON_DAMAGE, entryPct )
+        , ( "Helmet Damage", STAT_ITEM_HEAD_DAMAGE, entryPct )
+        , ( "Breastplate Damage", STAT_ITEM_CHEST_DAMAGE, entryPct )
+        , ( "Ring Damage", STAT_ITEM_RING_DAMAGE, entryPct )
+        , ( "Pants Damage", STAT_ITEM_LEGS_DAMAGE, entryPct )
+        , ( "Gloves Damage", STAT_ITEM_HANDS_DAMAGE, entryPct )
+        , ( "Boots Damage", STAT_ITEM_FEET_DAMAGE, entryPct )
+        , ( "Cape Damage", STAT_ITEM_BACK_DAMAGE, entryPct )
+        ]
+      )
+    , ( "Traits"
+      , [ ( "Increased MultiClicks", MultiClick_stacks, entryInt )
+        , ( "More Big Clicks", BigClicks_stacks, entryInt )
+        , ( "Bigger Big Clicks", BigClicks_damage, entryPct )
+        , ( "Improved Energize", Energize_duration, entryPct )
+        , ( "Huger Huge Click", HugeClick_damage, entryPct )
+        , ( "Sustained Powersurge", Powersurge_damage, entryPct )
+        , ( "Mana Crit Damage", ManaCrit_damage, entryPct )
+        , ( "Improved Powersurge", Powersurge_duration, entryPct )
+        , ( "Reload Energy and Mana", Reload_effect, entryInt ) -- not on the stats screen, but useful
+        ]
+      )
+    , ( "Misc"
+      , [ ( "Attack Delay", STAT_HASTE, entrySecDiv 600 )
+        , ( "Global Cooldown Time", STAT_HASTE, entrySecDiv 2000 )
+        , ( "Automator Speed", STAT_AUTOMATOR_SPEED, entryPct )
+        ]
+      )
     ]
 
 
@@ -326,10 +333,10 @@ viewStatEntry { label, level, value } =
         (\val ->
             tr
                 [ class <| "level-" ++ statLevelTier level
-                , title <| "Level " ++ String.fromInt level
                 ]
                 [ td [] [ text <| label ++ ": " ]
                 , td [ class "stat-value" ] [ text val ]
+                , td [ class "stat-level" ] [ text " (", text <| String.fromInt level, text ")" ]
 
                 -- , td [ class "stat-level" ] [ text <| "Level " ++ toString level ]
                 ]
