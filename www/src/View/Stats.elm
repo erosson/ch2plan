@@ -292,9 +292,9 @@ cidStatEntrySpecs =
         , ( "Bigger Big Clicks", BigClicks_damage, entryPct )
         , ( "Improved Energize", Energize_duration, entryPct )
         , ( "Huger Huge Click", HugeClick_damage, entryPct )
-        , ( "Sustained Powersurge", Powersurge_damage, entryPct )
+        , ( "Sustained Powersurge", Powersurge_duration, entryPct )
         , ( "Mana Crit Damage", ManaCrit_damage, entryPct )
-        , ( "Improved Powersurge", Powersurge_duration, entryPct )
+        , ( "Improved Powersurge", Powersurge_damage, entryPct )
         , ( "Reload Energy and Mana", Reload_effect, entryInt ) -- not on the stats screen, but useful
         ]
       )
