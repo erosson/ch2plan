@@ -44,8 +44,8 @@
     "BigClicks_damage": [3, "linear", [0.05, 1]],
     "HugeClick_damage": [10, "linear", [0.05, 1]],
     "ManaCrit_damage": [1, "linear", [0.05, 1]],
-    "Energize_duration": [60000, "linearReciprocal", [0.05, 1]],
-    "Powersurge_duration": [60000, "linearReciprocal", [0.05, 1]],
+    "Energize_duration": [0, "linear", [3, 60]],
+    "Powersurge_duration": [0, "linear", [3, 60]],
     "Powersurge_damage": [2, "linear", [0.05, 1]],
     "Reload_effect": [40, "linear", [10]],
 

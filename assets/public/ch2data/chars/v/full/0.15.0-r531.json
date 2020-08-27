@@ -36353,19 +36353,19 @@
         ]
       ],
       "Energize_duration": [
-        60000,
-        "linearReciprocal",
+        0,
+        "linear",
         [
-          0.05,
-          1
+          3,
+          60
         ]
       ],
       "Powersurge_duration": [
-        60000,
-        "linearReciprocal",
+        0,
+        "linear",
         [
-          0.05,
-          1
+          3,
+          60
         ]
       ],
       "Powersurge_damage": [
