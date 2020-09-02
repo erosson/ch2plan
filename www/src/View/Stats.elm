@@ -266,7 +266,7 @@ cidStatEntrySpecs =
         , ( "Critical Damage Multiplier", STAT_CRIT_DAMAGE, entryPct )
         , ( "Haste", STAT_HASTE, entryPct )
         , ( "Gold Received", STAT_GOLD, entryPct )
-        , ( "Monster Gold", STAT_BOSS_GOLD, entryPct )
+        , ( "Monster Gold", STAT_MONSTER_GOLD, entryPct )
         , ( "Bonus Gold Chance (×10)", STAT_BONUS_GOLD_CHANCE, entryPct ) -- the multiplier is datamined from heroclickerlib/managers/Formulas.as
         , ( "Clickable Chance", STAT_CLICKABLE_CHANCE, entryPct )
         , ( "Clickable Gold", STAT_CLICKABLE_GOLD, entryPct )
