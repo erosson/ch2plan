@@ -4,6 +4,7 @@ import AMF from "amf-js";
 import { Elm } from "../src/Main.elm";
 import gameData from "../../assets/public/ch2data/chars/all.min.json";
 import changelog from "!!raw-loader!../../CHANGELOG.md";
+import ClipboardJS from "clipboard";
 
 // google analytics
 window.dataLayer = window.dataLayer || [];
@@ -12,6 +13,11 @@ function gtag() {
 }
 gtag("js", new Date());
 gtag("config", "UA-122483662-1");
+
+const clipTarget = new ClipboardJS('.clipboard-button-target');
+const clipText = new ClipboardJS('.clipboard-button-text', {
+  text: trigger => trigger.getAttribute('data-clipboard-text'),
+});
 
 console.log("init", { Elm, gameData, changelog, env: process.env, Zlib, AMF });
 const flags = {

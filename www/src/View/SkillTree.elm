@@ -19,6 +19,7 @@ import Model.Graph as Graph exposing (GraphModel)
 import Route
 import Set exposing (Set)
 import View.SkillTreeGraph
+import View.Spreadsheet
 import View.Stats
 
 
@@ -28,8 +29,8 @@ ver =
     }
 
 
-view : List (Html Msg) -> Model -> GraphModel -> Route.HomeParams -> Html Msg
-view header model graph params =
+view : List (Html Msg) -> Model -> GameData -> GraphModel -> Route.HomeParams -> Html Msg
+view header model gameData graph params =
     let
         ethItemCount =
             model.etherealItemInventory |> Maybe.Extra.unwrap 0 Dict.size
@@ -57,7 +58,18 @@ view header model graph params =
                        , p [] [ a [ Route.href <| Route.Stats params ] [ text "Statistics:" ] ]
                        , View.Stats.viewStatsSummary graph.char <| Stats.statTable <| Model.statsSummary model graph
                        , p [] [ a [ Route.href <| Route.Stats params ] [ text <| String.fromInt (Set.size graph.selected.set) ++ " skill points" ] ]
-                       , p [] [ a [ Route.href <| Route.StatsTSV params ] [ text "Spreadsheet format" ] ]
+                       , p []
+                            [ a [ Route.href <| Route.StatsTSV params ] [ text "Spreadsheet format " ]
+
+                            -- https://clipboardjs.com/
+                            , button
+                                -- this class should match the `new Clipboard(..)` call in index.js
+                                [ class "clipboard-button-text"
+                                , A.attribute "data-clipboard-text" <|
+                                    View.Spreadsheet.format model gameData params
+                                ]
+                                [ text "📋" ]
+                            ]
                        ]
                 )
 
@@ -69,8 +81,18 @@ view header model graph params =
 viewImportExport : Route.HomeParams -> List (Html Msg)
 viewImportExport params =
     [ div []
-        [ text "In-game planner import/export:"
-        , input [ onInput Model.TextImport, value <| Maybe.withDefault "" params.build ] []
+        [ div []
+            [ text "In-game planner import/export:"
+            , input [ id "in-game-import-export", onInput Model.TextImport, value <| Maybe.withDefault "" params.build ] []
+
+            -- https://clipboardjs.com/
+            , button
+                -- this class should match the `new Clipboard(..)` call in index.js
+                [ class "clipboard-button-target"
+                , A.attribute "data-clipboard-target" "#in-game-import-export"
+                ]
+                [ text "📋" ]
+            ]
         , div [] [ small [] [ text "copy this to export, or paste here to import" ] ]
         ]
     ]

@@ -13,6 +13,10 @@ Now also on [Android](https://play.google.com/store/apps/details?id=com.ironhors
 
 ---
 
+## 2020-09-03
+
+- Added quick copy-to-clipboard buttons for tree planner export and spreadsheet export.
+
 ## 2020-09-02
 
 - Cid's stats now correctly count Monster Gold.

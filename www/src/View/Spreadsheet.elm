@@ -12,34 +12,48 @@ import Route exposing (Route)
 import Set exposing (Set)
 
 
+url : Route.HomeParams -> String
+url params =
+    "https://ch2.erosson.org" ++ (Route.stringify <| Route.Home params)
+
+
 view : Model -> GameData -> Route.HomeParams -> Html msg
 view model gameData params =
-    let
-        url =
-            "https://ch2.erosson.org" ++ (Route.stringify <| Route.Home params)
-    in
     div [ class "spreadsheet" ]
-        ([ p [ class "help" ] [ text "Copy the text below (click the text box, ctrl+a, ctrl+c), and paste it into your favorite spreadsheet-based Clicker Heroes 2 calculator (ctrl+v)." ]
+        ([ p [ class "help" ]
+            [ text "Copy the text below ("
+
+            -- https://clipboardjs.com/
+            , button
+                -- this class should match the `new Clipboard(..)` call in index.js
+                [ class "clipboard-button-target"
+                , A.attribute "data-clipboard-target" "#spreadsheet-export"
+                ]
+                [ text "📋 Copy" ]
+            , text " or click the text box, ctrl+a, ctrl+c), and paste it into your favorite spreadsheet-based Clicker Heroes 2 calculator (ctrl+v)."
+            ]
          , p [ class "help" ]
             [ a [ target "_blank", href "https://docs.google.com/spreadsheets/d/16oUAO0uxAChI0P9rUGNTxCIvlX9wM97ljOcUGf8DXCA" ]
                 [ text "Writing your own spreadsheet? Here's an example showing how to use this." ]
             ]
-         , textarea [ class "tsv" ]
-            [ text
-                (case Model.parseStatsSummary model gameData params of
-                    Err err ->
-                        "error: " ++ err
-
-                    Ok stats ->
-                        format url model stats
-                )
-            ]
+         , textarea [ id "spreadsheet-export", class "tsv" ]
+            [ text <| format model gameData params ]
          ]
             ++ (if model.features.transcendNodes then
-                    [ div [] [ text "Transcended node levels:" ]
-                    , textarea [ class "tsv" ]
+                    [ div []
+                        [ text "Transcended node levels:"
+
+                        -- https://clipboardjs.com/
+                        , button
+                            -- this class should match the `new Clipboard(..)` call in index.js
+                            [ class "clipboard-button-target"
+                            , A.attribute "data-clipboard-target" "#spreadsheet-node-level-export"
+                            ]
+                            [ text "📋" ]
+                        ]
+                    , textarea [ class "tsv", id "spreadsheet-node-level-export" ]
                         [ text
-                            (case formatTranscendNodes url model of
+                            (case formatTranscendNodes (url params) model of
                                 Err err ->
                                     "error: " ++ err
 
@@ -56,7 +70,7 @@ view model gameData params =
 
 
 formatTranscendNodes : String -> Model -> Result String String
-formatTranscendNodes url model =
+formatTranscendNodes url_ model =
     case model.graph of
         Nothing ->
             Err "no graph"
@@ -93,20 +107,30 @@ formatTranscendNodes url model =
                                     ]
                     )
                 |> List.filter ((/=) [])
-                |> (::) [ "node-id", "level", "is-selected", "node-type", "label", "", "build planner:", url ]
+                |> (::) [ "node-id", "level", "is-selected", "node-type", "label", "", "build planner:", url_ ]
                 |> formatCells
                 |> Ok
 
 
-format : String -> Model -> Model.StatsSummary -> String
-format url model stats =
+format : Model -> GameData -> Route.HomeParams -> String
+format model gameData params =
+    case Model.parseStatsSummary model gameData params of
+        Err err ->
+            "error: " ++ err
+
+        Ok stats ->
+            format_ (url params) model stats
+
+
+format_ : String -> Model -> Model.StatsSummary -> String
+format_ url_ model stats =
     formatRows model stats
         |> (::)
             (if model.features.transcendNodes then
-                [ "id", "trnslvl", "count", "label", "is-upgradable", "", "build planner:", url ]
+                [ "id", "trnslvl", "count", "label", "is-upgradable", "", "build planner:", url_ ]
 
              else
-                [ "id", "count", "label", "", "build planner:", url ]
+                [ "id", "count", "label", "", "build planner:", url_ ]
             )
         |> formatCells
 

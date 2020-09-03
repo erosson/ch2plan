@@ -57,7 +57,7 @@ viewBody model =
                                     div [] (header ++ [ text "404" ])
 
                                 Just graph ->
-                                    View.SkillTree.view header model graph home
+                                    View.SkillTree.view header model gameData graph home
 
                         Route.Stats params ->
                             div [] (header ++ [ View.Stats.view model gameData params ])
