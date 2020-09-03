@@ -14,9 +14,9 @@ function gtag() {
 gtag("js", new Date());
 gtag("config", "UA-122483662-1");
 
-const clipTarget = new ClipboardJS('.clipboard-button-target');
-const clipText = new ClipboardJS('.clipboard-button-text', {
-  text: trigger => trigger.getAttribute('data-clipboard-text'),
+const clipTarget = new ClipboardJS(".clipboard-button-target");
+const clipText = new ClipboardJS(".clipboard-button-text", {
+  text: (trigger) => trigger.getAttribute("data-clipboard-text"),
 });
 
 console.log("init", { Elm, gameData, changelog, env: process.env, Zlib, AMF });
