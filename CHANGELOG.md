@@ -13,6 +13,10 @@ Now also on [Android](https://play.google.com/store/apps/details?id=com.ironhors
 
 ---
 
+## 2020-09-04
+
+- Fixed/updated wizard burn and corrosion values.
+
 ## 2020-09-03
 
 - Added quick copy-to-clipboard buttons for tree planner export and spreadsheet export.
