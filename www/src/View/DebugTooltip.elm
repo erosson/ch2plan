@@ -59,5 +59,8 @@ viewNode node =
                 , div [] [ text placeholdered ]
                 ]
             )
-        , td [] [ text <| Debug.toString node.stats ]
+
+        -- TODO
+        -- , td [] [ text <| Debug.toString node.stats ]
+        , td [] [ text <| String.fromInt <| List.length node.stats ]
         ]
