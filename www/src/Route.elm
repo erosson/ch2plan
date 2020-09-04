@@ -41,7 +41,7 @@ legacyVersion =
 
 liveVersion : String
 liveVersion =
-    "0.15.0-r531"
+    "0.15.0-r536"
 
 
 defaultHero =
