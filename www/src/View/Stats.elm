@@ -13,6 +13,7 @@ import Result.Extra
 import Route
 import Set exposing (Set)
 import Time
+import View.FormatUtil exposing (float, int, pct, pct0, sec)
 import View.Spreadsheet
 import View.Util
 
@@ -342,41 +343,6 @@ viewStatEntry { label, level, value } =
                 ]
         )
         value
-
-
-pct : Float -> String
-pct f =
-    (f * 100 |> floor |> String.fromInt) ++ "%"
-
-
-float : Int -> Float -> String
-float sigfigs f =
-    let
-        exp =
-            10 ^ toFloat sigfigs
-    in
-    (f * exp |> floor |> toFloat) / exp |> String.fromFloat
-
-
-sec : Int -> Float -> String
-sec sigfigs f =
-    float sigfigs f ++ "s"
-
-
-pct0 f =
-    pct <| f - 1
-
-
-negPct f =
-    if f == 1 then
-        "-0%"
-
-    else
-        pct0 f
-
-
-int =
-    String.fromInt << floor
 
 
 statLevelTier : Int -> String

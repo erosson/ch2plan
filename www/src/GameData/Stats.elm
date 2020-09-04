@@ -7,6 +7,7 @@ module GameData.Stats exposing
     , StatValue
     , Stats
     , TranscensionPerk
+    , calcAllStats
     , calcStat
     , calcStats
     , decoder
@@ -331,13 +332,21 @@ type alias StatTotal =
     { stat : Stat, level : Int, val : Float }
 
 
-calcStats : Stats -> List ( Stat, Int ) -> List StatTotal
-calcStats stats =
+calcAllStats : Stats -> List ( Stat, Int ) -> List StatTotal
+calcAllStats stats =
     sumStatLevels
         >> List.map
             (\( stat, level ) ->
                 { stat = stat, level = level, val = calcStat stats stat level }
             )
+
+
+calcStats : Stats -> List ( Stat, Int ) -> List StatTotal
+calcStats stats =
+    List.map
+        (\( stat, level ) ->
+            { stat = stat, level = level, val = calcStat stats stat level }
+        )
 
 
 type

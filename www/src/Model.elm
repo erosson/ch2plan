@@ -782,7 +782,7 @@ statsSummary : { m | transcendNodes : Dict NodeId Int } -> { a | selected : Grap
 statsSummary m g =
     nodeSummary m g
         |> List.concatMap (\s -> s.nodeType.stats |> List.map (\( stat, level ) -> ( stat, s.transcendLevel * s.count * level )))
-        |> Stats.calcStats g.game.stats
+        |> Stats.calcAllStats g.game.stats
 
 
 type alias StatsSummary =

@@ -30,6 +30,7 @@ module GameData exposing
     , startNodes
     , tooltip
     , tooltipPlaceholder
+    , tooltipReplace
     , wizardSpells
     )
 
@@ -41,6 +42,7 @@ import Json.Decode.Pipeline as P
 import Maybe.Extra
 import Regex exposing (Regex)
 import Set exposing (Set)
+import View.FormatUtil
 
 
 type alias GameData =
@@ -158,28 +160,200 @@ tooltipPlaceholder node =
 
             else
                 let
-                    rex1 =
-                        Regex.fromString "\\d+(\\.\\d+)?%" |> Maybe.withDefault Regex.never
+                    rexp0 =
+                        Regex.fromString "\\d+%" |> Maybe.withDefault Regex.never
 
-                    try1 =
-                        raw |> Regex.replaceAtMost (List.length node.stats) rex1 (always "${VALUE%}")
+                    tryp0 =
+                        raw |> Regex.replaceAtMost (List.length node.stats) rexp0 (always "${VALUE%0}")
 
-                    rex2 =
-                        Regex.fromString "\\d+(\\.\\d+)?" |> Maybe.withDefault Regex.never
+                    rexp2 =
+                        Regex.fromString "\\d+\\.\\d{2}%" |> Maybe.withDefault Regex.never
 
-                    try2 =
-                        raw |> Regex.replaceAtMost (List.length node.stats) rex2 (always "${VALUE}")
+                    tryp2 =
+                        raw |> Regex.replaceAtMost (List.length node.stats) rexp2 (always "${VALUE%2}")
+
+                    rexf0 =
+                        Regex.fromString "\\d+" |> Maybe.withDefault Regex.never
+
+                    tryf0 =
+                        raw |> Regex.replaceAtMost (List.length node.stats) rexf0 (always "${VALUE.0}")
+
+                    rexf2 =
+                        Regex.fromString "\\d+\\.\\d\\d" |> Maybe.withDefault Regex.never
+
+                    tryf2 =
+                        raw |> Regex.replaceAtMost (List.length node.stats) rexf2 (always "${VALUE.2}")
                 in
                 -- Try replacing percentage-numbers, then non-percentage-numbers.
                 -- This seems to work for most things, except reload nodes.
                 -- TODO: how to substitute wizard's two-element tooltips?
-                if try1 /= raw && node.key /= "Ra" then
-                    try1
+                if node.key == "Ra" then
+                    tryf2
+
+                else if raw /= tryp2 then
+                    tryp2
+
+                else if raw /= tryp0 then
+                    tryp0
+
+                else if raw /= tryf2 then
+                    tryf2
+
+                else if raw /= tryf0 then
+                    tryf0
 
                 else
-                    try2
+                    raw
         )
         (tooltip_ node)
+
+
+{-| String split at most once
+-}
+split1 : String -> String -> Result String ( String, String )
+split1 glue str =
+    case String.split glue str of
+        [] ->
+            Err str
+
+        head :: [] ->
+            Err str
+
+        head :: tail ->
+            Ok ( head, String.join glue tail )
+
+
+tooltipReplace1 : StatTotal -> String -> Maybe String
+tooltipReplace1 stat0 tmpl =
+    let
+        stat : StatTotal
+        stat =
+            case stat0.stat of
+                Stats.STAT_AUTOATTACK_DAMAGE ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.BigClicks_stacks ->
+                    { stat0 | val = stat0.val - 6 }
+
+                Stats.MultiClick_stacks ->
+                    { stat0 | val = stat0.val - 5 }
+
+                Stats.BigClicks_damage ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.HugeClick_damage ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.Energize_duration ->
+                    { stat0 | val = (stat0.val - 60) / 30 }
+
+                Stats.Powersurge_damage ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.Powersurge_duration ->
+                    { stat0 | val = (stat0.val - 60) / 60 }
+
+                Stats.STAT_CRIT_DAMAGE ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.STAT_CLICK_DAMAGE ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.ManaCrit_damage ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.STAT_GOLD ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.STAT_MONSTER_GOLD ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.STAT_CLICKABLE_GOLD ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.STAT_TREASURE_CHEST_GOLD ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.STAT_HASTE ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.STAT_ITEM_WEAPON_DAMAGE ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.STAT_ITEM_HEAD_DAMAGE ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.STAT_ITEM_CHEST_DAMAGE ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.STAT_ITEM_RING_DAMAGE ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.STAT_ITEM_LEGS_DAMAGE ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.STAT_ITEM_HANDS_DAMAGE ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.STAT_ITEM_FEET_DAMAGE ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.STAT_ITEM_BACK_DAMAGE ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.STAT_TOTAL_MANA ->
+                    { stat0 | val = stat0.val - 100 }
+
+                Stats.STAT_TOTAL_ENERGY ->
+                    { stat0 | val = stat0.val - 100 }
+
+                Stats.STAT_MANA_REGEN ->
+                    { stat0 | val = stat0.val - 1 }
+
+                Stats.STAT_ITEM_COST_REDUCTION ->
+                    { stat0 | val = 1 - stat0.val }
+
+                -- TODO wizard stats:
+                -- * burn/corrosion values are wrong
+                -- * lightning flash swaps duration (spell count) and cast-count
+                -- * double-check all double stats order
+                _ ->
+                    stat0
+    in
+    [ ( True, "${VALUE.0}", View.FormatUtil.int )
+    , ( True, "${VALUE.2}", View.FormatUtil.float 2 )
+    , ( True, "${VALUE%0}", View.FormatUtil.pctN 0 )
+    , ( True, "${VALUE%2}", View.FormatUtil.pctN 2 )
+    ]
+        |> List.filterMap
+            (\( pred, placeholder, formatter ) ->
+                if pred then
+                    case split1 placeholder tmpl of
+                        Ok ( pre, suf ) ->
+                            pre ++ formatter stat.val ++ suf |> Just
+
+                        Err _ ->
+                            Nothing
+
+                else
+                    Nothing
+            )
+        |> List.head
+
+
+tooltipReplace : List StatTotal -> String -> String
+tooltipReplace stats tmpl =
+    case stats of
+        [] ->
+            tmpl
+
+        stat :: tail ->
+            case tooltipReplace1 stat tmpl of
+                Nothing ->
+                    tmpl
+
+                Just str ->
+                    str |> tooltipReplace tail
 
 
 type NodeQuality
