@@ -85,6 +85,8 @@ type Route
     | EthItems
     | Changelog
     | Runecorder (Maybe String)
+    | Debug
+    | DebugTooltip
 
 
 type alias Features =
@@ -173,6 +175,8 @@ parser =
         , P.map EthItems <| P.s "ethitems"
         , P.map Changelog <| P.s "changelog"
         , P.map Runecorder <| P.s "runecorder" <?> Q.string "body"
+        , P.map Debug <| P.s "debug"
+        , P.map DebugTooltip <| P.s "debug" </> P.s "tooltip"
         ]
 
 
@@ -277,6 +281,12 @@ stringify route =
 
         Runecorder body ->
             "#/runecorder" ++ B.toQuery (List.filterMap identity [ Maybe.map (B.string "body") body ])
+
+        Debug ->
+            "#/debug"
+
+        DebugTooltip ->
+            "#/debug/tooltip"
 
 
 href : Route -> H.Attribute msg

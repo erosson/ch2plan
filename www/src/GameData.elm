@@ -29,6 +29,7 @@ module GameData exposing
     , spellFatigue
     , startNodes
     , tooltip
+    , tooltipPlaceholder
     , wizardSpells
     )
 
@@ -132,9 +133,53 @@ type alias TranscensionPerk =
     }
 
 
+tooltip_ : NodeType -> Maybe String
+tooltip_ node =
+    node.newTooltip |> Maybe.map Just |> Maybe.withDefault node.oldTooltip
+
+
 tooltip : NodeType -> String -> String
 tooltip node default =
-    node.newTooltip |> Maybe.withDefault (node.oldTooltip |> Maybe.withDefault default)
+    tooltip_ node |> Maybe.withDefault default
+
+
+{-| Find the stat-value placeholders in tooltip text. Replace them with ${VALUE}.
+
+This is incredibly hacky and surely has bugs. The as3 constructs tooltips from a
+function that we can't export. This is the best I've got for version 1.
+
+-}
+tooltipPlaceholder : NodeType -> Maybe String
+tooltipPlaceholder node =
+    Maybe.map
+        (\raw ->
+            if List.isEmpty node.stats then
+                raw
+
+            else
+                let
+                    rex1 =
+                        Regex.fromString "\\d+(\\.\\d+)?%" |> Maybe.withDefault Regex.never
+
+                    try1 =
+                        raw |> Regex.replaceAtMost (List.length node.stats) rex1 (always "${VALUE%}")
+
+                    rex2 =
+                        Regex.fromString "\\d+(\\.\\d+)?" |> Maybe.withDefault Regex.never
+
+                    try2 =
+                        raw |> Regex.replaceAtMost (List.length node.stats) rex2 (always "${VALUE}")
+                in
+                -- Try replacing percentage-numbers, then non-percentage-numbers.
+                -- This seems to work for most things, except reload nodes.
+                -- TODO: how to substitute wizard's two-element tooltips?
+                if try1 /= raw && node.key /= "Ra" then
+                    try1
+
+                else
+                    try2
+        )
+        (tooltip_ node)
 
 
 type NodeQuality
@@ -154,6 +199,7 @@ type alias Graph =
     -- precalculated/derived from edges/nodes
     , bounds : GraphBounds
     , neighbors : Dict NodeId (Set NodeId)
+    , nodesByType : Dict String (Set NodeId)
     }
 
 
@@ -497,8 +543,13 @@ graphDecoder nodeTypes graphSpec =
                     D.succeed
                         { nodes = nodes
                         , edges = edges
-                        , neighbors = calcNeighbors <| Dict.values edges
-                        , bounds = calcBounds <| Dict.values nodes
+                        , nodesByType =
+                            nodes
+                                |> Dict.values
+                                |> Dict.Extra.groupBy .typeId
+                                |> Dict.map (always (List.map .id >> Set.fromList))
+                        , neighbors = Dict.values edges |> calcNeighbors
+                        , bounds = Dict.values nodes |> calcBounds
                         }
 
 

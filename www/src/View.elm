@@ -11,6 +11,8 @@ import Maybe.Extra
 import Model exposing (Model, Msg)
 import Route exposing (Route)
 import View.Changelog
+import View.Debug
+import View.DebugTooltip
 import View.EthItems
 import View.Runecorder
 import View.SkillTree
@@ -76,6 +78,12 @@ viewBody model =
 
                         Route.Runecorder _ ->
                             div [] (header ++ [ View.Runecorder.view model gameData ])
+
+                        Route.Debug ->
+                            div [] (header ++ [ View.Debug.view model gameData ])
+
+                        Route.DebugTooltip ->
+                            div [] (header ++ [ View.DebugTooltip.view model gameData ])
 
 
 gameVersion : Model -> GameData -> Maybe GameData.GameVersionData
