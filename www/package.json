@@ -24,7 +24,7 @@
     "elm-format": "^0.8.3",
     "elm-live": "^4.0.2",
     "elm-test": "^0.19.1-revision2",
-    "prettier": "^2.1.1",
+    "prettier": "^2.1.2",
     "raw-loader": "^4.0.1",
     "scripty": "^2.0.0",
     "serve": "^11.3.2"
