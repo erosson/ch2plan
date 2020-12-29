@@ -118,6 +118,8 @@ jobs:
         run: ./ClickerHeroes2.exe
         timeout-minutes: 1
         continue-on-error: true
+      - run: sleep 10
+      - run: ls -l "c:\Users\runneradmin\AppData\Roaming\ClickerHeroes2\Local Store\"
       - run: ls -l "c:\Users\runneradmin\Desktop"
       - run: ls -l "c:\Users\runneradmin\Desktop\latest.json"
 
