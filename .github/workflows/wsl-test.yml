@@ -10,8 +10,8 @@ jobs:
       - run: ls -l /
       - run: ls -l "c:"
       - run: ls -l "c:\Users\"
-      - run: ls -l "c:\Users\`whoami`"
-      - run: ls -l "c:\Users\`whoami`\AppData"
-      - run: ls -l "c:\Users\`whoami`\AppData\Roaming"
+      - run: ls -l "c:\Users\runneradmin"
+      - run: ls -l "c:\Users\runneradmin\AppData"
+      - run: ls -l "c:\Users\runneradmin\AppData\Roaming"
       # - run: ls -l "/c/Users/`whoami`/AppData/Roaming/ClickerHeroes2/Local Store/"
       # - run: ls -l "/c/Users/`whoami`/AppData/Roaming/ClickerHeroes2/Local Store/"
