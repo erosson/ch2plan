@@ -1,1 +1,1 @@
-bash -x scripts/icons "D:\Steam\steamapps\common\Clicker Heroes 2"
+bash -x scripts/icons

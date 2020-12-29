@@ -15,21 +15,22 @@ echo "this is broken! ch2 changed how it packs its icons, and I have not yet wri
 exit 1
 
 # I expect the Clicker Heroes 2 game to be extracted to `./game`
-game=${1-game}
+GAME_PATH_DEFAULT="$(cd .. && pwd)/assets-dl/dist"
+GAME_PATH="${GAME_PATH:-$GAME_PATH_DEFAULT}"
 mkdir -p build/extract
-# unzip -o "$game"/CH2Library.swc -d ./build/extract/CH2Library
+# unzip -o "$GAME_PATH"/CH2Library.swc -d ./build/extract/CH2Library
 # ffdec -export sprite ./build/extract/CH2Library/sprites ./build/extract/CH2Library/library.swf
 
-# ffdec -export sprite ./build/extract/ClickerHeroes2/sprites "$game"/ClickerHeroes2.swf
-# ffdec -export sprite ./build/extract/HelpfulAdventurer/sprites "$game"/mods/active/HelpfulAdventurer.swf
-# find "$game" | grep -E "(swf|swc|bin)"
+# ffdec -export sprite ./build/extract/ClickerHeroes2/sprites "$GAME_PATH"/ClickerHeroes2.swf
+# ffdec -export sprite ./build/extract/HelpfulAdventurer/sprites "$GAME_PATH"/mods/active/HelpfulAdventurer.swf
+# find "$GAME_PATH" | grep -E "(swf|swc|bin)"
 # exit
 
 # don't re-extract unless the swc is newer, because it takes ages
 extract() {
   package=$1;shift
-  if [ ! ./build/extract/$package -nt "$game"/packer/src/exports/$package.swc ]; then
-    unzip -o "$game"/packer/src/exports/$package.swc -d ./build/extract/$package
+  if [ ! ./build/extract/$package -nt "$GAME_PATH"/packer/src/exports/$package.swc ]; then
+    unzip -o "$GAME_PATH"/packer/src/exports/$package.swc -d ./build/extract/$package
     ffdec -export sprite ./build/extract/$package/sprites ./build/extract/$package/library.swf
   fi
 }

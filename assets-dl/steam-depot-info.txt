@@ -1,0 +1,15 @@
+App ID: 629910
+Depot ID: 629911
+Depot Name: Clicker Heroes 2 Windows
+Manifest GID: 3703958721087355633
+Created On: 2020-08-15 01:26:20 Coordinated Universal Time
+Size: 2 GB
+Compressed Size: 1 GB
+Unique/Total chunks: 7401 / 7583 (2.40%)
+Encrypted Filenames: False
+Number of Files: 7010
+Config: {'oslist': 'windows'}
+Open branches: public
+Protected branches: experimental, private_testing, public_test, public_test_2
+---
+fake-diff-to-test-ci: true

@@ -1,0 +1,136 @@
+name: assets-export
+on:
+  # schedule:
+    # - cron: "5 1 * * *"
+  workflow_dispatch:
+
+jobs:
+  # linux must run `fetch`, as headless steam authentication requires pexpect which has poor windows support.
+  # windows must run `export`, as we must run ch2.exe to complete our export and it doesn't run on linux.
+  #
+  # I don't like the complexity of two OSes here... but it works
+  #
+  # Based on similar code I wrote for path of exile:
+  # https://github.com/mapwatch/mapwatch/blob/master/.github/workflows/ggpk-export.yml
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "::add-mask::${{ secrets.STEAMCTL_USER }}"
+          echo "::add-mask::${{ secrets.STEAMCTL_PASSWD }}"
+          echo "::add-mask::${{ secrets.STEAMCTL_SECRET }}"
+      - uses: actions/checkout@v2
+      # https://github.com/marketplace/actions/setup-python
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - run: pip install steamctl pexpect
+
+      - working-directory: ./packages/datamine-dl
+        env:
+          STEAMCTL_USER: ${{ secrets.STEAMCTL_USER }}
+          STEAMCTL_PASSWD: ${{ secrets.STEAMCTL_PASSWD }}
+          STEAMCTL_SECRET: ${{ secrets.STEAMCTL_SECRET }}
+        run: python steamctl-auth.py
+
+      # fetch if and only if there are info.txt differences
+      - working-directory: ./packages/datamine-dl
+        run: yarn fetch
+
+      - working-directory: ./packages/datamine-dl
+        run: |
+          echo 'STEAM_DEPOT_INFO_NEW<<__EOF__' >> $GITHUB_ENV
+          cat steam-depot-info.txt >> $GITHUB_ENV
+          echo '__EOF__' >> $GITHUB_ENV
+          cat $GITHUB_ENV
+      - working-directory: ./packages/datamine-dl
+        run: |
+          echo 'STEAM_DEPOT_INFO_DIFF<<__EOF__' >> $GITHUB_ENV
+          (diff steam-depot-info-old.txt steam-depot-info.txt || true) >> $GITHUB_ENV
+          echo '__EOF__' >> $GITHUB_ENV
+          cat $GITHUB_ENV
+      # Stop running if there's no info.txt differences
+      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: assets-dl
+          path: assets-dl/dist/**/*
+          retention-days: 1
+      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: assets-info
+          path: assets-dl/steam-depot-info.txt
+          retention-days: 1
+    outputs:
+      STEAM_DEPOT_INFO_NEW: ${{ env.STEAM_DEPOT_INFO_NEW }}
+      STEAM_DEPOT_INFO_DIFF: ${{ env.STEAM_DEPOT_INFO_DIFF }}
+  export:
+    needs: fetch
+    if: ${{ needs.fetch.outputs.STEAM_DEPOT_INFO_DIFF != '' }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          name: assets-dl
+          path: assets-dl/dist
+      - uses: actions/download-artifact@v2
+        with:
+          name: assets-info
+          path: steam-depot-info.txt
+      - run: ls steam-depot-info.txt
+      - run: ls assets-dl/dist/
+      - run: rm assets-dl/steam-depot-info.txt
+      - run: mv steam-depot-info.txt assets-dl/steam-depot-info.txt
+      # https://docs.github.com/en/free-pro-team@latest/actions/guides/building-and-testing-nodejs
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      # https://github.com/marketplace/actions/setup-java-jdk
+      # ffdec needs this (flash decompiler, in `yarn as3`)
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '9.0.4' # The JDK version to make available on the path.
+          java-package: jdk # (jre, jdk, or jdk+fx) - defaults to jdk
+          architecture: x64 # (x64 or x86) - defaults to x64
+
+      - run: yarn --frozen-lockfile
+      - working-directory: ./assets
+        run: yarn ffdec:install
+
+      - working-directory: ./assets
+        run: yarn as3
+
+      # TODO: install the ch2 mod /exporter/bin/ch2plan-exporter.swf, run ch2,
+      # and copy the "latest.json" file it exports.
+      # Let's just see if we can run unmodified ch2.exe on a windows server first...
+      #
+      # Start CH2, let the 1-minute timeout kill the process, and keep going.
+      # 1 minute is plenty of time for ch2plan-exporter to do its thing.
+      - working-directory: ./assets-dl/dist
+        run: ./ClickerHeroes2.exe
+        timeout-minutes: 1
+        continue-on-error: true
+
+      # TODO: `yarn build` won't work until we get the above working.
+      # by installing the ch2 mod
+      # and running ch2.
+      #- working-directory: ./assets
+      #  run: yarn build
+
+      # https://peterevans.dev/posts/github-actions-how-to-create-pull-requests-automatically/
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: workflows-assets-export
+          commit-message: '[assets-export] CH2 content updates'
+          title: '[assets-export] CH2 content updates'
+          body: >
+            Looks like Clicker Heroes 2 was patched recently! I've updated ch2plan for you.
+
+            Sadly, some game updates can't be automatically exported. You might need to update [stats.json5](https://github.com/erosson/ch2plan/blob/master/assets/stats.json5) by hand: read the developers' patch notes and the `.as` files I've exported here. Run `cd assets && yarn build` when done. (None of that requires installing any of the arcane flash tools, just nodejs.)
+
+            This PR is auto-generated by the [assets-export robot](https://github.com/erosson/ch2plan/actions?query=workflow%3Aassets-export).
+          labels: automated pr

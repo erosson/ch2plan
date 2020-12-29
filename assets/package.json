@@ -2,6 +2,7 @@
   "name": "@ch2plan/assets",
   "version": "1.0.0",
   "scripts": {
+    "ffdec:install": "scripty",
     "build": "scripty",
     "icons": "scripty",
     "as3": "scripty"

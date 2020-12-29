@@ -1,0 +1,9 @@
+#!/bin/bash
+set -euxo pipefail
+cd "`dirname "$0"`/../.."
+
+#wget https://github.com/jindrapetrik/jpexs-decompiler/releases/download/version11.3.0/ffdec_11.3.0.zip
+rm -rf build/ffdec
+mkdir -p build/ffdec
+curl -Lo build/ffdec/ffdec.zip https://github.com/jindrapetrik/jpexs-decompiler/releases/download/version11.3.0/ffdec_11.3.0.zip
+(cd build/ffdec && unzip ffdec.zip)

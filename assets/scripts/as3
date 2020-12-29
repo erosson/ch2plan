@@ -1,7 +1,13 @@
-#!/bin/sh -eux
-game=${1-game}
-cp "$game"/mods/active/*.as ch2data/
-ffdec -export script build/ClickerHeroes2 "$game"/ClickerHeroes2.swf
+#!/bin/bash
+set -euxo pipefail
+cd "`dirname "$0"`/.."
+
+GAME_PATH_DEFAULT="$(cd .. && pwd)/assets-dl/dist"
+GAME_PATH="${GAME_PATH:-$GAME_PATH_DEFAULT}"
+cp "$GAME_PATH"/mods/active/*.as ch2data/
+# TODO we only need a few files below. Exporting everything is fine for manual
+# exploration - but for CI, surely there's some way to slim this export down
+java -jar ./build/ffdec/ffdec.jar -export script build/ClickerHeroes2 "$GAME_PATH"/ClickerHeroes2.swf
 cp build/ClickerHeroes2/scripts/models/Character.as ch2data/
 cp build/ClickerHeroes2/scripts/heroclickerlib/managers/Formulas.as ch2data/
 cp build/ClickerHeroes2/scripts/heroclickerlib/CH2.as ch2data/

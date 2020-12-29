@@ -1,0 +1,13 @@
+{
+  "name": "@ch2plan/assets-dl",
+  "version": "1.0.0",
+  "license": "GPL-3.0",
+  "private": true,
+  "scripts": {
+    "info.txt": "bash -c \"TZ=UTC steamctl depot info --app 629910 --depot 629911 --branch public | tail --lines=+2 | tee steam-depot-info-new.txt\"",
+    "info.txt:mv": "bash -c \"mv --force --no-target-directory steam-depot-info.txt steam-depot-info-old.txt && mv --force --no-target-directory steam-depot-info-new.txt steam-depot-info.txt\"",
+    "fetch": "bash -c \"yarn fetch:query || (yarn fetch:force && yarn info.txt:mv)\"",
+    "fetch:query": "bash -c \"yarn info.txt && diff steam-depot-info.txt steam-depot-info-new.txt && echo \\\"assets-dl is up to date.\\\"\"",
+    "fetch:force": "bash -c \"mkdir -p ${FETCH_DIR:-dist} && cd ${FETCH_DIR:-dist} && steamctl depot download --app 629910 --depot 629911 --branch public \""
+  }
+}
