@@ -1,0 +1,5 @@
+HelpfulAdventurer.swf
+Wizard.swf
+ch2plan-exporter.swf
+OneWorldFrenzy.swf
+OneWorldExhaustion.swf

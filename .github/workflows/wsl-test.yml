@@ -2,6 +2,7 @@ name: wsl-test
 on:
   workflow_dispatch:
 
+# I'm for quickly exploring how windows server machines work, feel free to delete me
 jobs:
   test:
     runs-on: windows-latest

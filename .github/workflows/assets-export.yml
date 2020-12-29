@@ -109,7 +109,7 @@ jobs:
       # add our mod to mods.txt, per the ch2-mods docs - but we've never run ch2 on this machine before, so we have to create mods.txt from scratch
       - run: ls -l "c:\Users\runneradmin\AppData\Roaming"
       - run: mkdir -p "c:\Users\runneradmin\AppData\Roaming\ClickerHeroes2\Local Store\"
-      - run: echo -e "HelpfulAdventurer.swf\nWizard.swf\nch2plan-exporter.swf\nOneWorldFrenzy.swf\nOneWorldExhaustion.swf" > "c:\Users\runneradmin\AppData\Roaming\ClickerHeroes2\Local Store\mods.txt"
+      - run: cp "./.github/workflows/assets-export-mods.txt" "c:\Users\runneradmin\AppData\Roaming\ClickerHeroes2\Local Store\mods.txt"
 
       # Start CH2, let the 1-minute timeout kill the process, and keep going.
       # 1 minute is plenty of time for ch2plan-exporter to do its thing.
