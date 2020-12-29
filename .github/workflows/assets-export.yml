@@ -26,7 +26,7 @@ jobs:
           python-version: 3.x
       - run: pip install steamctl pexpect
 
-      - working-directory: ./packages/datamine-dl
+      - working-directory: ./assets-dl
         env:
           STEAMCTL_USER: ${{ secrets.STEAMCTL_USER }}
           STEAMCTL_PASSWD: ${{ secrets.STEAMCTL_PASSWD }}
@@ -34,16 +34,16 @@ jobs:
         run: python steamctl-auth.py
 
       # fetch if and only if there are info.txt differences
-      - working-directory: ./packages/datamine-dl
+      - working-directory: ./assets-dl
         run: yarn fetch
 
-      - working-directory: ./packages/datamine-dl
+      - working-directory: ./assets-dl
         run: |
           echo 'STEAM_DEPOT_INFO_NEW<<__EOF__' >> $GITHUB_ENV
           cat steam-depot-info.txt >> $GITHUB_ENV
           echo '__EOF__' >> $GITHUB_ENV
           cat $GITHUB_ENV
-      - working-directory: ./packages/datamine-dl
+      - working-directory: ./assets-dl
         run: |
           echo 'STEAM_DEPOT_INFO_DIFF<<__EOF__' >> $GITHUB_ENV
           (diff steam-depot-info-old.txt steam-depot-info.txt || true) >> $GITHUB_ENV
