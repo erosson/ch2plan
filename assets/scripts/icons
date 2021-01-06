@@ -15,7 +15,7 @@ echo "this is broken! ch2 changed how it packs its icons, and I have not yet wri
 exit 1
 
 # I expect the Clicker Heroes 2 game to be extracted to `./game`
-GAME_PATH_DEFAULT="$(cd .. && pwd)/assets-dl/dist"
+GAME_PATH_DEFAULT="$(cd .. && pwd)/assets-dl/depot"
 GAME_PATH="${GAME_PATH:-$GAME_PATH_DEFAULT}"
 mkdir -p build/extract
 # unzip -o "$GAME_PATH"/CH2Library.swc -d ./build/extract/CH2Library

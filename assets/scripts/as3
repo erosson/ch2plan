@@ -2,7 +2,7 @@
 set -euxo pipefail
 cd "`dirname "$0"`/.."
 
-GAME_PATH_DEFAULT="$(cd .. && pwd)/assets-dl/dist"
+GAME_PATH_DEFAULT="$(cd .. && pwd)/assets-dl/depot"
 GAME_PATH="${GAME_PATH:-$GAME_PATH_DEFAULT}"
 cp "$GAME_PATH"/mods/active/*.as ch2data/
 # TODO we only need a few files below. Exporting everything is fine for manual

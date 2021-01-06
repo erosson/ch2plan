@@ -1,19 +1,13 @@
 name: assets-export
 on:
-  # schedule:
-    # - cron: "5 1 * * *"
+  schedule:
+    - cron: "5 1 * * *"
   workflow_dispatch:
 
 jobs:
-  # linux must run `fetch`, as headless steam authentication requires pexpect which has poor windows support.
-  # windows must run `export`, as we must run ch2.exe to complete our export and it doesn't run on linux.
-  #
-  # I don't like the complexity of two OSes here... but it works
-  #
-  # Based on similar code I wrote for path of exile:
-  # https://github.com/mapwatch/mapwatch/blob/master/.github/workflows/ggpk-export.yml
+  # windows must run this, not ubuntu, as we must run ch2.exe to complete our export and it doesn't run on linux.
   fetch:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - run: |
           echo "::add-mask::${{ secrets.STEAMCTL_USER }}"
@@ -24,112 +18,102 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.x
-      - run: pip install steamctl pexpect
+      # https://docs.github.com/en/free-pro-team@latest/actions/guides/building-and-testing-nodejs
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
 
       - working-directory: ./assets-dl
+        run: yarn fetch:install
+      - working-directory: ./assets-dl
         env:
-          STEAMCTL_USER: ${{ secrets.STEAMCTL_USER }}
-          STEAMCTL_PASSWD: ${{ secrets.STEAMCTL_PASSWD }}
-          STEAMCTL_SECRET: ${{ secrets.STEAMCTL_SECRET }}
-        run: python steamctl-auth.py
-
-      # fetch if and only if there are info.txt differences
+          STEAMPULL_USER: ${{ secrets.STEAMCTL_USER }}
+          STEAMPULL_PASSWD: ${{ secrets.STEAMCTL_PASSWD }}
+          STEAMPULL_SECRET: ${{ secrets.STEAMCTL_SECRET }}
+        run: yarn fetch:auth
       - working-directory: ./assets-dl
         run: yarn fetch
 
       - working-directory: ./assets-dl
         run: |
-          echo 'STEAM_DEPOT_INFO_NEW<<__EOF__' >> $GITHUB_ENV
-          cat steam-depot-info.txt >> $GITHUB_ENV
-          echo '__EOF__' >> $GITHUB_ENV
-          cat $GITHUB_ENV
+          bash -c "echo 'STEAM_DEPOT_INFO_NEW<<__EOF__' >> $GITHUB_ENV"
+          bash -c "cat steam-depot-info.txt >> $GITHUB_ENV"
+          bash -c "echo '__EOF__' >> $GITHUB_ENV"
+          bash -c "cat $GITHUB_ENV"
       - working-directory: ./assets-dl
         run: |
-          echo 'STEAM_DEPOT_INFO_DIFF<<__EOF__' >> $GITHUB_ENV
-          (diff steam-depot-info-old.txt steam-depot-info.txt || true) >> $GITHUB_ENV
-          echo '__EOF__' >> $GITHUB_ENV
-          cat $GITHUB_ENV
-      # Stop running if there's no info.txt differences
-      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: assets-dl
-          path: assets-dl/dist/**/*
-          retention-days: 1
-      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: assets-info
-          path: assets-dl/steam-depot-info.txt
-          retention-days: 1
-    outputs:
-      STEAM_DEPOT_INFO_NEW: ${{ env.STEAM_DEPOT_INFO_NEW }}
-      STEAM_DEPOT_INFO_DIFF: ${{ env.STEAM_DEPOT_INFO_DIFF }}
-  export:
-    needs: fetch
-    if: ${{ needs.fetch.outputs.STEAM_DEPOT_INFO_DIFF != '' }}
-    runs-on: windows-latest
-    steps:
-      - run: whoami
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        with:
-          name: assets-dl
-          path: assets-dl/dist
-      - uses: actions/download-artifact@v2
-        with:
-          name: assets-info
-          path: steam-depot-info.txt
-      - run: ls steam-depot-info.txt
-      - run: ls assets-dl/dist/
-      - run: rm assets-dl/steam-depot-info.txt
-      - run: mv steam-depot-info.txt assets-dl/steam-depot-info.txt
-      # https://docs.github.com/en/free-pro-team@latest/actions/guides/building-and-testing-nodejs
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12.x
+          bash -c "echo 'STEAM_DEPOT_INFO_DIFF<<__EOF__' >> $GITHUB_ENV"
+          bash -c "(diff steam-depot-info-old.txt steam-depot-info.txt || true) >> $GITHUB_ENV"
+          bash -c "echo '__EOF__' >> $GITHUB_ENV"
+          bash -c "cat $GITHUB_ENV"
+      ## Stop running if there's no info.txt differences
+      ## If PRs ever stop working, we could create an issue instead:
+      #- if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+      #  uses: JasonEtco/create-an-issue@v2
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #  with:
+      #    filename: .github/ggpk-notify-issue-template.md
+      #    update_existing: true
+
       # https://github.com/marketplace/actions/setup-java-jdk
       # ffdec needs this (flash decompiler, in `yarn as3`)
-      - uses: actions/setup-java@v1
+      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+        uses: actions/setup-java@v1
         with:
           java-version: '9.0.4' # The JDK version to make available on the path.
           java-package: jdk # (jre, jdk, or jdk+fx) - defaults to jdk
           architecture: x64 # (x64 or x86) - defaults to x64
 
-      - run: yarn --frozen-lockfile
-      - working-directory: ./assets
+      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+        run: yarn --frozen-lockfile
+      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+        working-directory: ./assets
         run: yarn ffdec:install
 
-      - working-directory: ./assets
+      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+        working-directory: ./assets
         run: yarn as3
 
       # TODO: install the ch2 mod /exporter/bin/ch2plan-exporter.swf, run ch2,
       # and copy the "latest.json" file it exports.
-      - run: cp exporter/bin/ch2plan-exporter.swf assets-dl/dist/mods/active/
+      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+        run: cp exporter/bin/ch2plan-exporter.swf assets-dl/dist/mods/active/
       # add our mod to mods.txt, per the ch2-mods docs - but we've never run ch2 on this machine before, so we have to create mods.txt from scratch
-      - run: ls -l "c:\Users\runneradmin\AppData\Roaming"
-      - run: mkdir -p "c:\Users\runneradmin\AppData\Roaming\ClickerHeroes2\Local Store\"
-      - run: cp "./.github/workflows/assets-export-mods.txt" "c:\Users\runneradmin\AppData\Roaming\ClickerHeroes2\Local Store\mods.txt"
+      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+        run: ls -l "c:\Users\runneradmin\AppData\Roaming"
+      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+        run: mkdir -p "c:\Users\runneradmin\AppData\Roaming\ClickerHeroes2\Local Store\"
+      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+        run: cp "./.github/workflows/assets-export-mods.txt" "c:\Users\runneradmin\AppData\Roaming\ClickerHeroes2\Local Store\mods.txt"
 
       # Start CH2, let the 1-minute timeout kill the process, and keep going.
       # 1 minute is plenty of time for ch2plan-exporter to do its thing.
-      - run: ls -l "c:\Users\runneradmin\Desktop"
-      - working-directory: ./assets-dl/dist
+      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+        run: ls -l "c:\Users\runneradmin\Desktop"
+      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+        working-directory: ./assets-dl/dist
         run: ./ClickerHeroes2.exe
         timeout-minutes: 1
         continue-on-error: true
-      - run: sleep 10
-      - run: ls -l "c:\Users\runneradmin\AppData\Roaming\ClickerHeroes2\Local Store\"
-      - run: ls -l "c:\Users\runneradmin\Desktop"
-      - run: ls -l "c:\Users\runneradmin\Desktop\latest.json"
+      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+        run: sleep 10
+      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+        run: ls -l "c:\Users\runneradmin\AppData\Roaming\ClickerHeroes2\Local Store\"
+      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+        run: ls -l "c:\Users\runneradmin\Desktop"
+      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+        run: ls -l "c:\Users\runneradmin\Desktop\latest.json"
 
       # TODO: `yarn build` won't work until we get the above working.
       # by installing the ch2 mod before running ch2.
-      #- working-directory: ./assets
+      #- if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+      #  working-directory: ./assets
       #  run: yarn build
 
       # https://peterevans.dev/posts/github-actions-how-to-create-pull-requests-automatically/
-      - name: Create pull request
+      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+        name: Create pull request
         uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
