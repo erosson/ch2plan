@@ -728,6 +728,8 @@ package models
       
       public var hasteThisFrame:Number = 0;
       
+      private var timeSinceLastSkillTreePlanPurchaseCheck:int = 0;
+      
       public var changeStateHandler:Object = null;
       
       public var attackHandler:Object = null;
@@ -2578,6 +2580,7 @@ package models
          this.timeSinceLastAutoAttack = this.timeSinceLastAutoAttack + dt;
          this.timeSinceRegularMonsterHasDroppedRubies = this.timeSinceRegularMonsterHasDroppedRubies + dt;
          this.timeSinceLastOrangeFishAppearance = this.timeSinceLastOrangeFishAppearance + dt;
+         this.timeSinceLastSkillTreePlanPurchaseCheck = this.timeSinceLastSkillTreePlanPurchaseCheck + dt;
          if(IdleHeroMain.IS_TIMELAPSE)
          {
             if(this.cachedTimelapseServerTime == 0)
@@ -2591,8 +2594,9 @@ package models
             this.cachedTimelapseServerTime = 0;
             this.serverTimeOfLastUpdate = ServerTimeKeeper.instance.timestamp;
          }
-         if(MiscUtils.requiresUpdate(1000,dt))
+         if(this.timeSinceLastSkillTreePlanPurchaseCheck >= 1000)
          {
+            this.timeSinceLastSkillTreePlanPurchaseCheck = this.timeSinceLastSkillTreePlanPurchaseCheck % 1000;
             this.purchaseSkillTreeNodesFromPlan();
          }
          this.updateStats(dt);
@@ -4842,10 +4846,13 @@ package models
             if(_loc6_ && _loc6_.isActive)
             {
                _loc7_ = _loc6_.slot;
-               if(_loc7_ >= 0 && CH2UI.instance.mainUI)
+               if(_loc7_ >= 0 && CH2UI.instance.mainUI && CH2UI.instance.mainUI.hud.skillBar.skillSlots)
                {
-                  CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc7_].removeChild(CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc7_].skillSlotUI);
-                  CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc7_].onDropRemoved(CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc7_].skillSlotUI);
+                  if(CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc7_].skillSlotUI && CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc7_].skillSlotUI.parent)
+                  {
+                     CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc7_].removeChild(CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc7_].skillSlotUI);
+                     CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc7_].onDropRemoved(CH2UI.instance.mainUI.hud.skillBar.skillSlots[_loc7_].skillSlotUI);
+                  }
                }
             }
          }
@@ -5184,6 +5191,7 @@ package models
       
       public function populateRubyPurchaseOptionsDefault() : void
       {
+         var zoneMetalDetector:RubyPurchase = null;
          var bagOfGold:RubyPurchase = null;
          var magicalBrew:RubyPurchase = null;
          var powerRunePurchase:RubyPurchase = new RubyPurchase();
@@ -5234,7 +5242,7 @@ package models
          timeMetalDetector.canAppear = this.canTimeMetalDetectorAppear;
          timeMetalDetector.canPurchase = this.canPurchaseTimeMetalDetector;
          this.rubyPurchaseOptions.push(timeMetalDetector);
-         var zoneMetalDetector:RubyPurchase = new RubyPurchase();
+         zoneMetalDetector = new RubyPurchase();
          zoneMetalDetector.id = "zoneMetalDetector";
          zoneMetalDetector.priority = 2;
          zoneMetalDetector.name = "Metal Detector (Zone)";
