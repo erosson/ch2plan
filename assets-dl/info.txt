@@ -1,3 +1,4 @@
+{'apps': {629910: 0}, 'packages': {}}
 App ID: 629910
 Depot ID: 629911
 Depot Name: Clicker Heroes 2 Windows
@@ -11,5 +12,3 @@ Number of Files: 7010
 Config: {'oslist': 'windows'}
 Open branches: public
 Protected branches: experimental, private_testing, public_test, public_test_2
----
-fake-diff-to-test-ci: true
