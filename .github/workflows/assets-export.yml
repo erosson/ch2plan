@@ -40,13 +40,13 @@ jobs:
       - working-directory: ./assets-dl
         run: |
           echo 'STEAM_DEPOT_INFO_NEW<<__EOF__' >> $GITHUB_ENV
-          cat steam-depot-info.txt >> $GITHUB_ENV
+          cat info.txt >> $GITHUB_ENV
           echo '__EOF__' >> $GITHUB_ENV
           cat $GITHUB_ENV
       - working-directory: ./assets-dl
         run: |
           echo 'STEAM_DEPOT_INFO_DIFF<<__EOF__' >> $GITHUB_ENV
-          (diff steam-depot-info-old.txt steam-depot-info.txt || true) >> $GITHUB_ENV
+          (diff info-old.txt info.txt || true) >> $GITHUB_ENV
           echo '__EOF__' >> $GITHUB_ENV
           cat $GITHUB_ENV
       ## Stop running if there's no info.txt differences
@@ -81,7 +81,7 @@ jobs:
       # TODO: install the ch2 mod /exporter/bin/ch2plan-exporter.swf, run ch2,
       # and copy the "latest.json" file it exports.
       - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
-        run: cp exporter/bin/ch2plan-exporter.swf assets-dl/dist/mods/active/
+        run: cp exporter/bin/ch2plan-exporter.swf assets-dl/depot/mods/active/
       # add our mod to mods.txt, per the ch2-mods docs - but we've never run ch2 on this machine before, so we have to create mods.txt from scratch
       - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
         run: ls -l "c:\Users\runneradmin\AppData\Roaming"
@@ -95,7 +95,7 @@ jobs:
       - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
         run: ls -l "c:\Users\runneradmin\Desktop"
       - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
-        working-directory: ./assets-dl/dist
+        working-directory: ./assets-dl/depot
         run: ./ClickerHeroes2.exe
         timeout-minutes: 1
         continue-on-error: true
