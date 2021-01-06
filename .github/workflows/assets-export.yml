@@ -8,6 +8,9 @@ jobs:
   # windows must run this, not ubuntu, as we must run ch2.exe to complete our export and it doesn't run on linux.
   fetch:
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
     steps:
       - run: |
           echo "::add-mask::${{ secrets.STEAMCTL_USER }}"
@@ -36,16 +39,16 @@ jobs:
 
       - working-directory: ./assets-dl
         run: |
-          bash -c "echo 'STEAM_DEPOT_INFO_NEW<<__EOF__' >> $GITHUB_ENV"
-          bash -c "cat steam-depot-info.txt >> $GITHUB_ENV"
-          bash -c "echo '__EOF__' >> $GITHUB_ENV"
-          bash -c "cat $GITHUB_ENV"
+          echo 'STEAM_DEPOT_INFO_NEW<<__EOF__' >> $GITHUB_ENV
+          cat steam-depot-info.txt >> $GITHUB_ENV
+          echo '__EOF__' >> $GITHUB_ENV
+          cat $GITHUB_ENV
       - working-directory: ./assets-dl
         run: |
-          bash -c "echo 'STEAM_DEPOT_INFO_DIFF<<__EOF__' >> $GITHUB_ENV"
-          bash -c "(diff steam-depot-info-old.txt steam-depot-info.txt || true) >> $GITHUB_ENV"
-          bash -c "echo '__EOF__' >> $GITHUB_ENV"
-          bash -c "cat $GITHUB_ENV"
+          echo 'STEAM_DEPOT_INFO_DIFF<<__EOF__' >> $GITHUB_ENV
+          (diff steam-depot-info-old.txt steam-depot-info.txt || true) >> $GITHUB_ENV
+          echo '__EOF__' >> $GITHUB_ENV
+          cat $GITHUB_ENV
       ## Stop running if there's no info.txt differences
       ## If PRs ever stop working, we could create an issue instead:
       #- if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
