@@ -86,7 +86,7 @@ jobs:
       - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
         run: ls -l "c:\\Users\\runneradmin\\AppData\\Roaming"
       - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
-        run: mkdir -p "c:\\Users\\runneradmin\\AppData\\Roaming\\ClickerHeroes2\\Local Store\"
+        run: mkdir -p "c:\\Users\\runneradmin\\AppData\\Roaming\\ClickerHeroes2\\Local Store\\"
       - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
         run: cp "./.github/workflows/assets-export-mods.txt" "c:\\Users\\runneradmin\\AppData\\Roaming\\ClickerHeroes2\\Local Store\\mods.txt"
 
