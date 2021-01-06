@@ -102,8 +102,9 @@ jobs:
         run: ls -l "c:\Users\runneradmin\AppData\Roaming\ClickerHeroes2\Local Store\"
       - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
         run: ls -l "c:\Users\runneradmin\Desktop"
-      - if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
-        run: ls -l "c:\Users\runneradmin\Desktop\latest.json"
+      # TODO: this didn't work - ch2 never actually ran on the ci machine! I don't know why.
+      #- if: ${{ env.STEAM_DEPOT_INFO_DIFF != '' }}
+      #  run: ls -l "c:\Users\runneradmin\Desktop\latest.json"
 
       # TODO: `yarn build` won't work until we get the above working.
       # by installing the ch2 mod before running ch2.
