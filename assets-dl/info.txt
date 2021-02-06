@@ -1,5 +1,3 @@
-{'apps': {629910: 0}, 'packages': {}}
-App ID: 629910
 Depot ID: 629911
 Depot Name: Clicker Heroes 2 Windows
 Manifest GID: 3703958721087355633
