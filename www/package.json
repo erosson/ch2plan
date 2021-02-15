@@ -21,7 +21,7 @@
   "devDependencies": {
     "create-elm-app": "^5.22.0",
     "elm": "^0.19.1-5",
-    "elm-format": "^0.8.3",
+    "elm-format": "^0.8.5",
     "elm-live": "^4.0.2",
     "elm-test": "^0.19.1-revision6",
     "prettier": "^2.2.1",
