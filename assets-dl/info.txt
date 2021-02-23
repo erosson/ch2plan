@@ -8,5 +8,6 @@ Unique/Total chunks: 7401 / 7583 (2.40%)
 Encrypted Filenames: False
 Number of Files: 7010
 Config: {'oslist': 'windows'}
+Branch: public
 Open branches: public
 Protected branches: experimental, private_testing, public_test, public_test_2
