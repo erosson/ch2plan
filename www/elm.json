@@ -25,7 +25,7 @@
             "elm-explorations/linear-algebra": "1.0.3",
             "elm-explorations/markdown": "1.0.0",
             "erosson/number-suffix": "1.1.0",
-            "mgold/elm-nonempty-list": "4.1.0",
+            "mgold/elm-nonempty-list": "4.2.0",
             "myrho/elm-round": "1.0.4",
             "zaboco/elm-draggable": "5.0.0"
         },
